@@ -16,6 +16,8 @@ function esc(t){ return String(t == null ? "" : t).replace(/[&<>]/g, function(c)
 function wrap(t, n, max){ var w = String(t || "").split(/\s+/), out = [], cur = ""; w.forEach(function(x){ if((cur + " " + x).trim().length > n && cur.trim()){ out.push(cur.trim()); cur = x; } else cur += " " + x; }); if(cur.trim()) out.push(cur.trim()); return out.slice(0, max || 3); }
 function lc(t){ return t.charAt(0).toLowerCase() + t.slice(1); }
 function ext(a, b){ for(var k in b) if(Object.prototype.hasOwnProperty.call(b, k)) a[k] = b[k]; return a; }
+/* easy read (LC): plain words for the first level only, so lv.medium and lv.spicy never carry ez */
+function EZ(lv, o, z){ if(lv === "mild") o.ez = z; return o; }
 function txt(d){ return d.p.map(function(p, k){ return '<p class="a2task"><b>' + (k + 1) + '.</b> ' + p + '</p>'; }).join(""); }
 /* build one question from a level set {mild, medium, spicy} of texts */
 function L(fn, set){ var o = fn(set.mild, "mild"); o.lv = { medium: fn(set.medium, "medium"), spicy: fn(set.spicy, "spicy") }; return o; }
@@ -175,64 +177,80 @@ function qPara(n){
     if(lv === "spicy") o.push(n === 0 ? d.lab[2] : d.lab[0]);
     var other = n === 0 ? [2, 3] : [3, 1], sl = { 1: "That is one detail in paragraph " + (n + 1) + ". What is the whole paragraph about?" };
     sl[2] = "That is what paragraph " + other[0] + " is about."; if(lv === "spicy") sl[3] = "That is what paragraph " + other[1] + " is about.";
-    return { q: txt(d) + "What is paragraph <b>" + (n + 1) + "</b> mostly about?", options: o, answer: 0, slips: sl,
+    return EZ(lv, { q: txt(d) + "What is paragraph <b>" + (n + 1) + "</b> mostly about?", options: o, answer: 0, slips: sl,
       hint: "Which label covers every sentence in paragraph " + (n + 1) + "?",
-      why: "Paragraph " + (n + 1) + " is mostly about <b>" + lc(d.lab[n]) + "</b>. Everything in it fits under that label." };
+      why: "Paragraph " + (n + 1) + " is mostly about <b>" + lc(d.lab[n]) + "</b>. Everything in it fits under that label." },
+      { slips: { 1: "That is one detail. What is it all about?", 2: "That is paragraph " + other[0] + "." }, hint: "Which label fits every sentence?",
+        why: "<b>" + d.lab[n] + "</b>. It fits the whole paragraph." });
   };
 }
-function qOrder(d){
-  return { q: txt(d) + "Put the main ideas in the order the text gives them.", items: d.lab.slice(),
-    hint: "One label for each paragraph, top to bottom.", why: "1: " + d.lab[0] + ". 2: " + d.lab[1] + ". 3: " + d.lab[2] + ". Those three, joined up, are most of a summary already." };
+function qOrder(d, lv){
+  return EZ(lv, { q: txt(d) + "Put the main ideas in the order the text gives them.", items: d.lab.slice(),
+    hint: "One label for each paragraph, top to bottom.", why: "1: " + d.lab[0] + ". 2: " + d.lab[1] + ". 3: " + d.lab[2] + ". Those three, joined up, are most of a summary already." },
+    { q: txt(d) + "Put the main ideas in order.", hint: "Top to bottom.", why: "1: " + d.lab[0] + ". 2: " + d.lab[1] + ". 3: " + d.lab[2] + "." });
 }
 function qBack(d, lv){
   var o = [d.det[0][0], d.det[2][0], d.no], sl = { 1: "That is a detail, but it backs up paragraph 3.", 2: "That is not in the text at all." };
   if(lv === "spicy"){ o.push(d.det[1][1]); sl[3] = "That backs up paragraph 2."; }
-  return { q: txt(d) + "Which detail backs up the main idea <b>" + lc(d.lab[0]) + "</b>?", options: o, answer: 0, slips: sl,
-    hint: "Look in paragraph 1.", why: "\"" + d.det[0][0] + "\" is in paragraph 1, and it backs up " + lc(d.lab[0]) + "." };
+  return EZ(lv, { q: txt(d) + "Which detail backs up the main idea <b>" + lc(d.lab[0]) + "</b>?", options: o, answer: 0, slips: sl,
+    hint: "Look in paragraph 1.", why: "\"" + d.det[0][0] + "\" is in paragraph 1, and it backs up " + lc(d.lab[0]) + "." },
+    { q: txt(d) + "Which detail backs up <b>" + lc(d.lab[0]) + "</b>?", slips: { 1: "That backs up paragraph 3.", 2: "That is not in the text." },
+      why: "It is in paragraph 1." });
 }
 function qSortDet(d, lv){
   var cards = lv === "mild" ? [[d.det[0][0], 0], [d.det[1][0], 1], [d.det[2][0], 2]] :
     lv === "medium" ? [[d.det[0][0], 0], [d.det[0][1], 0], [d.det[1][0], 1], [d.det[2][0], 2], [d.det[2][1], 2]] :
     [[d.det[0][0], 0], [d.det[0][1], 0], [d.det[1][0], 1], [d.det[1][1], 1], [d.det[2][0], 2], [d.no, 3]];
   var b = d.lab.slice(); if(lv === "spicy") b.push("Not in the text");
-  return { q: txt(d) + "Sort the details. Which main idea does each one back up?", buckets: b, cards: cards,
+  return EZ(lv, { q: txt(d) + "Sort the details. Which main idea does each one back up?", buckets: b, cards: cards,
     slips: { any: "Find each detail in the text. Which paragraph is it in?" },
-    hint: "Each detail lives in one paragraph.", why: "Each key detail backs up the main idea of the paragraph it comes from." + (lv === "spicy" ? " One was never in the text at all." : "") };
+    hint: "Each detail lives in one paragraph.", why: "Each key detail backs up the main idea of the paragraph it comes from." + (lv === "spicy" ? " One was never in the text at all." : "") },
+    { q: txt(d) + "Which main idea does each detail back up?", slips: { any: "Which paragraph is it in?" }, hint: "Each one is in one paragraph.",
+      why: "Each detail backs up its own paragraph." });
 }
 function qPick(d, lv){
   var o = [d.det[2][0], d.det[2][1], d.det[1][0]]; if(lv !== "mild") o.push(d.no); if(lv === "spicy") o.push(d.det[0][1]);
-  return { q: txt(d) + "Pick <b>both</b> details that back up <b>" + lc(d.lab[2]) + "</b>.", options: o, answers: [0, 1],
+  return EZ(lv, { q: txt(d) + "Pick <b>both</b> details that back up <b>" + lc(d.lab[2]) + "</b>.", options: o, answers: [0, 1],
     slips: { any: "Both are in paragraph 3. Watch out for details from other paragraphs, and things the text never says." },
-    hint: "Look in paragraph 3.", why: "\"" + d.det[2][0] + "\" and \"" + d.det[2][1] + "\" are both in paragraph 3." };
+    hint: "Look in paragraph 3.", why: "\"" + d.det[2][0] + "\" and \"" + d.det[2][1] + "\" are both in paragraph 3." },
+    { q: txt(d) + "Pick <b>both</b> details for <b>" + lc(d.lab[2]) + "</b>.", slips: { any: "Both are in paragraph 3." }, why: "Both are in paragraph 3." });
 }
 function qFade3(d, lv){
   var o = lv === "mild" ? [d.lab[2], d.lab[0], d.lab[1]] : [d.lab[2], d.t3, d.lab[0]];
   var sl = lv === "mild" ? { 1: "That is paragraph 1, already done.", 2: "That is paragraph 2, already done." } : { 1: "That is a small detail in paragraph 3, not the whole idea.", 2: "That is paragraph 1, already done." };
   if(lv === "spicy"){ o.push(d.lab[1]); sl[3] = "That is paragraph 2, already done."; }
-  return { q: txt(d) + "Step 1 is half done: paragraph 1 is <b>" + lc(d.lab[0]) + "</b>, paragraph 2 is <b>" + lc(d.lab[1]) + "</b>. Your turn: what is paragraph 3 mostly about?",
-    options: o, answer: 0, slips: sl, hint: "One label that covers all of paragraph 3.", why: "Paragraph 3: <b>" + lc(d.lab[2]) + "</b>." };
+  return EZ(lv, { q: txt(d) + "Step 1 is half done: paragraph 1 is <b>" + lc(d.lab[0]) + "</b>, paragraph 2 is <b>" + lc(d.lab[1]) + "</b>. Your turn: what is paragraph 3 mostly about?",
+    options: o, answer: 0, slips: sl, hint: "One label that covers all of paragraph 3.", why: "Paragraph 3: <b>" + lc(d.lab[2]) + "</b>." },
+    { q: txt(d) + "What is paragraph <b>3</b> mostly about?", slips: { 1: "That is paragraph 1.", 2: "That is paragraph 2." }, hint: "One label for all of paragraph 3." });
 }
-function qFadeJoin(d){
-  return { q: txt(d) + "Steps 1 and 2 are done. The labels are: <b>" + d.lab.map(lc).join(" / ") + "</b>. Step 3: which summary joins them up?",
+function qFadeJoin(d, lv){
+  return EZ(lv, { q: txt(d) + "Steps 1 and 2 are done. The labels are: <b>" + d.lab.map(lc).join(" / ") + "</b>. Step 3: which summary joins them up?",
     options: [d.sum, d.miss, d.long], answer: 0,
     slips: { 1: "Close, but it leaves out paragraph 3.", 2: "That copies nearly everything. A summary is short." },
-    hint: "Short, and all three labels in it.", why: "It has all three main ideas, joined up, and it is short." };
+    hint: "Short, and all three labels in it.", why: "It has all three main ideas, joined up, and it is short." },
+    { q: txt(d) + "Labels: <b>" + d.lab.map(lc).join(" / ") + "</b>. Which summary joins them up?", slips: { 1: "It leaves out paragraph 3.", 2: "Too long. A summary is short." },
+      hint: "Short, with all three labels.", why: "All three ideas, and short." });
 }
-function qOwn(d){
-  return { q: txt(d) + "Your turn, all three steps. Sum up the whole text in one or two sentences, in your own words if you can.",
+function qOwn(d, lv){
+  return EZ(lv, { q: txt(d) + "Your turn, all three steps. Sum up the whole text in one or two sentences, in your own words if you can.",
     need: d.kw, model: d.sum,
     hint: "Label each paragraph in your head first, then join the labels up.",
-    why: "Something like: \"" + d.sum + "\" Yours does not have to match. If it covers every paragraph and is short, it works." };
+    why: "Something like: \"" + d.sum + "\" Yours does not have to match. If it covers every paragraph and is short, it works." },
+    { q: txt(d) + "Sum it all up in 1 or 2 sentences.", hint: "Label each paragraph. Then join them.", why: "Like: \"" + d.sum + "\"" });
 }
 var CHK = ["It misses out a paragraph.", "It adds something the text does not say.", "It is far too long: it copies nearly everything.", "Nothing: it is a good summary."];
-function qChk(kind, who){
-  return function(d){
+function qChk(kind, who, ezWho){
+  return function(d, lv){
     var ans = { miss: 0, extra: 1, long: 2 }[kind], sl = {};
     var say = ["Check: is every paragraph in it? Look for paragraph 3.", "Check: is everything in it from the text? Look at the last sentence.", "Check: is it short? Count the ands."];
     [0, 1, 2, 3].forEach(function(k){ if(k !== ans) sl[k] = k === 3 ? "Have another look with the checklist. Something is not quite right." : say[ans]; });
-    return { q: txt(d) + who + " <b>\"" + d[kind] + "\"</b> What is not quite right?", options: CHK, answer: ans, fixed: true, slips: sl,
+    var zsay = ["Is every paragraph in it? Check paragraph 3.", "Is it all from the text? Check the end.", "Is it short? Count the ands."], zsl = {};
+    [0, 1, 2, 3].forEach(function(k){ if(k !== ans) zsl[k] = k === 3 ? "Try the checklist again." : zsay[ans]; });
+    return EZ(lv, { q: txt(d) + who + " <b>\"" + d[kind] + "\"</b> What is not quite right?", options: CHK, answer: ans, fixed: true, slips: sl,
       hint: "Use the checklist: every paragraph, short, nothing new.",
-      why: ["It leaves out paragraph 3: " + lc(d.lab[2]) + ".", "The last part is an opinion or a guess. The text never says it.", "It copies almost every detail. A summary keeps the main ideas and leaves the rest."][ans] };
+      why: ["It leaves out paragraph 3: " + lc(d.lab[2]) + ".", "The last part is an opinion or a guess. The text never says it.", "It copies almost every detail. A summary keeps the main ideas and leaves the rest."][ans] },
+      { q: txt(d) + (ezWho || who) + " <b>\"" + d[kind] + "\"</b> What is not quite right?", slips: zsl, hint: "Every paragraph, short, nothing new.",
+        why: ["It leaves out paragraph 3.", "The end is not in the text.", "It copies nearly everything."][ans] });
   };
 }
 
@@ -260,6 +278,10 @@ function qChk(kind, who){
     music: { name: "Music", w: { crew: "the band", who: "the drummer" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>You sum up films, matches and your weekend.</p><p>Back from the past? Sum it up in 3 ideas!</p>" },
+    make: { intro: "Sum up a film, a match or your weekend. One or two sentences." }
+  },
   startFig: STACK,
   steps: [
 
@@ -269,6 +291,7 @@ function qChk(kind, who){
       html: "<p>A paragraph is a group of sentences about <b>one thing</b>. That one thing is its <b>main idea</b>.</p>" +
         "<p>A handy trick: give each paragraph a <b>label</b>, just a few words, like a sticker on a box. \"Getting there.\" \"On the beach.\" \"Going home.\"</p>" +
         "<p>A good label covers <b>every</b> sentence in the paragraph, not just one.</p>",
+      ez: { title: "One main idea", html: "<p>Each paragraph has <b>one main idea</b>.</p><p>Give it a short <b>label</b>, like a sticker on a box.</p>" },
       lv: { spicy: { html: "<p>Each paragraph has <b>one main idea</b>. Give it a <b>label</b> of a few words, like a sticker on a box.</p>" +
         "<p>A good label covers <b>every</b> sentence. If it only fits one sentence, it is a detail. If it would fit the whole text, it is too big.</p>" +
         "<p>Lively writing hides the main idea behind jokes and description. Ask: if I took away the colourful bits, what is left?</p>" } } },
@@ -282,7 +305,8 @@ function qChk(kind, who){
       fig: BACK,
       html: "<p>Each main idea has <b>key details</b> that back it up. They are the proof.</p>" +
         "<p>\"Getting to the seaside\" is backed up by \"They went by train.\" That detail is in the same paragraph, and it shows the main idea is right.</p>" +
-        "<p>Some details are just extras. And watch out for things that sound right but are not in the text at all.</p>" },
+        "<p>Some details are just extras. And watch out for things that sound right but are not in the text at all.</p>",
+      ez: { html: "<p><b>Key details</b> back up the main idea. They are the proof.</p><p>Watch out for things not in the text.</p>" } },
 
     S("mc", "Key details", qBack, X),
     S("sort", "Key details", qSortDet, X),
@@ -294,6 +318,7 @@ function qChk(kind, who){
       html: "<p>Here is one Jay did earlier. The text:</p>" +
         "<p class=\"a2task\"><b>1.</b> In January, a tiny hedgehog was found in the snow. It was very cold.<br><b>2.</b> At the rescue centre, it was fed every day and gained weight.<br><b>3.</b> In April, it was let go in the garden where it was found.</p>" +
         "<p><b>Step 1:</b> a label for each paragraph. <b>Step 2:</b> keep the key details in mind. <b>Step 3:</b> join the labels into one or two short sentences.</p>",
+      ez: { html: "<p><b>1.</b> Label each paragraph. <b>2.</b> Keep key details. <b>3.</b> Join the labels up.</p>" },
       lv: { spicy: { html: "<p>Here is one Jay did earlier. The text:</p>" +
         "<p class=\"a2task\"><b>1.</b> In January, a tiny hedgehog was found in the snow. It was very cold.<br><b>2.</b> At the rescue centre, it was fed every day and gained weight.<br><b>3.</b> In April, it was let go in the garden where it was found.</p>" +
         "<p><b>Step 1:</b> label each paragraph. <b>Step 2:</b> note the key details. <b>Step 3:</b> join the labels into one or two sentences.</p>" +
@@ -305,6 +330,7 @@ function qChk(kind, who){
       slips: { any: "Have a look at the worked example. What did Jay do first?" },
       hint: "It starts with the paragraphs, one at a time.",
       why: "Label, details, join, check.",
+      ez: { q: "Put the summary steps in order.", slips: { any: "What did Jay do first?" }, hint: "Start with the paragraphs.", why: "Label, join, check." },
       lv: { mild: { items: ["Give each paragraph a label", "Join the labels into a short summary", "Check it"] } } },
 
     S("mc", "Boil it down", qFade3, Y),
@@ -315,11 +341,12 @@ function qChk(kind, who){
     { type: "learn", topic: "Check it", title: "The summary check",
       fig: CHECK,
       html: "<p>Last bit. Some people have had a go at summing up the same text. Each one has something not quite right.</p>" +
-        "<p>Use the check: is <b>every paragraph</b> in it? Is it <b>short</b>? Is there <b>nothing new</b> or made up?</p>" },
+        "<p>Use the check: is <b>every paragraph</b> in it? Is it <b>short</b>? Is there <b>nothing new</b> or made up?</p>",
+      ez: { html: "<p>Is <b>every paragraph</b> in it? Is it <b>short</b>? Is there <b>nothing new</b>?</p>" } },
 
     S("mc", "Check it", qChk("miss", "[[Who]] wrote:"), Y),
     S("mc", "Check it", qChk("extra", "Jay wrote:"), Y, { explain: true }),
-    S("mc", "Check it", qChk("long", "Bonnie dictated this one, between biscuits:"), Y)
+    S("mc", "Check it", qChk("long", "Bonnie dictated this one, between biscuits:", "Bonnie wrote this one:"), Y)
   ],
 
   realWorld: {

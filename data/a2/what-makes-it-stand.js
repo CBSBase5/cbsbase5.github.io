@@ -144,6 +144,10 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
     music: { name: "Music", w: { tower: "lighting rig", top: "stage lights", crew: "the stage crew" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>Look for triangles on pylons, cranes and bridges.</p><p>Old castles have wide bases too.</p>" },
+    make: { intro: "Try a build away from the screen. Send Jay a photo if you like." }
+  },
   startFig: START,
   steps: [
 
@@ -153,6 +157,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>Push the top corner of a square frame and it leans over. Keep pushing and it folds flat.</p>" +
         "<p>Push a triangle and it <b>stays put</b>. A triangle cannot change shape unless one of its sides bends or snaps.</p>" +
         "<p>That is why [[crew]] put triangles all over the [[tower]].</p>",
+      ez: { html: "<p>Push a square. It leans.</p><p>Push a triangle. It <b>stays put</b>.</p>" },
       lv: {
         mild: { html: "<p>Push a square and it leans over.</p><p>Push a triangle and it <b>stays put</b>.</p><p>Triangles make things strong.</p>" },
         spicy: { html: "<p>A square frame with loose corners can change shape without any side changing length. It leans into a diamond and folds flat.</p>" +
@@ -162,6 +167,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
     { type: "widget", topic: "Shapes that stay strong", unscored: true,
       title: "Push test",
       html: "<p>Give each frame a push and see what happens. Then try adding a diagonal to the square, if you like.</p>",
+      ez: { html: "<p>Push each one. What happens?</p>" },
       mount: function(el, api){
         var d = api.data;
         d.pushes = d.pushes || 0; d.brace = !!d.brace;
@@ -217,6 +223,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "A square leans over when you push a corner. It needs a diagonal to help.", 2: "A rectangle is a stretched square, so it leans over too." },
       hint: "Think about the push test. Which one did not budge?",
       why: "A triangle cannot change shape unless a side breaks. That makes it the strongest frame shape.",
+      ez: { q: "Which shape stays put when you push it?", slips: { 1: "A square leans over." }, hint: "Which one did not budge?", why: "A <b>triangle</b>. It cannot change shape." },
       lv: {
         mild: { options: ["A triangle", "A square"], slips: { 1: "A square leans over when you push it." } },
         spicy: { q: "A square frame on the [[tower]] wobbles. What is the best fix?",
@@ -232,6 +239,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[3, "You found the ones pointing up. Look for upside down ones in between them too."], [2, "Those are the upside down ones. Count the ones pointing up as well."]],
       hint: "Count the ones pointing up first, then the upside down ones in the gaps.",
       why: "3 point up and 2 point down: <b>5</b> triangles. Each one keeps the bridge from leaning.",
+      ez: { q: "How many triangles can you see?", slips: [[null, "There is one upside down too."], [null, "Some point up as well."]], hint: "Count the up ones, then the down ones.", why: "2 up, 1 down: <b>3</b> triangles." },
       lv: {
         mild: { fig: truss(2), boxes: [{ label: "Triangles", a: 3 }],
           slips: [[2, "You found the ones pointing up. There is one upside down in the middle too."], [1, "Look again: some point up as well."]],
@@ -247,6 +255,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 0: "Part A has a diagonal, so it is made of triangles.", 2: "Part C has a diagonal, so it is made of triangles." },
       hint: "Find the part with no diagonal.",
       why: "Part B is just a square. It has no diagonal, so it can lean over.",
+      ez: { q: "Which part will wobble in the wind?", slips: { 0: "Part A has a diagonal.", 2: "Part C has a diagonal." }, why: "<b>Part B</b>. It has no diagonal." },
       lv: { spicy: { q: "Which part needs a brace, and why?",
         options: ["Part B, because it is a square with no diagonal", "Part A, because it is at the top", "Part C, because it carries the most weight", "None of them, the frame is rigid"],
         answer: 0, fixed: false,
@@ -260,6 +269,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>A tall thin tower tips over easily. A <b>wide base</b> makes it much steadier.</p>" +
         "<p>Try it on a bus: stand with your feet together and you wobble. Stand with your feet apart and you stay steady.</p>" +
         "<p>Keeping the heavy stuff low helps too. That is why the [[tower]] is wider at the bottom than the top.</p>",
+      ez: { html: "<p>Tall and thin falls over.</p><p><b>Wide at the bottom</b> stays up.</p>" },
       lv: {
         mild: { html: "<p>Tall and thin falls over easily.</p><p><b>Wide at the bottom</b> stays up.</p><p>Stand with your feet apart and you are steadier too.</p>" },
         spicy: { fig: TIPS,
@@ -274,6 +284,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 0: "A is tall and thin, so the smallest push could tip it.", 1: "B is steadier than A, but C has the widest base." },
       hint: "Look at the bottom of each tower. Which one is widest?",
       why: "C is short with the widest base, so it is the hardest to tip.",
+      ez: { slips: { 0: "A is tall and thin.", 1: "C is wider than B." }, hint: "Which one is widest at the bottom?", why: "<b>C</b> has the widest base." },
       lv: { spicy: { q: "Both blocks are leaning. Which one will fall over?",
         fig: TIPS, options: ["A", "B", "Both of them", "Neither of them"], answer: 1,
         slips: { 0: "In A the red dot is still above the base, so it rocks back.", 2: "Check where the red dot is in A. It is still above the base.", 3: "In B the red dot has gone past the edge of the base." },
@@ -286,6 +297,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { any: "Wider bases and heavy things low down make it harder to tip." },
       hint: "Tall and thin tips first. Short, wide and heavy at the bottom tips last.",
       why: "The wider the base and the lower the weight, the harder it is to tip.",
+      ez: { q: "Put them in order. <b>Easiest</b> to tip first.", slips: { any: "Wide bases are harder to tip." }, hint: "Tall and thin tips first.", why: "The wider the base, the harder to tip." },
       lv: {
         mild: { items: ["Tall and thin", "Medium", "Short and wide"] },
         spicy: { items: ["A tall pole with a heavy weight on top", "A tall thin pole", "A tall tower with a wide base", "A wide tower with its heavy parts at the bottom"],
@@ -300,6 +312,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "Brown is lovely, but colour does not hold anything up.", 2: "True, Bonnie has no tail. Outrageous. But a tail does not hold her up." },
       hint: "Think about feet apart on a bus.",
       why: "Four legs spread out make a wide base, just like a wide tower.",
+      ez: { q: "Bonnie is steadier on four legs. Why?", slips: { 1: "Colour does not hold her up.", 2: "True, no tail! But that does not hold her up." }, hint: "Feet apart on a bus.", why: "Four legs make a <b>wide base</b>." },
       lv: { spicy: { options: ["Her four feet make a wider base, so her centre of mass stays above it", "Four legs make her lighter", "Her centre of mass moves to her head", "She has no tail"],
         slips: { 1: "She weighs the same however she stands.", 2: "Her centre of mass stays near her middle.", 3: "True, Bonnie has no tail. Outrageous. But it does not hold her up." },
         why: "Four feet spread out give a wide base, so her centre of mass has a long way to lean before it passes the edge." } } },
@@ -311,6 +324,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>Where two pieces meet is called a <b>joint</b>. Most structures break at a joint, not in the middle of a piece.</p>" +
         "<p>Strong joints <b>overlap</b> the pieces, <b>wrap</b> them firmly, and add a little <b>triangle</b> across the corner.</p>" +
         "<p>The other secret is the <b>material</b>: stiff things for legs, light things up high, nothing soggy.</p>",
+      ez: { html: "<p>Where pieces meet is a <b>joint</b>. Joints break first.</p><p>Overlap them and wrap them tight.</p>" },
       lv: {
         mild: { html: "<p>Where two pieces meet is a <b>joint</b>.</p><p>Joints break first.</p><p>Overlap the pieces and wrap them tight to make them strong.</p>" },
         spicy: { html: "<p>Where two pieces meet is a <b>joint</b>. Forces have to pass through it, so it is usually the first thing to fail.</p>" +
@@ -324,6 +338,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 0: "A only just touches, with a tiny bit of tape. It would snap apart first.", 1: "B is good: it overlaps and is wrapped. C does all that and adds a triangle." },
       hint: "Look for overlap, wrapping and a triangle.",
       why: "C overlaps, is wrapped, and has a triangle plate across the corner, so it cannot fold.",
+      ez: { slips: { 0: "A only just touches.", 1: "B is good. C has a triangle too." }, hint: "Overlap, wrap and a triangle.", why: "<b>C</b>. Overlap, wrap and a triangle." },
       lv: { spicy: { q: "Which joint will hold best, and what is the triangle plate called?",
         options: ["A, it uses the least tape", "B, it is wrapped", "C, it has a gusset across the corner", "C, it has a brace on the bottom"],
         answer: 2, fixed: true,
@@ -336,6 +351,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { any: "Think about how each one feels and what it is used for." },
       hint: "Which one floppy thing is still good for pulling?",
       why: "Each material has jobs it is good at. Builders pick the one that suits the job.",
+      ez: { q: "Match each material to its job.", slips: { any: "How does each one feel?" }, hint: "Which floppy thing is good for pulling?", why: "Builders pick the right one for the job." },
       lv: {
         mild: { pairs: [["Steel", "Very strong"], ["String", "Good for pulling"], ["Glass", "You can see through it"]] },
         spicy: { pairs: [["Concrete", "Strong in compression (squashing)"], ["Steel cable", "Strong in tension (pulling)"], ["Aluminium", "Strong for its weight"], ["Rubber", "Flexible, soaks up shakes"]],
@@ -348,6 +364,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { any: "Legs need to be stiff. Anything soggy or wobbly will flop." },
       hint: "Would it stay straight if you held it upright?",
       why: "Dry spaghetti, paper tubes and lolly sticks are stiff. Cooked spaghetti, wet tissue and jelly flop.",
+      ez: { q: "Good for the [[tower]] legs, or not?", slips: { any: "Legs need to be stiff." }, hint: "Would it stand up straight?", why: "Dry spaghetti and lolly sticks are stiff. The others flop." },
       lv: {
         mild: { cards: [["Dry spaghetti", 0], ["Cooked spaghetti", 1], ["Lolly sticks", 0], ["Jelly", 1]] },
         spicy: { cards: [["Spaghetti bundled in threes", 0], ["One long strand of spaghetti", 1], ["Short paper tubes", 0], ["A single flat sheet of paper", 1], ["Lolly sticks glued in a triangle", 0], ["Marshmallows stacked up", 1]],
@@ -360,6 +377,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>The weight a structure holds is called the <b>load</b>. The [[top]] is the load on the [[tower]].</p>" +
         "<p>Some parts get <b>squashed</b> by the load, like the legs. Some parts get <b>stretched</b>, like a rope holding something up.</p>" +
         "<p>Good builders know which parts get squashed and which get stretched, and make each part strong enough.</p>",
+      ez: { html: "<p>The weight on top is the <b>load</b>.</p><p>It <b>squashes</b> the legs.</p>" },
       lv: {
         mild: { html: "<p>The weight on top is the <b>load</b>.</p><p>The load <b>squashes</b> the legs.</p><p>Strong legs hold the load up.</p>" },
         spicy: { html: "<p>The weight a structure carries is its <b>load</b>. A load can cause <b>compression</b> (squashing) or <b>tension</b> (stretching).</p>" +
@@ -373,6 +391,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "Stretching is a pull, like a rope. Weight on top pushes down.", 2: "Any weight on top pushes down on the legs below it." },
       hint: "Think of standing on an empty can.",
       why: "Weight on top pushes down, so the legs get squashed.",
+      ez: { q: "The [[top]] is heavy. What does it do to the legs?", slips: { 1: "Stretching is a pull, like a rope.", 2: "Weight on top pushes down." }, hint: "Think of standing on a can.", why: "It <b>squashes</b> them." },
       lv: { spicy: { q: "A long thin spaghetti leg suddenly bends sideways under the load. What is happening, and what could fix it?",
         options: ["Buckling: make it shorter, bundle it, or brace it", "Tension: pull it tighter", "Rusting: keep it dry", "Bending: use cooked spaghetti instead"],
         slips: { 1: "Tension is stretching. This leg is being squashed.", 2: "Spaghetti does not rust. Something about its shape is the problem.", 3: "Cooked spaghetti would flop even sooner." },
@@ -385,6 +404,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       answers: [0, 1, 2],
       hint: "Three of these are the big ideas from today.",
       why: "Triangles, a wide base and strong joints. A heavy top and unbraced squares make it wobble.",
+      ez: { q: "Pick <b>all</b> the things that help it stand.", hint: "Two of these help.", why: "Triangles and a wide base." },
       lv: {
         mild: { options: ["Triangles", "A wide base", "Wobbly legs"], answers: [0, 1], why: "Triangles and a wide base help. Wobbly legs do not." },
         spicy: { options: ["Triangles in every section", "A wide base with a low centre of mass", "Gussets at the joints", "Short or bundled legs to stop buckling", "The load placed high on one side", "Long single strands for legs"],
@@ -397,6 +417,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       starters: ["I will use", "My base will be", "I will put triangles", "My joints will", "I think it will be"],
       checklist: ["I said what I will build with", "I used at least one of the big ideas"],
       minWords: 20,
+      ez: { q: "Only if you like: plan a tower to build. How will you make it stand?" },
       lv: { mild: { minWords: 8, starters: ["I will use", "I will put triangles", "My base will be wide"] },
         spicy: { minWords: 40, checklist: ["I said what I will build with", "I explained how I will stop it tipping", "I explained how I will stop it buckling"] } } }
   ],

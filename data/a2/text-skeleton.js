@@ -126,13 +126,15 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
         mild: { html: "<p>A text has a skeleton that holds it up.</p><p>The <b>heading</b> says what it is all about. A <b>subheading</b> says what one part is about. <b>Bullet points</b> make a quick list.</p>" },
         spicy: { html: "<p>Under the words, every text has a skeleton. In exams these are called <b>structural</b> or <b>organisational features</b>.</p>" +
           "<p>Some are visible: <b>headings, subheadings, bullet points, numbered lists, bold text, captions</b>. Others sit inside the writing: <b>topic sentences, the opening, the ending</b>, and the little words that link one part to the next.</p>" +
-          "<p>Spotting them is the easy half. The marks come from saying <b>why</b> the writer chose them.</p>" } } },
+          "<p>Spotting them is the easy half. The marks come from saying <b>why</b> the writer chose them.</p>" } } ,
+      ez: { html: "<p>A <b>heading</b> says what it is all about.</p><p>A <b>subheading</b> is for 1 part. <b>Bullet points</b> make a list.</p>" } },
 
     { type: "match", topic: "Bones you can see",
       q: "Match each feature to its job.",
       pairs: [["Heading", "Says what the whole text is about"], ["Subheading", "Says what one section is about"], ["Bullet points", "A quick list of separate things"], ["Numbered list", "Steps that go in order"]],
       hint: "Start with the biggest one. The heading covers everything.",
       why: "Heading for the whole thing, subheadings for sections, bullets for lists, numbers for steps in order.",
+      ez: { q: "Match each one to its job.", hint: "The heading covers everything.", why: "Heading: all of it. Subheading: 1 part. Bullets: a list." },
       lv: {
         mild: { pairs: [["Heading", "Says what the whole text is about"], ["Subheading", "Says what one part is about"], ["Bullet points", "A quick list of things"]] },
         spicy: { pairs: [["Heading", "Says what the whole text is about"], ["Subheading", "Says what one section is about"], ["Bullet points", "A quick list of separate things"], ["Numbered list", "Steps that go in order"], ["Bold text", "Makes a key word stand out"], ["Caption", "Explains a picture"]] } } },
@@ -144,7 +146,9 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       answer: 0,
       slips: { 1: "The heading is the big one at the very top: [[head]]. What to bring only covers one part.", 2: "The bullet points are the items under it, like [[kit1]].", 3: "A caption sits under a picture. This sits above a list." },
       hint: "Does it cover the whole leaflet, or just one section?",
-      why: "What to bring tells you what one section is about, so it is a subheading." },
+      why: "What to bring tells you what one section is about, so it is a subheading." ,
+      ez: { hint: "Is it for all of it, or 1 part?", why: "It is for 1 part. So it is a subheading.",
+        slips: { 1: "The heading is the big one at the top.", 2: "The bullets are the items under it.", 3: "A caption goes under a picture." } } },
 
     { type: "mc", topic: "Bones you can see",
       q: "The writer wants to list the kit: [[kit1]], [[kit2]] and [[kit3]]. Which feature fits best?",
@@ -153,6 +157,8 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       slips: { 1: "A paragraph works, but the reader has to dig the items out. A list is quicker to scan.", 2: "Three headings for three small items would make the leaflet huge and messy." },
       hint: "Separate things, no order needed.",
       why: "Bullet points let the reader see the whole list at a glance, a bit like a shopping list.",
+      ez: { q: "A list of kit: [[kit1]], [[kit2]], [[kit3]]. Which feature fits?", hint: "Separate things. No order.", why: "Bullets show the list at a glance.",
+        slips: { 1: "A list is quicker to scan.", 2: "3 headings would be messy." } },
       lv: { spicy: { q: "The How to book section has two steps that must be done in order. Bullet points or a numbered list?",
         options: ["A numbered list, because the order matters", "Bullet points, because they look neater", "Either, it makes no difference"],
         slips: { 1: "Bullets are great for a list in any order. Here the order matters, so numbers help.", 2: "It does make a difference: numbers tell the reader what to do first." },
@@ -165,6 +171,7 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       cards: [["[[Do1]]", 0], ["[[Kit1]]", 1], ["[[Do2]]", 0], ["[[Kit3]]", 1]],
       hint: "Is it something you do, or something you pack?",
       why: "Things to do go together, things to pack go together. Grouping like this is exactly what subheadings are for.",
+      ez: { q: "Sort each one under its subheading.", hint: "Do it, or pack it?", why: "Things to do together. Things to pack together." },
       lv: {
         medium: { buckets: ["What you will do", "What to bring", "How to book"],
           cards: [["[[Do1]]", 0], ["[[Kit1]]", 1], ["Fill in the form", 2], ["[[Do2]]", 0], ["[[Kit2]]", 1], ["Pay 5 pounds", 2]] },
@@ -180,7 +187,8 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       lv: {
         mild: { html: "<p>The <b>topic sentence</b> is usually the first one in a paragraph. It says what the paragraph is about.</p>" + KITPARA + "<p>The first sentence says: this is about kit.</p>" },
         spicy: { html: "<p>Inside each paragraph is a hidden bone: the <b>topic sentence</b>. It says what the paragraph is about, and every other sentence backs it up.</p>" + KITPARA +
-          "<p>It is usually first, so a reader can skim the first lines and get the gist. Sometimes a writer saves it for <b>last</b>, to sum up like a punchline.</p>" } } },
+          "<p>It is usually first, so a reader can skim the first lines and get the gist. Sometimes a writer saves it for <b>last</b>, to sum up like a punchline.</p>" } } ,
+      ez: { html: "<p>The <b>topic sentence</b> is usually first.</p><p>It says what the paragraph is about.</p>" } },
 
     { type: "mc", topic: "Topic sentences",
       q: "Read the paragraph. Which is the topic sentence?" + KITPARA,
@@ -189,6 +197,8 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       slips: { 1: "That is one item: a detail. Which sentence covers all of them?", 2: "That is one item: a detail. Which sentence covers all of them?", 3: "That is the last detail. The topic sentence covers the whole paragraph." },
       hint: "Which sentence is the umbrella that all the others sit under?",
       why: "\"There are a few things you will need to bring\" covers every other sentence. The rest are details.",
+      ez: { q: "Which is the topic sentence?" + KITPARA, hint: "Which one covers all the others?", why: "The first one covers all the rest.",
+        slips: { 1: "That is 1 item. A detail.", 2: "That is 1 item. A detail.", 3: "That is the last detail." } },
       lv: { spicy: { q: "This one is trickier. Which is the topic sentence?<p class=\"a2task\">You will be on your feet for most of the day. The timetable is packed from 9am until 6pm. Even the breaks are short. In short, [[act]] is harder than it looks.</p>",
         options: ["In short, [[act]] is harder than it looks.", "You will be on your feet for most of the day.", "The timetable is packed from 9am until 6pm.", "Even the breaks are short."],
         slips: { 1: "It comes first, but it is only one detail about being busy.", 2: "That is a detail backing up the main point.", 3: "That is a detail backing up the main point." },
@@ -200,6 +210,7 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       items: ["There are a few things you will need to bring.", "Top of the list is [[kit1]].", "Pack [[kit2]] in case it turns cold.", "Finally, do not forget [[kit3]]."],
       hint: "Find the umbrella sentence first. \"Finally\" is a clue for the end.",
       why: "Topic sentence, then the details, with \"Finally\" landing the last one.",
+      ez: { q: "Topic sentence first. Then the details.", hint: "Finally goes at the end.", why: "Topic sentence, then details. Finally comes last." },
       lv: { spicy: { q: "Put this paragraph in order so it hangs together.",
         items: ["Getting to [[place]] is easier than you might think.", "A bus leaves the town centre every half hour.", "From the stop, it is a five minute walk.", "If you would rather drive, there is free parking.", "Either way, you will be there in no time."],
         hint: "Topic sentence first. \"From the stop\" needs the bus to come before it. \"Either way\" sums up two choices.",
@@ -211,7 +222,9 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       answer: 0,
       slips: { 1: "Nothing in it is something to pack.", 2: "There is nothing about forms or paying.", 3: "It is about what happens once you are there, not the journey." },
       hint: "What is every sentence about?",
-      why: "Every sentence is about something you will do, so the subheading is What you will do." },
+      why: "Every sentence is about something you will do, so the subheading is What you will do." ,
+      ez: { q: "Which subheading fits best?<p class=\"a2task\">On the first morning, you will [[do1]]. After lunch, you will [[do2]]. Every evening ends with a hot chocolate and a chat with [[who]].</p>",
+        why: "It is all things you will do.", slips: { 1: "Nothing here is to pack.", 2: "Nothing about forms or paying.", 3: "It is not about the journey." } } },
 
     { type: "text", topic: "Topic sentences", explain: true,
       q: "Here are the details for a paragraph: <b>it costs 5 pounds, you book online, places sell out fast.</b> Write a topic sentence to go at the start.",
@@ -219,7 +232,9 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       slips: [[["5 pounds", "five pounds"], "That is one of the details. A topic sentence covers all three, like \"Booking a place is easy.\""]],
       model: "Booking a place is quick and easy.",
       hint: "All three details are about one thing. What is it? Say that in one sentence.",
-      why: "Something like \"Booking a place is quick and easy\" covers the price, the website and the rush." },
+      why: "Something like \"Booking a place is quick and easy\" covers the price, the website and the rush." ,
+      ez: { q: "Write a topic sentence for these: <b>it costs 5 pounds, you book online, places sell out fast.</b>", hint: "All 3 are about 1 thing. What?", why: "Like \"Booking a place is easy.\"",
+        slips: [[[], "That is 1 detail. Cover all 3, like: Booking is easy."]] } },
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Openings and endings", title: "Hook them in, then land it",
@@ -229,13 +244,15 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       lv: {
         mild: { html: "<p>The <b>opening</b> hooks you in, often with a question.</p><p>The <b>ending</b> finishes things off, often by telling you what to do next.</p>" },
         spicy: { html: "<p><b>Openings</b> hook: a question, a surprising number, a little scene, a quote. Each one makes the reader curious in a different way.</p>" +
-          "<p><b>Endings</b> land it: a summary, a call to action (what to do next), or a <b>circular ending</b> that echoes the opening. A circular ending makes a text feel complete, like a story that comes home.</p>" } } },
+          "<p><b>Endings</b> land it: a summary, a call to action (what to do next), or a <b>circular ending</b> that echoes the opening. A circular ending makes a text feel complete, like a story that comes home.</p>" } } ,
+      ez: { html: "<p>The <b>opening</b> hooks you in.</p><p>The <b>ending</b> finishes it off.</p>" } },
 
     { type: "match", topic: "Openings and endings",
       q: "Match each opening to the kind of hook it uses.",
       pairs: [["Have you ever wanted to [[do1]]?", "A question"], ["Over 3000 people came to [[place]] last year.", "A surprising number"], ["Picture it: [[place]], early morning, totally silent.", "A little scene"]],
       hint: "Look for the question mark, then the number.",
       why: "A question makes you want the answer. A big number makes you sit up. A little scene drops you straight in.",
+      ez: { q: "Match each opening to its hook.", hint: "Look for the ? and the number.", why: "Question. Big number. Little scene." },
       lv: { medium: { pairs: [["Have you ever wanted to [[do1]]?", "A question"], ["Over 3000 people came to [[place]] last year.", "A surprising number"], ["Picture it: [[place]], early morning, totally silent.", "A little scene"], ["\"In the wise words of my late, great grandfather: stop.\"", "A quote"]] },
         spicy: { pairs: [["Have you ever wanted to [[do1]]?", "A question"], ["Over 3000 people came to [[place]] last year.", "A surprising number"], ["Picture it: [[place]], early morning, totally silent.", "A little scene"], ["\"In the wise words of my late, great grandfather: stop.\"", "A quote"]] } } },
 
@@ -245,7 +262,8 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       answer: 0,
       slips: { 1: "A new little detail at the very end leaves the reader hanging. Endings round things off.", 2: "\"Firstly\" starts things off. Endings land them." },
       hint: "Which one tells the reader what to do next?",
-      why: "It tells the reader what to do next and sends them off. That is a strong ending." },
+      why: "It tells the reader what to do next and sends them off. That is a strong ending." ,
+      ez: { hint: "Which says what to do next?", why: "It tells the reader what to do next.", slips: { 1: "A new detail at the end leaves you hanging.", 2: "Firstly starts things. It does not end them." } } },
 
     { type: "mc", topic: "Openings and endings", explain: true,
       q: "The leaflet opens with: \"Have you ever wanted to [[do1]]?\" It ends with: \"Now you can.\" What is the writer doing?",
@@ -254,6 +272,8 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       slips: { 1: "\"Now you can\" is not new information. It answers something from earlier.", 2: "Nothing new starts. It is the very last line." },
       hint: "What question did the opening ask?",
       why: "The ending answers the opening question. That is a circular ending: the text comes home to where it started.",
+      ez: { q: "Start: \"Have you ever wanted to [[do1]]?\" End: \"Now you can.\" What does the ending do?", hint: "What did the start ask?", why: "It answers the question from the start.",
+        slips: { 1: "Now you can is an answer, not a question.", 2: "There is no list here." } },
       lv: {
         mild: { q: "The leaflet starts: \"Have you ever wanted to [[do1]]?\" It ends: \"Now you can.\" What does the ending do?",
           options: ["Answers the question from the start", "Asks a new question", "Gives a new list"],
@@ -275,7 +295,8 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
         mild: { html: "<p>Every feature does a job for the reader.</p><p class=\"a2task\">The writer uses <b>bullet points</b> so that the reader <b>can see the list quickly</b>.</p>" },
         spicy: { html: "<p>Spotting a feature gets you started. The marks come from the <b>effect</b>: what it does to the reader.</p>" +
           "<p class=\"a2task\">The writer uses a <b>one line paragraph</b>, \"Nobody answered.\", which makes it stand out on the page and slows the reader down, building tension.</p>" +
-          "<p>Cohesion counts too. Words like <b>this, these, however, as a result</b> point back to what came before, so each paragraph hooks on to the last one and the reader follows the argument without getting lost.</p>" } } },
+          "<p>Cohesion counts too. Words like <b>this, these, however, as a result</b> point back to what came before, so each paragraph hooks on to the last one and the reader follows the argument without getting lost.</p>" } } ,
+      ez: { html: "<p>Every feature helps the reader.</p><p class=\"a2task\"><b>Bullet points</b> help the reader <b>see the list fast</b>.</p>" } },
 
     { type: "mc", topic: "What it does to the reader",
       q: "Why does the leaflet use subheadings?",
@@ -285,6 +306,7 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       slips: { 1: "Subheadings add a few words, but that is not why writers use them.", 2: "Lots of texts, like stories and letters, have no subheadings at all. It is a choice." },
       hint: "Think about someone who only wants to know what to bring.",
       why: "Subheadings split the leaflet up, so a reader can jump straight to the bit they need.",
+      ez: { hint: "Someone only wants to know what to bring.", why: "So you can jump to the bit you need.", slips: { 1: "That is not why writers use them.", 2: "Lots of texts have none. It is a choice." } },
       lv: { spicy: { q: "A spooky story has long paragraphs, then a paragraph that is just three words: \"Nobody came back.\" What is the effect?",
         fig: "",
         options: ["The short paragraph stands out and makes the reader stop, so the moment hits harder", "It shows the writer was in a hurry", "It makes the story easier to skim for facts"],
@@ -298,6 +320,7 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       answers: [1, 3],
       hint: "Look for the ones that mention the reader.",
       why: "Naming a feature is a start. The two picks go further and say what it does to the reader.",
+      ez: { hint: "Look for the reader.", why: "It says how bullets help the reader." },
       lv: {
         mild: { q: "Pick the comment that says how it helps the reader.",
           options: ["There are bullet points.", "The bullet points help the reader see the list quickly.", "There is a heading."], answers: [1],
@@ -312,6 +335,8 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       model: "can follow the steps in the right order.",
       hint: "Numbers tell you what comes first.",
       why: "The numbers show the order, so the reader knows what to do first and what to do next.",
+      ez: { q: "Finish it: \"The writer uses a numbered list so that the reader...\"", hint: "Numbers tell you what is first.", why: "So the reader knows what to do first and next.",
+        slips: [[[], "Not how it looks. What do the numbers help you do?"]] },
       lv: { spicy: { q: "A paragraph explains why [[place]] closed for a year. The next paragraph begins: \"<b>This</b> is why the new owners started again.\" What does the word <b>This</b> do?",
         need: [["back", "previous", "before", "last", "earlier", "refer", "refers", "link", "links", "linking", "connect", "connects", "join", "joins", "points"]],
         slips: [[["start", "starts", "first word"], "It is the first word, but what is it pointing at?"]],
@@ -324,6 +349,7 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       fig: LEAFLET,
       starters: ["The writer uses", "so that the reader", "This helps the reader", "The subheadings"],
       checklist: ["I named a feature", "I said what it does to the reader"],
+      ez: { q: "Only if you like: pick a feature. What does it do for the reader?" },
       minWords: 25,
       lv: {
         mild: { minWords: 10, starters: ["The leaflet has", "This helps the reader", "The bullet points"], checklist: ["I named a feature", "I said how it helps"] },
@@ -341,6 +367,11 @@ var KITPARA = "<p class=\"a2task\">There are a few things you will need to bring
       T(172, 80, "What not to say", 13, ' font-weight="700" fill="#e04848"') + bar(172, 88, 110, 6, "#d7dbea") +
       T(172, 116, "How to get home", 13, ' font-weight="700" fill="#e04848"') + bar(172, 124, 130, 6, "#d7dbea") +
       A.bird(372, 60, 0.8, "#ff5d5d") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>People skim headings to find what they need.</p><p>A time travel guide would need <b>How to get home</b>!</p>" },
+    make: { intro: "A heading, 3 subheadings and a hook." }
   },
 
   make: {
