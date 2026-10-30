@@ -119,6 +119,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       html: "<p>An <b>object</b> is a thing: a chair, a window, a bottle.</p>" +
         "<p>A <b>material</b> is what the object is made of: wood, glass, plastic, metal, fabric, rock, rubber, paper.</p>" +
         "<p>Look around [[place]]. Everything there is made of at least one material.</p>",
+      ez: { title: "Thing and stuff", html: "<p>An <b>object</b> is a thing, like a chair.</p><p>A <b>material</b> is what it is made of: wood.</p>" },
       lv: {
         mild: { html: "<p>An <b>object</b> is a thing, like a chair.</p><p>A <b>material</b> is what it is made of, like wood.</p>" },
         spicy: { html: "<p>An <b>object</b> is a thing. A <b>material</b> is the stuff it is made from.</p>" +
@@ -130,6 +131,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       pairs: [["[[Metal]]", "Metal"], ["[[Fabric]]", "Fabric"], ["[[Wood]]", "Wood"], ["[[Glass]]", "Glass"]],
       hint: "Picture it. What would it feel like to touch?",
       why: "Each object is made of the material that suits its job.",
+      ez: { q: "Match each thing to its material.", hint: "What would it feel like?", why: "Each thing is made of a material that suits it." },
       lv: {
         mild: { pairs: [["[[Metal]]", "Metal"], ["[[Fabric]]", "Fabric"], ["[[Wood]]", "Wood"]] },
         spicy: { pairs: [["[[Metal]]", "Metal"], ["[[Fabric]]", "Fabric"], ["[[Wood]]", "Wood"], ["[[Glass]]", "Glass"], ["[[Plastic]]", "Plastic"]] } } },
@@ -141,6 +143,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "A window is an object. It is made of a material: glass.", 2: "A bottle is an object. It could be made of glass or plastic.", 3: "A mirror is an object. It is made of glass with a shiny coat on the back." },
       hint: "Which one could be used to make the others?",
       why: "Glass is a material. Windows, bottles and mirrors are objects made from it.",
+      ez: { hint: "What are the other 2 made of?", why: "<b>Wood</b> is a material. Chairs are made of it.", slips: { 1: "A chair is a thing. It is made of wood.", 2: "A table is a thing. It is made of wood." } },
       lv: {
         mild: { q: "Which one is a material?", options: ["Wood", "A chair", "A table"],
           slips: { 1: "A chair is an object. It can be made of wood.", 2: "A table is an object. It can be made of wood." },
@@ -156,6 +159,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       cards: [["a door key", 0], ["a pencil", 1], ["a sock", 2], ["a coin", 0], ["a cricket bat", 1], ["a pillowcase", 2]],
       hint: "Think about what each one feels like in your hand.",
       why: "Keys and coins are metal, pencils and cricket bats are wood, socks and pillowcases are fabric.",
+      ez: { q: "What is each one made of? Sort them.", hint: "How does it feel in your hand?", why: "Key and coin: metal. Pencil: wood. Sock: fabric." },
       lv: {
         mild: { cards: [["a door key", 0], ["a pencil", 1], ["a sock", 2], ["a coin", 0]] },
         spicy: { buckets: ["Metal", "Wood", "Fabric", "Glass"],
@@ -163,6 +167,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
 
     { type: "num", topic: "Objects and materials",
       q: "Look at the shelves. How many of the things are made of <b>metal</b>?",
+      ez: { q: "Look at the shelves. How many things are <b>metal</b>?", hint: "Metal is often shiny. Check both shelves.", why: "Fork, pan, key, tin can: <b>4</b>.", slips: [[null, "Close! The tin and the key are metal too."], [null, "1 too many. The spoon is wood."], [null, "Look along both shelves again."]] },
       fig: KITCHEN,
       boxes: [{ label: "Metal things", a: 4 }],
       slips: [[3, "Close. Look again: the tin can and the key are metal too."], [5, "One too many. The wooden spoon is wood, not metal."], [2, "Look again along both shelves."]],
@@ -176,6 +181,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       model: "Everything is made of materials, like wood, metal or plastic.",
       hint: "The word starts with m.",
       why: "Everything is made of materials. Saying it in your own words, with an example or two, is exactly the idea.",
+      ez: { q: "What is everything around [[place]] made of?", hint: "The word starts with m.", why: "Everything is made of <b>materials</b>.", slips: [[null, "Good examples! What are they all called?"]] },
       lv: { spicy: { q: "In your own words: what is everything around [[place]] made of? Give two examples of objects and their materials.",
         model: "Everything is made of materials: a chair is made of wood, and a window is made of glass." } } },
 
@@ -185,6 +191,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       html: "<p>A <b>property</b> is what a material is like. Properties often come in opposite pairs:</p>" +
         "<p><b>hard</b> or <b>soft</b>, <b>bendy</b> or <b>stiff</b>, <b>see through</b> or not, <b>waterproof</b> or <b>soaks up water</b>, <b>magnetic</b> or not.</p>" +
         "<p>Scientists find properties by testing: drip water on it, hold a magnet near it, try to bend it.</p>",
+      ez: { title: "Properties", html: "<p>A <b>property</b> is what a material is like.</p><p>Hard or soft? Bendy or stiff? See through?</p>" },
       lv: {
         mild: { html: "<p>A <b>property</b> is what a material is like.</p><p>Is it <b>hard</b> or <b>soft</b>? <b>Bendy</b> or <b>stiff</b>? Can you <b>see through</b> it? Does water <b>soak in</b> or <b>run off</b>?</p>" },
         spicy: { html: "<p>A <b>property</b> is what a material is like. Scientists use exact words:</p>" +
@@ -198,6 +205,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "Glass is hard and stiff. That is not why it is used here.", 2: "Glass is waterproof: water runs straight off." },
       hint: "What do you do with a window?",
       why: "Glass is see through, so light gets in and you can see through it.",
+      ez: { q: "Why is [[glass]] made of glass?", hint: "What do you do with a window?", why: "You can <b>see through</b> glass.", slips: { 1: "Glass is hard and stiff.", 2: "Water runs off glass." } },
       lv: { spicy: { q: "Which word means you can see clearly through a material?",
         options: ["Transparent", "Opaque", "Absorbent", "Flexible"],
         slips: { 1: "Opaque is the opposite: light cannot get through.", 2: "Absorbent means it soaks up liquid.", 3: "Flexible means it bends." },
@@ -206,6 +214,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
     { type: "widget", topic: "What is it like?", unscored: true,
       title: "Test lab",
       html: "<p>Pick a material, then pick a test, and see what happens. Try a few. Your results fill in the table.</p>",
+      ez: { html: "<p>Pick a material. Pick a test. See what happens!</p>" },
       mount: function(el, api){
         var d = api.data;
         if(!d.res || typeof d.res !== "object") d.res = {};
@@ -275,6 +284,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       cards: [["a rubber boot", 0], ["a towel", 1], ["a plastic bag", 0], ["a sponge", 1], ["a glass bottle", 0], ["kitchen roll", 1]],
       hint: "Which ones would you use to dry something?",
       why: "Rubber, plastic and glass are waterproof. Towels, sponges and kitchen roll are absorbent: that is their whole job.",
+      ez: { q: "Does water run off, or soak in?", hint: "Which would dry you?", why: "Boots and bags are waterproof. Towels soak it up." },
       lv: {
         mild: { cards: [["a rubber boot", 0], ["a towel", 1], ["a plastic bag", 0], ["a sponge", 1]] },
         spicy: { q: "Sort them. Conductor of electricity, or insulator?",
@@ -288,6 +298,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       pairs: [["See through", "Hold it up to the light"], ["Waterproof", "Drip water on it"], ["Bendy", "Try to bend it gently"], ["Magnetic", "Hold a magnet near it"]],
       hint: "What would you actually do to find out?",
       why: "Every property has a test. That is how scientists know.",
+      ez: { q: "Match each property to its test.", hint: "What would you do to find out?", why: "Every property has a test." },
       lv: {
         mild: { pairs: [["See through", "Hold it up to the light"], ["Waterproof", "Drip water on it"], ["Bendy", "Try to bend it gently"]] },
         spicy: { pairs: [["Transparent", "Hold it up to the light"], ["Absorbent", "Drip water on it"], ["Flexible", "Try to bend it gently"], ["Magnetic", "Hold a magnet near it"], ["Conductor", "Put it in a circuit with a bulb"]] } } },
@@ -297,6 +308,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       fig: TEAPOT,
       html: "<p>Objects are made from materials with the <b>right properties for the job</b>.</p>" +
         "<p>Wellies are rubber: waterproof and bendy. Windows are glass: see through and waterproof. A teapot made of chocolate would be the right shape, but it would melt the moment you poured the tea in.</p>",
+      ez: { title: "Right for the job", html: "<p>Pick the material that does the <b>job</b>.</p><p>A chocolate teapot would melt!</p>" },
       lv: {
         mild: { html: "<p>We pick the material that does the job.</p><p>Wellies are rubber, so your feet stay dry.<br>A chocolate teapot would melt!</p>" },
         spicy: { html: "<p>Designers choose a material for its <b>properties</b>, but they also weigh up <b>cost</b>, <b>weight</b>, how <b>durable</b> it is, and whether it can be <b>recycled</b>.</p>" +
@@ -310,6 +322,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "Wellies are not see through. Think about puddles.", 2: "Rubber is not magnetic, and wellies do not need to be." },
       hint: "What do wellies have to keep out?",
       why: "Rubber keeps water out and bends when you walk.",
+      ez: { hint: "What do wellies keep out?", why: "Rubber keeps water out and <b>bends</b>.", slips: { 1: "Wellies are not see through. Think puddles.", 2: "Wellies do not need to be magnetic." } },
       lv: { spicy: { q: "Why are aeroplane bodies usually made of aluminium rather than steel?",
         options: ["It is strong but much lighter", "It is magnetic", "It is transparent"],
         slips: { 1: "Aluminium is not magnetic, and that would not help a plane fly.", 2: "Aluminium is opaque. The windows are the see through bits." },
@@ -323,6 +336,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "Plastic is waterproof, so it would keep you dry.", 2: "Waterproof fabric is what most umbrellas are made of." },
       hint: "Which one soaks up water and goes soggy?",
       why: "Paper soaks up water and falls apart. The umbrella would be soggy in seconds.",
+      ez: { q: "Which would make a <b>terrible</b> umbrella?", hint: "Which one goes soggy?", why: "<b>Paper</b> soaks up water and falls apart.", slips: { 1: "Plastic keeps you dry.", 2: "Most umbrellas are made of this." } },
       lv: { spicy: { q: "A designer wants a cup for hot drinks that is comfortable to hold. Which is the <b>worst</b> choice?",
         options: ["Thin steel, because it conducts heat to your hand", "Ceramic, because it is a poor conductor of heat", "Thick card with a sleeve, because it insulates"],
         slips: { 1: "Ceramic mugs work well: heat moves through them slowly.", 2: "Card with a sleeve is how takeaway cups keep your hand cool." },
@@ -336,6 +350,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       model: "Metal gets hot, so a plastic or wooden handle stops you burning your hand.",
       hint: "What happens to metal on a hot cooker?",
       why: "Metal conducts heat, so a metal handle would get hot. Plastic and wood are insulators, so the handle stays cool enough to hold.",
+      ez: { q: "A pan has a plastic handle. Why not metal?", hint: "What happens to metal on a cooker?", why: "Metal gets <b>hot</b>. Plastic stays cool to hold.", slips: [[null, "Think about the pan on the cooker."]] },
       lv: {
         mild: { q: "A frying pan has a metal part and a plastic handle. Why is the handle plastic, not metal?",
           model: "The metal gets hot and the plastic does not, so you do not burn your hand." },
@@ -350,6 +365,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       answers: [0, 3],
       hint: "Which ones would stop rain getting in?",
       why: "Waterproof nylon and rubber coated cotton keep rain out. Wool is warm, but it soaks up water. Paper goes soggy.",
+      ez: { q: "You need a window. Pick <b>all</b> you can see through.", hint: "Which let light in?", why: "Glass and clear plastic are see through." },
       lv: {
         mild: { q: "You need a window. Pick the materials you could see through.", options: ["Glass", "Wood", "Clear plastic", "Brick"], answers: [0, 2],
           hint: "Which ones let light through?", why: "Glass and clear plastic are see through. Wood and brick are not." },
@@ -365,6 +381,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
         "<p><b>Natural</b> materials are used almost as they are found: wood, wool, cotton, stone, clay.</p>" +
         "<p>Other materials are <b>made by people</b>, by changing raw materials: glass from sand, plastic from oil, metal from rock called ore, paper from wood.</p>" +
         "<p>Next up: a material hunt, away from the screen.</p>",
+      ez: { title: "From the Earth", html: "<p><b>Natural:</b> wood, wool, stone.</p><p><b>Made by people:</b> glass from sand, plastic from oil.</p>" },
       lv: {
         mild: { html: "<p>Every material comes from the Earth.</p><p><b>Natural</b> ones we use as they are: wood, wool, stone.</p><p>Others are <b>made by people</b>, who change them first: glass is made from sand, plastic from oil.</p>" },
         spicy: { html: "<p>Every material starts as a <b>raw material</b> from the Earth or its atmosphere: glass from sand, plastic from crude oil, metals from ores dug out of rock, paper from trees.</p>" +
@@ -377,6 +394,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       cards: [["wool", 0], ["plastic", 1], ["wood", 0], ["glass", 1], ["stone", 0], ["paper", 1]],
       hint: "Has it been changed in a factory, or used as it was found?",
       why: "Wool, wood and stone are used as found. Plastic, glass and paper are made by changing a raw material.",
+      ez: { q: "Natural, or made by people?", hint: "Made in a factory?", why: "Wool and wood are natural. Plastic and glass are made." },
       lv: {
         mild: { cards: [["wool", 0], ["plastic", 1], ["wood", 0], ["glass", 1]] },
         spicy: { q: "Sort the raw materials: can it grow again, or will it run out?",
@@ -390,6 +408,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       pairs: [["Sand", "Glass"], ["Oil", "Plastic"], ["Trees", "Paper"], ["Rock (ore)", "Metal"]],
       hint: "Glass is made by melting something you find on a beach.",
       why: "Sand melts into glass, oil becomes plastic, trees become paper, and ore is heated to get metal out.",
+      ez: { q: "What is each one made into?", hint: "Glass comes from the beach.", why: "Sand to glass. Oil to plastic. Trees to paper." },
       lv: {
         mild: { pairs: [["Sand", "Glass"], ["Oil", "Plastic"], ["Trees", "Paper"]] },
         spicy: { pairs: [["Sand", "Glass"], ["Crude oil", "Plastic"], ["Trees", "Paper"], ["Iron ore", "Steel"], ["Clay", "Bricks"]] } } },
@@ -401,6 +420,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "Wool comes from sheep. It is spun, but it is a natural material.", 2: "Stone is dug up and used as it is: natural.", 3: "Wood comes from trees: natural." },
       hint: "Which one could never be found lying around in nature?",
       why: "Plastic is made from oil in a factory. The others are natural.",
+      ez: { hint: "Where does wool grow?", why: "Wool grows on <b>sheep</b>. It is natural.", slips: { 1: "Wool is spun, but it grows on sheep." } },
       lv: {
         mild: { q: "Is wool natural, or made by people?", options: ["Natural: it comes from sheep", "Made by people in a factory"], fixed: true,
           slips: { 1: "Wool is spun into yarn, but it grows on sheep. Natural." },
@@ -417,10 +437,16 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       starters: ["I will look in", "I think I will find lots of", "I want to test", "I was surprised that"],
       checklist: ["I said where I will look", "I made a guess about the most common material"],
       minWords: 15,
+      ez: { q: "Get ready for a material hunt. Where will you look?" },
       lv: {
         mild: { minWords: 6, starters: ["I will look in", "I think there will be lots of"] },
         spicy: { minWords: 35, checklist: ["I said where I will look", "I made a guess about the most common material", "I said which property I most want to test", "I mentioned natural or made by people"] } } }
   ],
+
+  ez: {
+    realWorld: { title: "Ages named after materials", html: "<p>The <b>Stone Age</b>. The <b>Bronze Age</b>. The <b>Iron Age</b>.</p><p>What will they call ours? The Plastic Age?</p>" },
+    make: { intro: "Find 5 things. What is each made of?" }
+  },
 
   realWorld: {
     title: "Ages named after materials",

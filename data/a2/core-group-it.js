@@ -23,19 +23,27 @@ function nums(list){ return task(list.map(function(s, k){ return "<b>(" + (k + 1
    slips. Version 1 is the base; the rest become vary, each with every level written out. */
 function res(v, L, vi){
   var o = {};
-  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0) o[k] = v[k]; });
+  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0 && k !== "ez") o[k] = v[k]; });
   if(v[L]) ext(o, v[L]);
+  var t = 0;
   if(o.o){
-    var right = o.o[0], rest = o.o.slice(1), t = vi % o.o.length, opts = rest.slice(), sl = {};
+    var right = o.o[0], rest = o.o.slice(1), opts = rest.slice(), sl = {};
+    t = vi % o.o.length;
     opts.splice(t, 0, right);
     (o.s || []).forEach(function(m, j){ if(m) sl[j < t ? j : j + 1] = m; });
     o.options = opts; o.answer = t; o.slips = sl; delete o.o; delete o.s;
+  }
+  /* easy read (LC): ez is for the first level only; ez.s moves with the options, like s */
+  if(v.ez && L === START){
+    var e = ext({}, v.ez);
+    if(e.s){ var es = {}; e.s.forEach(function(m, j){ if(m) es[j < t ? j : j + 1] = m; }); e.slips = es; delete e.s; }
+    o.ez = e;
   }
   return o;
 }
 function Q(type, topic, flags, vers){
   var all = [], R = vers.map(function(v, vi){ var r = {}; LVS.forEach(function(L){ r[L] = res(v, L, vi); all.push(r[L]); }); return r; });
-  var keys = {}; all.forEach(function(o){ Object.keys(o).forEach(function(k){ keys[k] = 1; }); });
+  var keys = {}; all.forEach(function(o){ Object.keys(o).forEach(function(k){ if(k !== "ez") keys[k] = 1; }); });
   all.forEach(function(o){ Object.keys(keys).forEach(function(k){ if(!(k in o)) o[k] = null; }); });
   function others(r){ var lv = {}; LVS.forEach(function(L){ if(L !== START) lv[L] = r[L]; }); return lv; }
   var step = ext(ext({ type: type, topic: topic }, flags || {}), R[0][START]);
@@ -142,7 +150,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
           "<p>Grouping like this helps the reader. They know what each part is about, and can find things again.</p>" },
         spicy: { html: "<p>A paragraph groups sentences around <b>one focus</b>. The tricky part is that topics overlap.</p>" +
           "<p>In a piece about herons, \"They stand still for ages\" could be about how they look, how they hunt or how they behave. Where it goes depends on the paragraph's job: in a hunting paragraph it belongs; in a looks paragraph it wanders off.</p>" +
-          "<p>So ask two questions: <b>what is this paragraph for?</b> and <b>does this sentence help with that?</b></p>" } } },
+          "<p>So ask two questions: <b>what is this paragraph for?</b> and <b>does this sentence help with that?</b></p>" } },
+      ez: { html: "<p>A <b>paragraph</b> is a box.</p><p>It holds sentences about 1 thing.</p>" } },
 
     Q("sort", "What goes together?", null, [
       { q: "Here are some sentences about Bonnie. Sort them into two paragraphs.",
@@ -150,6 +159,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["She has brown curly fur.", 0], ["She has no tail.", 0], ["She loves chasing leaves.", 1], ["Her favourite snack is carrot.", 1]],
         hint: "Is it about how she looks, or what she enjoys?",
         why: "Fur and no tail are about looks. Leaves and carrot are things she likes.",
+        ez: { q: "Sort the sentences about Bonnie into 2 groups.", hint: "Her looks, or what she likes?", why: "Fur and tail are looks. Leaves and carrot she likes." },
         medium: { buckets: ["What she looks like", "What she likes", "Her day"],
           cards: [["She has brown curly fur.", 0], ["She has no tail.", 0], ["She loves chasing leaves.", 1], ["Her favourite snack is carrot.", 1], ["She has a walk every morning.", 2], ["She naps after lunch.", 2]],
           why: "Three topics, three paragraphs: looks, likes, and her day." },
@@ -161,6 +171,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["Robins have a red chest.", 0], ["They are small and round.", 0], ["They eat worms.", 1], ["They like seeds and berries.", 1]],
         hint: "Looks, or food?",
         why: "Red chest and round are looks. Worms, seeds and berries are food.",
+        ez: { q: "Sort the sentences about robins into 2 groups.", why: "Red chest and round are looks. The rest is food." },
         medium: { buckets: ["What they look like", "What they eat", "Where they live"],
           cards: [["Robins have a red chest.", 0], ["They are small and round.", 0], ["They eat worms.", 1], ["They like seeds and berries.", 1], ["They live in gardens and parks.", 2], ["They nest in hedges.", 2]],
           why: "Looks, food and home: three paragraphs." },
@@ -172,6 +183,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["The coach left at 9am.", 0], ["We sang songs on the way.", 0], ["The museum had a huge dinosaur.", 1], ["We saw old Roman coins.", 1]],
         hint: "Getting there, or being there?",
         why: "Coach and singing were the journey. Dinosaur and coins were in the museum.",
+        ez: { q: "Sort the sentences about the trip into 2 groups.", why: "Coach and songs were the journey. The rest was the museum." },
         medium: { buckets: ["The journey", "The museum", "Lunch"],
           cards: [["The coach left at 9am.", 0], ["We sang songs on the way.", 0], ["The museum had a huge dinosaur.", 1], ["We saw old Roman coins.", 1], ["We ate in the park.", 2], ["Jay dropped his sandwich.", 2]],
           why: "Journey, museum and lunch: three paragraphs." },
@@ -186,6 +198,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["Sand is part of the beach. It belongs.", "Rock pools are on the beach. It belongs."],
         hint: "Which one is not about the beach?",
         why: "Everything else is about the beach. The bike has wandered in from somewhere else.",
+        ez: { q: "Which sentence does not belong?" + task("The beach has soft sand. The sea is calm and blue. My cousin has a new bike. There are rock pools to explore."),
+          s: ["Sand is on the beach. It fits.", "Rock pools are on the beach. It fits."], why: "The bike is not about the beach." },
         medium: { o: ["My cousin has a new bike.", "The beach has soft sand.", "The sea is calm and blue.", "There are rock pools to explore."],
           s: ["Sand is part of the beach.", "The sea is part of the beach.", "Rock pools are on the beach."] },
         spicy: { q: "This paragraph is about <b>what herons look like</b>. Which sentence does not belong?" + task("Herons are tall grey birds. They have long thin legs and a sharp yellow beak. Their wings can be almost two metres across. They mostly eat fish and frogs."),
@@ -197,6 +211,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["Lions are at the zoo. It belongs.", "Penguins are at the zoo. It belongs."],
         hint: "Which one is not about the zoo?",
         why: "Jay's favourite story, but it is not about the zoo.",
+        ez: { q: "Which sentence does not belong?" + task("We went to the zoo. We saw two lions. When I was in China, I ate noodles. The penguins were swimming."),
+          s: ["Lions are at the zoo. It fits.", "Penguins are at the zoo. It fits."], why: "Jay's favourite story. But not about the zoo." },
         medium: { o: ["When I was in China, I ate noodles.", "We went to the zoo.", "We saw two lions.", "The penguins were swimming."],
           s: ["That is what the paragraph is about.", "Lions are at the zoo.", "Penguins are at the zoo."] },
         spicy: { q: "This paragraph is about <b>the journey to the zoo</b>. Which sentence does not belong?" + task("We left school at nine. The coach was freezing. We got stuck in traffic near the bridge. The penguins were swimming when we arrived."),
@@ -208,6 +224,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["That is what the paragraph is about.", "Long legs are part of a heron."],
         hint: "Which one is not about herons?",
         why: "It is all about herons, then suddenly Jay's car. Outrageous.",
+        ez: { q: "Which sentence does not belong?" + task("Herons are tall grey birds. They have long legs. They stand very still. Jay's car is blue."),
+          s: ["That is what it is all about.", "Long legs are part of a heron."], why: "Jay's car is not a heron. Outrageous." },
         medium: { o: ["Jay's car is blue.", "Herons are tall grey birds.", "They have long legs.", "They stand very still."],
           s: ["That is the topic.", "Long legs are part of a heron.", "Standing still is something herons do."] },
         spicy: { q: "This paragraph is about <b>how herons catch food</b>. Which sentence does not belong?" + task("Herons wade into shallow water. They stand completely still for ages. Then they strike with their beak. Their nests are made of sticks."),
@@ -221,6 +239,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         o: ["What [[thing]] looks like", "Where [[thing]] is", "What happens there"],
         s: ["Nothing here says where it is.", "Nothing here says what happens."],
         hint: "Both sentences describe it.",
+        ez: { s: ["Nothing says where it is.", "Nothing says what happens."] },
         why: "Both sentences describe how it looks.",
         spicy: { q: "Which is the best label for this paragraph?" + task("[[Lk1]] [[Lk2]]"),
           o: ["Its appearance", "Its location", "Facts"],
@@ -229,6 +248,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         o: ["Where [[thing]] is", "What [[thing]] looks like", "What happens there"],
         s: ["Nothing here describes how it looks.", "Nothing here says what happens."],
         hint: "Both sentences are about a place.",
+        ez: { s: ["Nothing says how it looks.", "Nothing says what happens."] },
         why: "Both sentences are about where it is.",
         spicy: { q: "Which is the best label for this paragraph?" + task("[[Wh1]] [[Wh2]]"),
           o: ["Its location", "Its appearance", "Information"],
@@ -237,6 +257,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         o: ["What happens there", "Where [[thing]] is", "What [[thing]] looks like"],
         s: ["Nothing here says where it is.", "Nothing here describes how it looks."],
         hint: "Both sentences are about things going on.",
+        ez: { s: ["Nothing says where it is.", "Nothing says how it looks."] },
         why: "Both sentences are about what happens.",
         spicy: { q: "Which is the best label for this paragraph?" + task("[[Do1]] [[Do2]]"),
           o: ["Activities", "Its location", "Other things"],
@@ -255,7 +276,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
           "<p>On the page, a new paragraph starts on a new line, often with a small gap or an indent.</p>" },
         spicy: { html: "<p>The four classic triggers for a new paragraph are often remembered as <b>TiPToP</b>: a change of <b>Ti</b>me, <b>P</b>lace, <b>To</b>pic or <b>P</b>erson.</p>" +
           "<p>Writers also break paragraphs for <b>effect</b>: a one sentence paragraph after long ones makes that moment hit harder.</p>" +
-          "<p>Watch for linking phrases that signal a shift: <b>However</b>, <b>On the other hand</b>, <b>Hours later</b>, <b>Back at home</b>. The new paragraph usually starts just before them.</p>" } } },
+          "<p>Watch for linking phrases that signal a shift: <b>However</b>, <b>On the other hand</b>, <b>Hours later</b>, <b>Back at home</b>. The new paragraph usually starts just before them.</p>" } },
+      ez: { title: "New thing, new paragraph", html: "<p>Something <b>new</b>? Start a new paragraph.</p><p>A new topic, time or place.</p>" } },
 
     Q("mc", "New topic, new paragraph", { fixed: true }, [
       { q: "This was written as one block. Where should a new paragraph start?" + nums(["We had breakfast at 8.", "I ate toast.", "In the afternoon, we went to the park.", "We fed the ducks."]),
@@ -263,6 +285,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { 0: "Toast is still breakfast. The topic has not changed yet.", 2: "The ducks are in the park, so they belong with sentence 3." },
         hint: "Find the sentence where the time changes.",
         why: "<b>In the afternoon</b> moves to a new time, so the new paragraph starts there.",
+        ez: { q: "Where does a new paragraph start?" + nums(["We had breakfast at 8.", "I ate toast.", "In the afternoon, we went to the park.", "We fed the ducks."]),
+          slips: { 0: "Toast is still breakfast.", 2: "The ducks are in the park too." }, hint: "Where does the time change?", why: "<b>In the afternoon</b> is a new time." },
         medium: { q: "This was written as one block. Where should a new paragraph start?" + nums(["We had breakfast at 8.", "I ate toast and Jay had porridge.", "Then we packed our bags.", "In the afternoon, we went to the park.", "We fed the ducks.", "Bonnie barked at a goose."]),
           options: ["Before sentence 3", "Before sentence 4", "Before sentence 5", "Before sentence 6"], answer: 1,
           slips: { 0: "Packing bags is still part of the morning.", 2: "The ducks are part of the park, which started at sentence 4.", 3: "The goose is still in the park." } },
@@ -275,6 +299,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { 0: "Orange is still about the fish.", 2: "Carrots grow in the garden, so they go with sentence 3." },
         hint: "Find where the topic changes from the fish.",
         why: "The topic changes from the fish to the garden at sentence 3.",
+        ez: { q: "Where does a new paragraph start?" + nums(["Our class has a pet fish.", "It is orange.", "Our class also has a garden.", "We grow carrots in it."]),
+          slips: { 0: "Orange is still about the fish.", 2: "Carrots go with the garden." }, hint: "Where does the topic change?", why: "Sentence 3 moves on to the garden." },
         medium: { q: "This was written as one block. Where should a new paragraph start?" + nums(["Our class has a pet fish called Gill.", "It is orange with a white tail.", "We feed it every morning.", "Our class also has a garden.", "We grow carrots and beans.", "Bonnie likes to dig in it."]),
           options: ["Before sentence 3", "Before sentence 4", "Before sentence 5", "Before sentence 6"], answer: 1,
           slips: { 0: "Feeding it is still about the fish.", 2: "Carrots are in the garden, which started at sentence 4.", 3: "Digging is still about the garden." } },
@@ -287,6 +313,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { 0: "Standing up is still on the bus.", 2: "The sandcastle is at the beach, so it goes with sentence 3." },
         hint: "Find where the place changes.",
         why: "<b>At the beach</b> is a new place.",
+        ez: { q: "Where does a new paragraph start?" + nums(["The bus was very busy.", "We had to stand up.", "At the beach, the sun came out.", "We built a sandcastle."]),
+          slips: { 0: "Standing up is still on the bus.", 2: "The sandcastle goes with the beach." }, hint: "Where does the place change?" },
         medium: { q: "This was written as one block. Where should a new paragraph start?" + nums(["The bus was very busy.", "We had to stand up.", "A man was singing loudly.", "At the beach, the sun came out.", "We built a huge sandcastle.", "The sea knocked it down."]),
           options: ["Before sentence 3", "Before sentence 4", "Before sentence 5", "Before sentence 6"], answer: 1,
           slips: { 0: "The singing man is still on the bus.", 2: "The sandcastle is at the beach, which started at sentence 4.", 3: "The sea is still at the beach." } },
@@ -303,6 +331,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { any: "Three are good reasons. A paragraph usually has more than one sentence." },
         hint: "What could change?",
         why: "A new topic, time or place. Not every sentence: then nothing would be grouped.",
+        ez: { q: "Pick <b>all</b> the good reasons for a new paragraph.", slips: { any: "3 are good reasons. Not after every sentence." }, why: "A new topic, time or place." },
         medium: { options: ["A new topic", "A new time", "A new place", "A new person", "After every single sentence", "When the line is full"], answers: [0, 1, 2, 3],
           slips: { any: "Four are good reasons. Paragraphs group sentences, and a full line just means carry on." } },
         spicy: { options: ["A change of time", "A change of place", "A change of topic", "A change of person", "For dramatic effect", "Whenever a sentence is long", "To make the page look fuller"], answers: [0, 1, 2, 3, 4],
@@ -313,6 +342,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { any: "Three signal something new. \"and then\" carries on the same sentence." },
         hint: "Which ones move to a new time, place or topic?",
         why: "A new time, a new place and a new topic. \"and then\" just keeps going.",
+        ez: { q: "Pick <b>all</b> the ones that could start a new paragraph.", slips: { any: "3 move on. \"and then\" just carries on." }, hint: "Which ones move to something new?", why: "New time, place and topic. \"and then\" carries on." },
         medium: { options: ["Later that day,", "When we got home,", "Another reason is", "Meanwhile, at school,", "and also", "because"], answers: [0, 1, 2, 3],
           slips: { any: "Four signal a shift. \"and also\" and \"because\" join ideas inside a sentence." } },
         spicy: { options: ["However,", "Hours later,", "On the other hand,", "Back at the castle,", "which meant", "so"], answers: [0, 1, 2, 3],
@@ -323,6 +353,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { any: "Three are shifts. You never break a paragraph in the middle of a sentence." },
         hint: "Time, topic, place.",
         why: "Time, topic and place changes. Never mid sentence.",
+        ez: { q: "When is a new paragraph good? Pick <b>all</b>.", slips: { any: "3 are changes. Never in the middle of a sentence." }, why: "When the time, topic or place changes." },
         medium: { options: ["Moving from the morning to the afternoon", "Moving from food to games", "Moving from the bus to the beach", "Moving from what Jay said to what Bonnie did", "In the middle of a sentence", "After every line"], answers: [0, 1, 2, 3],
           slips: { any: "Four are shifts: time, topic, place, person." } },
         spicy: { options: ["Moving from reasons for to reasons against", "Moving from 1966 to 2026", "Moving from the lab to the past", "Moving from one character to another", "Halfway through a list of reasons for the same side", "Whenever you start a new line on the screen"], answers: [0, 1, 2, 3],
@@ -335,6 +366,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["Writers start new paragraphs for a reason, not because they are bored.", "Paragraphs can be any length."],
         hint: "Look at the first words of the new paragraph.",
         why: "<b>After lunch</b> moves to a new time.",
+        ez: { q: "Why a new paragraph here?" + task("...and we had cereal for breakfast.<br><br><b>After lunch,</b> we walked to the shops."),
+          s: ["Writers have a reason. Look at the words.", "Paragraphs can be any length."], hint: "Look at the first words.", why: "<b>After lunch</b> is a new time." },
         spicy: { o: ["A change of time signals a new stage of the day", "Paragraphs should never be more than one line", "The writer wanted to show a change of person"],
           s: ["Paragraphs can be any length.", "No new person is introduced."] } },
       { q: "Why did the writer start a new paragraph here?" + task("...and the bus finally stopped.<br><br><b>At the castle,</b> a guide met us at the gate."),
@@ -342,6 +375,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["There is always space for one more line. The reason is in the words.", "Close, but the big change here is where they are."],
         hint: "Look at the first words of the new paragraph.",
         why: "<b>At the castle</b> moves to a new place.",
+        ez: { q: "Why a new paragraph here?" + task("...and the bus finally stopped.<br><br><b>At the castle,</b> a guide met us at the gate."),
+          s: ["There is space. The reason is in the words.", "Close. But the big change is the place."], hint: "Look at the first words.", why: "<b>At the castle</b> is a new place." },
         spicy: { o: ["A change of place moves the reader to a new setting", "A change of person introduces the guide as the main focus", "It is for dramatic effect"],
           s: ["The guide appears, but the paragraph opens with where they are.", "There is nothing dramatic here; it is a simple shift."] } },
       { q: "Why did the writer start a new paragraph here?" + task("...so that is why I like football.<br><br><b>Another thing I enjoy</b> is drawing."),
@@ -349,6 +384,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["Nothing here says a new time.", "The full stop is there. The new paragraph is for something else."],
         hint: "Look at the first words of the new paragraph.",
         why: "<b>Another thing I enjoy</b> moves to a new topic: drawing.",
+        ez: { q: "Why a new paragraph here?" + task("...so that is why I like football.<br><br><b>Another thing I enjoy</b> is drawing."),
+          s: ["Nothing says a new time.", "The full stop is there."], hint: "Look at the first words.", why: "<b>Another thing I enjoy</b> is a new topic." },
         spicy: { o: ["A change of topic, signalled by Another thing", "A change of place, signalled by drawing", "A change of time, signalled by is"],
           s: ["Drawing is an activity, not a place.", "\"is\" does not signal any change."] } }
     ]),
@@ -367,7 +404,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         "<p><b>1. Spot the topics.</b> The park, and the cold.</p>" +
         "<p><b>2. Sort.</b> Watch the sneaky one: frost is in the park, but it is about the cold.</p>" +
         "<p><b>3. Topic sentence first</b>, the one that sums up the rest:</p>" +
-        task("The park was busier than usual. Bonnie sniffed every tree. She chased a pigeon, which ignored her.<br><br>It was the coldest morning of the year. Frost covered the grass. My fingers went numb inside my gloves.") } } },
+        task("The park was busier than usual. Bonnie sniffed every tree. She chased a pigeon, which ignored her.<br><br>It was the coldest morning of the year. Frost covered the grass. My fingers went numb inside my gloves.") } },
+      ez: { title: "Group it in 3 steps", html: "<p>1. <b>Spot</b> the topics. 2. <b>Sort</b> the sentences.</p><p>3. Put the <b>topic sentence</b> first.</p>" } },
 
     Q("sort", "Build the paragraphs", null, [
       { q: "<b>Step 1 is done:</b> the topics are below. Step 2: sort the sentences into the two paragraphs.",
@@ -375,6 +413,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["We saw a robin.", 0], ["A heron flew over us.", 0], ["We ate cheese sandwiches.", 1], ["The juice was too warm.", 1]],
         hint: "Birds, or food?",
         why: "The robin and the heron go together. The sandwiches and the juice go together.",
+        ez: { q: "Sort the sentences into the 2 boxes.", why: "Robin and heron are birds. The rest is the picnic." },
         medium: { buckets: ["The birds we saw", "Our picnic", "The weather"],
           cards: [["We saw a robin.", 0], ["A heron flew over us.", 0], ["We ate cheese sandwiches.", 1], ["The juice was too warm.", 1], ["It was sunny all morning.", 2], ["Then it started to drizzle.", 2]] },
         spicy: { buckets: ["The birds we saw", "Our picnic", "The weather"],
@@ -385,6 +424,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["We played four matches.", 0], ["We won two of them.", 0], ["Everyone got a medal.", 1], ["The best player won a ball.", 1]],
         hint: "Playing, or winning things?",
         why: "Matches and wins go together. Medals and the ball go together.",
+        ez: { q: "Sort the sentences into the 2 boxes.", why: "Matches and wins are games. Medals and ball are prizes." },
         medium: { buckets: ["The games", "The prizes", "The food"],
           cards: [["We played four matches.", 0], ["We won two of them.", 0], ["Everyone got a medal.", 1], ["The best player won a ball.", 1], ["There was a burger van.", 2], ["The chips were cold.", 2]] },
         spicy: { buckets: ["The games", "The prizes", "The food"],
@@ -395,6 +435,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["The film was about space.", 0], ["The ending was sad.", 0], ["The seats were comfy.", 1], ["The screen was huge.", 1]],
         hint: "The story, or the building?",
         why: "Space and the ending are the film. Seats and the screen are the cinema.",
+        ez: { q: "Sort the sentences into the 2 boxes.", why: "Space and the ending are the film. The rest is the cinema." },
         medium: { buckets: ["The film", "The cinema", "Getting home"],
           cards: [["The film was about space.", 0], ["The ending was sad.", 0], ["The seats were comfy.", 1], ["The screen was huge.", 1], ["We got the late bus.", 2], ["I fell asleep on the way.", 2]] },
         spicy: { buckets: ["The film", "The cinema", "Getting home"],
@@ -407,18 +448,21 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         items: ["Our walk took us all round the park.", "First we went past the pond.", "Then we climbed the hill.", "Finally we sat on the bench."],
         hint: "Which sentence says what the whole paragraph is about?",
         why: "The topic sentence goes first, then the details in order.",
+        ez: { q: "Put these in order. Topic sentence first.", hint: "Which one says what it is all about?", why: "Topic sentence first. Then the rest in order." },
         medium: { items: ["Our walk took us all round the park.", "First we went past the pond.", "Then we climbed the big hill.", "After that we fed the ducks.", "Finally we sat on the bench."] },
         spicy: { items: ["Our walk took us all round the park.", "We started at the pond, where Bonnie stared at the ducks.", "Then we climbed the hill, which took ages.", "From the top, we could see the whole town.", "Finally we sat on the bench and shared a flask of tea."] } },
       { q: "<b>Steps 1 and 2 are done.</b> Step 3: put this paragraph in order, topic sentence first.",
         items: ["Making pancakes is easy.", "First you mix the flour, egg and milk.", "Then you pour some into a hot pan.", "Finally you flip it over."],
         hint: "Which sentence sums it all up?",
         why: "Topic sentence first, then the steps in order.",
+        ez: { q: "Put these in order. Topic sentence first.", hint: "Which one sums it all up?", why: "Topic sentence first. Then the steps in order." },
         medium: { items: ["Making pancakes is easy.", "First you mix the flour, egg and milk.", "Then you heat the pan.", "Next you pour some mix in.", "Finally you flip it over."] },
         spicy: { items: ["Making pancakes is easier than it looks.", "First, whisk the flour, egg and milk until smooth.", "Then heat a little oil in a pan.", "Pour in just enough mix to cover the bottom.", "Finally, flip it when the edges turn golden."] } },
       { q: "<b>Steps 1 and 2 are done.</b> Step 3: put this paragraph in order, topic sentence first.",
         items: ["Sports day was a big success.", "In the morning we did the races.", "At lunch we had a picnic.", "In the afternoon there was a tug of war."],
         hint: "Which sentence sums it all up?",
         why: "Topic sentence first, then the day in time order.",
+        ez: { q: "Put these in order. Topic sentence first.", hint: "Which one sums it all up?", why: "Topic sentence first. Then the day in order." },
         medium: { items: ["Sports day was a big success.", "In the morning we did the races.", "After that we did the long jump.", "At lunch we had a picnic.", "In the afternoon there was a tug of war."] },
         spicy: { items: ["Sports day was a bigger success than anyone expected.", "The morning started with the sprints, in bright sunshine.", "By lunchtime our team was second.", "The afternoon tug of war changed everything.", "When the final scores came in, we had won by one point."] } }
     ]),
@@ -429,6 +473,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { 1: "Sentence 2 is about lunch, not the field.", 2: "Sentence 3 is about the field, so it belongs with sentence 1." },
         hint: "Which sentences are about the field? Which are about food?",
         why: "Field sentences together (1 and 3), food sentences together (2 and 4).",
+        ez: { q: "How would you split these into 2 paragraphs?" + nums(["Our school has a big field.", "Lunch is at 12.", "The field has two goals.", "We have pizza on Fridays."]),
+          slips: { 1: "Sentence 2 is about lunch.", 2: "Sentence 3 is about the field." }, hint: "Which ones are about the field?", why: "Field is 1 and 3. Food is 2 and 4." },
         medium: { q: "<b>All three steps, on your own.</b> Which is the best way to split these into two paragraphs?" + nums(["Our school has a big field.", "Lunch is at 12.", "The field has two goals.", "We have pizza on Fridays.", "There is a running track round the edge.", "The cooks make great soup."]),
           options: ["1, 3, 5, then 2, 4, 6", "1, 2, 3, then 4, 5, 6", "1, 3, 4, then 2, 5, 6"], answer: 0,
           slips: { 1: "That splits by position, not by topic. The field and food are mixed up.", 2: "Pizza is food, and the running track is part of the field." },
@@ -442,6 +488,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { 1: "That mixes the feeder and the ball.", 2: "Sentence 3 is about the feeder, so it goes with sentence 1." },
         hint: "Which are about the feeder? Which are about the ball?",
         why: "Feeder: 1 and 3. Ball: 2 and 4.",
+        ez: { q: "How would you split these into 2 paragraphs?" + nums(["Jay has a bird feeder.", "Bonnie has a red ball.", "Blue tits visit it every day.", "She chews it every night."]),
+          slips: { 1: "That mixes the feeder and the ball.", 2: "Sentence 3 is about the feeder." }, hint: "Which ones are about the feeder?", why: "Feeder is 1 and 3. Ball is 2 and 4." },
         medium: { q: "<b>All three steps, on your own.</b> Which is the best way to split these into two paragraphs?" + nums(["Jay has a bird feeder.", "Bonnie has a red ball.", "Blue tits visit it every day.", "She chews it every night.", "A robin comes when it rains.", "The ball has lost its squeak."]),
           options: ["1, 3, 5, then 2, 4, 6", "1, 2, 3, then 4, 5, 6", "1, 3, 4, then 2, 5, 6"], answer: 0,
           slips: { 1: "That splits by position, not by topic.", 2: "Sentence 4 is about the ball, and sentence 5 is about the feeder." },
@@ -455,6 +503,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         slips: { 1: "That mixes how it looks with where it is.", 2: "Sentence 3 describes how it looks, so it goes with sentence 1." },
         hint: "Which describe how it looks? Which say where it is?",
         why: "Looks: 1 and 3. Where: 2 and 4.",
+        ez: { q: "How would you split these into 2 paragraphs?" + nums(["[[Lk1]]", "[[Wh1]]", "[[Lk2]]", "[[Wh2]]"]),
+          slips: { 1: "That mixes looks and place.", 2: "Sentence 3 is about how it looks." }, hint: "Which ones say how it looks?", why: "Looks is 1 and 3. Place is 2 and 4." },
         medium: { q: "<b>All three steps, on your own.</b> Which is the best way to split these into three paragraphs?" + nums(["[[Lk1]]", "[[Wh1]]", "[[Do1]]", "[[Lk2]]", "[[Wh2]]", "[[Do2]]"]),
           options: ["1 and 4, then 2 and 5, then 3 and 6", "1 and 2, then 3 and 4, then 5 and 6", "1, 2 and 3, then 4, 5 and 6"], answer: 0,
           slips: { 1: "That splits by position, not by topic.", 2: "That puts looks, place and events all in one paragraph." },
@@ -475,7 +525,8 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
           "<p>Then decide the <b>order</b> of the boxes. For a story or a day out, time order works. For a fact file, go from the biggest, most basic idea to the details.</p>" },
         spicy: { html: "<p>A plan is where you make the big decisions: what the paragraphs are, what goes in each, and what order they go in.</p>" +
           "<p>Most pieces need an <b>opening</b> that sets things up and an <b>ending</b> that sums up or looks forward. In between, each paragraph has one job.</p>" +
-          "<p>For an argument (like <b>should we time travel?</b>) a classic plan is: introduction, reasons for, reasons against, your conclusion.</p>" } } },
+          "<p>For an argument (like <b>should we time travel?</b>) a classic plan is: introduction, reasons for, reasons against, your conclusion.</p>" } },
+      ez: { html: "<p><b>Plan</b> first. Make 1 box for each topic.</p><p>Each box becomes a paragraph.</p>" } },
 
     Q("sort", "Plan your paragraphs", null, [
       { q: "You are planning a fact file about [[thing]]. Put each idea in the right box.",
@@ -483,6 +534,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["[[Lk1]]", 0], ["[[Lk2]]", 0], ["[[Wh1]]", 1], ["[[Wh2]]", 1]],
         hint: "Does it describe it, or say where it is?",
         why: "Description in one box, location in the other. Each box becomes a paragraph.",
+        ez: { q: "Put each idea about [[thing]] in a box.", hint: "How it looks, or where it is?", why: "Looks in one box. Place in the other." },
         medium: { buckets: ["Looks", "Where", "What happens"],
           cards: [["[[Lk1]]", 0], ["[[Lk2]]", 0], ["[[Wh1]]", 1], ["[[Wh2]]", 1], ["[[Do1]]", 2], ["[[Do2]]", 2]],
           why: "Looks, location, events: three boxes, three paragraphs." },
@@ -494,6 +546,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["Red chest", 0], ["Brown wings", 0], ["Worms", 1], ["Berries", 1]],
         hint: "Looks, or food?",
         why: "Red chest and brown wings are looks. Worms and berries are food.",
+        ez: { q: "Help Jay. Put each robin idea in a box.", why: "Chest and wings are looks. Worms and berries are food." },
         medium: { buckets: ["What they look like", "What they eat", "Where they live"],
           cards: [["Red chest", 0], ["Brown wings", 0], ["Worms", 1], ["Berries", 1], ["Gardens", 2], ["Hedges", 2]] },
         spicy: { buckets: ["What they look like", "What they eat", "Where they live", "How they behave"],
@@ -503,6 +556,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         cards: [["Long train ride", 0], ["Missed our stop", 0], ["Lions sleeping", 1], ["Penguin feeding", 1]],
         hint: "Travelling, or being there?",
         why: "The train and the missed stop are getting there. Lions and penguins are at the zoo.",
+        ez: { q: "Put each day out idea in a box.", why: "The train is getting there. Lions and penguins are the zoo." },
         medium: { buckets: ["Getting there", "At the zoo", "Going home"],
           cards: [["Long train ride", 0], ["Missed our stop", 0], ["Lions sleeping", 1], ["Penguin feeding", 1], ["Rain on the way back", 2], ["Fell asleep on the train", 2]] },
         spicy: { buckets: ["Opening: why we went", "At the zoo", "Ending: what I thought"],
@@ -515,6 +569,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         items: ["Getting there", "Morning on the beach", "Lunch at the cafe", "Going home"],
         hint: "Follow the day.",
         why: "Time order: the day from start to finish.",
+        ez: { q: "Put the boxes in order for <b>A day at the seaside</b>.", why: "Follow the day, start to finish." },
         medium: { items: ["Getting there", "Morning on the beach", "Lunch at the cafe", "Afternoon in the arcade", "Going home"] },
         spicy: { q: "Put these paragraph boxes in order for a piece called <b>Should we time travel?</b>",
           items: ["Introduction: what time travel would mean", "Reasons we should", "Reasons we should not", "Conclusion: what I think"],
@@ -523,6 +578,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         items: ["Before kick off", "The first half", "The second half", "The final whistle"],
         hint: "Follow the match.",
         why: "Time order: the match from start to finish.",
+        ez: { q: "Put the boxes in order for <b>The big match</b>.", why: "Follow the match, start to finish." },
         medium: { items: ["Before kick off", "The first half", "Half time", "The second half", "The final whistle"] },
         spicy: { q: "Put these paragraph boxes in order for a piece called <b>Should phones be allowed at lunch?</b>",
           items: ["Introduction: the question", "Reasons for", "Reasons against", "Conclusion: what I think"],
@@ -531,6 +587,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         items: ["Writing the idea", "Filming", "Editing", "Showing it to the class"],
         hint: "What has to happen first?",
         why: "Time order: you cannot edit a film you have not filmed.",
+        ez: { q: "Put the boxes in order for <b>Making our film</b>.", why: "You film it before you edit it." },
         medium: { items: ["Writing the idea", "Planning the shots", "Filming", "Editing", "Showing it to the class"] },
         spicy: { q: "Put these paragraph boxes in order for a piece called <b>Is it better to live in a city or the countryside?</b>",
           items: ["Introduction: the question", "Good things about cities", "Good things about the countryside", "Conclusion: where I would choose"],
@@ -543,6 +600,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["That is about looks. It belongs in a different paragraph.", "That is a story about one robin, not about what robins eat."],
         hint: "It should say what the paragraph is about.",
         why: "It tells the reader straight away: this paragraph is about food.",
+        ez: { q: "Which is the best start for <b>What they eat</b>?", s: ["That is about looks.", "That is about 1 robin."], hint: "It says what it is about.", why: "It tells you this part is about food." },
         spicy: { q: "Which is the best topic sentence for the <b>What they eat</b> paragraph?",
           o: ["Robins are not fussy eaters.", "Robins eat worms.", "Robins have red chests and eat worms."],
           s: ["True, but that is a detail. A topic sentence sums up the whole paragraph.", "That mixes two topics in one sentence."],
@@ -552,6 +610,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["That describes how it looks.", "That is about what happens."],
         hint: "It should be about a place.",
         why: "It is about where it is, so it starts that paragraph well.",
+        ez: { q: "Which is the best start for <b>Where it is</b>?", s: ["That is about looks.", "That is about what happens."], hint: "It is about a place.", why: "It says where it is." },
         spicy: { q: "Which is the best topic sentence for a paragraph about where [[thing]] is?",
           o: ["Finding [[thing]] is easier than you might think.", "[[Wh1]]", "[[Lk1]]"],
           s: ["Good detail, but a topic sentence sums up the whole paragraph.", "That is about looks, a different paragraph."],
@@ -561,6 +620,7 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
         s: ["That is about being at the zoo.", "That is about getting there."],
         hint: "It should be about going home.",
         why: "It tells the reader the paragraph is now about going home.",
+        ez: { q: "Which is the best start for <b>Going home</b>?", s: ["That is at the zoo.", "That is getting there."], why: "It says this part is about going home." },
         spicy: { q: "Which is the best topic sentence for the <b>Going home</b> paragraph?",
           o: ["The journey home felt twice as long as the journey there.", "The train was at 4.15.", "The penguins were funny, and then we went home."],
           s: ["A detail, not a summary of the paragraph.", "That mixes the zoo and going home."],
@@ -571,12 +631,18 @@ var PLAN = '<svg viewBox="0 0 520 210" role="img" aria-label="A paragraph plan: 
       q: "Only if you fancy it: write one paragraph about one thing. Bonnie, a bird, a game, a place you know. Start with a sentence that says what it is about, then add two or three more about the same thing.",
       starters: ["This paragraph is about", "The best thing about", "First,", "Also,"],
       checklist: ["My first sentence says what it is about", "All my sentences are about the same thing"],
+      ez: { q: "Only if you fancy it: write about 1 thing. Start by saying what it is." },
       minWords: 20,
       lv: { medium: { q: "Only if you fancy it: write two short paragraphs about something you know well, each with its own topic. Start each one on a new line.", minWords: 40,
           checklist: ["Each paragraph has one topic", "Each starts with a topic sentence", "The second one starts on a new line"] },
         spicy: { q: "Only if you fancy it: write the first two paragraphs of <b>Should we time travel?</b> An introduction, then reasons for. Keep each paragraph to its one job.", minWords: 70,
           checklist: ["The introduction sets up the question", "The second paragraph is only reasons for", "Each starts with a clear topic sentence"] } } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Emails, reports and news all use <b>paragraphs</b>.</p><p>Time travel? 1 box for yes, 1 for no, 1 for what you think.</p>" },
+    make: { intro: "A title and 3 paragraph topics. About anything. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Where you would use this",
