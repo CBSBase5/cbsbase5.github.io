@@ -123,6 +123,42 @@ function huntWidget(el, api){
   });
   drawStart();
 }
+/* easy read for LC: the same hunt, in fewer words (same choices, same ticks) */
+var STARTS_EZ = [["like", "A job I like"], ["hobby", "A hobby job"], ["random", "A random job"]];
+var HUNT_TICKS_EZ = ["Open a careers website", "Find a job", "Read the profile", "Pick 3 facts", "Add them to my fact file"];
+function huntWidgetEz(el, api){
+  var d = api.data || {};
+  if(!Array.isArray(d.ticks)) d.ticks = [];
+  el.innerHTML = '<div class="a2task"><h4>Career hunt</h4>' +
+    '<p>Try the <b>National Careers Service</b> website. Search <b>job profiles</b>.</p>' +
+    '<p style="font-weight:700;margin:10px 0 6px">Start with:</p><div class="ce-start" style="display:flex;gap:8px;flex-wrap:wrap"></div>' +
+    '<p style="font-weight:700;margin:12px 0 6px">Tick as you go:</p><div class="ce-list"></div></div>';
+  var st = el.querySelector(".ce-start"), list = el.querySelector(".ce-list");
+  function drawStart(){
+    st.innerHTML = STARTS_EZ.map(function(s){
+      var on = d.start === s[0];
+      return '<button type="button" data-s="' + s[0] + '" aria-pressed="' + on + '" style="font:inherit;cursor:pointer;padding:8px 14px;border-radius:12px;border:3px solid ' + (on ? "#141a33" : "#d9d8e6") + ';background:' + (on ? "#ffd23f" : "#fff") + ';font-weight:' + (on ? 700 : 400) + '">' + s[1] + '</button>';
+    }).join("");
+  }
+  st.addEventListener("click", function(e){
+    var b = e.target && e.target.closest ? e.target.closest("button[data-s]") : null;
+    if(!b) return;
+    d.start = b.getAttribute("data-s");
+    try{ api.save(); }catch(err){}
+    drawStart();
+    api.done("done");
+  });
+  HUNT_TICKS_EZ.forEach(function(t, k){
+    var lab = document.createElement("label");
+    lab.style.cssText = "display:flex;gap:10px;align-items:center;margin:8px 0;font-size:1rem;cursor:pointer";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!d.ticks[k];
+    cb.style.cssText = "width:22px;height:22px";
+    cb.onchange = function(){ d.ticks[k] = cb.checked; try{ api.save(); }catch(err){} api.done("done"); };
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(t));
+    list.appendChild(lab);
+  });
+  drawStart();
+}
 
 (window.A2PACKS = window.A2PACKS || {})["career-explorer"] = {
   a2: true,
@@ -172,7 +208,8 @@ function huntWidget(el, api){
       html: "<p>Careers websites have a <b>job profile</b> for hundreds of jobs. Each one is set out in the same <b>sections</b>, so you know where to look.</p>" +
         "<p><b>What you do</b>, <b>pay</b>, <b>hours</b>, <b>how to get in</b> and <b>skills</b>. Here is one for a [[job]].</p>",
       lv: { spicy: { html: "<p>Careers websites have a <b>job profile</b> for hundreds of jobs, all set out in the same <b>sections</b>: what you do, pay, hours, how to get in, and skills. Many also show a <b>career path</b>: the jobs you could move up to.</p>" +
-        "<p>Because every profile uses the same sections, you can <b>compare</b> two jobs side by side. Here is one for a [[job]].</p>" } } },
+        "<p>Because every profile uses the same sections, you can <b>compare</b> two jobs side by side. Here is one for a [[job]].</p>" } } ,
+      ez: { title: "A job profile", html: "<p>A <b>job profile</b> is a page about 1 job.</p><p>It has <b>sections</b>: what you do, pay, hours, how to get in, skills.</p>" } },
 
     { type: "mc", topic: "What is a job profile?",
       q: "Which section would tell you how much a [[job]] earns?",
@@ -182,6 +219,7 @@ function huntWidget(el, api){
       slips: { 1: "Skills tells you what you need to be good at, not the money.", 2: "That says what the job involves day to day." },
       hint: "Look for the coin.",
       why: "Earnings are in the Pay section.",
+      ez: { q: "Which section says how much it earns?", slips: { 1: "Skills is what you need to be good at.", 2: "That is what the job involves." } },
       lv: { spicy: { q: "You want to know if you need a degree to be a [[job]]. Which section?",
           options: ["How to get in", "Pay", "Hours"],
           slips: { 1: "Pay is about money, not qualifications.", 2: "Hours is about when you work." },
@@ -193,6 +231,7 @@ function huntWidget(el, api){
       pairs: [["Would I work weekends?", "Hours"], ["What would I do all day?", "What you do"], ["Do I need to go to college?", "How to get in"], ["What do I need to be good at?", "Skills"]],
       hint: "Read each question and think: time, tasks, training or talents?",
       why: "Weekends are hours. Tasks are what you do. College is how to get in. Being good at things is skills.",
+      ez: { q: "Match each question to its section.", hint: "Time, tasks, training or talents?", why: "Weekends: hours. College: how to get in." },
       lv: { medium: { pairs: [["Would I work weekends?", "Hours"], ["What would I do all day?", "What you do"], ["Do I need to go to college?", "How to get in"], ["What do I need to be good at?", "Skills"], ["How much would I earn?", "Pay"]] },
         spicy: { pairs: [["Would I work weekends?", "Hours"], ["What would I do all day?", "What you do"], ["Can I do an apprenticeship?", "How to get in"], ["Do I need to be organised?", "Skills"], ["How much could I earn later on?", "Pay"], ["What job could I move up to?", "Career path"]] } } },
 
@@ -203,12 +242,15 @@ function huntWidget(el, api){
       answer: 0,
       slips: { 1: "That is an opinion (and Jay would like it to be true). Profiles stick to facts.", 2: "Lovely, but a profile is about the job, not one person." },
       hint: "Which one could be true of every teacher, and checked?",
-      why: "How to get in is a real section, and it is a fact you could check." },
+      why: "How to get in is a real section, and it is a fact you could check." ,
+      ez: { q: "Jay is a teacher. What would a teacher profile say?", hint: "Which one could you check?", why: "It is a fact you could check.",
+        slips: { 1: "That is an opinion. Jay wishes!", 2: "Lovely, but a profile is about the job." } } },
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Read a profile", title: "Read a profile",
       html: "<p>Here is an example profile. Read it once, then have a go at the questions. You can come back up to it any time.</p>" + profile(false),
-      lv: { spicy: { html: "<p>Here is an example profile. Read it once, then have a go at the questions. You can come back up to it any time.</p>" + profile(true) } } },
+      lv: { spicy: { html: "<p>Here is an example profile. Read it once, then have a go at the questions. You can come back up to it any time.</p>" + profile(true) } } ,
+      ez: { html: "<p>Read this profile. You can come back to it.</p>" + profile(false) } },
 
     { type: "mc", topic: "Read a profile",
       q: "Where does a [[job]] work?",
@@ -217,6 +259,7 @@ function huntWidget(el, api){
       slips: { 1: "Have a look at the Where section again.", 2: "The profile does not say that. Look at the Where section." },
       hint: "Look at the Where section.",
       why: "The profile says: [[place]].",
+      ez: { slips: { 1: "Look at the Where part again.", 2: "It does not say that. Look at Where." } },
       lv: { medium: { q: "What is one way into this job?",
           options: ["[[Route]]", "You have to be famous first", "There is no way in"],
           slips: { 1: "Nothing in the profile says that. Look at How to get in.", 2: "Every job has a way in. Look at How to get in." },
@@ -233,7 +276,8 @@ function huntWidget(el, api){
       options: ["[[Do1]]", "[[Do2]]", "Sell tickets at the door", "Drive a bus"],
       answers: [0, 1],
       hint: "Both are in the What you do section.",
-      why: "The profile says you [[do1]], and you [[do2]]." },
+      why: "The profile says you [[do1]], and you [[do2]]." ,
+      ez: { hint: "Look in What you do." } },
 
     { type: "num", topic: "Read a profile", explain: true,
       q: "The profile says 40 hours a week, over 5 days. How many hours is that each day?",
@@ -241,6 +285,8 @@ function huntWidget(el, api){
       slips: [[200, "That multiplies. Share the 40 hours between the 5 days."], [35, "That takes 5 away. Share 40 into 5 equal days instead."], [45, "That adds. Share the hours out instead."]],
       hint: "40 shared between 5.",
       why: "40 / 5 = <b>8</b> hours a day.",
+      ez: { q: "40 hours over 5 days. How many hours a day?", hint: "Share 40 between 5.", why: "40 &divide; 5 = <b>8</b> hours a day.",
+        slips: [[200, "That multiplies. Share 40 into 5."], [35, "That takes away. Share 40 into 5."], [45, "That adds. Share 40 into 5."]] },
       lv: { medium: { q: "Starting pay is &pound;21,600 a year. With experience it is &pound;32,000. How much more is that a year?",
           boxes: [{ label: "More a year", a: 10400, pre: "&pound;" }],
           slips: [[53600, "That adds them. Find the difference instead."], [11600, "Check the subtraction: 32,000 take away 21,600."], [10600, "Nearly. 32,000 - 21,600 = 10,400."]],
@@ -259,7 +305,8 @@ function huntWidget(el, api){
         "<p>And an <b>interesting</b> fact is one that surprised you, or matters to you.</p>",
       lv: { spicy: { html: "<p>A good fact is <b>specific</b>: a number, a place, a name or a clear task. \"Works 40 hours a week\" tells you something; \"does lots of stuff\" does not; \"the best job ever\" is opinion.</p>" +
         "<p>Then put it in <b>your own words</b>. Copying a line straight off a website does not show you understood it. Change the wording, keep the meaning.</p>" +
-        "<p>And check the <b>source</b>: an official careers website is more reliable than a random comment online.</p>" } } },
+        "<p>And check the <b>source</b>: an official careers website is more reliable than a random comment online.</p>" } } ,
+      ez: { title: "Pick specific facts", html: "<p>A good fact is <b>specific</b>: a number, a place, a name.</p><p>Works 40 hours: yes. Does lots of stuff: no.</p>" } },
 
     { type: "mc", topic: "Facts worth keeping",
       q: "Which is the most useful fact about being a [[job]]?",
@@ -267,7 +314,9 @@ function huntWidget(el, api){
       answer: 0,
       slips: { 1: "True, but it does not tell you anything new.", 2: "That is an opinion. Nobody could check it." },
       hint: "Which one has a number in it?",
-      why: "It is specific: you could check it, and it tells you something real." },
+      why: "It is specific: you could check it, and it tells you something real." ,
+      ez: { q: "Which fact is the most useful?", hint: "Which one has a number?", why: "It has a number. You could check it.",
+        slips: { 1: "True, but it tells you nothing new.", 2: "That is an opinion." } } },
 
     { type: "sort", topic: "Facts worth keeping",
       q: "Sort them. Fact you could keep, or not a fact?",
@@ -275,6 +324,7 @@ function huntWidget(el, api){
       cards: [["[[Jobs]] work [[place]].", 0], ["[[Jobs]] are the coolest people.", 1], ["The job is 40 hours a week.", 0], ["Everyone would love this job.", 1]],
       hint: "Could you check it on the profile?",
       why: "Places and hours can be checked. Coolest and everyone would love it are opinions.",
+      ez: { q: "Fact to keep, or not a fact?", hint: "Could you check it?", why: "Places and hours can be checked. Coolest is an opinion." },
       lv: { spicy: { cards: [["[[Jobs]] work [[place]].", 0], ["[[Jobs]] are the coolest people.", 1], ["The job is 40 hours a week.", 0], ["Everyone would love this job.", 1], ["[[Fact]]", 0], ["A comment online says it is easy money.", 1]],
           why: "Places, hours and the Did you know fact come from the profile. Opinions and random comments online are not facts to keep." } } },
 
@@ -285,6 +335,8 @@ function huntWidget(el, api){
       slips: [[["cool", "best", "amazing", "awesome", "love"], "That sounds like an opinion. Try something from the profile you could check, like the hours or where they work."]],
       hint: "Pick something from the Where, Hours or Pay sections.",
       why: "Any checkable detail works, such as \"They work [[place]]\" or \"It is 40 hours a week\".",
+      ez: { q: "Write <b>1</b> fact about a [[job]], in your own words.", hint: "Try Where, Hours or Pay.", why: "Like \"They work [[place]].\"",
+        slips: [[[], "That is an opinion. Try the hours or the place."]] },
       lv: { spicy: { q: "Rewrite this in your own words, keeping the meaning: \"[[Fact]]\"",
           model: "[[Own]]",
           hint: "Start it differently, and swap a word or two. Keep the facts the same.",
@@ -294,13 +346,15 @@ function huntWidget(el, api){
     { type: "learn", topic: "Your career hunt", title: "Now try a real one, if you like",
       fig: HUNT,
       html: "<p>Real careers websites have hundreds of profiles. A good free one is the <b>National Careers Service</b>: look for <b>job profiles</b>.</p>" +
-        "<p><b>1</b> Search for a job, or browse a list. <b>2</b> Read the profile. <b>3</b> Pick three facts that interest you. <b>4</b> Put them in your own words.</p>" },
+        "<p><b>1</b> Search for a job, or browse a list. <b>2</b> Read the profile. <b>3</b> Pick three facts that interest you. <b>4</b> Put them in your own words.</p>" ,
+      ez: { html: "<p>Try a real careers website: the <b>National Careers Service</b>.</p><p>Search. Read. Pick 3 facts. Own words.</p>" } },
 
     { type: "order", topic: "Your career hunt",
       q: "Put the career hunt in order.",
       items: ["Open a careers website", "Search for a job that sounds interesting", "Read the whole profile", "Pick three facts that interest you", "Write them in your own words"],
       hint: "Find it, read it, pick, write.",
-      why: "Find a profile, read it all, pick three facts, then put them in your own words." },
+      why: "Find a profile, read it all, pick three facts, then put them in your own words." ,
+      ez: { why: "Find it, read it, pick 3, own words." } },
 
     { type: "mc", topic: "Your career hunt",
       q: "You search for a job and it sounds boring after all. What now?",
@@ -309,6 +363,8 @@ function huntWidget(el, api){
       slips: { 1: "One boring one does not mean they all are.", 2: "No need. Finding out you do not like something is useful too." },
       hint: "Exploring means trying a few.",
       why: "Ruling a job out is part of exploring. Pick another one and have a look.",
+      ez: { q: "A job sounds boring. What now?", hint: "Try a few.", why: "Pick another one. There are hundreds!",
+        slips: { 1: "1 boring one does not mean all are.", 2: "No need. It is fine not to like it." } },
       lv: { spicy: { q: "You find a forum post saying \"[[Jobs]] earn millions\". The careers website says about &pound;32,000 with experience. Which do you trust more?",
           options: ["The careers website", "The forum post", "Neither, so give up"],
           slips: { 1: "Anyone can post anything. Who wrote it, and how do they know?", 2: "The careers website is a reliable source. Use that." },
@@ -319,13 +375,15 @@ function huntWidget(el, api){
       title: "Career hunt",
       html: "<p>Pick where to start, and tick things off as you go. This bit happens on a real careers website.</p>",
       mount: huntWidget,
+      ez: { html: "<p>Pick a start. Tick as you go.</p>", mount: huntWidgetEz },
       report: function(d){ if(!d) return ""; var n = (d.ticks || []).filter(Boolean).length; var s = (STARTS.filter(function(x){ return x[0] === d.start; })[0] || [])[1]; return (s || n) ? "Career hunt: " + (s ? "started with " + s.toLowerCase() + ", " : "") + n + " of " + HUNT_TICKS.length + " ticked." : ""; } },
 
     { type: "write", topic: "Your career hunt",
       q: "After your hunt, tell Jay about the career you found, if you like. What is it, and would you want to do it? Why, or why not?",
       starters: ["I looked at", "One thing that surprised me was", "I would like it because", "I would not like it because"],
       checklist: ["The job I looked at", "Something that surprised me", "Would I want to do it, and why"],
-      minWords: 25 }
+      minWords: 25,
+      ez: { q: "Only if you like: tell Jay about a job you found. Would you like it?" } }
   ],
 
   realWorld: {
@@ -337,6 +395,11 @@ function huntWidget(el, api){
       '<path d="M350 140l-56 -84" stroke="#7a5532" stroke-width="5" stroke-linecap="round"/>' +
       '<circle cx="360" cy="78" r="14" fill="#f6d1b0" stroke="#141a33" stroke-width="2"/><path d="M346 98q14 -10 28 0v40h-28z" fill="#5b6180"/>' +
       T(330, 18, "tap tap", 14, { b: 1 }) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>Colleges and job centres use job profiles.</p><p>Long ago, people were paid to tap on windows to wake you up!</p>" },
+    make: { intro: "3 facts about 1 job, in your own words." }
   },
 
   make: {
