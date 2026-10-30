@@ -241,6 +241,7 @@ function checkWidget(el, api){
       html: "<p>An expedition is a journey you plan before you set off. Today: a walk from the school gate to [[dest]].</p>" +
         "<p>A route has a <b>start</b> (S), some <b>checkpoints</b> on the way (1 and 2), and a <b>finish</b> (F). Checkpoints help you know you are on track.</p>" +
         "<p>The map has a <b>scale</b>: each square is 250 metres of real ground. Four squares make 1 km.</p>",
+      ez: { title: "Plan a journey", html: "<p>Walk from <b>S</b> to <b>1</b>, then <b>2</b>, then <b>F</b>.</p><p>F is [[dest]]. Count the squares!</p>" },
       lv: { mild: { html: "<p>An expedition is a journey you plan before you set off. Today: a walk from the school gate to [[dest]].</p>" +
           "<p>The red line is the <b>route</b>. It goes from <b>S</b> (start) to <b>1</b>, then <b>2</b>, then <b>F</b> (finish).</p>" +
           "<p>You can count the squares to see how far it is.</p>" },
@@ -257,6 +258,7 @@ function checkWidget(el, api){
       slips: { 1: "[[Dest]] is F, the finish. Look at the key for number 2.", 2: "The school gate is S, the start. Look at the key for number 2." },
       hint: "Find the circle with a 2 in it, then look it up in the key.",
       why: "Checkpoint 2 is [[cp2]]. When you reach it, you know you are more than halfway.",
+      ez: { q: "On the map, what is checkpoint 2?", hint: "Find the 2. Look at the key.", why: "Checkpoint 2 is <b>[[cp2]]</b>.", slips: { 1: "[[Dest]] is F, the finish.", 2: "The school gate is S, the start." } },
       lv: { spicy: { q: "Which part of the route is likely to be the slowest?", fig: mapFig({ scale: "500 m", hill: true }),
         options: ["From 2 up to F, over the hill", "From S to 1, on the flat", "Crossing the road at the crossing"],
         slips: { 1: "Flat walking is the quickest kind. Look for the contour rings.", 2: "A crossing takes a moment, but it is short. Where are the contour rings?" },
@@ -270,6 +272,7 @@ function checkWidget(el, api){
       slips: [[8, "That is the number of squares. Each one is 250 m, so times it by 250."], [2250, "That is 9 squares. Count the moves from square to square, not the start square."], [2, "2 km is right! The box wants it in metres: 1 km is 1000 m."]],
       hint: "Count the squares the red line moves through, then times by 250.",
       why: "The route moves 8 squares. 8 x 250 m = <b>2000 m</b>, which is 2 km.",
+      ez: { q: "How many squares long is the route?", hint: "Start on S. Count each move.", why: "3, then 2, then 3. <b>8 squares</b>.", slips: [[null, "So close! Do not count the start square."], [null, "Nearly. Count each square the line moves into."]] },
       lv: { mild: { q: "How many squares long is the route? Count each move from one square to the next.",
           boxes: [{ label: "Squares", a: 8 }],
           slips: [[9, "So close. You counted the start square too. Count the moves, from S to the next square and on."], [7, "Nearly. Count again, touching each square the line moves into."]],
@@ -284,6 +287,7 @@ function checkWidget(el, api){
     { type: "widget", topic: "Plan the route", unscored: true,
       title: "Draw your own route",
       html: "<p>Have a go at drawing a route of your own from the school gate. Maybe one that avoids the road, or visits the woods. The map works out how far it is.</p>",
+      ez: { html: "<p>Draw your own route. The map says how far.</p>" },
       mount: routeWidget,
       report: function(d){ return d && d.route && d.route.length > 1 ? "Drew a route " + (d.route.length - 1) + " squares long." : ""; } },
 
@@ -293,6 +297,7 @@ function checkWidget(el, api){
       html: "<p>A good guess for walking: <b>1 km takes about 15 minutes</b>.</p>" +
         "<p><b>Worked example.</b> The route is 2 km. Walking: 2 x 15 = 30 minutes. Add a snack stop of 15 minutes. Total: 30 + 15 = <b>45 minutes</b>.</p>" +
         "<p>Leave at 10:00, back at 10:45.</p>",
+      ez: { title: "Walking takes time", html: "<p><b>1 km takes about 15 minutes.</b></p><p>2 km: 15 + 15 = <b>30 minutes</b>.</p>" },
       lv: { mild: { html: "<p>A good guess for walking: <b>1 km takes about 15 minutes</b>.</p>" +
           "<p><b>Worked example.</b> The route is 2 km. That is 15 minutes, then 15 more. 15 + 15 = <b>30 minutes</b>.</p>" +
           "<p>Leave at 10:00, there by 10:30.</p>" },
@@ -307,6 +312,7 @@ function checkWidget(el, api){
       slips: [[0, 3, "That is the km. Each km takes 15 minutes, so 3 x 15."], [1, 45, "That is just the walking. Add the 15 minute stop too."], [0, 18, "That is 3 + 15. It is 3 lots of 15: 15 + 15 + 15."]],
       hint: "3 lots of 15, then add 15 for the stop.",
       why: "3 x 15 = <b>45</b> minutes walking. 45 + 15 = <b>60</b> minutes altogether: one hour.",
+      ez: { q: "The walk is 3 km. 1 km takes 15 minutes. How long in all?", hint: "Add 15, 3 times.", why: "15 + 15 + 15 = <b>45 minutes</b>.", slips: [[null, "That is 2 km. There are 3 lots of 15."], [null, "That is 1 km. Add the other 2."], [null, "That is 3 + 15. Try 15, 3 times."]] },
       lv: { mild: { q: "Your turn. The route to [[dest]] is 3 km. Each km takes 15 minutes. How long is the walk?",
           boxes: [{ label: "15 + 15 + 15 =", a: 45, post: "minutes" }],
           slips: [[30, "That is 2 km. There are 3 lots of 15."], [15, "That is just 1 km. Add on the other two."], [18, "That is 3 + 15. It is 15, three times."]],
@@ -325,6 +331,7 @@ function checkWidget(el, api){
       slips: { 1: "That is the walking only. Add the 15 minute stop too.", 2: "That is just the stop. The walking takes 4 x 15 = 60 minutes as well.", 3: "That adds two stops. There is only one." },
       hint: "4 x 15 for walking, plus 15. Then count on from 1:00.",
       why: "4 x 15 = 60 minutes, plus 15 = 75 minutes. 1:00pm plus 1 hour 15 minutes is <b>2:15pm</b>.",
+      ez: { q: "You leave at 10:00. You walk 30 minutes. When do you get there?", hint: "30 minutes is half an hour.", why: "<b>10:30</b>. Half an hour later.", slips: { 1: "That is 3 minutes.", 2: "That is an hour and a half." } },
       lv: { mild: { q: "You leave at 10:00 and walk for 30 minutes. What time do you get there?",
           options: ["10:30", "10:03", "11:30"],
           slips: { 1: "That is 3 minutes. 30 minutes is half an hour.", 2: "That is an hour and a half. 30 minutes is just half an hour." },
@@ -343,6 +350,7 @@ function checkWidget(el, api){
       slips: { 1: "Starting at 3:15pm gets you back at 4:30pm, in the dark.", 2: "Starting at 3:45pm gets you back at 5pm, well after dark." },
       hint: "Count back 1 hour 15 minutes from 4pm.",
       why: "4pm take away 1 hour is 3pm. Take away 15 more minutes: <b>2:45pm</b>.",
+      ez: { q: "Dark at 4pm. The walk takes 1 hour. Which start is safe?", hint: "Add 1 hour to each one.", why: "2pm plus 1 hour is 3pm. Before dark.", slips: { 1: "3:30 plus 1 hour is 4:30. Dark!", 2: "4pm is when it gets dark." } },
       lv: { mild: { q: "It gets dark at 4pm. Your walk takes 1 hour. Which start time gets you back before dark?",
           options: ["2pm", "3:30pm", "4pm"],
           slips: { 1: "3:30pm plus an hour is 4:30pm. That is after dark.", 2: "4pm is when it gets dark. You would walk the whole way in the dark." },
@@ -360,6 +368,7 @@ function checkWidget(el, api){
       html: "<p>Everyone needs the same few things: <b>water</b>, a <b>snack</b>, a <b>waterproof</b>, a <b>warm layer</b>, a <b>charged phone</b>, a <b>map</b> and a small <b>first aid kit</b>.</p>" +
         "<p>Then add what the weather asks for: hat and gloves, or sun cream and a cap.</p>" +
         "<p>Bonnie would like you to know that dogs need water too.</p>",
+      ez: { title: "Pack for the walk", html: "<p>Pack <b>water</b>, a <b>snack</b>, a <b>coat</b> and a <b>phone</b>.</p><p>Leave heavy, silly things at home.</p>" },
       lv: { mild: { html: "<p>Pack the important things: <b>water</b>, a <b>snack</b>, a <b>coat</b> for rain, a <b>warm layer</b> and a <b>phone</b>.</p><p>Leave the heavy, silly things at home.</p>" } } },
 
     { type: "sort", topic: "Kit and weather",
@@ -369,6 +378,7 @@ function checkWidget(el, api){
       slips: { any: "Ask: would I need it on a walk, and could I carry it all the way?" },
       hint: "Ask: would I need it on a walk, and could I carry it all the way?",
       why: "Water, a waterproof, a snack and a phone help you on the walk. [[Silly]]? Outrageous. Leave it at home.",
+      ez: { q: "Pack it, or leave it?", hint: "Would you need it? Could you carry it?", why: "Water, coat, snack, phone. [[Silly]]? Outrageous!", slips: { any: "Would you need it? Could you carry it?" } },
       lv: { spicy: { cards: [["A bottle of water", 0], ["A waterproof jacket", 0], ["[[Silly]]", 1], ["A small first aid kit", 0], ["Flip flops for the whole walk", 1], ["A paper map, in case the phone dies", 0], ["A spare warm layer", 0], ["Three full size towels", 1]],
         why: "Light, useful things go in. A paper map is a good backup, because phones run out of charge. Heavy or silly things stay at home." } } },
 
@@ -376,6 +386,7 @@ function checkWidget(el, api){
       fig: FC_MILD,
       html: "<p>Look at the forecast the day before, and again on the morning. It tells you the <b>time</b>, the <b>weather</b>, the <b>temperature</b> and the <b>wind</b>.</p>" +
         "<p>This one starts sunny, then rain arrives in the afternoon. That changes what you pack, and maybe when you go.</p>",
+      ez: { title: "Check the weather", html: "<p>Check the <b>forecast</b> before you go.</p><p>This one says rain later.</p>" },
       lv: { spicy: { fig: FC_SPICY,
         html: "<p>Look at the forecast the day before, and again on the morning: <b>time</b>, <b>weather</b>, <b>temperature</b> and <b>wind</b>.</p>" +
           "<p>Wind matters more than people think. Gusts of 50 mph can knock you off balance, and wind makes it feel colder than the number says.</p>" +
@@ -389,6 +400,7 @@ function checkWidget(el, api){
       slips: { 1: "It is sunny at 9am, but you are out later. Look at 3pm.", 2: "Look at 3pm. What is the symbol there?" },
       hint: "Look at the 3pm picture.",
       why: "Rain arrives at 3pm, while you are still out. A waterproof keeps you dry.",
+      ez: { q: "You are out from 12 to 4pm. What could you pack?", hint: "Look at 3pm.", why: "Rain comes at 3pm. Take a <b>waterproof</b>.", slips: { 1: "Sunny at 9am. Look at 3pm.", 2: "Look at 3pm. What is there?" } },
       lv: { spicy: { q: "Look at this forecast for your walk on the hill. What is the best call?", fig: FC_SPICY,
         options: ["Switch to plan B: a short, low, sheltered route, or another day", "Go anyway: a good waterproof sorts it", "Go, and do not tell anyone, so nobody worries"],
         slips: { 1: "A waterproof helps with rain, but 50 mph gusts on a hill are a balance and cold problem too.", 2: "Not telling anyone makes it riskier, not safer. Someone should always know." },
@@ -402,6 +414,7 @@ function checkWidget(el, api){
       slips: { any: "Think about keeping your head, hands and body warm." },
       hint: "Think about keeping your head, hands and body warm.",
       why: "A hat, gloves and a fleece keep you warm. Sun cream and shorts are for a hot day.",
+      ez: { q: "A cold day. Pick <b>2</b> things to add.", hint: "Head and hands.", why: "A hat and gloves keep you warm.", slips: { any: "Keep your head and hands warm." } },
       lv: { mild: { q: "It is a cold day. Pick the <b>two</b> things to add.",
         options: ["A hat", "Gloves", "Sunglasses", "Shorts"], answers: [0, 1],
         why: "A hat and gloves keep you warm on a cold day." } } },
@@ -412,6 +425,7 @@ function checkWidget(el, api){
       html: "<p>Before you go, fill in a <b>route card</b> and leave it with someone: where you are going, who with, and when you will be back.</p>" +
         "<p>On the walk: stay with [[group]], cross roads at a crossing, and keep back from water.</p>" +
         "<p>If you get lost: <b>stop</b>, stay together, look at the map, and call the person who has your route card.</p>",
+      ez: { title: "Someone should know", html: "<p>Tell someone <b>where</b> you go and <b>when</b> you will be back.</p><p>Lost? <b>Stop</b>. Stay together. Call.</p>" },
       lv: { spicy: { html: "<p>Before you go, fill in a <b>route card</b> and leave it with someone: where, who with, the route, and when you will be back.</p>" +
         "<p>Agree what happens if you are late: when they should call you, and when they should call for help.</p>" +
         "<p>On the way, think about each <b>hazard</b> (something that could cause harm) and what you will do about it. That is a risk assessment, and it can be done in your head in seconds.</p>" } } },
@@ -422,6 +436,7 @@ function checkWidget(el, api){
       slips: { any: "Think about what could happen with each one, then what would stop it." },
       hint: "Think about what could happen with each one, then what would stop it.",
       why: "Every hazard has a simple plan. Thinking of it before you go means you do not have to think in a hurry.",
+      ez: { q: "Match each danger to a safe plan.", hint: "What could happen? What stops it?", why: "Every danger has a simple plan.", slips: { any: "What could happen? What would stop it?" } },
       lv: { spicy: { pairs: [["A busy road", "Cross together, at the crossing"], ["The river", "Stay back from the edge"], ["Getting lost", "Stop, stay together, call"], ["Getting tired", "Rest and have a snack"], ["Cold and wet on the hill", "Add layers, take the lower route"]] } } },
 
     { type: "mc", topic: "Staying safe",
@@ -429,11 +444,13 @@ function checkWidget(el, api){
       options: ["Call or text the person who has your route card", "Nothing, it is only 30 minutes", "Run the rest of the way"],
       answer: 0,
       slips: { 1: "The person waiting does not know you are fine. A quick message stops them worrying.", 2: "Rushing makes trips and slips more likely. A message is quicker and safer." },
+      ez: { q: "You will be 30 minutes late. What could you do?", hint: "Who is waiting for you?", why: "<b>Send a message</b>. Then they know you are fine.", slips: { 1: "They do not know you are fine yet.", 2: "Rushing makes slips more likely." } },
       hint: "Who is expecting you back?",
       why: "One message and everyone knows you are fine. That is exactly what the route card is for." },
 
     { type: "write", topic: "Staying safe",
       q: "Plan a local expedition of your own, if you like. Where would you go, how far is it, how long would it take, and what would you pack? This goes to Jay if you choose.",
+      ez: { q: "Plan your own walk, if you like. Where? What would you pack?" },
       starters: ["I would walk to", "It is about", "It would take", "I would pack", "I would tell"],
       checklist: ["Where to", "How far and how long", "What to pack", "Who would know"],
       minWords: 30 },
@@ -441,9 +458,16 @@ function checkWidget(el, api){
     { type: "widget", topic: "Staying safe", unscored: true,
       title: "Try it for real",
       html: "<p>A challenge for away from the screen, whenever you fancy it: a short walk somewhere local, planned your way.</p>",
+      ez: { html: "<p>Try a short local walk for real, if you fancy it.</p>" },
       mount: checkWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Expedition challenge: " + n + " of " + GO_LIST.length + " ticked." : ""; } }
   ],
+
+  ez: {
+    blurb: "Plan a walk: the route, the time, the kit.",
+    realWorld: { title: "Real explorers plan", html: "<p>Rescue teams and rangers use <b>route cards</b>.</p><p>A trip to the past needs the best route card ever!</p>" },
+    make: { intro: "Plan a real walk. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Real explorers plan like this",

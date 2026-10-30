@@ -268,6 +268,10 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
     music: { name: "Music", w: { place: "the theatre", job: "the stage manager", sight: "a figure in a cloak sitting in seat 13", rule: "sits in seat 13" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { title: "Story collectors", html: "<p>Some people collect old stories. Some bust new myths.</p><p>With time travel, we could find out if Robin Hood was real.</p>" },
+    make: { intro: "One old story, one new one. What do they share?" }
+  },
   startFig: THREE,
   steps: [
 
@@ -278,6 +282,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
         "<p><b>Myth:</b> a very old story that explains how the world works. Long ago, Norse people told how thunder was the god Thor riding across the sky, swinging his hammer.</p>" +
         "<p><b>Legend:</b> a story about a hero or a place, which might have a little bit of truth in it. Robin Hood hid in Sherwood Forest. Nobody is sure if he was real.</p>" +
         "<p><b>Urban myth:</b> a story from today, passed on as if it is true. Usually it is not. \"If you swallow gum, it stays in your tummy for seven years.\" (It does not. It passes through in a few days.)</p>",
+      ez: { html: "<p><b>Myth</b>: explains the world, like thunder.</p><p><b>Legend</b>: a hero, like Robin Hood. <b>Urban myth</b>: a story from today.</p>" },
       lv: { mild: { html: "<p>People have always told stories that sound true.</p>" +
           "<p>Long ago, people told <b>myths</b> and <b>legends</b>. A myth explains something, like thunder. A legend is about a hero, like Robin Hood.</p>" +
           "<p>Today, people still pass on stories that sound true but are not. These are <b>urban myths</b>. \"Gum stays in your tummy for seven years\" is one. (It does not.)</p>" },
@@ -294,6 +299,8 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       slips: { 1: "Urban myths are from today. This one is very old, and it explains the weather.", 2: "A news report tells you what happened, with facts you could check. This explains the weather with a god." },
       hint: "Is it old or new? Does it explain something about the world?",
       why: "It is very old and it explains thunder. That makes it a myth.",
+      ez: { q: "Long ago, people said Thor made the thunder. What kind of story is that?",
+        slips: { 1: "Urban myths are from today.", 2: "A news report has facts you can check." }, hint: "Old or new?", why: "A <b>myth</b>. It is old and explains thunder." },
       lv: { spicy: { q: "Which of these is a <b>myth</b>?",
         options: ["A story saying winter comes because a goddess is sad", "An account of a real battle, with dates and names", "A story that alligators live in city drains", "A story about an outlaw who hid in a forest"],
         slips: { 1: "Dates and names you can check make that history, not myth.", 2: "That one is a modern urban myth, not an ancient one.", 3: "An outlaw hero who might have been real makes that a legend." },
@@ -307,6 +314,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       slips: { 1: "This one is from today, not long ago. Listen for \"my cousin's friend\".", 2: "There is no hero here, just a warning about gum." },
       hint: "Is it from long ago or from today?",
       why: "It is a story from today, passed on as true. Gum really passes through you in a few days. That makes it an urban myth.",
+      ez: { slips: { 1: "This one is from today. Look for my cousin's friend.", 2: "There is no hero here." }, hint: "Long ago, or today?", why: "An <b>urban myth</b>. It is from today, and not true." },
       lv: { spicy: { q: "\"Gum stays in your stomach for seven years\" has been passed on for decades. Why might it have spread so far?",
         options: ["It is a short warning, easy to repeat, and hard to check for yourself", "Doctors teach it in medical school", "It first appeared in a science textbook", "It is about a famous hero"],
         slips: { 1: "Doctors say the opposite: gum passes through in a few days.", 2: "It did not come from a textbook. It spread by word of mouth.", 3: "There is no hero in it, just a warning." },
@@ -319,6 +327,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       cards: [["Thor makes the thunder.", 0], ["Robin Hood hides in Sherwood Forest.", 1], ["Gum stays in you for seven years.", 2], ["Winter comes when a goddess is sad.", 0], ["Young Arthur pulls a sword from a stone and becomes king.", 1], ["Alligators live in the city drains.", 2]],
       hint: "Myths explain the world. Legends have a hero. Urban myths are from today.",
       why: "Thunder and winter are explained by gods: myths. Robin Hood and Arthur are heroes: legends. Gum and alligators are stories from today: urban myths.",
+      ez: { q: "Long ago, or today? Sort them.", why: "Thor and Robin Hood are old. Gum and alligators are today." },
       lv: { mild: { q: "Long ago, or today? Sort the stories, if you like.",
           buckets: ["Long ago", "Today"],
           cards: [["Thor makes the thunder.", 0], ["Robin Hood hides in the forest.", 0], ["Gum stays in you for seven years.", 1], ["Alligators live in the city drains.", 1]],
@@ -337,7 +346,9 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       answer: 0,
       slips: { 1: "Lots of people saying something does not make it true. The scientists checked, and it is not.", 2: "There is no hero, and it is not very old. It is a story from today." },
       hint: "It was checked. What did the check show?",
-      why: "Lots of people believe it, but checks show dogs see some colours. Passed on as true, but it is not: a modern myth. Bonnie is unbothered either way." },
+      why: "Lots of people believe it, but checks show dogs see some colours. Passed on as true, but it is not: a modern myth. Bonnie is unbothered either way.",
+      ez: { q: "Bonnie can see blue and yellow. So \"dogs only see black and white\" is...",
+        slips: { 1: "Lots of people saying it does not make it true.", 2: "There is no hero. It is from today." }, hint: "What did the check show?", why: "A <b>modern myth</b>. People pass it on, but it is not true." } },
 
     /* ---------- chunk 2: myths from long ago ---------- */
     { type: "learn", topic: "Myths from long ago", title: "Old stories, told out loud",
@@ -345,6 +356,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       html: "<p>Before books and screens, stories were <b>told out loud</b> and <b>passed down</b>: grandparents to parents to children, for hundreds of years.</p>" +
         "<p>Old myths and legends often:</p><ul><li><b>explain</b> something in nature (Thor and thunder)</li><li>have a <b>hero</b> and a <b>monster</b></li><li>carry a <b>warning</b> or a lesson</li></ul>" +
         "<p>In a Greek myth, <b>Icarus</b> flew on wings made of feathers and wax. His father told him not to fly too high. He flew too close to the sun, the wax melted, and he fell into the sea. A warning: listen to good advice.</p>",
+      ez: { html: "<p>Long ago, stories were <b>told out loud</b>.</p><p>Icarus flew too near the sun. The lesson: <b>listen to good advice</b>.</p>" },
       lv: { mild: { html: "<p>Long ago, there were no books or screens. People <b>told stories out loud</b>. Grandparents told parents, and parents told children.</p>" +
           "<p>Old stories often have a <b>hero</b>, a <b>monster</b>, and a <b>lesson</b>.</p>" +
           "<p><b>Icarus</b> had wings made of wax. His dad said: do not fly too high. He flew too near the sun, the wax melted, and he fell in the sea. The lesson: listen to good advice.</p>" },
@@ -357,6 +369,8 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
         { name: "Read it", html: LAMBTON_MED },
         { name: "See it", fig: STRIP, html: "<p>The same legend in four pictures. John goes fishing and catches a tiny worm. He throws it down a well. It grows huge and wraps around a hill. He comes back in spiky armour and beats it in the river.</p>" }
       ],
+      ez: { routes: ["<p class=\"a2task\"><b>The Lambton Worm</b><br><br>John caught a tiny worm. He threw it down a well.<br><br>The worm grew huge. It ate the sheep.<br><br>John wore spiky armour. He beat the worm.</p>",
+        "<p>Fishing. Down the well. It grows. Spiky armour.</p>"] },
       lv: { mild: { routes: [
           { name: "Read it", html: "<p class=\"a2task\"><b>The Lambton Worm</b><br><br>Long ago, John Lambton went fishing. He caught a tiny worm. He did not like it, so he threw it down a well and forgot about it.<br><br>The worm grew and grew. It climbed out, wrapped itself around a hill, and ate the farmers' sheep.<br><br>John came back wearing spiky armour, and he beat the worm in the river.</p>" },
           { name: "See it", fig: STRIP, html: "<p>The same legend in four pictures: fishing, down the well, it grows, spiky armour.</p>" }] },
@@ -371,6 +385,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       slips: { 1: "Have another look at the part just after he caught it.", 2: "Close: there is water in it, but it was a well, not the river." },
       hint: "Look at picture 2, or the sentence after he caught it.",
       why: "He threw it down a well and forgot about it. That is where it grew.",
+      ez: { slips: { 1: "Look just after he caught it.", 2: "Close. It was a well, not the river." }, hint: "Look at picture 2.", why: "He threw it <b>down a well</b>. It grew there." },
       lv: { spicy: { q: "Why might the storyteller mention that John went fishing <b>on a Sunday, instead of going to church</b>?",
         options: ["It hints that the trouble came from breaking the rules of the time", "It tells you what time the shops shut", "It is a random detail with no purpose", "It proves the story really happened"],
         slips: { 1: "Nothing in the story is about shops. Think about what Sunday meant to people back then.", 2: "Old stories rarely waste a detail. This one was kept for hundreds of years.", 3: "A day of the week cannot prove a giant worm was real." },
@@ -384,6 +399,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       slips: { 1: "Fishing is not really the problem. What happened after he caught the worm?", 2: "John did not keep it as a pet. He got rid of it without dealing with it." },
       hint: "What did John do with the worm, and what happened because of it?",
       why: "John threw the worm away and forgot it, and it grew into a much bigger problem. Small problems can grow if you ignore them.",
+      ez: { q: "What is the warning in the Lambton Worm?", slips: { 1: "Fishing is not the problem. What did the worm do?" }, hint: "What did the worm do next?", why: "Ignore a <b>small problem</b> and it can grow." },
       lv: { mild: { options: ["A small problem can grow if you ignore it", "Never go fishing"], slips: { 1: "Fishing is not really the problem. What happened after he threw the worm away?" } },
         spicy: { options: ["Problems you push out of sight do not go away; they can grow", "Spiky armour solves everything", "Fishing should be against the law", "Never trust a worm"],
           slips: { 1: "The armour was the fix, not the message. What caused the trouble in the first place?", 2: "The story is not really about fishing laws.", 3: "Funny, but the worm is a symbol. What does throwing it down a well stand for?" } } } },
@@ -393,6 +409,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       pairs: [["Thor and his hammer", "Thunder and lightning"], ["Icarus and his wax wings", "Listen to good advice"], ["The Lambton Worm", "Small problems can grow"], ["Persephone and her mother", "Why winter comes"]],
       hint: "Two of these explain nature. Two carry a warning.",
       why: "Thor explains thunder, Persephone explains winter. Icarus and the Worm are warnings.",
+      ez: { q: "Match each story to its job.", hint: "One explains nature. Two are lessons.", why: "Thor explains thunder. Icarus and the Worm are lessons." },
       lv: { mild: { pairs: [["Thor and his hammer", "Thunder"], ["Icarus and his wax wings", "Listen to good advice"], ["The Lambton Worm", "Small problems can grow"]],
           why: "Thor explains thunder. Icarus and the Worm both carry a lesson." },
         spicy: { pairs: [["Thor and his hammer", "Explains thunder and lightning"], ["Icarus and his wax wings", "Warns against ignoring advice"], ["The Lambton Worm", "Warns that ignored problems grow"], ["Persephone and her mother", "Explains the seasons"], ["Arthur and the sword in the stone", "Shows who is meant to rule"]],
@@ -404,6 +421,8 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       html: "<p>Today's myths are called <b>urban myths</b>. They spread by word of mouth, by message and online. Look out for these signs:</p>" +
         "<ul><li>It happened to <b>a friend of a friend</b>, never to the person telling you.</li><li>It is set somewhere <b>ordinary</b> and nearby.</li><li>It is told as <b>definitely true</b>, but nobody can check it.</li><li>It <b>changes</b> a little each time it is told.</li></ul>" +
         "<p class=\"a2task\">My cousin's mate knows someone who works at [[place]]. Late one night, [[job]] saw [[sight]]. When the lights came on, it was gone. That is why nobody [[rule]] after dark any more.</p>",
+      ez: { html: "<p><b>Urban myths</b> happen to <b>a friend of a friend</b>. Nobody can check.</p>" +
+        "<p class=\"a2task\">My cousin's mate says [[job]] at [[place]] saw [[sight]]. Then it was gone. Now nobody [[rule]] after dark.</p>" },
       lv: { mild: { html: "<p>Today, people still pass on stories that sound true. They are called <b>urban myths</b>.</p>" +
           "<ul><li>It happened to <b>a friend of a friend</b>.</li><li>It is told as <b>true</b>, but nobody can check.</li><li>It <b>changes</b> each time it is told.</li></ul>" +
           "<p class=\"a2task\">My cousin's mate says [[job]] at [[place]] saw [[sight]]. Then it was gone. Now nobody [[rule]] after dark.</p>" },
@@ -418,12 +437,14 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       slips: { 1: "The teller did not see it. Look at the very first words: \"My cousin's mate...\"", 2: "There is no photo and no reporter. Nobody in the story can be checked." },
       hint: "Look at the very first words of the story.",
       why: "It was someone that the teller's cousin's mate knows. That far away, nobody can check. Classic urban myth.",
+      ez: { slips: { 1: "Look at the first words: My cousin's mate." }, hint: "Look at the first words.", why: "<b>Nobody knows</b>. So nobody can check it." },
       lv: { mild: { options: ["Someone a friend of a friend knows", "The person telling the story"], fixed: true,
         slips: { 1: "The teller did not see it. Look at the first words: \"My cousin's mate...\"" } } } },
 
     { type: "widget", topic: "Urban myths today", unscored: true,
       title: "Pass it on",
       html: "<p>Here is how an urban myth grows. Every time the story is passed on, you choose how that person changes it. Have a go, and watch what happens.</p>",
+      ez: { html: "<p>Pass the story on. Pick how it changes.</p>" },
       mount: passWidget,
       report: function(d){ return d && d.n ? "Pass it on: the story was passed on " + d.n + " times." : ""; } },
 
@@ -433,6 +454,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       answers: [0, 1, 3],
       hint: "Look for the signs from the learn card: who, where, and how it changes.",
       why: "Friend of a friend, an ordinary place, and a story that changes: all signs of an urban myth. Names, dates and sources you can check point the other way.",
+      ez: { q: "Pick the clues it is an urban myth.", hint: "Two are signs. One you could check.", why: "A friend of a friend, and a story that changes." },
       lv: { mild: { q: "Pick the clues that a story might be an urban myth.",
           options: ["It happened to a friend of a friend", "It changes each time it is told", "It has a photo and a date you can check"],
           answers: [0, 1],
@@ -448,6 +470,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       slips: { 1: "The cousin is not famous. Nobody even knows who they are.", 2: "Names are allowed. Leaving them out is a choice. What does it do?" },
       hint: "Could you ask the cousin's mate what really happened?",
       why: "Close enough to sound true, too far away to check. That is what keeps an urban myth alive.",
+      ez: { q: "Could you ask \"my cousin's mate\" what happened?", slips: { 1: "Who is the cousin's mate? Nobody knows." }, hint: "Do you know their name?", why: "<b>Not really</b>. Nobody can check it." },
       lv: { mild: { q: "The story says \"my cousin's mate\". Could you ask that person what happened?",
           options: ["Not really: we do not know who they are", "Yes, easily"], fixed: true,
           slips: { 1: "Who is the cousin's mate? What is their name? Nobody knows, so you cannot ask them." },
@@ -464,6 +487,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       html: "<p><b>Then:</b> old myths and legends have gods and heroes, explain nature, and were told aloud for hundreds of years.</p>" +
         "<p><b>Now:</b> urban myths happen to a friend of a friend, in ordinary places, and spread online in hours.</p>" +
         "<p><b>Both:</b> told as if they are true, change with each telling, and often carry a warning.</p>",
+      ez: { title: "Then and now", html: "<p><b>Then:</b> gods and heroes, told out loud.</p><p><b>Now:</b> sent on phones. <b>Both:</b> told as true.</p>" },
       lv: { mild: { html: "<p><b>Then:</b> gods and heroes, told out loud.</p><p><b>Now:</b> a friend of a friend, sent on phones.</p><p><b>Both:</b> told as if they are true.</p>" },
         spicy: { fig: FEARS,
           html: "<p>Old myths and urban myths do the <b>same jobs</b>: they are told as true, they change with each telling, and they warn.</p>" +
@@ -477,6 +501,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       cards: [["Gods and heroes", 0], ["Told as if true", 1], ["Spread by phone and online", 2], ["Passed down for hundreds of years", 0], ["Changes when it is retold", 1], ["Happened to a friend of a friend", 2]],
       hint: "Use the Venn diagram: left is then, right is now, the middle is both.",
       why: "Gods and centuries: then. Phones and a friend of a friend: now. Told as true and changing with each telling: both.",
+      ez: { q: "Then or now? Sort them.", why: "Gods and campfires: then. Phones: now." },
       lv: { mild: { q: "Then or now? Sort them, if you like.",
           buckets: ["Then", "Now"],
           cards: [["Gods and heroes", 0], ["Told round the fire", 0], ["Sent on phones", 1], ["A friend of a friend saw it", 1]],
@@ -492,6 +517,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       slips: { 1: "Gods turn up in old myths, not in urban myths about gum and drains.", 2: "Old myths were around long before phones." },
       hint: "Look at the middle of the Venn diagram.",
       why: "Thor and the gum story were both told as if they were true. That is what they share.",
+      ez: { q: "Which is true of <b>both</b> old and new myths?", slips: { 1: "Gods are in old myths only.", 2: "Old myths came long before phones." }, hint: "Look at the middle of the circles.", why: "<b>Both</b> are told as if they are true." },
       lv: { spicy: { q: "Old myths are full of dark woods, wolves and the deep sea. Urban myths are full of phones, cameras and strangers online. What does that suggest?",
         options: ["Stories show what people were worried about at the time", "People in the past had no imagination", "Phones are scarier than wolves", "Myths are always about animals"],
         slips: { 1: "They had plenty of imagination: a worm round a hill! The difference is what they were worried about.", 2: "Not scarier, just newer. Each age tells stories about its own dangers.", 3: "Urban myths are often about technology, not animals." },
@@ -504,6 +530,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       starters: ["My old story is", "My urban myth is", "They are both", "They are different because"],
       checklist: ["I named an old story and a new one", "I said one thing that is the same", "I said one thing that is different"],
       minWords: 25,
+      ez: { q: "Only if you like: one old story, one new one. What is the same? What is different?" },
       lv: { mild: { minWords: 8, starters: ["My old story is", "My new story is", "They are both"], checklist: ["I named two stories", "I said one thing that is the same"] },
         spicy: { minWords: 45, fig: FEARS, starters: ["Both stories", "The old story was told to", "The urban myth spreads because", "This shows that people were worried about"],
           checklist: ["I compared an old story with a modern one", "I said what job each story does", "I said what each one shows about the people who told it"] } } },
@@ -511,6 +538,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
     { type: "widget", topic: "Then and now", unscored: true,
       title: "Myth hunt: try it for real",
       html: "<p>A challenge for away from the screen, whenever you fancy it. Every family and every place has its own stories. See what you can find.</p>",
+      ez: { html: "<p>A challenge away from the screen. Only if you like.</p>" },
       mount: huntWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Myth hunt: " + n + " of " + HUNT.length + " ticked." : ""; } }
   ],

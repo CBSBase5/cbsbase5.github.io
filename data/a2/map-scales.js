@@ -211,6 +211,7 @@ function mountRoute(el, api){
       html: "<p>A map is a small drawing of a real place. Everything is shrunk by the same amount.</p>" +
         "<p>The <b>scale</b> tells you how much. <b>1 cm = 1 km</b> means every 1 cm on the map stands for 1 km in real life.</p>" +
         "<p>On this map each square is 1 cm. So from the [[spot2]] to the [[spot3]] along the road is 6 squares: <b>6 km</b> in real life.</p>",
+      ez: { html: "<p>A map is a <b>small drawing</b> of a real place.</p><p>Here, <b>each square is 100 m</b>. 6 squares is 600 m.</p>" },
       lv: {
         mild: { fig: mapSvg({ key: ["1 square", "= 100 m"] }),
           html: "<p>A map is a small drawing of a real place.</p>" +
@@ -228,6 +229,8 @@ function mountRoute(el, api){
       slips: { 1: "The scale is about how much each bit of map stands for, not how big the paper is.", 2: "The scale says nothing about time. It links map lengths to real lengths." },
       hint: "It links a length on paper to a length in the real world.",
       why: "Each 1 cm you measure on the map stands for 1 km out there.",
+      ez: { slips: { 1: "It is not about counting squares.", 2: "The real place is 100 m. Not the paper." },
+        hint: "Paper, or the real world?", why: "1 square is 100 m in real life." },
       lv: {
         mild: { q: "A map says <b>each square = 100 m</b>. What does that mean?",
           options: ["Each square on the map is 100 m in real life.", "The map has 100 squares.", "Each square is 100 m wide on the paper."],
@@ -247,6 +250,8 @@ function mountRoute(el, api){
       slips: [[6, "6 cm is the distance on the map. Each cm is 2 km in real life."], [3, "That divides. Map to real life multiplies: 6 &#215; 2."], [8, "6 + 2 adds. Each of the 6 cm is worth 2 km: multiply."]],
       hint: "Count the squares, then times by 2.",
       why: "6 squares = 6 cm on the map. 6 &#215; 2 = <b>12 km</b>.",
+      ez: { q: "Each square is <b>100 m</b>. How far from the [[spot2]] to the [[spot3]]?",
+        slips: [[6, "6 is the squares. Each is 100 m."], [60, "Each square is 100 m, not 10 m."], [106, "Count in hundreds: 100, 200, 300."]] },
       lv: {
         mild: { q: "Each square is <b>100 m</b>. How far is it along the road from the [[spot2]] to the [[spot3]]?",
           fig: mapSvg({ route: R23, key: ["1 square", "= 100 m"] }),
@@ -268,6 +273,8 @@ function mountRoute(el, api){
       slips: [[2, "It goes past the 2 km mark. Look at where it stops: half way to 3."], [3, "It stops before 3 km. Half way between 2 and 3."], [5, "That counts the blocks in halves. Read the labels on the bar instead."]],
       hint: "It stops half way between two labels.",
       why: "The path stops half way between 2 km and 3 km: <b>2.5 km</b>.",
+      ez: { q: "Use the <b>scale bar</b>. How far from the [[spot1]] to the [[spot3]]?",
+        slips: [[3, "3 is the blocks. Read the label."], [40, "Follow the dotted line down."]] },
       lv: {
         mild: { q: "This map uses a <b>scale bar</b>. Line the path up with the bar. How far is it from the [[spot1]] to the [[spot3]]?",
           fig: bar(["0", "10 m", "20 m", "30 m", "40 m", "50 m"], 3),
@@ -290,6 +297,7 @@ function mountRoute(el, api){
         "<p><b>2. Read the scale:</b> 1 cm = 2 km.</p>" +
         "<p><b>3. Multiply:</b> 3.5 &#215; 2 = <b>7 km</b> in real life.</p>" +
         "<p>Map to real life is always a multiply, because real life is bigger.</p>",
+      ez: { html: "<p><b>Measure</b> on the map: 4 cm. Each cm is 10 m.</p><p>4 lots of 10 m = <b>40 m</b>. Real life is bigger.</p>" },
       lv: {
         mild: { fig: ruler(4, "Scale: 1 cm = 10 m"),
           html: "<p>Here is a worked example.</p>" +
@@ -311,6 +319,8 @@ function mountRoute(el, api){
       slips: [[1, 7, "4 + 3 adds. Each of the 4 cm is worth 3 km: multiply."], [1, 4, "4 cm is on the map. Times by 3 for real life."]],
       hint: "Where does the green pin sit on the ruler?",
       why: "4 cm on the map. 4 &#215; 3 = <b>12 km</b>.",
+      ez: { q: "<b>1 cm = 10 m</b>. Read the ruler. Then times by 10.",
+        slips: [[1, 15, "That adds. You need 5 lots of 10."], [1, 5, "5 cm is the map. Times by 10."]], hint: "Where is the green pin?" },
       lv: {
         mild: { q: "Your turn, with some of it done. The scale is <b>1 cm = 10 m</b>. Read the ruler, then times by 10.",
           fig: ruler(5, "Scale: 1 cm = 10 m"),
@@ -330,6 +340,8 @@ function mountRoute(el, api){
       slips: [[7.5, "2.5 + 5 adds. Multiply instead."], [0.5, "That divides. Map to real life multiplies."], [10, "Do not forget the half: 2 &#215; 5 = 10, plus 0.5 &#215; 5."]],
       hint: "2 &#215; 5, then add half of 5.",
       why: "2.5 &#215; 5 = 10 + 2.5 = <b>12.5 km</b>.",
+      ez: { q: "<b>1 cm = 100 m</b>. Two places are 6 cm apart. How far for real?",
+        slips: [[106, "That adds. You need 6 lots of 100."], [60, "6 lots of 100, not 10."], [6, "6 cm is the map. Count in hundreds."]], hint: "Count in hundreds 6 times." },
       lv: {
         mild: { q: "The scale is <b>1 cm = 100 m</b>. Two places are 6 cm apart on the map. How far is that in real life?",
           boxes: [{ label: "Real distance", a: 600, post: "m" }],
@@ -349,6 +361,9 @@ function mountRoute(el, api){
       slips: { 1: "Map A needs 3 cm (3 &#215; 1 km). Map B needs 6 cm, because each cm is only 500 m.", 2: "The real walk is the same, but each map shrinks it by a different amount." },
       hint: "How many cm does each map need for 3 km?",
       why: "A: 3 cm. B: 6 cm. When each cm stands for less, the map is bigger and shows more detail.",
+      ez: { q: "Map A: 1 square is 100 m. Map B: 1 square is 10 m. Which map needs more squares for 100 m?",
+        slips: { 1: "On Map A, 100 m is just 1 square.", 2: "The squares are worth different amounts." },
+        hint: "How many squares make 100 m?", why: "A needs 1 square. B needs 10 squares." },
       lv: {
         mild: { q: "Map A: each square is 100 m. Map B: each square is 10 m. The same 100 m walk is drawn on both. On which map does it take more squares?",
           slips: { 1: "On Map A, 100 m is just 1 square. On Map B it is 10 squares.", 2: "The walk is the same, but the squares are worth different amounts." },
@@ -367,6 +382,7 @@ function mountRoute(el, api){
         "<p><b>Map to real life: multiply.</b> <b>Real life to map: divide.</b></p>" +
         "<p>Example: a real road is 6 km and the scale is 1 cm = 2 km. 6 &#247; 2 = <b>3 cm</b> on the map.</p>" +
         "<p>Building plans use scales too. A plan at 1 cm = 1 m shows a 5 m wall as 5 cm.</p>",
+      ez: { title: "Going backwards", html: "<p>Map to real life: <b>times</b>. Real life to map: <b>divide</b>.</p><p>50 m with 10 m squares is <b>5 squares</b>.</p>" },
       lv: {
         mild: { fig: conv("Each square = 10 m", "&#215; 10", "&#247; 10"),
           html: "<p>Sometimes you know the real distance and want to draw it. Go backwards.</p>" +
@@ -383,6 +399,8 @@ function mountRoute(el, api){
       slips: [[75, "That multiplies. Real life to map divides."], [10, "15 &#8722; 5 takes away. Think: how many 5s in 15?"]],
       hint: "15 &#247; 5.",
       why: "15 &#247; 5 = <b>3 cm</b>. Check: 3 &#215; 5 = 15 km.",
+      ez: { q: "Each square is <b>10 m</b>. A fence is <b>50 m</b>. How many squares?",
+        slips: [[500, "That multiplies. How many 10s in 50?"], [40, "That takes away. Count in tens to 50."]] },
       lv: {
         mild: { q: "Each square is <b>10 m</b>. A real fence is <b>50 m</b> long. How many squares long is it on the map?",
           boxes: [{ label: "Squares", a: 5 }],
@@ -400,6 +418,7 @@ function mountRoute(el, api){
       pairs: [["3 cm", "6 km"], ["4.5 cm", "9 km"], ["0.5 cm", "1 km"], ["10 cm", "20 km"]],
       hint: "Times each one by 2.",
       why: "Each cm is 2 km, so double the map distance.",
+      ez: { q: "Each square is <b>10 m</b>. Match them up." },
       lv: {
         mild: { q: "Each square is <b>10 m</b>. Match each number of squares to the real distance.",
           pairs: [["2 squares", "20 m"], ["5 squares", "50 m"], ["8 squares", "80 m"]],
@@ -417,6 +436,8 @@ function mountRoute(el, api){
       slips: [[0, 1.5, "That divides. Plan to real life multiplies: 3 &#215; 2."], [1, 4.5, "2.5 + 2 adds. Multiply: 2.5 &#215; 2."]],
       hint: "Times each one by 2.",
       why: "3 &#215; 2 = <b>6 m</b>, and 2.5 &#215; 2 = <b>5 m</b>.",
+      ez: { q: "<b>1 cm = 1 m</b>. The plan is 5 cm by 4 cm. How big is the real room?",
+        slips: [[0, 50, "1 cm is 1 m. So 5 cm is 5 m."]] },
       lv: {
         mild: { q: "On this plan, <b>1 cm = 1 m</b>. The room is 5 cm by 4 cm on the plan. How big is the real room?",
           fig: planRoom("5 cm", "4 cm", "1 cm = 1 m"),
@@ -435,6 +456,7 @@ function mountRoute(el, api){
     { type: "widget", topic: "Plan a route", unscored: true,
       title: "Route planner",
       html: "<p>Plan a trip round the map for [[who]]. Tap the places in order, then work out how far it is in real life. Try a few routes, if you like.</p>",
+      ez: { html: "<p>Plan a trip for [[who]]. Tap the places in order.</p><p>How far is it for real?</p>" },
       mount: mountRoute },
 
     { type: "num", topic: "Plan a route",
@@ -443,6 +465,8 @@ function mountRoute(el, api){
       slips: [[7.5, "7.5 cm is on the map. Times by 2 for real life."], [9, "That is just the second part. Add the first part too."], [6, "That is just the first part. Add the second part too."]],
       hint: "Add the map distances first: 3 + 4.5. Then times by 2.",
       why: "3 + 4.5 = 7.5 cm. 7.5 &#215; 2 = <b>15 km</b>.",
+      ez: { q: "[[Who]] walks 2 squares, then 3 more. Each is <b>100 m</b>. How far?",
+        slips: [[5, "5 squares. Each one is 100 m."], [200, "Add the second part too."], [300, "Add the first part too."]], hint: "2 + 3, then count in hundreds." },
       lv: {
         mild: { q: "[[Who]] walks 2 squares, then 3 more squares. Each square is <b>100 m</b>. How far is that altogether?",
           boxes: [{ label: "Total real distance", a: 500, post: "m" }],
@@ -462,6 +486,8 @@ function mountRoute(el, api){
       slips: { 1: "That suits a town or a walk. A whole country would need a map hundreds of metres long.", 2: "1 cm = 1 m suits a room plan. A country map would be enormous.", 3: "That would make the map ten times bigger than the real country!" },
       hint: "A country is hundreds of km across. The map has to fit on a page.",
       why: "At 1 cm = 10 km, a country 500 km across fits in 50 cm. The others would not fit anywhere.",
+      ez: { slips: { 1: "That suits a room plan.", 2: "That map would be bigger than the country!" },
+        hint: "The map has to fit on a page.", why: "1 cm = 10 km. A country fits on a page." },
       lv: {
         mild: { options: ["1 cm = 10 km", "1 cm = 1 m", "1 cm = 1 mm"],
           slips: { 1: "1 cm = 1 m suits a room plan. A country map would be enormous.", 2: "That would make the map bigger than the real country!" } },
@@ -471,6 +497,11 @@ function mountRoute(el, api){
           hint: "First find what 1 cm stands for. How many of those make 1 km?",
           why: "1 cm = 25 000 cm = 250 m. Four lots of 250 m make 1 km, so <b>4 cm = 1 km</b>." } } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Walkers, drivers and sat navs all use <b>scales</b>.</p><p>Would a 200 year old map still be right?</p>" },
+    make: { intro: "Pick 2 places and a scale. The card works out the real distance. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Scales get people where they are going",

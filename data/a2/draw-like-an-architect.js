@@ -295,6 +295,7 @@ function goWidget(el, api){
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Plan or elevation?", title: "Two ways to draw a building flat",
+      ez: { title: "Plan or elevation", html: "<p>A <b>plan</b> is from <b>above</b>.</p><p>An <b>elevation</b> is from the <b>front</b>.</p>" },
       fig: VIEWS,
       html: "<p>Architects draw buildings flat, from straight on, so builders can measure from the drawing.</p>" +
         "<p>A <b>plan</b> is the view from <b>above</b>: like a bird flying over with the roof lifted off. You see the rooms, the walls, the doors and the windows.</p>" +
@@ -310,6 +311,7 @@ function goWidget(el, api){
       slips: { 1: "Drawing B has a roof and a door you can see the front of. That is the view from the front: an elevation." },
       hint: "Which one looks down from above, with no roof?",
       why: "Drawing A looks down from above: walls, a door gap and windows in the walls. That is the plan.",
+      ez: { q: "Which one is the <b>plan</b>?", hint: "Which looks down, with no roof?", why: "A looks down from above. A is the plan.", slips: { 1: "B shows the front. That is an elevation." } },
       lv: { spicy: { q: "Which drawing is the <b>elevation</b> of [[building]]?",
         fig: twoDrawings(true), answer: 0,
         slips: { 1: "Drawing B looks down from above: that is the plan." },
@@ -323,6 +325,7 @@ function goWidget(el, api){
       slips: { any: "Ask: would I see it looking down, or looking straight at the front?" },
       hint: "Heights need the front view. Layouts need the view from above.",
       why: "Rooms and where things go are seen from above. The roof and the height are seen from the front.",
+      ez: { hint: "Heights: front. Layouts: above.", why: "Rooms are seen from above. Roof and height from the front.", slips: { any: "Looking down, or looking at the front?" } },
       lv: {
         medium: { cards: [["Where the rooms are", 0], ["The shape of the roof", 1], ["Where the [[thing]] goes", 0], ["How tall the building is", 1], ["Which way the door swings", 0], ["How high up the windows are", 1]],
           why: "Layouts and door swings are seen from above. Roofs, heights and window heights are seen from the front." },
@@ -339,6 +342,7 @@ function goWidget(el, api){
       slips: { 1: "An elevation is from the front, at ground level. The bird is up above.", 2: "Looking straight down from above is exactly what a plan shows." },
       hint: "The bird is looking down.",
       why: "From above is the <b>plan</b>. Architects even call it a bird's eye view.",
+      ez: { q: "A bird flies over. The roof is off. What does it see?", hint: "The bird is looking down.", why: "From above is the <b>plan</b>.", slips: { 1: "An elevation is from the front.", 2: "Looking down is a plan." } },
       lv: { spicy: { q: "Why are plans drawn as if the walls were sliced through at about 1 metre high?",
         fig: "",
         options: ["So the doors and windows show up in the walls", "So the roof shows on the plan", "To save paper", "So the furniture looks 3D"],
@@ -353,6 +357,7 @@ function goWidget(el, api){
       slips: { any: "Three are true. Colour is optional, and lunch is very optional." },
       hint: "Colour is optional. Lunch is very optional.",
       why: "Straight on views, symbols and labels. Colour is a bonus, not a rule.",
+      ez: { q: "Which are true about plans? Pick <b>all</b>.", hint: "Colour is a bonus.", why: "Straight on views and symbols. Colour is a bonus.", slips: { any: "2 are true. Colour is a bonus." } },
       lv: {
         mild: { options: ["They are drawn from straight above or straight in front", "They use symbols for doors and windows", "They must be in bright colours"], answers: [0, 1],
           why: "Straight on views and symbols. Colour is a bonus, not a rule." },
@@ -362,6 +367,7 @@ function goWidget(el, api){
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Symbols", title: "Symbols every builder can read",
+      ez: { title: "Symbols", html: "<p><b>Wall</b>: thick line. <b>Door</b>: a gap and a curve.</p><p><b>Window</b>: thin lines. <b>Stairs</b>: an arrow.</p>" },
       fig: symbols(true),
       html: "<p>Plans use the same symbols everywhere, so any builder can read them.</p>" +
         "<p><b>Wall:</b> a thick line. <b>Door:</b> a gap in the wall, a line for the door, and a curve showing where it swings. <b>Window:</b> thin lines across the wall. <b>Stairs:</b> rows of steps with an arrow pointing up.</p>",
@@ -374,7 +380,7 @@ function goWidget(el, api){
       pairs: [["Symbol A", "Wall"], ["Symbol B", "Door"], ["Symbol C", "Window"], ["Symbol D", "Stairs"]],
       slips: { any: "Look for the swing curve (door), the thin lines across (window) and the arrow (stairs)." },
       hint: "The door has a curve. The stairs have an arrow.",
-      why: "A thick line is a wall. A curve is a door. Thin lines across are a window. Steps with an arrow are stairs." },
+      why: "A thick line is a wall. A curve is a door. Thin lines across are a window. Steps with an arrow are stairs.", ez: { hint: "Door: curve. Stairs: arrow.", why: "Thick line: wall. Curve: door. Thin lines: window. Arrow: stairs.", slips: { any: "Look for the curve, the thin lines and the arrow." } } },
 
     { type: "mc", topic: "Symbols",
       q: "Here is a plan of [[building]]. Where is the door?",
@@ -384,6 +390,7 @@ function goWidget(el, api){
       slips: { 1: "The thin lines in the top wall are a window.", 2: "The right wall is solid all the way down." },
       hint: "Look for the gap with a curve.",
       why: "The gap with the swing curve is at the bottom, on the left.",
+      ez: { q: "Where is the door?", hint: "Find the gap with a curve.", why: "Bottom wall, on the left.", slips: { 1: "Thin lines are a window.", 2: "The right wall has no gap." } },
       lv: {
         medium: { q: "Here is a plan of [[building]]. How many windows does it have?",
           fig: WINFIG,
@@ -406,10 +413,11 @@ function goWidget(el, api){
       answer: 1, fixed: true,
       slips: { 0: "Spot A is inside the door's curve. The door would bang into it every time.", 2: "Spot C is outside the room, in the doorway. Nobody could get in." },
       hint: "Keep out of the door's curve, and keep the way in clear.",
-      why: "Spot B is against a wall, clear of the door swing and the way in. Architects check this on every plan." },
+      why: "Spot B is against a wall, clear of the door swing and the way in. Architects check this on every plan.", ez: { hint: "Keep out of the door curve.", why: "Spot B. It is clear of the door.", slips: { 0: "A is in the door curve. Bang!", 2: "C blocks the way in." } } },
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Labels and scale", title: "Labels, a title and a scale",
+      ez: { title: "Labels and scale", html: "<p>A plan has a <b>title</b>, <b>labels</b> and a <b>scale</b>.</p><p><b>1 square = 1 metre</b>. 6 squares = 6 metres.</p>" },
       fig: labelled(30, "1 square = 1 m", A2ART.egg('<g transform="translate(200 240)">' + A2ART.bonnie(0, 0, 0.32, "sit") + '</g>', "Bonnie has sneaked onto the plan. Architects call this a dog bed. Bonnie calls it the most important room.")),
       html: "<p>A finished plan has three helpers.</p>" +
         "<p><b>A title:</b> what it is, like \"Plan of [[building]]\". <b>Labels:</b> words that name things. <b>A scale:</b> how big it is for real.</p>" +
@@ -430,6 +438,7 @@ function goWidget(el, api){
       slips: [[0, 4, "That is the short wall. Count along the long one."], [0, 5, "Count again from corner to corner, one square at a time."]],
       hint: "Count the squares along the top wall.",
       why: "6 squares, and each one is 1 m, so the long wall is <b>6 m</b>.",
+      ez: { q: "1 square = 1 metre. Count the <b>long</b> wall. How long is it?", hint: "Count along the top wall.", why: "6 squares. So <b>6 m</b>.", slips: [[null, null, "That is the short wall."], [null, null, "Count again, 1 square at a time."]] },
       lv: {
         medium: { q: "Your turn, step by step. 1 square = 50 cm. Count the squares along the long wall, change it to cm, then to metres.",
           fig: labelled(30, "1 square = 50 cm"),
@@ -451,6 +460,7 @@ function goWidget(el, api){
       slips: [[6, "That is the long wall. Count down the short side."], [3, "Count again, one square at a time, from corner to corner."]],
       hint: "Count down the right hand wall.",
       why: "4 squares at 1 m each: <b>4 m</b>.",
+      ez: { q: "1 square = 1 metre. How long is the <b>short</b> wall?", hint: "Count down the right wall.", why: "4 squares. So <b>4 m</b>.", slips: [[null, "That is the long wall."], [null, "Count again, 1 square at a time."]] },
       lv: {
         medium: { q: "Now on your own. 1 square = 50 cm. How wide is it for real, along the short wall, in metres?",
           fig: labelled(30, "1 square = 50 cm"),
@@ -473,6 +483,7 @@ function goWidget(el, api){
       slips: { 1: "Drawing of what? A title says what it shows.", 2: "Which thing? A reader would not know.", 3: "That is an opinion, not what the drawing is." },
       hint: "Which one tells a stranger what they are looking at?",
       why: "<b>Plan of [[building]]</b> says what kind of drawing it is, and what it shows.",
+      ez: { q: "Which is the best title?", hint: "Which tells a stranger the most?", why: "<b>Plan of [[building]]</b> says what it shows.", slips: { 1: "Drawing of what?", 2: "Which thing?", 3: "That is an opinion." } },
       lv: {
         medium: { q: "Why does a plan need a scale?",
           fig: "",
@@ -489,6 +500,7 @@ function goWidget(el, api){
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Your turn", title: "Drawing your own, step by step",
+      ez: { title: "Draw your own", html: "<p><b>Measure</b>. Draw <b>walls</b>. Add <b>symbols</b>. Add <b>labels</b>.</p><p>Pencil first!</p>" },
       fig: GROW,
       html: "<p>Architects build a drawing up in layers.</p>" +
         "<p><b>1.</b> Measure the space. A tape is best, but counting steps works too.<br><b>2.</b> Pick a scale and draw the <b>walls</b>.<br><b>3.</b> Add <b>symbols</b> for doors and windows.<br><b>4.</b> Add <b>labels</b>, a <b>title</b> and the <b>scale</b>.</p>" +
@@ -500,16 +512,19 @@ function goWidget(el, api){
       slips: { any: "You need the walls before you can put doors in them, and the sizes before you can draw the walls." },
       hint: "You cannot put a door in a wall that is not there yet.",
       why: "Measure, scale, walls, symbols, labels. Each step needs the one before.",
+      ez: { hint: "Walls come before doors.", why: "Measure, walls, symbols, labels.", slips: { any: "Walls first. Then doors go in them." } },
       lv: { mild: { items: ["Measure the space", "Draw the walls", "Add door and window symbols", "Add labels and a title"] } } },
 
     { type: "widget", topic: "Your turn", unscored: true,
       title: "Try the drawing board",
+      ez: { html: "<p>Draw any building you like. Only if you fancy it.</p>" },
       html: "<p>Draw any building you like: [[building]], your dream bedroom, a den. Only if you fancy it.</p>",
       mount: gridWidget,
       report: function(d){ var n = d && d.cells ? Object.keys(d.cells).length : 0; return n ? "Drawing board: " + n + " squares drawn." : ""; } },
 
     { type: "widget", topic: "Your turn", unscored: true,
       title: "Challenge card",
+      ez: { html: "<p>A real drawing, away from the screen.</p>" },
       html: "<p>A real world drawing, away from the screen. What you tick can go to Jay with the rest if you send it.</p>",
       mount: goWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Real plan challenge: " + n + " of " + GO.length + " ticked." : ""; } },
@@ -518,9 +533,15 @@ function goWidget(el, api){
       q: "How did your drawing go? Tell Jay about it, if you like: what you drew, what went well, and what you would add next time.",
       starters: ["I drew a plan of", "The scale I used was", "The best part was", "Next time I would add", "The trickiest bit was"],
       checklist: ["I said what I drew", "I said one thing that went well", "I said one thing to try next time"],
+      ez: { q: "How did your drawing go? Tell Jay, if you like." },
       minWords: 25,
       lv: { spicy: { minWords: 50, checklist: ["I said what I drew and the scale", "I said how I measured it", "I said one thing that went well", "I said one thing I would change, and why"] } } }
   ],
+
+  ez: {
+    realWorld: { title: "Who draws like this?", html: "<p>Builders, game designers and estate agents all use plans.</p><p>Plans let us see a Roman villa from long ago.</p>" },
+    make: { intro: "Make a title block for your drawing." }
+  },
 
   realWorld: {
     title: "Who draws like this?",

@@ -169,6 +169,7 @@ function setWidget(el, api){
       html: "<p>When it gets hotter, the red liquid in a thermometer goes <b>up</b>. When it gets colder, it goes <b>down</b>.</p>" +
         "<p>To read it, look at the <b>top of the red line</b> and read the number on the scale next to it.</p>" +
         "<p>Temperatures are measured in <b>degrees Celsius</b>, written " + DEG + ". This one reads 20" + DEG + ", about right for [[room]].</p>",
+      ez: { title: "Meet the thermometer", html: "<p>Hotter: the red line goes <b>up</b>. Colder: it goes <b>down</b>.</p><p>Read the number at the <b>top of the red line</b>.</p>" },
       lv: { spicy: { html: "<p>When it gets hotter, the red liquid goes <b>up</b>. Read the scale level with the <b>top of the red line</b>. Temperatures are in <b>degrees Celsius</b> (" + DEG + ").</p>" +
         "<p>Scorching tip: before you read anything, <b>check the labels</b>. Scales can go up in 1s, 2s, 5s, 10s or 20s, and some do not even start at 0.</p>" } } },
 
@@ -179,6 +180,7 @@ function setWidget(el, api){
       slips: [[2, "That is how many marks up it is. Read the number next to the top of the red line."]],
       hint: "Put your finger on the top of the red line. Which number is next to it?",
       why: "The red line stops at the <b>20</b> label, so it reads 20" + DEG + ".",
+      ez: { q: "What temperature does it show?", hint: "Find the top of the red line.", why: "It stops at <b>20</b>. So 20" + DEG + ".", slips: [[null, "That is the marks. Read the number."]] },
       lv: { medium: { fig: one(0, 50, 10, 5, 30), boxes: [{ label: "Temperature", a: 30, post: DEG }],
           slips: [[6, "That is how many marks up it is. Read the label next to the top of the red line."], [35, "Look again: the red line stops right on a label."]],
           why: "The red line stops at the <b>30</b> label, so it reads 30" + DEG + "." },
@@ -194,6 +196,7 @@ function setWidget(el, api){
       slips: { 0: "A has the shorter red line, so it is colder. Higher red line, hotter." },
       hint: "Which red line goes higher?",
       why: "B reads 30" + DEG + " and A reads 10" + DEG + ". 30 is more than 10, so B is hotter.",
+      ez: { q: "Which one is hotter?", hint: "Which red line is higher?", why: "B is 30" + DEG + ". A is 10" + DEG + ". <b>B</b> is hotter.", slips: { 0: "A is lower, so it is colder." } },
       lv: { medium: { fig: thermos([{ min: 0, max: 50, major: 10, minor: 5, val: 25, name: "A" }, { min: 0, max: 50, major: 10, minor: 5, val: 35, name: "B" }], "Two thermometers, A and B"),
           why: "B reads 35" + DEG + " and A reads 25" + DEG + ". 35 is more, so B is hotter." },
             spicy: { q: "Careful: these two have different scales. Which is hotter?",
@@ -210,6 +213,7 @@ function setWidget(el, api){
       slips: [[4, "That is how many marks up it is. Read the label next to the top of the red line."], [50, "That is the top of the scale. Look where the red line stops."]],
       hint: "Find the top of the red line, then read across.",
       why: "The red line stops at <b>40</b>. Hot!",
+      ez: { q: "This is [[hot]]. What does it read?", hint: "Find the top of the red line.", why: "It stops at <b>40</b>. Hot!", slips: [[null, "That is the marks. Read the number."], [null, "That is the top. Where does red stop?"]] },
       lv: { medium: { fig: one(0, 50, 10, 5, 45), boxes: [{ label: "Temperature", a: 45, post: DEG }],
           slips: [[40, "Nearly: the red line goes one mark past 40. Each mark is 5."], [41, "Each mark here is worth 5, not 1."]],
           hint: "There is one mark between each label. What is halfway between 40 and 50?",
@@ -224,6 +228,7 @@ function setWidget(el, api){
       fig: WORKED.medium,
       html: "<p>Lots of thermometers have little marks <b>between</b> the labels. Here is how to read one, step by step.</p>" +
         "<p>The trick is step 3: <b>share</b> the jump between two labels by the number of gaps. Then count up.</p>",
+      ez: { title: "Between the labels", html: "<p>Count the <b>gaps</b> between 2 labels.</p><p>Share the jump. Then count up.</p>" },
       lv: { mild: { fig: WORKED.mild }, spicy: { fig: WORKED.spicy, html: "<p>Here is the method, step by step. It works on any scale.</p>" +
         "<p>The trick is step 3: <b>share</b> the jump between two labels by the number of gaps. This time each gap is a decimal, 2.5. That is fine: count up in 2.5s.</p>" } } },
 
@@ -234,6 +239,7 @@ function setWidget(el, api){
       slips: [[0, 4, "Count the gaps (spaces), not the little lines. There are 5 spaces."], [1, 1, "10 shared between 5 gaps is 2, not 1."], [2, 12, "Count up from 10 in 2s: 12, 14. Two gaps."]],
       hint: "Count the spaces between 10 and 20. Then share 10 between them.",
       why: "5 gaps share 10, so each gap is 2. Two gaps above 10: 12, <b>14</b>.",
+      ez: { q: "Your turn. Fill in each box.", hint: "Count the spaces. Share 10.", why: "Each gap is 5. So <b>15</b>.", slips: [[null, null, "Count spaces, not lines."], [null, null, "10 shared by 2 gaps is 5."], [null, null, "Each gap is 5. So 15."]] },
       lv: { mild: { fig: one(0, 40, 10, 5, 15), boxes: [{ label: "Gaps between 10 and 20", a: 2 }, { label: "Each gap is worth", a: 5 }, { label: "Temperature", a: 15, post: DEG }],
           slips: [[0, 1, "Count the spaces, not the lines. There is a space each side of the middle mark."], [1, 1, "10 shared between 2 gaps is 5."], [2, 11, "Each gap is worth 5, so one gap above 10 is 15."]],
           why: "2 gaps share 10, so each gap is 5. One gap above 10 is <b>15</b>." },
@@ -248,6 +254,7 @@ function setWidget(el, api){
       slips: [[1, 31, "It is one gap above 30, but each gap is worth 2, not 1."], [0, 1, "Share 10 between the 5 gaps."]],
       hint: "Same steps: two labels, count the gaps, share, count up.",
       why: "Each gap is 2. One gap above 30 is <b>32</b>.",
+      ez: { q: "What is each gap worth? What does it read?", hint: "Count the gaps. Share. Count up.", why: "Each gap is 5. So <b>35</b>.", slips: [[null, null, "Each gap is 5, not 1."], [null, null, "That is the gaps. Share 10."]] },
       lv: { mild: { fig: one(0, 40, 10, 5, 35), boxes: [{ label: "Each gap is worth", a: 5 }, { label: "Temperature", a: 35, post: DEG }],
           slips: [[1, 31, "One gap above 30, but each gap is worth 5, not 1."], [0, 2, "That is how many gaps. Share 10 between them."]],
           why: "Each gap is 5. One gap above 30 is <b>35</b>." },
@@ -262,6 +269,7 @@ function setWidget(el, api){
       slips: [[44, "Four gaps above 40, but each gap is worth 2."], [42, "Count all the gaps above 40: there are 4, each worth 2."]],
       hint: "Find the gap size first.",
       why: "Each gap is 2. Four gaps above 40: 42, 44, 46, <b>48</b>. Toasty.",
+      ez: { q: "On your own. What does it read?", hint: "Find the gap size first.", why: "Each gap is 5. So <b>45</b>.", slips: [[null, "Each gap is 5, not 1."], [null, "Red goes 1 gap past 40."]] },
       lv: { mild: { fig: one(0, 50, 10, 5, 45), boxes: [{ label: "Temperature", a: 45, post: DEG }],
           slips: [[41, "One gap above 40, but each gap is worth 5."], [40, "The red line goes one gap past 40."]],
           why: "Each gap is 5. One gap above 40 is <b>45</b>." },
@@ -279,6 +287,7 @@ function setWidget(el, api){
       html: "<p>The <b>bigger</b> the number, the <b>hotter</b> it is.</p>" +
         "<p>To find <b>how much hotter</b>, count up from the colder one to the hotter one. From 12" + DEG + " to 28" + DEG + ": jump 8 to get to 20, then 8 more to get to 28. That is <b>16 degrees hotter</b>.</p>" +
         "<p>Or take away: 28 - 12 = 16. Same answer.</p>",
+      ez: { title: "Bigger is hotter", html: "<p><b>Bigger</b> number, <b>hotter</b>.</p><p>20 to 30 is a jump of 10. <b>10 degrees hotter</b>.</p>" },
       lv: { mild: { fig: jumps(0, 40, [20, 30], "Counting up from 20 to 30: plus 10"),
           html: "<p>The <b>bigger</b> the number, the <b>hotter</b> it is. 30" + DEG + " is hotter than 20" + DEG + ".</p>" +
           "<p>To find <b>how much hotter</b>, count up from the colder one. From 20 to 30 is one jump of 10. So 30" + DEG + " is <b>10 degrees hotter</b>.</p>" },
@@ -293,6 +302,7 @@ function setWidget(el, api){
       slips: { 0: "15 is less than 25, so Monday was colder." },
       hint: "Which number is bigger?",
       why: "25 is bigger than 15, so Tuesday was hotter.",
+      ez: { q: "Which day was hotter?", hint: "Which number is bigger?", why: "25 is bigger. <b>Tuesday</b> was hotter.", slips: { 0: "15 is smaller, so Monday was colder." } },
       lv: { medium: { q: "Which day was hottest in [[room]]?", options: ["Monday: 19" + DEG, "Tuesday: 21" + DEG, "Wednesday: 12" + DEG],
           slips: { 0: "19 ends in a big 9, but 21 has more tens. 21 is bigger.", 2: "12 is the smallest, so Wednesday was coldest." },
           hint: "Look at the tens first.",
@@ -308,6 +318,7 @@ function setWidget(el, api){
       items: ["[[Cold]]: 3" + DEG, "[[Room]]: 18" + DEG, "[[Hot]]: 35" + DEG],
       hint: "Smallest number first.",
       why: "3, then 18, then 35. Smallest number is coldest.",
+      ez: { q: "Put them in order. <b>Coldest first</b>.", hint: "Smallest number first.", why: "3, then 18, then 35." },
       lv: { medium: { items: ["[[Cold]]: 6" + DEG, "[[Room]]: 19" + DEG, "[[Hot]]: 31" + DEG, "A warm bath: 40" + DEG],
           why: "6, 19, 31, 40." },
             spicy: { items: ["[[Cold]]: 9.75" + DEG, "[[Room]]: 19.05" + DEG, "Jay's forgotten cup of tea: 19.5" + DEG, "[[Hot]]: 31" + DEG],
@@ -321,6 +332,7 @@ function setWidget(el, api){
       slips: [[40, "You added them. For how much hotter, count up from 12 to 28, or take away."], [14, "Count the jumps again: 12 to 20 is 8, 20 to 28 is 8."]],
       hint: "Count up from 12 to 28.",
       why: "8 + 8 = 16, or 28 - 12 = 16. It is <b>16 degrees</b> hotter.",
+      ez: { q: "[[Hot]] is 30" + DEG + ". [[Room]] is 20" + DEG + ". How much hotter?", hint: "Count up from 20 to 30.", why: "One jump of <b>10</b>.", slips: [[null, "You added them. Count up instead."], [null, "Count in tens. 20 to 30 is 10."]] },
       lv: { mild: { q: "[[Hot]] is 30" + DEG + ". [[Room]] is 20" + DEG + ". How many degrees hotter is [[hot]]?",
           fig: jumps(0, 40, [20, 30], "Counting up from 20 to 30"),
           boxes: [{ label: "Degrees hotter", a: 10 }],
@@ -340,6 +352,7 @@ function setWidget(el, api){
       cards: [["25" + DEG, 0], ["18" + DEG, 1], ["30" + DEG, 0], ["12" + DEG, 1]],
       hint: "Is the number bigger than 20?",
       why: "25 and 30 are bigger than 20. 18 and 12 are smaller.",
+      ez: { q: "Hotter than 20" + DEG + " or not?", hint: "Is it bigger than 20?", why: "25 and 30 are bigger than 20." },
       lv: { medium: { cards: [["25" + DEG, 0], ["18" + DEG, 1], ["21" + DEG, 0], ["12" + DEG, 1], ["20" + DEG, 1], ["32" + DEG, 0]],
           hint: "Is it bigger than 20? Careful with 20 itself.",
           why: "20" + DEG + " is not hotter than 20" + DEG + ": it is the same. 21, 25 and 32 are hotter." },
@@ -351,6 +364,7 @@ function setWidget(el, api){
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Hot or not in real life", title: "Temperatures worth knowing",
       fig: REF,
+      ez: { title: "Good to know", html: "<p>Fridge <b>4" + DEG + "</b>. Room <b>20" + DEG + "</b>. Body <b>37" + DEG + "</b>.</p><p>Boiling water <b>100" + DEG + "</b>.</p>" },
       html: "<p>Knowing a few temperatures helps you check whether a number makes sense.</p>" +
         "<p>A <b>fridge</b> is about 4" + DEG + ". A comfy <b>room</b> is about 20" + DEG + ". A <b>hot day</b> here is about 30" + DEG + ". Your <b>body</b> is about 37" + DEG + ". A warm <b>bath</b> is about 40" + DEG + ". Water <b>boils</b> at 100" + DEG + ".</p>" },
 
@@ -359,6 +373,7 @@ function setWidget(el, api){
       pairs: [["Inside a fridge", "4" + DEG], ["A comfy room", "20" + DEG], ["Boiling water", "100" + DEG]],
       hint: "Fridges are cold, kettles are very hot.",
       why: "Fridge 4" + DEG + ", room 20" + DEG + ", boiling 100" + DEG + ".",
+      ez: { hint: "Fridges are cold. Kettles are very hot." },
       lv: { medium: { pairs: [["Inside a fridge", "4" + DEG], ["A comfy room", "20" + DEG], ["Your body", "37" + DEG], ["Boiling water", "100" + DEG]] },
             spicy: { pairs: [["Inside a fridge", "4" + DEG], ["A hot day in Britain", "30" + DEG], ["Your body", "37" + DEG], ["A warm bath", "40" + DEG], ["Boiling water", "100" + DEG]],
               hint: "30, 37 and 40 are close. Your body is a little cooler than a warm bath.",
@@ -371,6 +386,7 @@ function setWidget(el, api){
       slips: { 1: "100" + DEG + " is boiling water. Nobody could stay in there.", 2: "1" + DEG + " is colder than a fridge. Brrr." },
       hint: "Think about a comfy room.",
       why: "About 20" + DEG + " is comfy for a room.",
+      ez: { q: "Which makes sense for [[room]]?", hint: "Think of a comfy room.", why: "<b>20" + DEG + "</b> is comfy for a room.", slips: { 1: "100" + DEG + " is boiling water!", 2: "1" + DEG + " is colder than a fridge. Brrr." } },
       lv: { spicy: { q: "A report says [[hot]] reached 300" + DEG + ". What has most likely happened?",
         options: ["A typing slip: 30" + DEG + " makes sense", "It was just a warm day", "That is about body temperature", "That is a normal room temperature"],
         slips: { 1: "300" + DEG + " is three times hotter than boiling water. Not a warm day.", 2: "Body temperature is about 37" + DEG + ".", 3: "Rooms are about 20" + DEG + "." },
@@ -380,6 +396,7 @@ function setWidget(el, api){
     { type: "widget", topic: "Hot or not in real life", unscored: true,
       title: "Set the thermometer",
       html: "<p>Have a go at setting the thermometer for [[room]] to the target. Slide until the top of the red line is in the right place.</p>",
+      ez: { html: "<p>Slide the red line to the target.</p>" },
       mount: setWidget,
       report: function(d){ return d && typeof d.v === "number" ? "Set the thermometer to " + fmt(d.v) + (d.hit ? " (on target)." : ".") : ""; } },
 
@@ -392,12 +409,19 @@ function setWidget(el, api){
       slips: { 1: "A fridge is about 4" + DEG + ". 40 is ten times that.", 2: "A room is about 20" + DEG + ". 40 is double." },
       hint: "Compare 40 with the temperatures worth knowing.",
       why: "40" + DEG + " is as hot as a warm bath. Very hot for weather.",
+      ez: { q: "Jay says: \"In China, it was 40" + DEG + " one day.\" Hot or not?", hint: "Compare 40 with a room.", why: "<b>Hot</b>. 40" + DEG + " is like a warm bath.", slips: { 1: "A fridge is 4" + DEG + ". 40 is far more.", 2: "A room is 20" + DEG + ". 40 is double." } },
       lv: { spicy: { q: "Jay says: \"When I was in China, it was 40" + DEG + " one day and 28.5" + DEG + " the next.\" How much cooler was the second day?",
         options: ["11.5 degrees cooler", "12.5 degrees cooler", "68.5 degrees cooler", "22.5 degrees cooler"],
         slips: { 1: "Count up from 28.5: +1.5 to 30, then +10 to 40. That is 11.5.", 2: "You added them. Take away, or count up.", 3: "Check the tens: 28.5 to 40 is less than 12." },
         hint: "Count up from 28.5 to 30, then to 40.",
         why: "1.5 + 10 = 11.5 degrees cooler. Still toasty." } } }
   ],
+
+  ez: {
+    blurb: "Read a thermometer. Hotter or colder?",
+    realWorld: { title: "Who reads temperatures?", html: "<p>Chefs, nurses and vets <b>read temperatures</b> every day.</p><p>Time travel? Check the thermometer before you jump!</p>" },
+    make: { intro: "Pick a place and a temperature. Hot or not?", fields: [{}, { label: "Temperature, 0 to 50" }] }
+  },
 
   realWorld: {
     title: "Who reads temperatures for real?",

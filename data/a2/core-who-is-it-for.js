@@ -21,7 +21,7 @@ function task(h){ return '<div class="a2task">' + h + '</div>'; }
    slips. Version 1 is the base; the rest become vary, each with every level written out. */
 function res(v, L, vi){
   var o = {};
-  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0) o[k] = v[k]; });
+  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0 && k !== "ez") o[k] = v[k]; });
   if(v[L]) ext(o, v[L]);
   if(o.o){
     var right = o.o[0], rest = o.o.slice(1), t = vi % o.o.length, opts = rest.slice(), sl = {};
@@ -39,7 +39,15 @@ function Q(type, topic, flags, vers){
   var step = ext(ext({ type: type, topic: topic }, flags || {}), R[0][START]);
   step.lv = others(R[0]);
   if(R.length > 1) step.vary = R.slice(1).map(function(r){ return ext(ext({}, r[START]), { lv: others(r) }); });
+  /* easy read (LC): a version's ez goes on the first level only. Its s becomes slips, moved round just as res() moves them. */
+  vers.forEach(function(v, vi){ var e = ezOf(v, vi); if(e){ if(vi) step.vary[vi - 1].ez = e; else step.ez = e; } });
   return step;
+}
+function ezOf(v, vi){
+  if(!v.ez) return null;
+  var e = ext({}, v.ez), oo = (v[START] && v[START].o) || v.o;
+  if(e.s && oo){ var t = vi % oo.length, sl = {}; e.s.forEach(function(m, j){ if(m) sl[j < t ? j : j + 1] = m; }); e.slips = sl; delete e.s; }
+  return e;
 }
 
 /* ---------- pictures ---------- */
@@ -128,6 +136,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     /* ---------- chunk 1: formal and informal ---------- */
     { type: "learn", topic: "Dress it up or down", title: "Words can be dressed up or down",
       fig: WARDROBE,
+      ez: { title: "Dressed up or down", html: "<p><b>Informal</b> is chatty, for friends. Hiya! Cheers!</p><p><b>Formal</b> is polite, for a boss. Dear Mrs Shah.</p>" },
       html: "<p>You would not wear the same clothes to the beach and to a wedding. Words are the same.</p>" +
         "<p><b>Informal</b> words are chatty, like trainers: <b>Hiya! Cheers!</b> They are for friends and family.</p>" +
         "<p><b>Formal</b> words are dressed up, like a bow tie: <b>Dear Mrs Shah, thank you very much.</b> They are for people you do not know well, like a boss.</p>",
@@ -143,6 +152,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Sort them. Dressed up (formal) or chatty (informal)?",
         buckets: ["Formal", "Informal"],
         cards: [["Dear Mr Khan,", 0], ["Thank you very much.", 0], ["Hiya!", 1], ["Cheers mate!", 1]],
+        ez: { q: "Sort them. Formal or chatty?", hint: "Best mate, or head teacher?", why: "Dear and thank you are formal. Hiya and cheers are chatty." },
         hint: "Would you say it to your best mate, or to a head teacher?",
         why: "Dear and thank you very much are dressed up. Hiya and cheers are chatty.",
         medium: { cards: [["Dear Mr Khan,", 0], ["Thank you very much.", 0], ["I am looking forward to it.", 0], ["Hiya!", 1], ["Cheers mate!", 1], ["Can't wait!!", 1]],
@@ -152,6 +162,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Sort them. Dressed up (formal) or chatty (informal)?",
         buckets: ["Formal", "Informal"],
         cards: [["Good morning.", 0], ["Yours sincerely,", 0], ["Yo!", 1], ["See ya!", 1]],
+        ez: { q: "Sort them. Formal or chatty?", hint: "Which goes in a letter?", why: "Good morning is formal. Yo is chatty." },
         hint: "Which would you put in a letter to a stranger?",
         why: "Good morning and Yours sincerely are dressed up. Yo and see ya are chatty.",
         medium: { cards: [["Good morning.", 0], ["Yours sincerely,", 0], ["Could I ask a question?", 0], ["Yo!", 1], ["See ya!", 1], ["Gonna be late, soz", 1]],
@@ -161,6 +172,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Sort them. Dressed up (formal) or chatty (informal)?",
         buckets: ["Formal", "Informal"],
         cards: [["Kind regards,", 0], ["I am sorry I was late.", 0], ["Soz!", 1], ["That's well good!", 1]],
+        ez: { q: "Sort them. Formal or chatty?", hint: "Which would you send a boss?", why: "Kind regards is formal. Soz is chatty." },
         hint: "Which would you send to a boss?",
         why: "Kind regards and I am sorry are dressed up. Soz and well good are chatty.",
         medium: { cards: [["Kind regards,", 0], ["I am sorry I was late.", 0], ["Thank you for your help.", 0], ["Soz!", 1], ["That's well good!", 1], ["Laters!", 1]],
@@ -173,6 +185,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which would you say to [[boss]], who you have just met?",
         o: ["Good morning. Could I ask you a question?", "Oi! Got a sec?", "Yo, wassup?"],
         s: ["Oi sounds rude to someone you have just met.", "Fine with a mate, but too chatty for a boss."],
+        ez: { q: "You just met [[boss]]. What do you say?", s: ["Oi sounds rude here.", "Too chatty for a boss."], why: "A new boss gets polite words." },
         hint: "Dressed up or dressed down?",
         why: "A boss you have just met gets polite, dressed up words.",
         spicy: { o: ["Excuse me, would you have a moment to answer a question?", "Got a minute? Need to ask you something.", "Hello mate, quick question!"],
@@ -180,6 +193,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which would you text to your best friend?",
         o: ["See you at 4!", "I look forward to meeting you at 4pm.", "Dear friend, I confirm our meeting."],
         s: ["Correct English, but it sounds odd to a best friend. Too dressed up.", "Your friend might think you have been taken over by a robot."],
+        ez: { q: "Which would you text your best friend?", s: ["Too dressed up for a friend.", "Your friend might think you are a robot."], why: "Short and chatty suits a friend." },
         hint: "Friends get chatty words.",
         why: "Short and chatty is perfect for a best friend.",
         spicy: { o: ["Still on for 4? Can't wait!", "I would be grateful if you could confirm 4pm.", "Please be advised that I will arrive at 4pm."],
@@ -187,6 +201,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which would you say to a friend's mum, who you do not know well?",
         o: ["Thank you for having me over.", "Ta for the grub!", "Cheers, love it!"],
         s: ["Grub is slang. A bit too chatty for someone you do not know well.", "Friendly, but chatty. A little more polite fits better here."],
+        ez: { q: "Which would you say to a friend's mum?", s: ["Grub is slang. A bit too chatty.", "Friendly, but a bit too chatty."], hint: "Be a bit more polite.", why: "Polite and friendly is just right." },
         hint: "Someone you do not know well gets a bit more polite.",
         why: "Polite and friendly: just right for someone you do not know well.",
         spicy: { o: ["Thank you so much for having me, it was lovely.", "I wish to express my gratitude for your hospitality.", "Cheers for that, it was class."],
@@ -197,18 +212,21 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     Q("match", "Dress it up or down", null, [
       { q: "Match each reader to the greeting that fits.",
         pairs: [["Your best friend", "Hiya!"], ["A head teacher you have never met", "Dear Mrs Shah,"], ["A little kid", "Hello there!"]],
+        ez: { q: "Match each reader to a greeting.", hint: "Who gets the most dressed up one?", why: "Each reader gets a greeting that fits." },
         hint: "Which reader gets the most dressed up greeting?",
         why: "Chatty for a friend, dressed up for a head teacher, warm and simple for a little kid.",
         medium: { pairs: [["Your best friend", "Hiya!"], ["A head teacher you have never met", "Dear Mrs Shah,"], ["A little kid", "Hello there!"], ["A company, name unknown", "Dear Sir or Madam,"]] },
         spicy: { pairs: [["Your best friend", "Hiya!"], ["A coach you know well", "Hi Coach,"], ["A head teacher you have never met", "Dear Mrs Shah,"], ["A company, name unknown", "Dear Sir or Madam,"], ["A whole room of people at an event", "Good evening, everyone."]] } },
       { q: "Match each reader to the sign off that fits.",
         pairs: [["Your best friend", "See ya!"], ["[[Boss]]", "Kind regards,"], ["A little kid", "Have fun!"]],
+        ez: { q: "Match each reader to a sign off.", hint: "Who gets the most dressed up one?", why: "Each reader gets a sign off that fits." },
         hint: "Which reader gets the most dressed up sign off?",
         why: "Chatty for a friend, dressed up for a boss, warm and simple for a little kid.",
         medium: { pairs: [["Your best friend", "See ya!"], ["[[Boss]]", "Kind regards,"], ["A little kid", "Have fun!"], ["Your gran", "Lots of love,"]] },
         spicy: { pairs: [["Your best friend", "See ya!"], ["A teacher you know well", "Thanks,"], ["[[Boss]]", "Kind regards,"], ["A company, name unknown", "Yours faithfully,"], ["A named stranger", "Yours sincerely,"]] } },
       { q: "Match each reader to the best way to say thank you.",
         pairs: [["Your best friend", "Cheers!"], ["[[Boss]]", "Thank you for your time."], ["A little kid", "You are a superstar!"]],
+        ez: { q: "Match each reader to a thank you.", hint: "What would a boss expect?", why: "Each reader gets words that fit." },
         hint: "Which one sounds like a boss would expect?",
         why: "Each reader gets words that fit them.",
         medium: { pairs: [["Your best friend", "Cheers!"], ["[[Boss]]", "Thank you for your time."], ["A little kid", "You are a superstar!"], ["A friend's parent", "Thank you so much for having me."]] },
@@ -218,18 +236,21 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     Q("order", "Dress it up or down", null, [
       { q: "Put these greetings in order, from the most chatty to the most dressed up.",
         items: ["Yo!", "Hello.", "Dear Sir or Madam,"],
+        ez: { q: "Put them in order. Most chatty first.", hint: "Which is only for a letter?", why: "Yo is most chatty. Dear Sir or Madam is most dressed up." },
         hint: "Which one would you only use in a formal letter?",
         why: "Yo is the most chatty, Dear Sir or Madam is the most dressed up.",
         medium: { items: ["Yo!", "Hiya!", "Good morning.", "Dear Sir or Madam,"] },
         spicy: { items: ["Oi oi!", "Hiya!", "Hello.", "Good morning.", "Dear Sir or Madam,"] } },
       { q: "Put these in order, from the most chatty to the most dressed up.",
         items: ["Ta!", "Thanks.", "Thank you very much."],
+        ez: { q: "Put them in order. Most chatty first.", hint: "Which has the most careful words?", why: "Ta is most chatty. Thank you very much is most dressed up." },
         hint: "Which uses the most full, careful words?",
         why: "Ta is the most chatty, thank you very much is the most dressed up.",
         medium: { items: ["Ta!", "Cheers.", "Thanks very much.", "Thank you for your help."] },
         spicy: { items: ["Ta!", "Cheers.", "Thanks very much.", "Thank you for your help.", "I am extremely grateful for your assistance."] } },
       { q: "Put these in order, from the most chatty to the most dressed up.",
         items: ["Soz!", "Sorry.", "I am very sorry."],
+        ez: { q: "Put them in order. Most chatty first.", hint: "Which has the most careful words?", why: "Soz is most chatty. I am very sorry is most dressed up." },
         hint: "Which uses the most full, careful words?",
         why: "Soz is the most chatty, I am very sorry is the most dressed up.",
         medium: { items: ["Soz!", "Sorry!", "I am sorry.", "I apologise."] },
@@ -239,6 +260,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     /* ---------- chunk 2: who is reading? ---------- */
     { type: "learn", topic: "Who is reading?", title: "Think about the reader",
       fig: READERS,
+      ez: { title: "Who is reading?", html: "<p>Ask: <b>who is reading?</b></p><p>Friend: chatty. Boss: polite. Kid: simple and fun. Advert: exciting.</p>" },
       html: "<p>Before you write, ask: <b>who is going to read this?</b></p>" +
         "<p>A <b>friend</b> gets chatty words. A <b>boss</b> gets polite words. A <b>little kid</b> gets short, simple, fun words. An <b>advert</b> uses exciting words to get people to buy.</p>",
       lv: {
@@ -253,6 +275,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which sentence is written for a <b>little kid</b>?",
         o: ["Brush your teeth so they stay shiny and strong!", "Dental hygiene is essential for long term health.", "Brush ur teeth innit"],
         s: ["Long, hard words. Great for adults, too tricky for a little kid.", "That is how teenagers text, not how you talk to a little kid."],
+        ez: { q: "Which one is for a <b>little kid</b>?", s: ["Too many hard words for a kid.", "That is how teens text."], why: "Short, simple and fun." },
         hint: "Short, simple, fun.",
         why: "Short, simple words, and fun (shiny and strong!).",
         spicy: { q: "A leaflet about teeth is for <b>6 year olds</b>. Which sentence fits best?",
@@ -262,6 +285,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which sentence is written for a <b>boss</b>?",
         o: ["I am sorry, but I cannot work on Monday.", "Can't do Monday, soz!", "Monday is a NO from me lol"],
         s: ["Short forms and soz are chatty.", "Lol and capitals are for friends."],
+        ez: { q: "Which one is for a <b>boss</b>?", s: ["Soz is chatty.", "Lol is for friends."], hint: "Polite, full words.", why: "Full words, and it says sorry." },
         hint: "Polite and full words.",
         why: "Full words (I am, cannot) and polite (I am sorry).",
         spicy: { q: "You need to tell [[boss]] you cannot work on Monday. Which is best?",
@@ -271,6 +295,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which sentence is from an <b>advert</b>?",
         o: ["Hungry? Grab a hot pizza for just 3 pounds!", "Pizza is a food made from dough.", "Dear Sir, I am writing about a pizza."],
         s: ["That is a fact, like an information book. It does not try to sell you anything.", "That is the start of a formal letter."],
+        ez: { q: "Which one is from an <b>advert</b>?", s: ["That is just a fact.", "That starts a formal letter."], why: "It hooks you and gives a deal." },
         hint: "Adverts want you to buy.",
         why: "A question to hook you, talking to you, and a deal. That is an advert.",
         spicy: { q: "Which line would persuade a busy parent most?",
@@ -283,6 +308,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Who is each message for? Sort them.",
         buckets: ["A friend", "A boss"],
         cards: [["Fancy the park later?", 0], ["LOL that was so funny", 0], ["Thank you for the job offer.", 1], ["Could I leave early on Friday?", 1]],
+        ez: { q: "Who is each one for? Sort them.", why: "Chatty for a friend. Polite for a boss." },
         hint: "Chatty for a friend, polite for a boss.",
         why: "Chatty messages for a friend, polite ones for a boss.",
         medium: { buckets: ["A friend", "A boss", "A little kid"],
@@ -294,6 +320,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Who is each message for? Sort them.",
         buckets: ["A friend", "A boss"],
         cards: [["Omg guess what!!", 0], ["Ur coming tonight yeah?", 0], ["I have attached my form.", 1], ["I look forward to starting on Monday.", 1]],
+        ez: { q: "Who is each one for? Sort them.", why: "Chatty for a friend. Polite for a boss." },
         hint: "Chatty for a friend, polite for a boss.",
         why: "Chatty for a friend, polite for a boss.",
         medium: { buckets: ["A friend", "A boss", "A little kid"],
@@ -304,6 +331,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Who is each message for? Sort them.",
         buckets: ["A friend", "A boss"],
         cards: [["That film was class!", 0], ["See ya at mine", 0], ["Thank you for your time today.", 1], ["I am sorry I was late this morning.", 1]],
+        ez: { q: "Who is each one for? Sort them.", why: "Chatty for a friend. Polite for a boss." },
         hint: "Chatty for a friend, polite for a boss.",
         why: "Chatty for a friend, polite for a boss.",
         medium: { buckets: ["A friend", "A boss", "A little kid"],
@@ -317,6 +345,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "What is this text trying to do?" + task("Come to our cake sale! Friday, 3pm. Every cake only 50p!"),
         o: ["Get you to come and buy", "Tell you how to bake a cake", "Tell a friend some news"],
         s: ["There are no steps to follow.", "It is written for everyone, not one friend."],
+        ez: { q: "What does this text want?" + task("Come to our cake sale! Friday, 3pm. Every cake only 50p!"), s: ["There are no steps.", "It is for everyone, not one friend."], why: "It wants you to come and buy." },
         hint: "What does it want you to do?",
         why: "It wants you to come and spend money: it is persuading.",
         medium: { o: ["To persuade", "To instruct", "To inform"], s: ["Instructions tell you how to do something step by step.", "It does give facts, but its main job is to get you there."] },
@@ -326,6 +355,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "What is this text trying to do?" + task("1. Fill the kettle. 2. Switch it on. 3. Wait for it to boil."),
         o: ["Tell you how to do something", "Get you to buy a kettle", "Tell a friend some news"],
         s: ["It does not try to sell anything.", "It is just steps, not news."],
+        ez: { q: "What does this text want?" + task("1. Fill the kettle. 2. Switch it on. 3. Wait for it to boil."), s: ["It does not sell anything.", "It is steps, not news."], why: "Numbered steps show you how." },
         hint: "Look at the numbers.",
         why: "Numbered steps tell you how to do something: it is instructing.",
         medium: { o: ["To instruct", "To persuade", "To entertain"], s: ["It does not try to get you to buy or do anything except boil water.", "Not much of a story."] },
@@ -335,6 +365,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "What is this text trying to do?" + task("Guess what! Bonnie got a new ball and she has already chewed it. Ha!"),
         o: ["Tell a friend some news", "Get you to buy a ball", "Tell you how to train a dog"],
         s: ["It does not try to sell anything.", "There are no steps or tips."],
+        ez: { q: "What does this text want?" + task("Guess what! Bonnie got a new ball and she has already chewed it. Ha!"), s: ["It does not sell anything.", "There are no steps."], why: "Chatty news for a friend." },
         hint: "Who might send this?",
         why: "Chatty news for a friend.",
         medium: { o: ["To share news and entertain a friend", "To persuade", "To instruct"], s: ["Nothing is being sold.", "There are no steps."] },
@@ -346,6 +377,9 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     /* ---------- chunk 3: swap the words (worked example, then fade) ---------- */
     { type: "learn", topic: "Swap the words", title: "Watch a message get dressed up",
       fig: SWAP,
+      ez: { title: "Dress up a message", html: "<p>Dress it up for Mr Khan.</p>" + task("Hiya, I'm gonna be late Saturday. Loads of traffic. Cheers!") +
+        "<p>Hiya becomes <b>Dear Mr Khan</b>. Gonna becomes <b>going to</b>.</p>" +
+        task("Dear Mr Khan,<br>I am going to be late on Saturday, because there is a lot of traffic. Thank you for understanding.<br>Kind regards, Jay") },
       html: "<p>Here is a chatty message. It needs to go to Mr Khan, the club manager:</p>" +
         task("Hiya, I'm gonna be late Saturday. Loads of traffic. Cheers!") +
         "<p><b>1. Greeting:</b> Hiya becomes <b>Dear Mr Khan,</b></p>" +
@@ -362,18 +396,21 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     Q("match", "Swap the words", null, [
       { q: "<b>Step 1 is done.</b> Step 2: match each chatty word to its dressed up version.",
         pairs: [["gonna", "going to"], ["ta", "thank you"], ["loads", "a lot"]],
+        ez: { q: "Match each chatty word to its dressed up word.", hint: "Say them out loud." },
         hint: "Say them out loud. Which ones mean the same?",
         why: "Same meaning, dressed up.",
         medium: { pairs: [["gonna", "going to"], ["ta", "thank you"], ["loads", "a lot"], ["can't", "cannot"], ["yeah", "yes"]] },
         spicy: { pairs: [["gonna", "going to"], ["loads", "a great deal"], ["get", "receive"], ["ask for", "request"], ["say sorry", "apologise"], ["help", "assistance"]] } },
       { q: "<b>Step 1 is done.</b> Step 2: match each chatty word to its dressed up version.",
         pairs: [["wanna", "want to"], ["soz", "sorry"], ["yeah", "yes"]],
+        ez: { q: "Match each chatty word to its dressed up word.", hint: "Say them out loud." },
         hint: "Say them out loud. Which ones mean the same?",
         why: "Same meaning, dressed up.",
         medium: { pairs: [["wanna", "want to"], ["soz", "sorry"], ["yeah", "yes"], ["I'm", "I am"], ["kids", "children"]] },
         spicy: { pairs: [["wanna", "would like to"], ["find out", "discover"], ["tell", "inform"], ["need", "require"], ["start", "commence"], ["enough", "sufficient"]] } },
       { q: "<b>Step 1 is done.</b> Step 2: match each chatty word to its dressed up version.",
         pairs: [["gotta", "have to"], ["cheers", "thank you"], ["mate", "Mr Khan"]],
+        ez: { q: "Match each chatty word to its dressed up word.", hint: "Say them out loud." },
         hint: "Say them out loud. Which ones mean the same?",
         why: "Same meaning, dressed up.",
         medium: { pairs: [["gotta", "have to"], ["cheers", "thank you"], ["don't", "do not"], ["telly", "television"], ["loads of", "many"]] },
@@ -383,6 +420,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     Q("mc", "Swap the words", { explain: true }, [
       { q: "<b>Steps 1 and 2.</b> Which is the best dressed up version of this, for [[boss]]?" + task("Can't come Monday, soz."),
         o: ["I am sorry, but I cannot come on Monday.", "Can't come Monday, soz.", "Soz mate, Monday's a no."],
+        ez: { q: "Dress this up for [[boss]]. Which is best?" + task("Can't come Monday, soz."), s: ["That is the chatty one.", "Even more chatty."], why: "Can't becomes cannot. Soz becomes sorry." },
         s: ["That is the chatty one, unchanged.", "Even more chatty than before."],
         hint: "Full words, polite.",
         why: "Can't becomes cannot, soz becomes I am sorry, and it is a full sentence.",
@@ -390,6 +428,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
           s: ["Better, but can't is still a short form and on is missing.", "Soz is still chatty, and the first sentence sounds blunt."] } },
       { q: "<b>Steps 1 and 2.</b> Which is the best dressed up version of this, for [[boss]]?" + task("Ta for the job, gonna be well good!"),
         o: ["Thank you for the job. I am looking forward to it.", "Ta for the job, gonna be well good!", "Ta. Gonna be good."],
+        ez: { q: "Dress this up for [[boss]]. Which is best?" + task("Ta for the job, gonna be well good!"), s: ["That is the chatty one.", "Shorter, but still chatty."], why: "Ta becomes thank you." },
         s: ["That is the chatty one, unchanged.", "Shorter, but still chatty."],
         hint: "Swap ta, gonna and well good.",
         why: "Ta becomes thank you, gonna be well good becomes I am looking forward to it.",
@@ -397,6 +436,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
           s: ["Friendly, but thanks, I'm and the exclamation mark keep it informal.", "Formal, but cold. It sounds like a robot."] } },
       { q: "<b>Steps 1 and 2.</b> Which is the best dressed up version of this, for [[boss]]?" + task("Wanna ask summat about Friday."),
         o: ["Could I ask you something about Friday?", "Wanna ask summat about Friday.", "Oi, Friday, question."],
+        ez: { q: "Dress this up for [[boss]]. Which is best?" + task("Wanna ask summat about Friday."), s: ["That is the chatty one.", "Even more chatty."], why: "It is a polite question now." },
         s: ["That is the chatty one, unchanged.", "Even more chatty, and a bit rude."],
         hint: "Make it a polite question.",
         why: "Wanna ask summat becomes Could I ask you something: polite and full.",
@@ -409,6 +449,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
         need: [["dear", "hello", "good morning", "good afternoon"], ["thank you", "grateful", "appreciate"]],
         model: "Dear Mr Khan, thank you for the job.",
         slips: [[["hiya", "cheers", "ta ", "thanks loads", "soz"], "That still has a chatty word in it. Try swapping it for the dressed up version."]],
+        ez: { q: "Dress this up for [[boss]]:" + task("Hiya, cheers for the job!"), slips: [[["hiya", "cheers", "ta ", "thanks loads", "soz"], "There is still a chatty word. Swap it."]], hint: "Swap Hiya and cheers.", why: "Like this: <b>Dear Mr Khan, thank you for the job.</b>" },
         hint: "Swap Hiya for a dressed up greeting, and cheers for thank you.",
         why: "Something like <b>Dear Mr Khan, thank you for the job.</b>",
         spicy: { q: "<b>All three steps, on your own.</b> Dress this up for [[boss]], as one or two full sentences:" + task("Hiya, cheers for the job, can't wait!"),
@@ -420,6 +461,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
         need: [["sorry", "apologise", "apologies"], ["going to", "will be", "late"]],
         model: "I am sorry, but I am going to be late.",
         slips: [[["soz", "gonna", "wanna"], "That still has a chatty word in it."]],
+        ez: { q: "Dress this up for [[boss]]:" + task("Soz, gonna be late."), slips: [[["soz", "gonna", "wanna"], "There is still a chatty word."]], why: "Like this: <b>I am sorry, but I am going to be late.</b>" },
         hint: "Swap soz and gonna.",
         why: "Something like <b>I am sorry, but I am going to be late.</b>",
         spicy: { q: "<b>All three steps, on your own.</b> Dress this up for [[boss]], as one or two full sentences:" + task("Soz, gonna be late, bus is rubbish."),
@@ -432,6 +474,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
         need: [["could", "may", "would", "please", "possible"], ["friday"]],
         model: "Please could I have Friday off? Thank you.",
         slips: [[["ta", "cheers", "soz"], "That still has a chatty word in it."]],
+        ez: { q: "Dress this up for [[boss]]:" + task("Can I have Friday off? Ta."), slips: [[["ta", "cheers", "soz"], "There is still a chatty word."]], hint: "Ask politely. Swap ta.", why: "Like this: <b>Please could I have Friday off? Thank you.</b>" },
         hint: "Make the question polite, and swap ta.",
         why: "Something like <b>Please could I have Friday off? Thank you.</b>",
         spicy: { q: "<b>All three steps, on your own.</b> Dress this up for [[boss]], as one or two full sentences:" + task("Can I have Friday off? Got a thing. Ta."),
@@ -445,6 +488,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
     /* ---------- chunk 4: adverts ---------- */
     { type: "learn", topic: "Adverts", title: "How adverts talk to you",
       fig: ADVERT,
+      ez: { title: "Advert tricks", html: "<p>An <b>advert</b> wants you to buy.</p><p>A question. Exciting words. A deal. Act now!</p>" },
       html: "<p>An <b>advert</b> wants you to buy something or do something. So it uses tricks.</p>" +
         "<p>It asks a <b>question</b> to hook you. It talks to <b>you</b>. It uses <b>exciting words</b> like amazing. It gives you a <b>deal</b>. It tells you to <b>act now</b>.</p>",
       lv: {
@@ -460,6 +504,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
         options: ["A question to hook you", "Exciting words like amazing", "Telling you to act now", "Long formal sentences"],
         answers: [0, 1, 2],
         slips: { any: "Three tricks are there. Adverts keep sentences short and chatty." },
+        ez: { q: "Pick <b>all</b> the tricks." + task("Bored this weekend? Try our amazing [[ad]]! Book now!"), slips: { any: "3 tricks. Adverts keep it short." }, hint: "Look at the start, middle and end.", why: "A question, an exciting word, act now." },
         hint: "Look at the start, the middle and the end.",
         why: "A question, an exciting word, and act now. Adverts keep it short.",
         medium: { options: ["A question to hook you", "Exciting words like amazing", "Telling you to act now", "Talking to you", "Long formal sentences", "Dear Sir or Madam"], answers: [0, 1, 2, 3],
@@ -471,6 +516,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
         options: ["A question to hook you", "Exciting words like brilliant", "A deal", "Numbered steps"],
         answers: [0, 1, 2],
         slips: { any: "Three tricks are there. Numbered steps are for instructions." },
+        ez: { q: "Pick <b>all</b> the tricks." + task("Want to have the best summer ever? Our [[ad]] are brilliant. Only 5 pounds!"), slips: { any: "3 tricks. Steps are for instructions." }, why: "A question, brilliant, and a deal." },
         hint: "Question, exciting word, deal.",
         why: "A question, brilliant, and a cheap price.",
         medium: { options: ["A question to hook you", "Exciting words like brilliant", "A deal", "Talking to you", "Numbered steps", "Yours sincerely"], answers: [0, 1, 2, 3],
@@ -482,6 +528,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
         options: ["Talking to you", "A question to hook you", "Exciting words like amazing", "A formal greeting"],
         answers: [0, 1, 2],
         slips: { any: "Three tricks. Hey you is not a formal greeting!" },
+        ez: { q: "Pick <b>all</b> the tricks." + task("Hey you! Love birds? Join Jay's AMAZING bird walk today!"), slips: { any: "3 tricks. Hey you is not formal!" }, why: "Hey you, a question, and AMAZING." },
         hint: "Who is it talking to?",
         why: "Hey you, a question, and AMAZING. Jay's walks are, in fairness.",
         medium: { options: ["Talking to you", "A question to hook you", "Exciting words like amazing", "Telling you to act now", "A formal greeting", "Numbered steps"], answers: [0, 1, 2, 3],
@@ -495,6 +542,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which is the best advert line for [[ad]]?",
         o: ["Try [[ad]] today. You will love them!", "[[Ad]] are an activity.", "Dear Sir or Madam, here is information about [[ad]]."],
         s: ["True, but it does not make anyone want to try them.", "That is a formal letter, not an advert."],
+        ez: { s: ["True, but not exciting.", "That is a letter, not an advert."], why: "It talks to you. It sounds fun." },
         hint: "Which one makes you want to try?",
         why: "It talks to you and makes it sound fun.",
         spicy: { o: ["Ready for something new? Book [[ad]] today: places are going fast!", "[[Ad]] are available on weekdays.", "Please contact us if you require [[ad]]."],
@@ -502,6 +550,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which is the best advert line for a cafe?",
         o: ["Fancy a treat? Our hot chocolate is the best in town!", "The cafe sells drinks.", "Hot chocolate is made with milk."],
         s: ["True, but nobody will rush in.", "A fact, not a reason to come."],
+        ez: { q: "Which is the best advert for a cafe?", why: "A question hook, then a big claim." },
         hint: "Which one makes you want to go?",
         why: "A question hook, and an exciting claim.",
         spicy: { o: ["Cold outside? Warm up with the creamiest hot chocolate in town. You deserve it.", "Our cafe is open from 9 until 5.", "We would like to inform you that we sell drinks."],
@@ -509,6 +558,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       { q: "Which is the best advert line for a dog walking service?",
         o: ["Busy day? We will walk your dog and make them happy!", "We walk dogs.", "Dogs need walks."],
         s: ["True, but flat.", "A fact, not an advert."],
+        ez: { q: "Which is the best advert for dog walking?", hint: "Which one talks to the owner?", why: "A question, and a happy dog. Bonnie approves." },
         hint: "Which one speaks to the owner?",
         why: "It hooks the reader with a question and promises a happy dog. Bonnie approves.",
         spicy: { o: ["Stuck at work? Your dog deserves a happy, healthy, adventure filled walk. Book today!", "Dog walking: 10 pounds per hour.", "We are a company that offers dog walking."],
@@ -520,6 +570,7 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       starters: ["To my friend:", "To the boss: Dear", "Thank you for", "Soz, I'm"],
       checklist: ["The friend one is chatty", "The boss one is polite, with full words"],
       minWords: 15,
+      ez: { q: "If you like: write one message twice. To a friend, then to [[boss]]." },
       lv: { medium: { q: "Only if you fancy it: write a short advert for [[ad]], then a polite message to [[boss]] asking to be a [[job]].", minWords: 35,
           checklist: ["The advert has a question hook and talks to you", "The advert tells you to act now", "The message is polite, with full words and a sign off"] },
         spicy: { q: "Only if you fancy it: write a short advert for [[ad]] aimed at teenagers, then rewrite it for their parents. Change the words, not just the facts.", minWords: 60,
@@ -532,6 +583,11 @@ var ADVERT = '<svg viewBox="0 0 540 250" role="img" aria-label="An advert with i
       "<p>For our big question, if we could time travel, should we? Imagine landing in 1850 and saying \"Hiya, that's well good!\". Nobody would understand you. You would need your most dressed up words of all.</p>",
     fig: '<svg viewBox="0 0 440 150" role="img" aria-label="Jay coming out of the time portal saying Good day to you">' + A.portal(74, 76, 54) +
       A.jay(206, 54, 0.8, "hmm") + A.bubble(260, 12, 164, 52, "Hiya! I mean...\ngood day to you.", 270) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Where you use this", html: "<p>You talk one way to mates. Another way at a job interview.</p><p>Time travel to 1850? \"Hiya!\" would confuse people.</p>" },
+    make: { intro: "One message, dressed down and dressed up." }
   },
 
   make: {

@@ -198,6 +198,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Hours and minutes", title: "60, not 100",
       fig: CLOCK,
+      ez: { title: "60 minutes", html: "<p><b>60 minutes</b> in an hour.</p><p>100 minutes is 60 + 40. So <b>1 h 40 min</b>.</p>" },
       html: "<p>Time does not work in hundreds. There are <b>60 minutes in an hour</b>.</p>" +
         "<p>Minutes to hours: take away 60s. 140 minutes is 60 + 60 + 20, so <b>2 h 20 min</b>.</p>" +
         "<p>Hours to minutes: times by 60, then add the extra minutes. 2 h 15 min is 120 + 15 = <b>135 minutes</b>.</p>" +
@@ -214,6 +215,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Hours", a: 2 }, { label: "Minutes", a: 20 }],
       slips: [[1, 40, "That treats an hour as 100 minutes. An hour is 60 minutes."], [0, 1, "Two lots of 60 fit into 140."]],
       hint: "60 + 60 = 120. How many minutes are left over?",
+      ez: { q: "A bus ride is 100 minutes. How many hours and minutes?", hint: "100 take away 60?", slips: [[null, null, "More than 1 hour. Take away 60."], [null, null, "100 minutes is 1 hour and a bit."]] },
       why: "140 = 60 + 60 + 20, so <b>2 h 20 min</b>.",
       lv: {
         mild: { q: "A bus ride takes 100 minutes. How long is that in hours and minutes?",
@@ -232,6 +234,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Minutes", a: 135 }],
       slips: [[215, "Two hours is 120 minutes, not 200."], [75, "Two hours is two lots of 60."], [17, "This one is a times: 2 " + "&#215;" + " 60, then add 15."]],
       hint: "2 " + "&#215;" + " 60, then add 15.",
+      ez: { q: "The walk is 1 hour 20 minutes. How many minutes?", slips: [null, [null, "1 hour is 60. Add the 20."]] },
       why: "2 " + "&#215;" + " 60 = 120, and 120 + 15 = <b>135 minutes</b>.",
       lv: {
         mild: { q: "The walk takes 1 hour 20 minutes. How many minutes is that?",
@@ -249,6 +252,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       q: "Match the 24 hour times to the 12 hour times.",
       pairs: [["14:30", "2:30 pm"], ["09:15", "9:15 am"], ["21:45", "9:45 pm"], ["00:20", "12:20 am"]],
       hint: "For afternoon and evening, take 12 away from the hour.",
+      ez: { q: "Match the times that are the same.", why: "Half is 30. A quarter is 15. Three quarters is 45." },
       why: "14 take away 12 is 2, so 14:30 is 2:30 pm. 21:45 is 9:45 pm. 00:20 is just after midnight.",
       lv: {
         mild: { q: "Match each one to the same amount of time.",
@@ -266,6 +270,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       answer: 0,
       slips: { 1: "0.5 of an hour is half an hour, which is 30 minutes, not 50.", 2: "1.5 hours is 90 minutes. 150 treats an hour as 100 minutes.", 3: "0.5 is a half, not 5 minutes." },
       hint: "0.5 is a half. What is half an hour?",
+      ez: { slips: { 1: "An hour is 60. Half is 30." } },
       why: "1.5 hours is 1 hour and a half: <b>1 h 30 min</b>.",
       lv: {
         mild: { q: "How many minutes are in half an hour?", options: ["30", "50", "60"],
@@ -280,6 +285,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "How long does it take?", title: "Count on in hops",
       fig: hops(["10:45", "11:00", "12:00", "12:20"], ["15 min", "1 hour", "20 min"], "1 hour 35 minutes"),
+      ez: { html: "<p>Count on in <b>hops</b>.</p><p>20 minutes + 15 minutes = <b>35 minutes</b>.</p>" },
       html: "<p>To find how long a journey takes, <b>count on in hops</b>: to the next o'clock, then whole hours, then the minutes left.</p>" +
         "<p>10:45 to 12:20: 15 minutes to 11:00, 1 hour to 12:00, then 20 minutes. Total <b>1 hour 35 minutes</b>.</p>" +
         "<p>Do not take away times like normal numbers: 1220 take away 1045 gives 175, but there is no such thing as 75 minutes past the hour.</p>",
@@ -297,6 +303,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "09:35 to 10:00", a: 25, post: "min" }, { label: "10:00 to 11:00", a: 60, post: "min", alts: [1] }, { label: "11:00 to 11:10", a: 10, post: "min" }, { label: "Total: hours", a: 1 }, { label: "and minutes", a: 35 }],
       slips: [[0, 35, "From 35 minutes past to the next o'clock is 25 minutes, not 35."], [4, 75, "That is 175 take away 100. Count the hops instead."]],
       hint: "From 09:35, how many minutes to 10:00?",
+      ez: { q: "Bus: 2:45 to 3:20. Fill in the hops.", hint: "2:45 to 3:00 is how many minutes?", slips: [[null, null, "2:45 to 3:00 is a quarter of an hour."], [null, null, "Add the hops: 15 + 20."]] },
       why: "25 + 60 + 10 = 95 minutes, which is <b>1 h 35 min</b>.",
       lv: {
         mild: { q: "A bus leaves at 2:45 and arrives at 3:20. Fill in the hops.",
@@ -317,6 +324,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Minutes", a: 56 }],
       slips: [[96, "That is 938 take away 842. Times do not work in hundreds. Count on: 18 minutes to 09:00, then 38 more."], [104, "Count on from 08:42: 18 minutes to 09:00, then 38 minutes to 09:38."]],
       hint: "08:42 to 09:00 is 18 minutes. Then add on to 09:38.",
+      ez: { q: "Bus: 8:05 to 8:30. How many minutes?", hint: "Count on in fives.", slips: [[null, "Count on from 8:05 to 8:30."], [null, "It starts at 8:05, not 8:00."]] },
       why: "18 + 38 = <b>56 minutes</b>.",
       lv: {
         mild: { q: "The bus leaves at 8:05 and gets to the station at 8:30. How many minutes?",
@@ -335,6 +343,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Hour", a: 10 }, { label: "Minutes", a: 45 }],
       slips: [[1, 85, "Count back 15 minutes from 11:00: it goes back into the 10 o'clock hour."], [0, 11, "Going back 15 minutes from 11:00 takes you before 11 o'clock."]],
       hint: "Count back 15 minutes from 11:00.",
+      ez: { q: "[[Start]] is at 4:00. The walk is 20 minutes. When do you leave?", hint: "Count back 20 from 4:00.", slips: [[null, null, "Count back 20 from 4:00. It is 3 something."], [null, null, "Count back 20, not forward."]] },
       why: "15 minutes before 11:00 is <b>10:45</b>.",
       lv: {
         mild: { q: "[[Start]] begins at 4:00. It takes 20 minutes to walk there. What time should you leave?",
@@ -356,6 +365,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       answer: 0,
       slips: { 1: "1220 take away 1045 is 175: he did take away. The trouble is what 175 means.", 2: "The times are fine. Look at how he worked it out." },
       hint: "Can you have 75 minutes past the hour?",
+      ez: { q: "9:50 to 10:10. Jay says 60 minutes. How long is it really?", why: "10 + 10 = <b>20 minutes</b>.", slips: { 1: "Count on. 9:50 to 10:00 is 10.", 2: "Count on. 10 minutes, then 10 more." } },
       why: "Taking away in hundreds does not work for time. Count on in hops: 15 min + 1 hour + 20 min = 1 h 35 min.",
       lv: {
         mild: { q: "Jay says 9:50 to 10:10 is 60 minutes. How long is it really?",
@@ -376,6 +386,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Read the timetable", title: "Read down a column",
       fig: TT24,
+      ez: { title: "Read down", html: "<p>Each <b>column</b> is one bus. Read <b>down</b> it.</p><p>The 8:35 bus gets to the Station at 9:00.</p>" },
       html: "<p>Each <b>row</b> is a stop. Each <b>column</b> is one bus or train. To follow one journey, pick a column and <b>read down</b> it.</p>" +
         "<p>The bus that leaves Millbrook at 08:35 gets to the Town Centre at 08:47 and the Station at 09:00.</p>" +
         "<p>To arrive by a certain time, start at the <b>bottom</b>: find the last arrival that is early enough, then read <b>up</b> to see when it leaves.</p>",
@@ -389,6 +400,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       answer: 1, fixed: true,
       slips: { 0: "That one works, but you would wait at the station for ages. Look for the latest one that still arrives by 09:15.", 2: "That one reaches the Station at 09:30. Too late.", 3: "That one reaches the Station at 10:00. Too late." },
       hint: "Look along the Station row for the last time before 09:15. Then read up.",
+      ez: { q: "Be at the Station by 9:15. What is the latest bus from Millbrook?", hint: "Find the Station row.", slips: { 0: "That works. Is there a later one?", 2: "That gets there at 9:30. Too late.", 3: "That gets there at 10:00. Too late." } },
       why: "The Station row has 09:00, the last one before 09:15. Read up: it leaves Millbrook at <b>08:35</b>.",
       lv: { mild: { q: "You want to be at the Station by 9:15. What is the latest bus from Millbrook you can catch?", fig: TT12,
         options: ["8:05", "8:35", "9:05", "9:35"],
@@ -402,6 +414,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Minutes", a: 25 }],
       slips: [[12, "That is Millbrook to the Town Centre. Keep reading down to the Station."], [13, "That is the Town Centre to the Station. Start from Millbrook."], [65, "Count on: 08:05 to 08:30 is 25 minutes."]],
       hint: "Pick any column. Millbrook 08:05, Station 08:30.",
+      ez: { q: "The 8:35 bus. When is it at the Town Centre?", hint: "Find 8:35. Go down 1.", slips: [[null, null, "That is the 8:05 bus. Find 8:35."], [null, null, "That is the Station. Town Centre is the middle row."]] },
       why: "08:05 to 08:30 is <b>25 minutes</b>, and every bus takes the same.",
       lv: {
         mild: { q: "The 8:35 bus leaves Millbrook. What time does it get to the Town Centre?", fig: TT12,
@@ -421,6 +434,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Minutes", a: 12 }],
       slips: [[42, "The 08:42 train has already gone by 09:00. Look at the 09:12 one."], [88, "That is 912 take away 824. Count on from 09:00 to 09:12."]],
       hint: "Count on from 09:00 to 09:12.",
+      ez: { q: "Buses at 8:05, 8:35 and 9:05. How long between them?", hint: "8:05 to 8:35?", slips: [[null, "Count on from 8:35 to 9:05."], [null, "That is 2 buses apart. Halve it."]] },
       why: "09:00 to 09:12 is <b>12 minutes</b>. Time for a snack.",
       lv: {
         mild: { q: "Buses leave Millbrook at 8:05, 8:35 and 9:05. How long between each bus?", fig: TT12,
@@ -437,12 +451,14 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
     { type: "widget", topic: "Read the timetable", unscored: true,
       title: "Journey planner",
       html: "<p>Have a go at planning the whole journey from Millbrook to [[dest]]. Try a few combinations and see which gets you there in time with the shortest wait.</p>",
+      ez: { html: "<p>Plan the trip to [[dest]]. Try a few. Can you get there on time?</p>" },
       mount: planner,
       report: function(d){ return d && d.last ? "Journey planner: tried " + (d.plans || 1) + " plans. Last one left at " + d.last.leave + " and arrived " + d.last.arrive + (d.last.onTime ? ", on time." : ", late.") : ""; } },
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Budget the trip", title: "What will it cost?",
       fig: FARES,
+      ez: { title: "What will it cost?", html: "<p>100p is " + P + "1. So 350p is <b>" + P + "3.50</b>.</p><p>2 tickets: " + P + "3.50 + " + P + "3.50 = <b>" + P + "7</b>.</p>" },
       html: "<p>Add up every part of the journey. A <b>return</b> ticket (there and back) is often cheaper than two singles: a train return is " + P + "12.60, but two singles are " + P + "16.80.</p>" +
         "<p>Then take the travel away from your <b>budget</b> to see what is left for food and fun.</p>" +
         "<p>Keep pounds and pence straight: 350p is " + P + "3.50, because 100p is " + P + "1.</p>",
@@ -458,6 +474,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Total", a: 16.1, pre: P }],
       slips: [[16.01, "Check the pence: 50p + 60p = 110p, which is " + P + "1.10."], [15.1, "Line up the pence: 3.50 + 12.60. The 50p and 60p make " + P + "1.10."], [10.4, "That is the two singles. The question asks for returns."]],
       hint: P + "3.50 + " + P + "12.60.",
+      ez: { slips: [[null, "Do not forget the 50p each time."], [null, "That is 1 person. 2 people need 2 tickets."]] },
       why: P + "3.50 + " + P + "12.60 = <b>" + P + "16.10</b>.",
       lv: {
         mild: { q: "A bus return is " + P + "3.50. How much for 2 people?",
@@ -476,6 +493,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       boxes: [{ label: "Left", a: 4.15, pre: P }],
       slips: [[5.15, "Check the pence: 16.10 + 4.75 = 20.85, and 25.00 take away 20.85 is 4.15."], [8.9, "That only takes off the travel. Take off lunch as well."], [20.85, "That is what you spend. Take it away from " + P + "25 to see what is left."]],
       hint: "Add up what you spend first, then take it away from " + P + "25.",
+      ez: { q: "You have " + P + "10. Bus " + P + "3.50. Snack " + P + "2.50. How much is left?", slips: [[null, "That is what you spend. Take it from " + P + "10."], [null, "Take off the snack too."]] },
       why: P + "16.10 + " + P + "4.75 = " + P + "20.85. " + P + "25 take away " + P + "20.85 = <b>" + P + "4.15</b>.",
       lv: {
         mild: { q: "You have " + P + "10. The bus is " + P + "3.50 and a snack at [[dest]] is " + P + "2.50. How much is left?",
@@ -496,6 +514,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       answer: 0,
       slips: { 1: "Two singles are 2 " + "&#215;" + " " + P + "8.40 = " + P + "16.80.", 2: "Work out two singles: 2 " + "&#215;" + " " + P + "8.40." },
       hint: "Two singles: 2 " + "&#215;" + " " + P + "8.40.",
+      ez: { slips: { 1: "That is 3500p. 350p is 3 pounds 50.", 2: "That is 35p." } },
       why: "Two singles cost " + P + "16.80, so the return saves " + P + "4.20.",
       lv: {
         mild: { q: "Which is the same as 350p?", fig: null, options: [P + "3.50", P + "35.00", P + "0.35"],
@@ -509,6 +528,10 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
           why: "4 discounted returns: 4 " + "&#215;" + " " + P + "8.40 = <b>" + P + "33.60</b>, cheaper than the " + P + "38 group ticket." } } }
   ],
 
+  ez: {
+    realWorld: { title: "Planning gets you there", html: "<p>Trips, college, a match. Getting there on time is a superpower.</p><p>Long ago, every town had its own time. Trains fixed that!</p>" },
+    make: { intro: "Plan a trip you would like to do." }
+  },
   realWorld: {
     title: "Planning gets you there",
     html: "<p>School trips, a first day at college, a job interview, a gig or a match: getting there on time means reading a timetable, counting on in hours and minutes, and knowing what it will cost. Apps help, but when a train is cancelled, being able to replan yourself is a superpower.</p>" +

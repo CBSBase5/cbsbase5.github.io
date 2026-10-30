@@ -444,6 +444,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
   ],
 
   ez: {
+    blurb: "What things are made of, and why.",
     realWorld: { title: "Ages named after materials", html: "<p>The <b>Stone Age</b>. The <b>Bronze Age</b>. The <b>Iron Age</b>.</p><p>What will they call ours? The Plastic Age?</p>" },
     make: { intro: "Find 5 things. What is each made of?" }
   },

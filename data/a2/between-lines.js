@@ -159,6 +159,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
 
     /* ---------- chunk 1: picture clues ---------- */
     { type: "learn", topic: "Picture clues", title: "Clue + what you know = idea",
+      ez: { title: "Clue + what you know", html: "<p><b>Clue</b> + what you know = <b>idea</b>.</p><p>Wet umbrella. Puddle. So it rained!</p>" },
       fig: RAIN,
       html: "<p>Nobody in this picture says \"it rained\". But the umbrella is dripping, the boots are wet and there is a puddle.</p>" +
         "<p>You already know that rain makes things wet. Put the <b>clue</b> together with <b>what you know</b>, and you get an <b>idea</b>: it has been raining.</p>" +
@@ -179,6 +180,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "Moving house would mean boxes, not a cake with candles.", 2: "Look for clues about the time. Balloons and cake fit a party better than bedtime." },
       hint: "What do candles on a cake usually mean?",
       why: "Cake with candles, balloons and a present: clues that add up to a birthday.",
+      ez: { q: "What is going on here?", hint: "What do candles on a cake mean?", why: "Cake, candles and balloons. It is a birthday.", slips: { 1: "Moving house means boxes, not cake.", 2: "Balloons and cake mean a party." } },
       lv: { spicy: { q: "Nobody is in the picture. What is the best supported idea?",
         fig: HURRY,
         options: ["Someone left in a hurry.", "Someone finished lunch slowly and tidied up.", "Nobody has been here today.", "Someone is about to arrive for lunch."],
@@ -194,6 +196,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "Jay has only just come home. And those are not shoe prints.", 2: "A burglar would leave shoe prints. Look at the shape of the prints." },
       hint: "Look at the shape of the prints, and where they lead.",
       why: "Paw prints lead from the door straight to Bonnie, and there is mud on the sofa. Nobody said it, but the clues do.",
+      ez: { hint: "Look at the shape of the prints.", why: "Paw prints lead to Bonnie. It was Bonnie!", slips: { 1: "Jay just got home. Those are not shoe prints.", 2: "A burglar leaves shoe prints. These are paws." } },
       lv: {
         medium: { q: "Jay comes home and finds this. Which clue best shows it was Bonnie?",
           options: ["The prints are paw shaped and lead to her.", "Bonnie is brown.", "The sofa is blue.", "The door is green."], fixed: false,
@@ -209,6 +212,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       pairs: [["A wet umbrella by the door", "It has been raining"], ["Yawning and rubbing eyes", "Feeling tired"], ["Sand in their shoes", "Been to the beach"], ["An empty plate with crumbs", "Someone has eaten"]],
       hint: "For each clue, ask: what usually causes that?",
       why: "Each clue plus what you know points to one idea.",
+      ez: { q: "Match each clue to its idea.", hint: "What usually causes that?", why: "Each clue points to 1 idea." },
       lv: {
         medium: { pairs: [["Coat dripping, hair flat on their head", "Just came in from the rain"], ["Checks the clock every minute", "Waiting for something"], ["Whistles all the way home", "In a good mood"], ["Answers in one word and looks at the floor", "Upset or fed up"]] },
         spicy: { pairs: [["Hands shaking as they hold the [[thing]]", "Nervous"], ["Laughs a bit too loudly at the joke", "Trying to fit in"], ["Keeps glancing at the exit", "Wants to leave"], ["Says \"fine.\" and nothing else", "Not really fine"], ["Arrives an hour early, in their best clothes", "This matters to them"]],
@@ -216,6 +220,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
 
     /* ---------- chunk 2: clues in sentences ---------- */
     { type: "learn", topic: "Clues in a story", title: "Writers show, they do not tell",
+      ez: { title: "Show, not tell", html: "<p class=\"a2task\">[[Who]] slammed the door.</p><p>It does not say angry. The <b>clue</b> tells you.</p>" },
       fig: SHOW,
       html: "<p>Writers often <b>show</b> a feeling instead of naming it. Read this:</p>" +
         "<p class=\"a2task\">[[Who]] slammed the door, threw the bag down and did not say a word.</p>" +
@@ -235,6 +240,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "Someone bored would not have shaking hands or need a deep breath.", 2: "Sleepy people yawn. Shaking hands and deep breaths suggest something else." },
       hint: "Why might your hands shake before you do something?",
       why: "Shaking hands and a deep breath are clues. They suggest [[who]] is nervous, but brave enough to step forward.",
+      ez: { hint: "Why do hands shake?", why: "Shaking hands mean <b>nervous</b>.", slips: { 1: "Bored people do not shake.", 2: "Sleepy people yawn." } },
       lv: {
         medium: { options: ["Nervous", "Bored", "Sleepy", "Angry"],
           slips: { 1: "Someone bored would not have shaking hands or need a deep breath.", 2: "Sleepy people yawn. Shaking hands suggest something else.", 3: "Angry people might shake, but the deep breath and stepping forward suggest building up courage." } },
@@ -251,6 +257,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: [[["sad", "upset", "angry", "cross"], "Look at the grin and the arms up. Does that fit a bad feeling?"]],
       hint: "Why would someone hold something up high and grin?",
       why: "The grin and [[prize]] held up high suggest [[who]] has won something. The text never says \"won\": you worked it out.",
+      ez: { model: "They won something.", hint: "Why hold it up and grin?", why: "A grin and [[prize]] up high. They won!", slips: [[null, "Look at the grin. Is that a bad feeling?"]] },
       lv: {
         medium: { q: "<span class=\"a2task\" style=\"display:block\">[[Who]] walked in grinning, holding [[prize]] high above their head.</span>What do you think has happened? Add the clue that tells you, using \"because\".",
           need: [["won", "win", "winner", "winning", "first", "champion", "victory", "prize", "award", "did well", "good news", "best"], ["because", "as", "since", "grin", "grinning", "smiling", "holding", "high", "above"]],
@@ -268,6 +275,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "A busy day would mean people and cars. The car park is empty.", 2: "Doors opening means the shutters would be going up, not down." },
       hint: "Look at the car park and the shutters.",
       why: "Empty car park, shutters down, lights off: clues that suggest it is late and everyone has gone.",
+      ez: { q: "<span class=\"a2task\" style=\"display:block\">[[Place]] was silent. The car park was empty, the shutters were down and only one light was still on.</span>When is this?", hint: "Look at the car park.", why: "Empty and shut. It is <b>late</b>.", slips: { 1: "A busy day means cars. It is empty.", 2: "In the morning, shutters go up." } },
       lv: { spicy: { q: "<span class=\"a2task\" style=\"display:block\">[[Place]] was silent. The car park was empty, the shutters were down and only one light was still on, high up in a window at the back.</span>Which idea does the last detail add?",
         options: ["Someone might still be inside.", "The building is closed for good.", "It is the middle of the day.", "The lights are broken."],
         slips: { 1: "One light on suggests someone may still be there, not that it has closed for good.", 2: "An empty car park and shutters down do not fit the middle of the day.", 3: "Nothing suggests broken lights. One light being on is the clue." },
@@ -276,6 +284,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
 
     /* ---------- chunk 3: word choices ---------- */
     { type: "learn", topic: "What the words suggest", title: "One word can carry a hint",
+      ez: { title: "Words give hints", html: "<p><b>Crept</b>: quiet. <b>Stomped</b>: cross. <b>Strolled</b>: relaxed.</p><p>They all mean walked.</p>" },
       fig: WALKS,
       html: "<p>\"Walked\" just tells you someone moved. Other words carry a hint about <b>how</b> and <b>why</b>.</p>" +
         "<p><b>Crept</b> suggests quiet and careful, maybe sneaky or scared. <b>Stomped</b> suggests cross. <b>Strolled</b> suggests relaxed, in no hurry.</p>" +
@@ -293,6 +302,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       pairs: [["crept", "Trying not to be heard"], ["stomped", "Cross"], ["strolled", "Relaxed, no rush"]],
       hint: "Picture someone doing each one.",
       why: "They all mean moved, but each one carries a different hint.",
+      ez: { q: "Match each word to its hint.", hint: "Picture someone doing it.", why: "They all mean walked. Each has a hint." },
       lv: {
         medium: { pairs: [["crept", "Trying not to be heard"], ["stomped", "Cross"], ["strolled", "Relaxed, no rush"], ["raced", "In a hurry"], ["trudged", "Tired or fed up"]] },
         spicy: { q: "Match each way of speaking to what it suggests.",
@@ -306,6 +316,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "Gloomy is close to the opposite of bright and cheerful.", 2: "Gloomy is about light and mood, not sound." },
       hint: "Think of a gloomy day.",
       why: "Gloomy suggests dim light and a low, uneasy mood.",
+      ez: { hint: "Think of a gloomy day.", why: "Gloomy means dark and a bit sad.", slips: { 1: "Gloomy is the opposite of bright.", 2: "Gloomy is about light, not sound." } },
       lv: { spicy: { q: "\"The room was small.\" and \"The room was cramped.\" What extra idea does cramped add?",
         options: ["It feels too full and uncomfortable.", "It is the smallest room in the building.", "It is cosy and warm.", "It has no windows."],
         slips: { 1: "Cramped is about how it feels, not a size ranking.", 2: "Cosy is the positive version. Cramped suggests the opposite feeling.", 3: "Nothing in the word tells us about windows." },
@@ -319,6 +330,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "That one says it straight out. We want the one that only hints.", 2: "Eating a sandwich does not hint at being scared." },
       hint: "Which one makes you work it out?",
       why: "A thumping heart and backing against a wall are clues. The reader works out \"scared\" for themselves.",
+      ez: { q: "Which one <b>hints</b> that [[who]] is scared?", hint: "Which one makes you work it out?", why: "The thumping heart is the clue.", slips: { 1: "That one says it. Find the hint.", 2: "A sandwich is not a scared clue." } },
       lv: { spicy: { q: "Which sentence best suggests that [[who]] does not trust the stranger?",
         options: ["[[Who]] kept one hand on the [[thing]] and never took their eyes off the stranger.", "[[Who]] did not trust the stranger.", "[[Who]] smiled and shook the stranger's hand.", "The stranger was tall and wore a grey coat."],
         slips: { 1: "That tells you directly. The question wants the one that suggests it.", 2: "A smile and a handshake suggest the opposite.", 3: "That describes the stranger, but says nothing about how [[who]] feels." },
@@ -327,6 +339,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
 
     /* ---------- chunk 4: a story ---------- */
     { type: "learn", topic: "Read between the lines", title: "A story to read between the lines of",
+      ez: { title: "A story", html: "<p>Read it slowly. Look for clues.</p>" + story("mild") },
       fig: NIGHT,
       html: "<p>Read it once, slowly. Notice anything that seems like a clue.</p>" + story("medium"),
       lv: { mild: { html: "<p>Read it once, slowly. Look for clues.</p>" + story("mild") },
@@ -339,6 +352,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "Someone bored would not keep checking the time and speed up.", 2: "Nothing here suggests anger. Checking the time and walking faster suggest something else." },
       hint: "Why would someone check the time twice and walk faster in the dark?",
       why: "Checking the time twice and walking faster are clues that [[who]] is worried, or uneasy about being out so late.",
+      ez: { hint: "Very late. Dark windows.", why: "It is <b>night time</b>.", slips: { 1: "Very late is not lunch time.", 2: "Dark windows. Not a sunny morning." } },
       lv: {
         mild: { q: bit(P1, "mild") + "What can you work out?",
           options: ["It is night time.", "It is lunch time.", "It is a sunny morning."],
@@ -358,6 +372,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: { 1: "Warm tells you about time, not whether the cup is new.", 2: "It is just after midnight. Warm tea is not about the weather.", 3: "[[Who]] has only just arrived. Someone else made it." },
       hint: "Tea goes cold quite quickly. So how long ago was it made?",
       why: "Tea cools down fast, so if it is still warm, someone made it and left it there not long ago.",
+      ez: { hint: "Tea goes cold fast.", why: "Warm tea. Someone was there <b>not long ago</b>.", slips: { 1: "Warm is about time, not a new cup.", 2: "It is late at night. Not about the weather." } },
       lv: {
         mild: { q: bit(P2, "mild") + "What can you work out from the warm cup?",
           options: ["Someone was there not long ago.", "The cup is brand new.", "It is a hot day."],
@@ -375,6 +390,7 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       slips: [[["happy", "excited", "brave", "confident"], "A small voice and pushing with one finger suggest the opposite of confident."]],
       hint: "Why might your voice come out small?",
       why: "A voice that comes out small, and pushing with only one finger, suggest [[who]] is nervous or scared.",
+      ez: { hint: "When is your voice small?", why: "A small voice means <b>scared</b>.", slips: [[null, "A small voice is not a brave voice."]] },
       lv: {
         mild: { q: bit(P3, "mild") + "How does [[who]] feel?",
           need: [["scared", "nervous", "worried", "afraid", "frightened", "anxious", "unsure", "shy", "fear", "scary", "jumpy"]],
@@ -392,11 +408,17 @@ function bit(p, lv){ return '<div class="a2task"><p>' + p[lv] + '</p></div>'; }
       q: "Your turn, if you like. Write two or three sentences that <b>show</b> how someone feels, without using the feeling word. Jay will try to read between your lines.",
       starters: ["[[Who]] stared at the...", "Nobody said anything, but...", "Their hands..."],
       checklist: ["I did not use the feeling word", "I used an action or a detail as a clue", "A reader could work out the feeling"],
+      ez: { q: "Show a feeling without naming it, if you like. Jay will guess!" },
       minWords: 15,
       lv: { mild: { q: "Your turn, if you like. Write one or two sentences that show how someone feels, without saying the feeling word. Jay will try to guess it.", minWords: 8 },
         spicy: { q: "Your turn, if you like. Write a short paragraph (three to five sentences) that shows how someone feels without naming it. Try to use one carefully chosen word that carries a hint, like \"crept\" or \"cramped\". Jay will try to read between your lines.", minWords: 35,
           checklist: ["I did not name the feeling", "I used actions or details as clues", "I chose at least one word for what it suggests", "A reader could support their guess with evidence"] } } }
   ],
+
+  ez: {
+    realWorld: { title: "You do this all day", html: "<p>A friend says \"fine.\" You can tell they are not.</p><p>Historians use clues to see the past.</p>" },
+    make: { intro: "A clue, and the idea it gives you. Make one about today." }
+  },
 
   realWorld: {
     title: "You read between the lines all day",

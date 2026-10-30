@@ -483,6 +483,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
   ],
 
   ez: {
+    blurb: "Rounding numbers, money and lengths.",
     realWorld: { title: "Rounding is everywhere", html: "<p>Prices, weather and recipes are all <b>rounded</b>.</p><p>Before 1971, a pound had 240 pennies!</p>" },
     make: { intro: "Your rounding rule, with an example." }
   },

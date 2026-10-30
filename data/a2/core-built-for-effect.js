@@ -650,6 +650,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
   ],
 
   ez: {
+    blurb: "Writers build a text to make you feel. Spot how.",
     realWorld: { title: "Built for effect", html: "<p>Trailers, news and adverts are all <b>built for effect</b>.</p><p>Writing home from the past? Dinosaur first!</p>" },
     make: { intro: "Pick 1 feature. Say what it does to the reader." }
   },

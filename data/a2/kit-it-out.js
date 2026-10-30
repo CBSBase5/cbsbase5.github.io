@@ -188,6 +188,7 @@ function planner(el, api){
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "How many do I need?", title: "Divide, then round up",
+      ez: { title: "Divide, then round up", html: "<p>9 m fence. 2 m panels. 9 &#247; 2 = 4.5.</p><p>No half panels. <b>Round up</b> to 5.</p>" },
       fig: FENCE,
       html: "<p>A new fence is going round [[fence]]. One side is <b>9 m</b> long. Fence panels are <b>2 m</b> wide.</p>" +
         "<p class=\"a2task\"><b>Worked example</b><br>9 &#247; 2 = 4.5 panels<br>You cannot buy half a panel, so <b>round up</b>: buy <b>5 panels</b>.</p>" +
@@ -206,6 +207,8 @@ function planner(el, api){
       slips: [[5.5, "That is the exact answer. You cannot buy half a panel, so round up."], [5, "5 panels only cover 10 m, which leaves a gap. Round up."]],
       hint: "Work out 11 &#247; 2, then round up.",
       why: "11 &#247; 2 = 5.5, so buy <b>6 panels</b>.",
+      ez: { q: "<b>8 m</b> fence. <b>2 m</b> panels. How many panels?", why: "8 &#247; 2 = <b>4 panels</b>. Nothing left over.",
+        slips: [[16, "That is 8 times 2. Divide instead."], [6, "Count in 2s to 8. How many 2s?"]] },
       lv: { mild: { q: "A fence is <b>8 m</b> long. Panels are <b>2 m</b> wide. How many panels do you need?",
               boxes: [{ label: "Panels", a: 4 }],
               slips: [[16, "That is 8 times 2. Share the 8 m out into 2 m pieces instead: divide."], [6, "Count in twos up to 8: 2, 4, 6, 8. How many twos?"]],
@@ -224,6 +227,7 @@ function planner(el, api){
       slips: { 1: "That is the normal rounding rule, but here even 4.1 panels would mean buying 5.", 2: "Shops will sell you any number. The reason is about the fence." },
       hint: "Picture the fence with one panel missing.",
       why: "Any part of a panel that is needed means buying one more, or the fence has a gap.",
+      ez: { why: "Rounding down leaves a <b>gap</b> in the fence.", slips: { 1: "Even 4.1 panels means buying 5.", 2: "Shops sell any number. Think about the fence." } },
       lv: { spicy: { q: "You work out you need <b>6.1</b> panels. How many do you buy?",
         options: ["7", "6", "6.1"], fixed: true,
         slips: { 1: "Normal rounding says 6, but 6 panels leave a gap. Any part of a panel means one more.", 2: "You cannot buy a tenth of a panel." },
@@ -236,6 +240,8 @@ function planner(el, api){
       slips: [[1, 4, "4 panels only cover 12 m. Round up."], [0, 42, "That is 14 times 3. Divide instead."]],
       hint: "Divide first. Then ask: is that enough panels?",
       why: "14 &#247; 3 = 4.67 (to 2 decimal places), so buy <b>5 panels</b>.",
+      ez: { q: "Your turn. <b>7 m</b> fence. <b>2 m</b> panels.", hint: "Half of 7. Is it whole?",
+        slips: [[1, 3, "3 panels leave a gap. Round up."], [0, 14, "That is 7 times 2. Divide instead."]] },
       lv: { mild: { q: "Your turn, with the steps laid out. A fence is <b>7 m</b> long. Panels are <b>2 m</b> wide.",
               boxes: [{ label: "7 &#247; 2 =", a: 3.5 }, { label: "Panels to buy", a: 4 }],
               slips: [[1, 3, "3 panels only cover 6 m, which leaves a gap. Round up."], [0, 14, "That is 7 times 2. Share it out instead: divide."]],
@@ -250,6 +256,7 @@ function planner(el, api){
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Packs and rounding up", title: "Floors: area, then packs",
       fig: floorFig(4, 3, 2.5, 5),
+      ez: { title: "Floors: tiles, then packs", html: "<p>3 x 2 = <b>6 tiles</b>.</p><p>Packs of 4. 6 &#247; 4 = 1.5. Buy <b>2 packs</b>.</p>" },
       html: "<p>New flooring for [[room]]: [[floor]]. It comes in packs, and each pack covers <b>2.5 " + M2 + "</b>.</p>" +
         "<p class=\"a2task\"><b>Worked example</b>: a room 4 m by 3 m<br>Step 1, area: 4 x 3 = <b>12 " + M2 + "</b><br>Step 2, packs: 12 &#247; 2.5 = 4.8<br>Step 3, round up: buy <b>5 packs</b></p>",
       lv: { mild: { fig: floorFig(3, 2, 4, 2, { label: "1 pack = 4 tiles" }),
@@ -265,6 +272,8 @@ function planner(el, api){
       slips: [[0, 16, "That is the perimeter, the distance round the edge. Area is length times width."], [0, 8, "That is 5 + 3. Area is 5 x 3."], [2, 7, "7 packs cover 14 " + M2 + ", not quite enough. Round up."]],
       hint: "Area first: length x width. Then divide by what one pack covers.",
       why: "5 x 3 = 15 " + M2 + ". 15 &#247; 2 = 7.5, so buy <b>8 packs</b>.",
+      ez: { q: "Room: <b>4 m by 2 m</b>. 1 tile per " + M2 + ". <b>Packs of 3</b>.", hint: "Tiles: 4 x 2. Then packs of 3.", why: "8 tiles. 2 packs is 6. So buy <b>3 packs</b>.",
+        slips: [[0, 6, "That is 4 + 2. Try 4 x 2."], [1, 2, "2 packs is only 6 tiles."]] },
       lv: { mild: { q: "Some steps left for you. A room is <b>4 m by 2 m</b>. Each tile covers 1 " + M2 + ". Tiles come in <b>packs of 3</b>.",
               boxes: [{ label: "Tiles needed", a: 8 }, { label: "Packs to buy", a: 3 }],
               slips: [[0, 6, "That is 4 + 2. Count the squares: 4 rows of 2."], [1, 2, "2 packs is only 6 tiles. You need 8."]],
@@ -282,6 +291,8 @@ function planner(el, api){
       slips: [[8.4, "That is the exact number. Round up to whole packs."], [8, "8 packs cover 20 " + M2 + ", but the room is 21 " + M2 + "."], [19, "That is the perimeter. Use the area: 6 x 3.5."]],
       hint: "Area first, then divide by 2.5, then round up.",
       why: "6 x 3.5 = 21 " + M2 + ". 21 &#247; 2.5 = 8.4, so buy <b>9 packs</b>.",
+      ez: { q: "Room: <b>5 m by 2 m</b>. 1 tile per " + M2 + ". <b>Packs of 4</b>. How many packs?",
+        slips: [[2.5, "Round up to whole packs."], [2, "2 packs is only 8 tiles. You need 10."], [10, "That is the tiles. Now packs of 4."]] },
       lv: { mild: { q: "On your own now. A room is <b>5 m by 2 m</b>. Each tile covers 1 " + M2 + ". Tiles come in <b>packs of 4</b>. How many packs?",
               boxes: [{ label: "Packs", a: 3 }],
               slips: [[2.5, "Round up to whole packs."], [2, "2 packs is only 8 tiles. The room needs 10."], [10, "That is the number of tiles. Now share them into packs of 4."]],
@@ -299,6 +310,7 @@ function planner(el, api){
       slips: { 1: "10 &#247; 2.5 is exactly 4. No part pack, so nothing to round up.", 2: "3 packs only cover 7.5 " + M2 + "." },
       hint: "Work out 10 &#247; 2.5. Is it a whole number?",
       why: "10 &#247; 2.5 = 4 exactly. Only round up when there is a part pack.",
+      ez: { q: "<b>Packs of 4</b>. You need <b>12 tiles</b>. How many packs?", slips: { 1: "12 &#247; 4 is exactly 3. No rounding up." } },
       lv: { mild: { q: "Tiles come in <b>packs of 4</b>. You need exactly <b>12 tiles</b>. How many packs?",
               options: ["3", "4", "2"],
               slips: { 1: "12 &#247; 4 is exactly 3. Nothing left over, so no rounding up.", 2: "2 packs is only 8 tiles." },
@@ -312,6 +324,7 @@ function planner(el, api){
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "What will it cost?", title: "Packs x price, then add it all up",
       fig: RECEIPT,
+      ez: { title: "How many x price", html: "<p>Cost is <b>how many x the price</b>.</p><p>4 panels at " + PD + "20 is " + PD + "80. Add paint at " + PD + "9: <b>" + PD + "89</b>.</p>" },
       html: "<p>Once you know how many packs, the cost is <b>number of packs x price of one pack</b>. Then add anything else you need.</p>" +
         "<p class=\"a2task\"><b>Worked example</b><br>5 packs at " + PD + "18.50: 5 x 18.50 = " + PD + "92.50<br>1 tub of glue: " + PD + "7<br>Total: 92.50 + 7 = <b>" + PD + "99.50</b></p>" +
         "<p>Quick check: 5 packs at about " + PD + "20 is about " + PD + "100. Close, so it makes sense.</p>",
@@ -326,6 +339,7 @@ function planner(el, api){
       slips: [[22.5, "That is 8 + 14.50. Multiply instead."], [112, "Close. Did you leave out the 50p? 8 x 50p is " + PD + "4."]],
       hint: "8 x 14 first, then 8 x 0.50, then add.",
       why: "8 x 14 = 112, 8 x 0.50 = 4, so <b>" + PD + "116</b>.",
+      ez: { hint: "Try 6 x 10, then 6 x 5." },
       lv: { mild: { q: "You need <b>6 panels</b> at <b>" + PD + "15</b> each. What do they cost?",
               boxes: [{ label: "Cost", a: 90, pre: PD }],
               slips: [[21, "That is 6 + 15. Multiply instead."], [75, "That is 5 panels. Count again: 6 lots of 15."]],
@@ -343,6 +357,7 @@ function planner(el, api){
       slips: [[150.5, "That has only one tub of glue. There are two."], [144, "That is just the flooring. Add the glue too."], [13, "That is just the glue. Add the flooring too."]],
       hint: "Flooring: 9 x 16. Glue: 2 x 6.50. Then add.",
       why: "9 x 16 = 144. 2 x 6.50 = 13. 144 + 13 = <b>" + PD + "157</b>.",
+      ez: { q: "<b>3 packs</b> at <b>" + PD + "10</b>. <b>1 tin</b> of paint at <b>" + PD + "8</b>. What is the total?" },
       lv: { mild: { q: "The list for [[room]]: <b>3 packs</b> of [[floor]] at <b>" + PD + "10</b> each, and <b>1 tin</b> of paint at <b>" + PD + "8</b>. What is the total?",
               boxes: [{ label: "Total", a: 38, pre: PD }],
               slips: [[30, "That is just the flooring. Add the paint too."], [18, "That is one pack and the paint. There are 3 packs."]],
@@ -360,6 +375,8 @@ function planner(el, api){
       slips: { 1: "Careful sums can still have a slip, like a lost decimal point. Estimate to check.", 2: "That is far too small: one pack alone costs more than " + PD + "9.25." },
       hint: "Round 18.50 to 20 and estimate.",
       why: "About 5 x 20 = 100, so " + PD + "925 is ten times too big. The answer is " + PD + "92.50: the decimal point went missing.",
+      ez: { q: "5 packs at " + PD + "18.50. Someone gets <b>" + PD + "925</b>. Is that sensible?", why: "5 x 20 is about 100. The answer is <b>" + PD + "92.50</b>.",
+        slips: { 1: "Estimate to check. A decimal point can go missing.", 2: "Too small. 1 pack costs more than that." } },
       lv: { spicy: { q: "A pack of [[floor]] costs " + PD + "18 and covers 2.5 " + M2 + ". Someone says that is <b>" + PD + "1.39 per " + M2 + "</b>. Is that sensible?",
         options: ["No: about " + PD + "18 for under 3 " + M2 + " is over " + PD + "6 per " + M2 + ".", "Yes: it is a small number, which is good.", "No: it should be " + PD + "45 per " + M2 + "."],
         slips: { 1: "Small is not the same as right. Estimate it.", 2: "That is 18 x 2.5. Price per " + M2 + " is price divided by area." },
@@ -369,6 +386,7 @@ function planner(el, api){
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Stick to the budget", title: "Will it fit the budget?",
       fig: BUDGET,
+      ez: { title: "Stick to the budget", html: "<p>A <b>budget</b> is the most you can spend.</p><p>" + PD + "100 take away " + PD + "85 leaves <b>" + PD + "15</b>.</p>" },
       html: "<p>A <b>budget</b> is the most you can spend. Add up everything, then take it away from the budget to see what is left.</p>" +
         "<p class=\"a2task\"><b>Worked example</b>: budget " + PD + "150<br>Flooring " + PD + "92.50 + paint " + PD + "24 + lights " + PD + "30 = " + PD + "146.50<br>Left over: 150 - 146.50 = <b>" + PD + "3.50</b></p>" +
         "<p>If it comes out over budget, swap something for a cheaper version, or leave something out. In the wise words of Jay's late, great grandfather: <i>stop</i>, before you spend money you do not have.</p>",
@@ -382,6 +400,8 @@ function planner(el, api){
       slips: [[0, 175.5, "That leaves out the light. Add all three."], [1, 13, "Check the pence: 200 - 187.50."]],
       hint: "Add the three costs. Then take the total away from 200.",
       why: "157 + 18.50 + 12 = <b>" + PD + "187.50</b>. 200 - 187.50 = <b>" + PD + "12.50</b> left.",
+      ez: { q: "Budget " + PD + "50. Mat " + PD + "28. Shelf " + PD + "15. What is the total? What is left?", hint: "Add 28 and 15. Then take from 50.",
+        slips: [[1, 22, "Take away both: 50 - 43."], [0, 13, "That is 28 - 15. Add them instead."]] },
       lv: { mild: { q: "Budget " + PD + "50 for [[room]]. A mat costs " + PD + "28 and a shelf costs " + PD + "15. What is the total, and what is left?",
               boxes: [{ label: "Total", a: 43, pre: PD }, { label: "Left over", a: 7, pre: PD }],
               slips: [[1, 22, "That is 50 - 28. Take away both things: 50 - 43."], [0, 13, "That is 28 - 15. Add them instead."]],
@@ -400,6 +420,7 @@ function planner(el, api){
       slips: { 1: "That saves " + PD + "4.50, so the total is " + PD + "142. Still over.", 2: "Adding things makes it more, not less." },
       hint: "You need to save at least " + PD + "6.50. How much does each change save?",
       why: "New lights save " + PD + "10: " + PD + "136.50, under " + PD + "140.",
+      ez: { q: "Rug " + PD + "30. Lamp " + PD + "25. Budget " + PD + "50. Which change gets it under budget?" },
       lv: { mild: { q: "A rug costs " + PD + "30 and a lamp costs " + PD + "25. That is " + PD + "55, but the budget is " + PD + "50. Which change brings it under budget?",
               options: ["Swap the lamp for a " + PD + "15 one.", "Swap the rug for a " + PD + "28 one.", "Add a " + PD + "5 cushion."],
               slips: { 1: "That saves " + PD + "2, so it is " + PD + "53. Still over.", 2: "Adding things makes it more." },
@@ -414,6 +435,7 @@ function planner(el, api){
     { type: "widget", topic: "Stick to the budget", unscored: true,
       title: "Room planner",
       html: "<p>Change the room size and pick a pack. The planner works out the area, the packs and the cost against the budget. Have a play.</p>",
+      ez: { html: "<p>Change the room. Pick a pack. See the cost.</p>" },
       mount: planner }
   ],
 
@@ -423,6 +445,11 @@ function planner(el, api){
       "<p>And for our big question, <b>if we could time travel, should we?</b> A time machine workshop would need kitting out too. Somebody has to pay for the floor.</p>",
     fig: '<svg viewBox="0 0 420 140" role="img" aria-label="Jay next to a time portal with a tape measure">' + A.portal(80, 70, 56) + A.jay(250, 50, 0.85, "wow") +
       A.bubble(296, 4, 120, 52, "Round it\nup!", 300) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Who does this for real?", html: "<p>Fitters and decorators do this every day.</p><p>Even a time machine workshop needs a floor!</p>" },
+    make: { intro: "Plan a space. 2 things to buy and a budget. The card adds it up.", fields: [{}, {}, { label: "Cost of thing 1 in pounds" }, {}, { label: "Cost of thing 2 in pounds" }, { label: "Budget in pounds" }] }
   },
 
   make: {

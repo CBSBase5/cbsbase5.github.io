@@ -545,6 +545,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
   ],
 
   ez: {
+    blurb: "Times and divide. Head or paper? Then check it.",
     realWorld: { title: "No calculator? No problem", html: "<p>Bills, pizza, paint. People <b>check</b> sums every day.</p><p>100 years ago? No calculators. Just head and paper.</p>" },
     make: { intro: "Your best trick, an example, and how to check it." }
   },

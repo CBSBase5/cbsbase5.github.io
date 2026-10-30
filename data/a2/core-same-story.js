@@ -138,6 +138,7 @@ function qComic(d){
     options: ["Comic", "News report", "Fairy tale"], answer: 0,
     slips: { 1: "A news report has a headline and columns of writing.", 2: "A fairy tale starts with Once upon a time." },
     hint: "Look at the boxes and the bubbles.", why: "Panels, speech bubbles and a sound effect: it is a <b>comic</b>.",
+    ez: { q: "What kind of text is this?", why: "Panels and bubbles: a <b>comic</b>.", slips: { 1: "News has a headline.", 2: "A fairy tale starts with Once upon a time." } },
     lv: { medium: { options: ["Comic", "News report", "Fairy tale", "Advert"], slips: { 1: "A news report has a headline and columns.", 2: "A fairy tale starts with Once upon a time.", 3: "An advert tries to sell you something." } },
       spicy: { q: "You can tell this is a comic before reading a single word. Which conventions give it away?",
         options: ["Panels, speech bubbles and a sound effect", "A headline and a quote", "Once upon a time and a happy ending", "A price and Buy now"],
@@ -149,6 +150,7 @@ function qNews(d){
     options: ["News report", "Recipe", "Comic"], answer: 0,
     slips: { 1: "A recipe has ingredients and a method.", 2: "A comic has panels and bubbles." },
     hint: "Look at the big words at the top.", why: "A headline, the name of the paper and a quote: it is a <b>news report</b>.",
+    ez: { q: "What kind of text is it now?", why: "A headline and a quote: a <b>news report</b>.", slips: { 1: "A recipe has ingredients.", 2: "A comic has panels." } },
     lv: { medium: { options: ["News report", "Recipe", "Comic", "Fairy tale"], slips: { 1: "A recipe has ingredients and a method.", 2: "A comic has panels and bubbles.", 3: "No Once upon a time here." } },
       spicy: { q: "Which convention of a news report is <b>" + d.quote + "</b>?",
         options: ["A quote from someone involved, to make it feel real", "A headline, to grab attention", "A happy ending", "A call to action, telling you to buy"],
@@ -160,6 +162,7 @@ function qTheme(d){
     options: [d.theme, d.others[0], d.others[1]], answer: 0,
     slips: { 1: "Is there a baddie in it? Look again at what happens.", 2: "Does anyone want more than they need?" },
     hint: "What does the main character do that matters?", why: "The look changes, but the theme stays the same: <b>" + d.theme.toLowerCase() + "</b>.",
+    ez: { q: "Now a fairy tale. What is the theme?", hint: "What does the hero do?", why: "Same theme in every look: <b>" + d.theme.toLowerCase() + "</b>.", slips: { 1: "Is there a baddie in it?", 2: "Does anyone want more than they need?" } },
     lv: { medium: { options: [d.theme].concat(d.others, ["Not giving up"]), slips: { 1: "Is there a baddie in it?", 2: "Does anyone want more than they need?", 3: "Close, but is that what the story is mostly about?" } },
       spicy: { options: [d.spicyTheme].concat(d.spicyOthers),
         slips: { 1: "There is no real villain in this story.", 2: "That is a detail of the setting, not the big idea.", 3: "Nobody in the story wants that." },
@@ -168,6 +171,7 @@ function qTheme(d){
 function qHead(d){
   return { q: "Have a go: write a <b>headline</b> for the story, as if it was going in the newspaper. Short and punchy.", fig: comic(d),
     need: [d.kw], model: d.model,
+    ez: { q: "Have a go: write a <b>headline</b> for this story.", hint: "Who, plus what happened. About 5 words.", why: "Something like \"" + d.model + "\". Short, with the main thing." },
     hint: "Who or what, plus what happened. Five words or so.",
     why: "Something like \"" + d.model + "\". Headlines are short, leave out little words, and tell you the main thing.",
     lv: { spicy: { q: "Have a go: write a <b>headline</b> for the story, then think about what a fairy tale title would be instead. Type the headline.", hint: "Headlines are short and present tense: \"Fox and Crow Escape Flood\", not \"A fox and a crow escaped\"." } } };
@@ -203,6 +207,7 @@ function qHead(d){
     /* ---------- chunk 1: themes ---------- */
     { type: "learn", topic: "Themes", title: "A theme is the big idea underneath",
       fig: THEMES,
+      ez: { title: "The big idea", html: "<p>A <b>theme</b> is the big idea in a story.</p><p>Like friendship, or being brave.</p>" },
       html: "<p>Every story is <b>about</b> something bigger than what happens. That big idea is the <b>theme</b>.</p>" +
         "<p>A story about two kids sharing a bike might really be about <b>friendship</b>. A story about a knight and a dragon might be about <b>good and evil</b>, or <b>being brave</b>.</p>" +
         "<p>The same theme turns up in all kinds of stories.</p>",
@@ -214,6 +219,7 @@ function qHead(d){
       options: ["Friendship", "Being brave", "Good and evil"], answer: 0,
       slips: { 1: "Nobody faces something scary here.", 2: "There is no baddie in this story." },
       hint: "What does Mia do for Sam?", why: "Mia sticks by Sam when things get hard. The theme is <b>friendship</b>.",
+      ez: { why: "Mia sticks by Sam. That is <b>friendship</b>." },
       lv: {
         medium: { options: ["Friendship", "Being brave", "Good and evil", "Greed"], slips: { 1: "Nobody faces something scary here.", 2: "There is no baddie in this story.", 3: "Nobody wants more than they need." } },
         spicy: { q: P("Everyone said Mia would stop walking to school with Sam once he broke his leg. It took twice as long, and she was late three times. She never once complained.") + "Which is the best way to put the theme?",
@@ -225,6 +231,7 @@ function qHead(d){
           options: ["Being brave", "Friendship", "Greed"], answer: 0,
           slips: { 1: "Nobody is helping a friend here.", 2: "Nobody wants more than they need." },
           hint: "How does [[who]] feel, and what do they do anyway?", why: "Scared, but they jump anyway. The theme is <b>being brave</b>.",
+          ez: { hint: "Scared, but what do they do?", why: "Scared, but they jump. That is <b>being brave</b>." },
           lv: { medium: { options: ["Being brave", "Friendship", "Greed", "Good and evil"], slips: { 1: "Nobody is helping a friend here.", 2: "Nobody wants more than they need.", 3: "There is no baddie." } },
             spicy: { q: P("For three weeks, [[who]] had climbed the ladder to the top board and climbed back down again. Today, their legs were shaking just as much. They walked to the edge anyway.") + "Which is the best way to put the theme?",
               options: ["Being brave means doing it even while you are scared", "Diving is dangerous", "You should never give in to fear", "Good always beats evil"],
@@ -234,6 +241,7 @@ function qHead(d){
           options: ["Good and evil", "Being brave", "Friendship"], answer: 0,
           slips: { 1: "Close, but the story is mainly about the wicked queen against the kind girl.", 2: "The girl and fox work together, but the big idea is about the queen." },
           hint: "Who is the baddie, and who wins?", why: "A wicked queen against a kind girl, and kindness wins: <b>good and evil</b>.",
+          ez: { why: "Wicked queen, kind girl, and kind wins: <b>good and evil</b>.", slips: { 1: "Close. It is mostly the queen against the girl.", 2: "They work together. The big idea is the queen." } },
           lv: { medium: { options: ["Good and evil", "Being brave", "Friendship", "Not giving up"], slips: { 1: "Close, but the big idea is wicked against kind.", 2: "They work together, but the big idea is about the queen.", 3: "Nobody keeps failing and trying again." } },
             spicy: { q: P("The queen had gold enough for a hundred lifetimes, yet she taxed the village until the children went hungry. In the end, it was a girl with nothing but a clever fox who took it all back.") + "Which is the best way to put the theme?",
               options: ["Greed is defeated by kindness and cleverness", "Foxes are clever animals", "Queens should not have gold", "Children should be fed"],
@@ -246,13 +254,16 @@ function qHead(d){
       pairs: [["A boy keeps trying to ride his bike, even after falling ten times.", "Not giving up"], ["A hero stops a cruel king.", "Good and evil"], ["Two lonely people become best mates.", "Friendship"]],
       slips: { any: "Ask: what is the big idea underneath?" },
       hint: "Falling ten times and still trying is about...", why: "Each story has one big idea underneath.",
+      ez: { hint: "Trying again and again is about...", slips: { any: "What is the big idea?" } },
       lv: { medium: { pairs: [["A boy keeps trying to ride his bike, even after falling ten times.", "Not giving up"], ["A hero stops a cruel king.", "Good and evil"], ["Two lonely people become best mates.", "Friendship"], ["A girl stands up to a bully, even though she is shaking.", "Being brave"]] },
         spicy: { pairs: [["A boy keeps trying to ride his bike, even after falling ten times.", "Not giving up"], ["A hero stops a cruel king.", "Good and evil"], ["Two lonely people become best mates.", "Friendship"], ["A girl stands up to a bully, even though she is shaking.", "Being brave"], ["A man finds treasure but loses all his friends.", "Greed"]] } },
       vary: [
         { pairs: [["A team loses every match but keeps training, and wins the last game.", "Not giving up"], ["A witch tries to curse a town, and a kind boy breaks the spell.", "Good and evil"], ["A new kid sits alone until someone shares their lunch.", "Friendship"]],
+          ez: { hint: "Trying again and again is about...", slips: { any: "What is the big idea?" } },
           lv: { medium: { pairs: [["A team loses every match but keeps training, and wins the last game.", "Not giving up"], ["A witch tries to curse a town, and a kind boy breaks the spell.", "Good and evil"], ["A new kid sits alone until someone shares their lunch.", "Friendship"], ["A shy singer goes on stage, even with her hands shaking.", "Being brave"]] },
             spicy: { pairs: [["A team loses every match but keeps training, and wins the last game.", "Not giving up"], ["A witch tries to curse a town, and a kind boy breaks the spell.", "Good and evil"], ["A new kid sits alone until someone shares their lunch.", "Friendship"], ["A shy singer goes on stage, even with her hands shaking.", "Being brave"], ["A dragon guards a mountain of gold it will never spend.", "Greed"]] } } },
         { pairs: [["An angler fishes all day with no bites, comes back the next day and lands a huge carp.", "Not giving up"], ["A superhero saves the city from a villain.", "Good and evil"], ["A dog and a cat who hated each other end up sharing a bed.", "Friendship"]],
+          ez: { hint: "Trying again and again is about...", slips: { any: "What is the big idea?" } },
           lv: { medium: { pairs: [["An angler fishes all day with no bites, comes back the next day and lands a huge carp.", "Not giving up"], ["A superhero saves the city from a villain.", "Good and evil"], ["A dog and a cat who hated each other end up sharing a bed.", "Friendship"], ["A boy goes into the dark woods to find his lost sister.", "Being brave"]] },
             spicy: { pairs: [["An angler fishes all day with no bites, comes back the next day and lands a huge carp.", "Not giving up"], ["A superhero saves the city from a villain.", "Good and evil"], ["A dog and a cat who hated each other end up sharing a bed.", "Friendship"], ["A boy goes into the dark woods to find his lost sister.", "Being brave"], ["A king wishes everything he touches turns to gold, then cannot eat.", "Greed"]] } } }
       ] },
@@ -262,6 +273,7 @@ function qHead(d){
       options: ["Two rival pirates share their last bit of food on a desert island.", "A knight fights a dragon to save a town.", "A runner trips but finishes the race."], answer: 0,
       slips: { 1: "That is more good and evil, or being brave.", 2: "That is more not giving up." },
       hint: "Which one is about people sticking together?", why: "Totally different story, same big idea: <b>friendship</b>. Themes travel between stories.",
+      ez: { q: "Mia's story is about friendship. Which one has the <b>same theme</b>?", why: "New story, same big idea: <b>friendship</b>.", slips: { 1: "That is more good and evil.", 2: "That is more not giving up." } },
       lv: { spicy: { options: ["Two rival pirates share their last bit of food on a desert island.", "A knight fights a dragon to save a town.", "A runner trips but finishes the race.", "A pirate buries his treasure so nobody else can have it."],
         slips: { 1: "Good and evil, or being brave.", 2: "Not giving up.", 3: "That is greed: the opposite of sharing." } } },
       vary: [
@@ -269,16 +281,19 @@ function qHead(d){
           options: ["A girl who is scared of dogs pats one for the first time.", "Two friends build a den together.", "A greedy man steals all the cakes."], answer: 0,
           slips: { 1: "That is friendship.", 2: "That is greed." },
           hint: "Which one is about facing a fear?", why: "Scared, but doing it anyway: <b>being brave</b>, again.",
+          ez: { q: "The diving story is about being brave. Which one has the <b>same theme</b>?" },
           lv: { spicy: { options: ["A girl who is scared of dogs pats one for the first time.", "Two friends build a den together.", "A greedy man steals all the cakes.", "A dog chases a cat up a tree."], slips: { 1: "That is friendship.", 2: "That is greed.", 3: "A dog is in it, but is anyone facing a fear?" } } } },
         { q: "The wicked queen story is about good and evil. Which of these stories has the <b>same theme</b>?",
           options: ["A small robot stops an evil robot army from taking over.", "A boy learns to swim after many tries.", "Two cousins finally make up after an argument."], answer: 0,
           slips: { 1: "That is not giving up.", 2: "That is friendship." },
           hint: "Which one has a baddie?", why: "A villain and a hero, and good wins: <b>good and evil</b>, in a robot costume.",
+          ez: { q: "The queen story is good and evil. Which one has the <b>same theme</b>?", why: "Good wins: <b>good and evil</b>, in a robot costume." },
           lv: { spicy: { options: ["A small robot stops an evil robot army from taking over.", "A boy learns to swim after many tries.", "Two cousins finally make up after an argument.", "A robot builds a better robot."], slips: { 1: "That is not giving up.", 2: "That is friendship.", 3: "Robots again, but is there a baddie?" } } } }
       ] },
 
     /* ---------- chunk 2: genre clues ---------- */
     { type: "learn", topic: "Story clues", title: "Conventions are clues",
+      ez: { title: "Clues", html: "<p>Each kind of story has clues. They are called <b>conventions</b>.</p><p>Fairy tale: Once upon a time. Horror: the dark. Comic: POW!</p>" },
       fig: GENRES,
       html: "<p>Each kind of story has its own <b>conventions</b>: the usual things you expect to find in it.</p>" +
         "<p><b>Fairy tale:</b> Once upon a time, castles, magic, a baddie, happily ever after.<br><b>Horror:</b> the dark, creaks and screams, something hiding, short scary sentences.<br><b>Comic:</b> panels, speech bubbles, sound effects like POW!</p>",
@@ -291,6 +306,7 @@ function qHead(d){
       options: ["Fairy tale", "Horror", "Comic"], answer: 0,
       slips: { 1: "Nothing scary here, yet.", 2: "There are no panels or speech bubbles." },
       hint: "How does it start?", why: "\"Once upon a time\", a castle and magic: a <b>fairy tale</b>.",
+      ez: { why: "Once upon a time, a castle and magic: a <b>fairy tale</b>." },
       lv: {
         medium: { options: ["Fairy tale", "Horror", "Comic", "News report"], slips: { 1: "Nothing scary here, yet.", 2: "There are no panels or bubbles.", 3: "News is about real events, with dates and quotes." } },
         spicy: { q: P("Once upon a time, in a castle at the top of the hill, the candles went out one by one. Something was scratching inside the walls.") + "What is the writer doing?",
@@ -302,6 +318,7 @@ function qHead(d){
           options: ["Horror", "Fairy tale", "Recipe"], answer: 0,
           slips: { 1: "No Once upon a time, no castle, no magic.", 2: "A recipe tells you how to cook." },
           hint: "How does it make you feel?", why: "A creaking door, darkness and something breathing: <b>horror</b>.",
+          ez: { why: "A creak, the dark, and breathing: <b>horror</b>.", slips: { 1: "No Once upon a time, no magic." } },
           lv: { medium: { options: ["Horror", "Fairy tale", "Recipe", "Advert"], slips: { 1: "No Once upon a time, no castle.", 2: "A recipe tells you how to cook.", 3: "Nothing is for sale." } },
             spicy: { q: P("The door creaked. Silence. Then, slowly, the handle began to turn.") + "Why does the writer use the one word sentence <b>Silence.</b>?",
               options: ["To build suspense by making the reader wait", "To give a happy ending", "To show someone is talking", "To list what you need"],
@@ -314,6 +331,7 @@ function qHead(d){
           options: ["Comic", "Horror", "Recipe"], answer: 0,
           slips: { 1: "It might be exciting, but look at the boxes and bubbles.", 2: "A recipe has ingredients and a method." },
           hint: "Look at the boxes and the bubble.", why: "Panels, a speech bubble and a sound effect: a <b>comic</b>.",
+          ez: { why: "Panels and a bubble: a <b>comic</b>.", slips: { 1: "Look at the boxes and bubbles." } },
           lv: { medium: { options: ["Comic", "Horror", "Recipe", "News report"], slips: { 1: "Look at the boxes and bubbles.", 2: "A recipe has ingredients and a method.", 3: "News has a headline and columns." } },
             spicy: { q: "Comics can show sound. Which convention is <b>CRASH!</b>?", options: ["A sound effect, in big letters, so you can hear the action", "A caption, telling you where it is", "A speech bubble", "A headline"],
               slips: { 1: "A caption is a box of narration, usually at the top.", 2: "Nobody is saying it.", 3: "Headlines belong to news." },
@@ -326,11 +344,14 @@ function qHead(d){
       cards: [["Once upon a time", 0], ["Happily ever after", 0], ["A creaking door at night", 1], ["A scream in the dark", 1], ["Speech bubbles", 2], ["POW!", 2]],
       slips: { any: "Have a look at the three covers in the last card." },
       hint: "Bubbles and POW belong together.", why: "Each genre has its own clues.",
+      ez: { q: "Sort the clues into the right story.", slips: { any: "Look at the 3 covers on the last card." } },
       lv: { spicy: { cards: [["Once upon a time", 0], ["A magic wish granted three times", 0], ["A light that flickers, then dies", 1], ["Very short sentences to build suspense", 1], ["Speech bubbles", 2], ["A sound effect in big letters", 2], ["Panels, one moment in each", 2]] } },
       vary: [
         { cards: [["A wicked witch", 0], ["A magic wand", 0], ["Footsteps behind you", 1], ["A ghost in the mirror", 1], ["Panels", 2], ["BANG!", 2]],
+          ez: { q: "Sort the clues into the right story.", slips: { any: "Look at the 3 covers on the last card." } },
           lv: { spicy: { cards: [["A talking animal who helps the hero", 0], ["The youngest child wins in the end", 0], ["Being alone in a big empty house", 1], ["Something you hear but never see", 1], ["A thought bubble, all cloudy", 2], ["A caption box: Meanwhile...", 2], ["ZAP!", 2]] } } },
         { cards: [["A castle on a hill", 0], ["A fairy godmother", 0], ["Blood on the floor", 1], ["A shadow at the window", 1], ["A thought bubble", 2], ["WHAM!", 2]],
+          ez: { q: "Sort the clues into the right story.", slips: { any: "Look at the 3 covers on the last card." } },
           lv: { spicy: { cards: [["Things happen in threes", 0], ["A clear lesson at the end", 0], ["A phone with no signal", 1], ["The reader knows something the hero does not", 1], ["Speed lines behind a runner", 2], ["Panels getting bigger at the exciting bit", 2], ["KAPOW!", 2]] } } }
       ] },
 
@@ -339,23 +360,27 @@ function qHead(d){
       options: ["Once upon a time", "A magic object", "Good beats evil", "Happily ever after", "A price list", "A headline"], answers: [0, 1, 2, 3],
       slips: { any: "Four of them belong in fairy tales. Prices and headlines belong somewhere else." },
       hint: "Think of a fairy tale you know.", why: "Once upon a time, magic, good beating evil and a happy ending. Prices are adverts, headlines are news.",
+      ez: { why: "Once upon a time, and happily ever after." },
       lv: { mild: { options: ["Once upon a time", "Happily ever after", "A price list", "A headline"], answers: [0, 1], slips: { any: "Two belong in fairy tales." } } },
       vary: [
         { q: "Pick <b>all</b> the horror conventions.",
           options: ["Darkness", "A creaking door", "Something hiding", "Short scary sentences", "Ingredients", "Buy now!"], answers: [0, 1, 2, 3],
           slips: { any: "Four of them belong in horror. Ingredients and Buy now belong somewhere else." },
           hint: "What makes a story scary?", why: "Darkness, creaks, something hiding and short sentences. Ingredients are recipes, Buy now is adverts.",
+          ez: { why: "Darkness, and a creaking door." },
           lv: { mild: { options: ["Darkness", "A creaking door", "Ingredients", "Buy now!"], answers: [0, 1], slips: { any: "Two belong in horror." } } } },
         { q: "Pick <b>all</b> the comic conventions.",
           options: ["Panels", "Speech bubbles", "Sound effects like BOOM", "Captions", "A method", "A headline"], answers: [0, 1, 2, 3],
           slips: { any: "Four of them belong in comics. A method and a headline belong somewhere else." },
           hint: "Picture a comic page.", why: "Panels, bubbles, sound effects and captions. A method is recipes, a headline is news.",
+          ez: { why: "Panels, and speech bubbles." },
           lv: { mild: { options: ["Panels", "Speech bubbles", "A method", "A headline"], answers: [0, 1], slips: { any: "Two belong in comics." } } } }
       ] },
 
     /* ---------- chunk 3: text type clues ---------- */
     { type: "learn", topic: "Text clues", title: "Real world texts have conventions too",
       fig: TYPES,
+      ez: { title: "Real texts have clues too", html: "<p><b>News:</b> a headline. <b>Advert:</b> a price.</p><p><b>Recipe:</b> ingredients, then steps.</p>" },
       html: "<p>It is not just stories. Everyday texts have conventions too.</p>" +
         "<p><b>News report:</b> a headline, who, what, where and when, quotes from people.<br><b>Advert:</b> a slogan, words like NEW and BEST, a price, Buy now!<br><b>Recipe:</b> a list of ingredients, then a method in numbered steps.</p>",
       lv: { spicy: { html: "<p>Everyday texts have conventions, and each one does a job for the reader.</p>" +
@@ -366,6 +391,7 @@ function qHead(d){
       options: ["News report", "Advert", "Recipe"], answer: 0,
       slips: { 1: "Nothing is for sale.", 2: "There is no cooking." },
       hint: "Big headline, a day, a quote.", why: "A headline, what happened, when, and a quote: a <b>news report</b>.",
+      ez: { why: "A headline, a day and a quote: a <b>news report</b>." },
       lv: { medium: { options: ["News report", "Advert", "Recipe", "Fairy tale"], slips: { 1: "Nothing is for sale.", 2: "There is no cooking.", 3: "No Once upon a time, and it says Monday." } },
         spicy: { q: P("<b>DOG SAVES DUCKLINGS</b><br>A dog called Pip rescued three ducklings from Hill Park pond on Monday. \"She just jumped in,\" said her owner.") + "Which convention shows the writer wants you to believe it really happened?",
           options: ["The quote from her owner", "The capital letters", "The word dog", "The full stop"],
@@ -376,6 +402,7 @@ function qHead(d){
           options: ["Advert", "News report", "Comic"], answer: 0,
           slips: { 1: "It is not telling you about something that happened.", 2: "No panels or bubbles." },
           hint: "Is it trying to get you to do something?", why: "NEW, a price and Buy yours today: an <b>advert</b>.",
+          ez: { hint: "What does it want you to do?", slips: { 1: "Nothing happened. It is selling.", 2: "No panels or bubbles." } },
           lv: { medium: { options: ["Advert", "News report", "Comic", "Recipe"], slips: { 1: "Nothing happened; it is selling.", 2: "No panels or bubbles.", 3: "No ingredients." } },
             spicy: { q: P("<b>NEW! The Super Squeaky Ball</b><br>Only &pound;3! Your dog will LOVE it. Buy yours today!") + "What is <b>Your dog will LOVE it</b> doing?",
               options: ["Promising how you, and your dog, will feel", "Telling you the price", "Telling you where to buy it", "Giving you a fact you could check"],
@@ -385,6 +412,7 @@ function qHead(d){
           options: ["Recipe", "Horror story", "News report"], answer: 0,
           slips: { 1: "Nothing scary, unless you burn it.", 2: "No headline or quotes." },
           hint: "What do you need, and what do you do?", why: "What you need, then numbered steps: a <b>recipe</b>.",
+          ez: { why: "What you need, then steps: a <b>recipe</b>." },
           lv: { medium: { options: ["Recipe", "Horror story", "News report", "Advert"], slips: { 1: "Nothing scary.", 2: "No headline or quotes.", 3: "Nothing is for sale." } },
             spicy: { q: P("<b>Cheese on Toast</b><br>You will need: 2 slices of bread, butter, cheese.<br>1. Toast the bread.<br>2. Add the cheese.<br>3. Grill for 3 minutes.") + "Why do the steps start with bossy verbs like <b>Toast</b>, <b>Add</b> and <b>Grill</b>?",
               options: ["They tell you exactly what to do, one action at a time", "To make it sound exciting", "Because recipes are rude", "To tell you what happened yesterday"],
@@ -397,13 +425,16 @@ function qHead(d){
       pairs: [["A headline", "News report"], ["A price and Buy now!", "Advert"], ["A list of ingredients", "Recipe"], ["Speech bubbles", "Comic"]],
       slips: { any: "Picture each text. Where would you see it?" },
       hint: "Ingredients are for cooking.", why: "Each convention has a home.",
+      ez: { q: "Match each clue to its text." },
       lv: { medium: { pairs: [["A headline", "News report"], ["A price and Buy now!", "Advert"], ["A list of ingredients", "Recipe"], ["Speech bubbles", "Comic"], ["Once upon a time", "Fairy tale"]] },
         spicy: { pairs: [["A headline", "News report"], ["A call to action", "Advert"], ["Bossy verbs in numbered steps", "Recipe"], ["Panels", "Comic"], ["A happy ending with a lesson", "Fairy tale"], ["Suspense", "Horror"]] } },
       vary: [
         { pairs: [["A quote from someone who was there", "News report"], ["A catchy slogan", "Advert"], ["A method in numbered steps", "Recipe"], ["Sound effects like BANG!", "Comic"]],
+          ez: { q: "Match each clue to its text." },
           lv: { medium: { pairs: [["A quote from someone who was there", "News report"], ["A catchy slogan", "Advert"], ["A method in numbered steps", "Recipe"], ["Sound effects like BANG!", "Comic"], ["A creaking door at midnight", "Horror"]] },
             spicy: { pairs: [["Who, what, where, when in the first line", "News report"], ["A promise about how you will feel", "Advert"], ["Amounts and cooking times", "Recipe"], ["Captions in boxes", "Comic"], ["Things happen in threes", "Fairy tale"], ["Something unseen", "Horror"]] } } },
         { pairs: [["The name of the newspaper at the top", "News report"], ["Words like NEW and BEST", "Advert"], ["Oven temperatures", "Recipe"], ["Panels", "Comic"]],
+          ez: { q: "Match each clue to its text." },
           lv: { medium: { pairs: [["The name of the newspaper at the top", "News report"], ["Words like NEW and BEST", "Advert"], ["Oven temperatures", "Recipe"], ["Panels", "Comic"], ["A fairy godmother", "Fairy tale"]] },
             spicy: { pairs: [["A short, punchy headline in the present tense", "News report"], ["Persuasive words like only and best", "Advert"], ["An ingredients list with amounts", "Recipe"], ["Speed lines", "Comic"], ["A clear villain", "Fairy tale"], ["Being trapped alone", "Horror"]] } } }
       ] },
@@ -413,17 +444,20 @@ function qHead(d){
       options: ["A list of ingredients", "A headline", "Speech bubbles"], answer: 0,
       slips: { 1: "Headlines are for news.", 2: "Speech bubbles are for comics." },
       hint: "Before you start cooking, what do you need to know?", why: "It has a title and a method, but no <b>ingredients list</b>. The birds will have to wait.",
+      ez: { q: P("<b>Bird Cake</b><br>1. Melt the lard.<br>2. Stir in the bird seed.<br>3. Pour into a pot and leave to set.") + "Jay's recipe is missing something. What?", hint: "What do you need before you cook?", why: "No <b>ingredients list</b>. The birds will have to wait." },
       lv: { spicy: { options: ["A list of ingredients with amounts", "A headline", "A call to action", "A quote from the chef"], slips: { 1: "Headlines are for news.", 2: "That is an advert convention.", 3: "That is more like news." } } },
       vary: [
         { q: P("A cat called Moss was rescued from a tree outside the library on Friday. Firefighter Jo Lee said: \"He was very calm about it.\"") + "This news report is missing something news reports nearly always have. What?",
           options: ["A headline", "An ingredients list", "Once upon a time"], answer: 0,
           slips: { 1: "That is for recipes.", 2: "That is for fairy tales." },
           hint: "What is usually in big letters at the top?", why: "It has who, what, where, when and a quote, but no <b>headline</b>.",
+          ez: { q: P("A cat called Moss was rescued from a tree outside the library on Friday. Firefighter Jo Lee said: \"He was very calm about it.\"") + "This news report is missing something. What?", hint: "What is big at the top?", why: "There is no <b>headline</b>." },
           lv: { spicy: { options: ["A headline", "An ingredients list", "A call to action", "A happy ending"], slips: { 1: "That is for recipes.", 2: "That is for adverts.", 3: "News does not need one." } } } },
         { q: P("<b>NEW! The Glow Torch</b><br>The brightest torch you will ever own. Perfect for camping.") + "This advert is missing something adverts nearly always have. What?",
           options: ["A price, or telling you to buy it", "A method", "Panels"], answer: 0,
           slips: { 1: "That is for recipes.", 2: "That is for comics." },
           hint: "What does an advert want you to do in the end?", why: "It has NEW and a slogan, but no price and no <b>call to action</b>, like Buy now!",
+          ez: { q: P("<b>NEW! The Glow Torch</b><br>The brightest torch you will ever own. Perfect for camping.") + "This advert is missing something. What?", hint: "What does an advert want you to do?", why: "No price, and no <b>Buy now!</b>" },
           lv: { spicy: { options: ["A call to action, like Buy now!", "A method", "Panels", "A quote from a witness"], slips: { 1: "That is for recipes.", 2: "That is for comics.", 3: "That is for news." } } } }
       ] },
 
@@ -432,7 +466,9 @@ function qHead(d){
       fig: comic(ST[0], true),
       html: "<p>Last bit. Here is one story, told three ways: as a <b>comic</b>, a <b>news report</b> and a <b>fairy tale</b>.</p>" +
         "<p>The conventions change the look. The theme underneath stays the same.</p>",
-      vary: [{ fig: comic(ST[1], true) }, { fig: comic(ST[2], true) }] },
+      ez: { title: "One story, 3 looks", html: "<p>One story. 3 looks: <b>comic</b>, <b>news</b>, <b>fairy tale</b>.</p><p>The theme stays the same.</p>" },
+      vary: [{ fig: comic(ST[1], true), ez: { title: "One story, 3 looks", html: "<p>One story. 3 looks: <b>comic</b>, <b>news</b>, <b>fairy tale</b>.</p><p>The theme stays the same.</p>" } },
+        { fig: comic(ST[2], true), ez: { title: "One story, 3 looks", html: "<p>One story. 3 looks: <b>comic</b>, <b>news</b>, <b>fairy tale</b>.</p><p>The theme stays the same.</p>" } }] },
 
     S("mc", "Three looks", qComic, ST),
     S("mc", "Three looks", qNews, ST),
@@ -448,6 +484,11 @@ function qHead(d){
       '<rect x="150" y="30" width="70" height="90" rx="6" fill="#ffffff" stroke="#141a33" stroke-width="2"/>' + T(185, 80, "POW!", 13, { a: "middle", b: 1, c: "#e8862a" }) +
       '<rect x="232" y="30" width="70" height="90" rx="2" fill="#ffffff" stroke="#141a33" stroke-width="2"/>' + T(267, 52, "NEWS", 12, { a: "middle", b: 1, serif: 1 }) + '<path d="M240 64h54M240 76h54M240 88h40" stroke="#c9cbd6" stroke-width="4"/>' +
       '<rect x="314" y="30" width="70" height="90" rx="6" fill="#fff4d6" stroke="#8a5a36" stroke-width="2"/>' + T(349, 72, "Once", 12, { a: "middle", i: 1, serif: 1 }) + T(349, 88, "upon...", 12, { a: "middle", i: 1, serif: 1 }) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Clues are everywhere", html: "<p>An advert wants your money. A horror story wants you to jump.</p><p>Clues help you read it right.</p>" },
+    make: { intro: "Pick a story you know. Name its theme. Write its first line in a new look." }
   },
 
   make: {

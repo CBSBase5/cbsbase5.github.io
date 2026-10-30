@@ -25,9 +25,55 @@ function clean(o){
   if(o.boxes && Array.isArray(o.slips)) o.slips = o.slips.filter(function(r){ var b = r.length === 3 ? r[0] : 0; return !(o.boxes[b] && Math.abs(r[r.length - 2] - o.boxes[b].a) < 1e-9); });
   return o;
 }
+/* easy read (LC): shorter wrong answer messages, matched from the full ones */
+var ZS = [
+  [/^That is the perimeter, the edge\..*/, "That is the edge. Area is length &times; width."],
+  [/^Those two were added\..*/, "That added. Area is length &times; width."],
+  [/^That cost used the perimeter\..*/, "Use the area for the cost."],
+  [/^The price is for each m&sup2;.*/, "Multiply the area by the price."],
+  [/^That is only two of the walls\..*/, "That is 2 walls. Add all 4."],
+  [/^That is the area\. Skirting runs round the edge\.$/, "That is the area. Skirting goes round the edge."],
+  [/^That multiplied\. Share the total.*/, "That multiplied. Divide instead."],
+  [/^That leaves you short of skirting\..*/, "Too short. Round up."],
+  [/^Shops sell whole lengths only\..*/, "Whole lengths only. Round up."],
+  [/^Cost the whole lengths you buy.*/, "Cost the whole lengths you buy."],
+  [/^Those were added\. Area is length.*/, "That added. Area is length &times; height."],
+  [/^That is the distance round the edge of the wall\..*/, "That is the edge. Area is length &times; height."],
+  [/^That would run out before the end\..*/, "Too few. Round up to a whole tin."],
+  [/^That is enough for one coat\..*/, "That is 1 coat. 2 coats is double."],
+  [/^That would run out\. Round up.*/, "Too few. Round up."],
+  [/^That multiplied\. Area = length.*/, "That multiplied. Divide the area by the length."],
+  [/^That added the rows\..*/, "That added. Multiply instead."],
+  [/^The last tile.*/, "Cut tiles still count. Round up."],
+  [/^That divided metres by centimetres\. (Change \S+ m into \S+ cm first).*/, "$1."],
+  [/^That multiplied\. You are fitting tiles.*/, "That multiplied. Divide instead."],
+  [/^That leaves you short of tiles\..*/, "Too few. Round up."],
+  [/^You can only buy whole packs\..*/, "Whole packs only. Round up."],
+  [/^Round up, or there will be a gap.*/, "Round up, or there is a gap."],
+  [/^That is the area of the run\..*/, "That is the area. A fence goes round the edge."],
+  [/^That is two sides\..*/, "That is 2 sides. Add all 4."],
+  [/^That leaves a gap Bonnie.*/, "Bonnie could squeeze through! Round up."],
+  [/^(.+) works out at (\S+) (each|per m&sup2;)\. (.+?) is .*cheaper\.$/, "$1 is $2 $3. $4 is cheaper."],
+  [/^That is the whole rectangle.*/, "That includes the missing corner. Take it off."]
+];
+function zmsg(m){ if(typeof m !== "string") return m; for(var i = 0; i < ZS.length; i++) if(ZS[i][0].test(m)) return m.replace(ZS[i][0], ZS[i][1]); return m; }
+function ezSlips(o){
+  if(!o.ez || !o.slips) return;
+  var any = false;
+  if(Array.isArray(o.slips)){
+    var z = o.slips.map(function(r){ var m = zmsg(r[r.length - 1]); if(m === r[r.length - 1]) return null; any = true; return r.map(function(x, j){ return j === r.length - 1 ? m : null; }); });
+    if(any) o.ez.slips = z;
+  } else {
+    var zo = {};
+    Object.keys(o.slips).forEach(function(k){ var m = zmsg(o.slips[k]); if(m !== o.slips[k]){ zo[k] = m; any = true; } });
+    if(any) o.ez.slips = zo;
+  }
+}
+function noez(x){ var o = {}; Object.keys(x).forEach(function(k){ if(k !== "ez") o[k] = x[k]; }); return o; }
 function G(type, topic, sets, extra){
-  sets.forEach(function(v){ v.forEach(clean); });
-  function one(v){ var o = {}; Object.keys(v[0]).forEach(function(k){ o[k] = v[0][k]; }); o.lv = { mild: v[1], spicy: v[2] }; return o; }
+  sets.forEach(function(v){ v.forEach(clean); v.forEach(ezSlips); });
+  /* ez comes from the first level's version only (v[1]); medium and spicy carry none */
+  function one(v){ var o = noez(v[0]); o.lv = { mild: noez(v[1]), spicy: noez(v[2]) }; if(v[1].ez) o.ez = v[1].ez; return o; }
   var s = { type: type, topic: topic }, b = one(sets[0]);
   Object.keys(b).forEach(function(k){ s[k] = b[k]; });
   if(sets.length > 1) s.vary = sets.slice(1).map(one);
@@ -153,11 +199,13 @@ var LEARN1 = roomFig(5, 4, { area: true, grid: true, perim: true, door: 0.9, ins
 /* ---------- question makers ---------- */
 
 function sortQ(cards){ return { q: "Sort the jobs. Do you need the <b>area</b> (the inside) or the <b>perimeter</b> (the edge)?", cards: cards,
+  ez: { q: "Sort them. <b>Area</b> is the inside. <b>Perimeter</b> is the edge.", hint: "Cover it, or go round it?", why: "Covering needs <b>area</b>. Going round needs <b>perimeter</b>." },
   hint: "Does it cover the whole surface, or go round the outside?",
   why: "Covering a surface (carpet, paint, tiles, turf) needs the area. Going round the edge (skirting, fences, trims, lights) needs the perimeter." }; }
 function floorCost(l, w, p){
   var a = r6(l * w), pe = r6(2 * (l + w)), c = r6(a * p);
   return { q: "[[Boss]] wants new flooring in [[room]], which is " + fm(l) + " m by " + fm(w) + " m. Flooring costs " + P + mo(p) + " per m&sup2;. Area first, then the cost.",
+    ez: { q: "Floor: " + fm(l) + " m by " + fm(w) + " m. " + P + mo(p) + " per m&sup2;.<br>Area first. Then the cost.", hint: "Length" + X + "width. Then" + X + "the price." },
     fig: roomFig(l, w, { area: true, grid: l * w <= 40 }),
     boxes: [{ label: "Area", a: a, post: M2 }, { label: "Cost", a: c, pre: P, show: mo(c) }],
     slips: [[0, pe, "That is the perimeter, the edge. Flooring covers the inside: length " + X.trim() + " width."], [0, r6(l + w), "Those two were added. Area is length " + X.trim() + " width."],
@@ -169,6 +217,7 @@ function skirt(l, w, door){
   var pe = r6(2 * (l + w)), ans = r6(pe - door), sl = [[r6(l + w), "That is only two of the walls. Go all the way round: there are four."], [r6(l * w), "That is the area. Skirting runs round the edge."]];
   if(door){ sl.push([pe, "Nearly. Skirting does not go across the doorway, so take the " + fm(door) + " m off."]); sl.push([r6(pe + door), "Take the doorway away, rather than adding it."]); }
   return { q: "Skirting board runs round the bottom of the walls in [[room]] (" + fm(l) + " m by " + fm(w) + " m)" + (door ? ", but not across the doorway, which is " + fm(door) + " m wide." : ", all the way round.") + " How many metres of skirting?",
+    ez: { q: "Skirting goes round [[room]]: " + fm(l) + " m by " + fm(w) + " m." + (door ? " Skip the " + fm(door) + " m door." : "") + "<br>How many metres?", hint: "Add all 4 sides" + (door ? ". Take off the door." : ".") },
     fig: roomFig(l, w, { perim: true, door: door }),
     boxes: [{ label: "Skirting", a: ans, post: " m" }], slips: sl,
     hint: "Add all four sides" + (door ? ", then take off the door." : "."),
@@ -181,6 +230,7 @@ function lengths(total, each, price){
   var bx = [{ label: "Lengths", a: n }];
   if(price){ bx.push({ label: "Cost", a: r6(n * price), pre: P, show: mo(n * price) }); sl.push([1, r6(raw * price), "Cost the whole lengths you buy (" + n + "), not the part answer."]); }
   return { q: "You need " + fm(total) + " m of skirting. It is sold in " + fm(each) + " m lengths" + (price ? " at " + P + mo(price) + " each" : "") + ". How many lengths do you buy" + (price ? ", and what does it cost?" : "?"),
+    ez: { q: "You need " + fm(total) + " m of skirting. It comes in " + fm(each) + " m lengths" + (price ? ", " + P + mo(price) + " each" : "") + ".<br>How many lengths" + (price ? "? What cost?" : "?") },
     boxes: bx, slips: sl, hint: "Divide, then round up.",
     why: fm(total) + " &divide; " + fm(each) + " = " + fa(raw) + (raw !== n ? ", which rounds <b>up</b> to <b>" + n + "</b> lengths." : ", so <b>" + n + "</b> lengths.") + (price ? " " + n + X + P + mo(price) + " = <b>" + P + mo(n * price) + "</b>." : "") };
 }
@@ -198,6 +248,7 @@ function walls(l, w, h, holes){
 function wallOne(l, h, hole){
   var wa = r6(l * h), off = r6(hole[1] * hole[2]), ans = r6(wa - off);
   return { q: "One wall in [[room]] is " + fm(l) + " m long and " + fm(h) + " m high. It has a " + hole[0] + " " + fm(hole[1]) + " m by " + fm(hole[2]) + " m, which does not get painted.",
+    ez: { q: "A wall: " + fm(l) + " m long, " + fm(h) + " m high.<br>Do not paint the " + hole[0] + ": " + fm(hole[1]) + " m by " + fm(hole[2]) + " m.", hint: "Length" + X + "height. Take off the " + hole[0] + "." },
     fig: wallsFig([l], h, [[hole[0], hole[1], hole[2], 0]]),
     boxes: [{ label: "Whole wall", a: wa, post: M2 }, { label: "Area to paint", a: ans, post: M2 }],
     slips: [[0, r6(l + h), "Those were added. Area is length " + X.trim() + " height."], [0, r6(2 * (l + h)), "That is the distance round the edge of the wall. Area is length " + X.trim() + " height."], [1, wa, "Nearly. Take off the " + hole[0] + "."]],
@@ -211,6 +262,7 @@ function mcTins(area, coats, cover){
   add(fm(need), "Shops sell whole tins. Round up.");
   if(coats > 1) add(up(area / cover), "That is enough for one coat. Two coats means double the paint.");
   return { q: "You need to paint " + fm(area) + M2 + (coats > 1 ? ", with <b>two coats</b>" : "") + ". One tin covers " + fm(cover) + M2 + ". How many tins do you buy?",
+    ez: { q: "Paint " + fm(area) + M2 + (coats > 1 ? ", <b>2 coats</b>" : "") + ". 1 tin covers " + fm(cover) + M2 + ".<br>How many tins?", hint: (coats > 1 ? "Double it. " : "") + "Divide. Then round up.", why: fm(area * coats) + " &divide; " + fm(cover) + " = " + fa(need) + ". So <b>" + n + " tins</b>." },
     options: opts, answer: 0, slips: sl,
     hint: (coats > 1 ? "Double the area for two coats. " : "") + "Divide by what one tin covers. Then round up.",
     why: (coats > 1 ? fm(area) + X + "2 = " + fm(area * 2) + M2 + ". " : "") + fm(area * coats) + " &divide; " + fm(cover) + " = " + fa(need) + ", so <b>" + n + " tins</b>. Rounding down would leave a patch unpainted." };
@@ -222,6 +274,7 @@ function tinsCost(area, coats, cover, price){
   if(coats > 1 && up(area / cover) !== n) sl.push([0, up(area / cover), "That only covers one coat."]);
   if(r6(need * price) !== c) sl.push([1, r6(need * price), "Cost the whole tins you buy (" + n + ")."]);
   return { q: "Paint " + fm(area) + M2 + (coats > 1 ? ", two coats" : ", one coat") + ". A tin covers " + fm(cover) + M2 + " and costs " + P + mo(price) + ". How many tins, and what is the cost?",
+    ez: { q: "Paint " + fm(area) + M2 + (coats > 1 ? ", 2 coats" : "") + ". 1 tin covers " + fm(cover) + M2 + ". It costs " + P + mo(price) + ".<br>How many tins? What cost?", hint: (coats > 1 ? "Double it. " : "") + "Divide. Round up. Then" + X + "the price." },
     boxes: [{ label: "Tins", a: n }, { label: "Cost", a: c, pre: P, show: mo(c) }], slips: sl,
     hint: "Area" + (coats > 1 ? " " + X.trim() + " 2 coats" : "") + ", divide by the cover, round up, then times the price.",
     why: fm(area * coats) + " &divide; " + fm(cover) + " = " + fa(need) + ", rounds up to " + n + " tins. " + n + X + P + mo(price) + " = <b>" + P + mo(c) + "</b>." };
@@ -229,6 +282,7 @@ function tinsCost(area, coats, cover, price){
 function missingSide(area, l){
   var ans = r6(area / l);
   return { q: "A wall in [[room]] is " + fm(l) + " m long. Its area is " + fm(area) + M2 + ". How high is it?",
+    ez: { q: "A wall is " + fm(l) + " m long. Its area is " + fm(area) + M2 + ".<br>How high is it?", hint: "Area &divide; length." },
     fig: wallFig(l, area),
     boxes: [{ label: "Height", a: ans, post: " m" }],
     slips: [[r6(area * l), "That multiplied. Area = length " + X.trim() + " height, so the height is area &divide; length."], [r6(area - l), "That took away. Think: " + fm(l) + X + "? = " + fm(area) + "."]],
@@ -240,6 +294,7 @@ function tiles(l, w, cm){
   if(Math.floor(r6(l / t)) !== nl) sl.push([0, Math.floor(r6(l / t)), "The last tile in the row gets cut to fit, but you still need it. Round up."]);
   if(Math.floor(r6(w / t)) !== nw) sl.push([1, Math.floor(r6(w / t)), "The last tile gets cut to fit, but you still need it. Round up."]);
   return { q: "Tiles " + (cm === 100 ? "1 m (100 cm)" : cm + " cm") + " square, on a floor " + fm(l) + " m by " + fm(w) + " m. How many along each side, and how many altogether?",
+    ez: { q: (cm === 100 ? "1 m" : cm + " cm") + " tiles. Floor " + fm(l) + " m by " + fm(w) + " m.<br>How many each way? How many in all?", hint: "Count along each side. Then multiply." },
     fig: tilesFig(l, w, cm, cm < 100 && (Math.floor(r6(l / t)) !== nl || Math.floor(r6(w / t)) !== nw) ? "Orange tiles get cut to fit, but you still buy them" : ""),
     boxes: [{ label: "Along " + fm(l) + " m", a: nl }, { label: "Along " + fm(w) + " m", a: nw }, { label: "Tiles altogether", a: nl * nw }], slips: sl,
     hint: "How many " + fm(t) + " m tiles fit along " + fm(l) + " m? Then along " + fm(w) + " m. Then multiply.",
@@ -253,12 +308,14 @@ function packsQ(n, extra, per, price){
   if(r6(need / per) !== pk) sl.push([o, r6(need / per), "You can only buy whole packs. Round up."]);
   if(r6(need / per * price) !== c) sl.push([o + 1, r6(need / per * price), "Cost the whole packs you buy (" + pk + ")."]);
   return { q: "You need " + n + " tiles" + (extra ? ", plus <b>" + extra + "% extra</b> in case some break when you cut them" : "") + ". Tiles come in packs of " + per + " at " + P + mo(price) + " a pack. " + (extra ? "How many tiles, how many packs, and the cost?" : "How many packs, and the cost?"),
+    ez: { q: "You need " + n + " tiles" + (extra ? ", plus " + extra + "% extra" : "") + ". A pack of " + per + " costs " + P + mo(price) + ".<br>" + (extra ? "How many tiles? Packs? Cost?" : "How many packs? What cost?"), hint: "Divide by " + per + ". Round up. Then" + X + "the price." },
     boxes: bx, slips: sl, hint: (extra ? "Find " + extra + "% of " + n + " and add it on (round up to a whole tile). " : "") + "Divide by " + per + ", round up, then times the price.",
     why: (extra ? extra + "% of " + n + " is " + fm(n * extra / 100) + ", so " + need + " tiles. " : "") + need + " &divide; " + per + " = " + fa(need / per) + ", so <b>" + pk + " packs</b>. " + pk + X + P + mo(price) + " = <b>" + P + mo(c) + "</b>." };
 }
 function mcConv(l, cm){
   var ans = r6(l * 100 / cm), opts = [ans, r6(l / cm), r6(l * cm)].map(fm);
   return { q: "Each tile is " + cm + " cm long" + (cm === 50 ? " (half a metre)" : "") + ". How many fit in a row " + fm(l) + " m long?", options: opts, answer: 0,
+    ez: { q: "Tiles are " + cm + " cm long. How many fit in " + fm(l) + " m?" },
     slips: { 1: "That divided metres by centimetres. Change " + fm(l) + " m into " + (l * 100) + " cm first (or " + cm + " cm into " + fm(cm / 100) + " m).", 2: "That multiplied. You are fitting tiles into a length, so divide." },
     hint: fm(l) + " m is " + (l * 100) + " cm.", why: fm(l) + " m = " + (l * 100) + " cm, and " + (l * 100) + " &divide; " + cm + " = <b>" + fm(ans) + "</b>." };
 }
@@ -274,6 +331,7 @@ function packCover(l, w, per, cm){
   if(Math.floor(r6(a / pa)) !== pk) sl.push([2, Math.floor(r6(a / pa)), "Round up, or there will be a gap in the floor."]);
   if(r6(a / pa) !== pk) sl.push([2, r6(a / pa), "Whole packs only. Round up."]);
   return { q: "[[Room]] is " + fm(l) + " m by " + fm(w) + " m. A pack has " + per + " tiles, each " + cm + " cm square. Find the floor area, what one pack covers, then the packs to buy.",
+    ez: { q: "Floor " + fm(l) + " m by " + fm(w) + " m. A pack has " + per + " tiles, each " + (cm === 100 ? "1 m" : cm + " cm") + " square.<br>Fill in each box." },
     boxes: [{ label: "Floor area", a: a, post: M2 }, { label: "One pack covers", a: pa, post: M2 }, { label: "Packs", a: pk }], slips: sl,
     hint: "One tile covers " + fm(cm / 100) + X + fm(cm / 100) + " m&sup2;.",
     why: "Floor " + fm(a) + M2 + ". One tile " + fm(ta) + M2 + ", so a pack covers " + per + X + fm(ta) + " = " + fm(pa) + M2 + ". " + fm(a) + " &divide; " + fm(pa) + " = " + fa(a / pa) + ", so <b>" + pk + " packs</b>." };
@@ -284,6 +342,7 @@ function fence(l, w, gate, panel, price){
   if(Math.floor(r6(len / panel)) !== n) sl.push([1, Math.floor(r6(len / panel)), "That leaves a gap Bonnie could squeeze through. Round up."]);
   if(price){ bx.push({ label: "Cost", a: r6(n * price), pre: P, show: mo(n * price) }); if(r6(len / panel * price) !== r6(n * price)) sl.push([2, r6(len / panel * price), "Cost the whole panels you buy (" + n + ")."]); }
   return { q: "Jay is fencing a dog run for Bonnie, " + fm(l) + " m by " + fm(w) + " m" + (gate ? ", leaving a " + fm(gate) + " m gap for a gate" : "") + ". Panels are " + fm(panel) + " m wide" + (price ? " and cost " + P + mo(price) + " each" : "") + ". How long is the fence, and how many panels" + (price ? ", and the cost?" : "?"),
+    ez: { q: "Bonnie's dog run: " + fm(l) + " m by " + fm(w) + " m." + (gate ? " Leave a " + fm(gate) + " m gate." : "") + " Panels are " + fm(panel) + " m.<br>How long is the fence? How many panels?" + (price ? " What cost?" : ""), hint: "Add the 4 sides" + (gate ? ", take off the gate" : "") + ". Divide by " + fm(panel) + "." + (Math.floor(r6(len / panel)) !== n ? " Round up." : "") },
     fig: fenceFig(l, w, gate, panel),
     boxes: bx, slips: sl, hint: "Perimeter" + (gate ? ", take off the gate" : "") + ", divide by the panel width, round up.",
     why: "Round the edge: " + fm(pe) + " m" + (gate ? ", take off " + fm(gate) + " m for the gate: " + fm(len) + " m" : "") + ". " + fm(len) + " &divide; " + fm(panel) + " = " + fa(len / panel) + ", so <b>" + n + " panels</b>." + (price ? " " + n + X + P + mo(price) + " = <b>" + P + mo(n * price) + "</b>." : "") };
@@ -292,6 +351,7 @@ function bestVal(offers, unit){
   var per = offers.map(function(o){ return r6(o[1] / o[2]); }), best = per.indexOf(Math.min.apply(null, per)), sl = {}, u = unit === "m2" ? " per m&sup2;" : " each";
   offers.forEach(function(o, k){ if(k !== best) sl[k] = o[0] + " works out at " + P + mo(per[k]) + u + ". " + offers[best][0] + " is " + P + mo(per[best]) + u + ", which is cheaper."; });
   return { q: "Which is the better value?", fig: valueFig(offers, unit),
+    ez: { hint: "Find the price of 1 " + (unit === "m2" ? "m&sup2;" : "pack") + " for each." },
     options: offers.map(function(o){ return o[0]; }), answer: best, fixed: true, slips: sl,
     hint: "Work out the price for one " + (unit === "m2" ? "m&sup2;" : "pack") + " for each: price &divide; " + (unit === "m2" ? "area" : "how many") + ".",
     why: offers.map(function(o, k){ return o[0] + ": " + P + mo(o[1]) + " &divide; " + fm(o[2]) + " = " + P + mo(per[k]); }).join(". ") + ". <b>" + offers[best][0] + "</b> is cheapest for each one." };
@@ -302,6 +362,7 @@ function budget(have, items){
   if(plain !== spent) sl.push([0, plain, "Remember the money off. Work out the discount before adding."]);
   if(items.some(function(x){ return x[2] > 1; })) sl.push([0, r6(items.reduce(function(a, x){ return a + x[1] * (1 - (x[3] || 0) / 100); }, 0)), "Some of those are several of the same thing. Multiply those first."]);
   return { q: "[[Boss]] has " + P + mo(have) + " for the makeover. The shopping list: " + items.map(function(x){ return x[0] + " " + ((x[2] || 1) > 1 ? x[2] + X + P + mo(x[1]) : P + mo(x[1])) + (x[3] ? " with " + x[3] + "% off" : ""); }).join(", ") + ". What is spent, and what is left?",
+    ez: { q: "[[Boss]] has " + P + mo(have) + ".<br>" + items.map(function(x){ return x[0] + " " + ((x[2] || 1) > 1 ? x[2] + X + P + mo(x[1]) : P + mo(x[1])) + (x[3] ? ", " + x[3] + "% off" : ""); }).join("<br>") + "<br>What is spent? What is left?", hint: "Add them up. Take that from " + P + mo(have) + "." },
     boxes: [{ label: "Spent", a: spent, pre: P, show: mo(spent) }, { label: "Left", a: left, pre: P, show: mo(left) }], slips: sl,
     hint: "Cost each line first" + (items.some(function(x){ return x[3]; }) ? " (take the % off that one)" : "") + ", add them up, then take that from " + P + mo(have) + ".",
     why: items.map(function(x){ return x[0] + " " + P + mo(x[1] * (x[2] || 1) * (1 - (x[3] || 0) / 100)); }).join(", ") + ". Spent <b>" + P + mo(spent) + "</b>, left <b>" + P + mo(left) + "</b>." };
@@ -309,6 +370,7 @@ function budget(have, items){
 function Lroom(W, H, cw, ch, p, o){
   var a = r6(W * H - cw * ch), c = r6(a * p);
   return { q: "[[Room]] is L shaped. Flooring costs " + P + mo(p) + " per m&sup2;. Find the floor area, then the cost." + (o && o.hide ? " Two lengths are missing: work them out from the others." : ""),
+    ez: { q: "An L shaped room. Flooring is " + P + mo(p) + " per m&sup2;.<br>Find the area. Then the cost.", hint: "Split it into 2 rectangles." },
     fig: LFig(W, H, cw, ch, o),
     boxes: [{ label: "Area", a: a, post: M2 }, { label: "Cost", a: c, pre: P, show: mo(c) }],
     slips: [[0, r6(W * H), "That is the whole rectangle, missing corner included. Take the corner off (or split it into two rectangles)."], [0, r6(2 * (W + H)), "That is the perimeter. Flooring needs the area."], [1, r6(W * H * p), "That cost includes the missing corner."]],
@@ -346,6 +408,7 @@ function Lroom(W, H, cw, ch, p, o){
     /* ---------- chunk 1: floor and edges ---------- */
     { type: "learn", topic: "Floor and edges", title: "Inside or edge?",
       fig: LEARN1,
+      ez: { html: "<p><b>Area</b> is the inside. 5 &times; 4 = 20 m&sup2;.</p><p><b>Perimeter</b> is the edge. 5 + 4 + 5 + 4 = 18 m.</p>" },
       html: "<p>Every makeover job is one of two kinds.</p>" +
         "<p><b>Covering the inside</b> (carpet, flooring, paint, tiles) needs the <b>area</b>: length &times; width, in m&sup2;. A 5 m by 4 m floor is 5 &times; 4 = <b>20 m&sup2;</b>. At &pound;12 per m&sup2;, flooring costs 20 &times; 12 = <b>&pound;240</b>.</p>" +
         "<p><b>Going round the edge</b> (skirting board, fences, trims) needs the <b>perimeter</b>: add all four sides. 5 + 4 + 5 + 4 = <b>18 m</b>. Skirting skips the doorway, so take that off: 18 &minus; 0.9 = <b>17.1 m</b>.</p>",
@@ -386,6 +449,7 @@ function Lroom(W, H, cw, ch, p, o){
     /* ---------- chunk 2: paint the walls ---------- */
     { type: "learn", topic: "Paint the walls", title: "Unroll the walls",
       fig: wallsFig([5, 4, 5, 4], 2.5, [["door", 1, 2, 0], ["window", 1.5, 1, 1]], "18 m long, 2.5 m high: 45 m&#178;, take off door and window"),
+      ez: { title: "Paint a wall", html: "<p>Wall: 4 &times; 2 = 8 m&sup2;. Take off the window: <b>7 m&sup2;</b>.</p><p>1 tin covers 3 m&sup2;. So <b>3 tins</b>.</p>" },
       html: "<p>Imagine peeling the walls off and laying them in one long strip. The strip is as long as the <b>distance round the room</b>, and as high as the walls.</p>" +
         "<p>Room 5 m by 4 m, walls 2.5 m high: round the room is 18 m, so the walls are 18 &times; 2.5 = <b>45 m&sup2;</b>. Take off the door (1 &times; 2 = 2 m&sup2;) and window (1.5 &times; 1 = 1.5 m&sup2;): <b>41.5 m&sup2;</b> to paint.</p>" +
         "<p>Tins: if one tin covers 10 m&sup2;, that is 41.5 &divide; 10 = 4.15 tins. You cannot buy 0.15 of a tin, so <b>round up to 5</b>.</p>",
@@ -424,6 +488,7 @@ function Lroom(W, H, cw, ch, p, o){
     /* ---------- chunk 3: tiles and packs ---------- */
     { type: "learn", topic: "Tiles and packs", title: "Fit the tiles, then buy the packs",
       fig: tilesFig(3, 2, 50, "6 along, 4 down: 6 x 4 = 24 tiles"),
+      ez: { title: "Fit the tiles", html: "<p>Floor 3 m by 2 m. 1 m tiles: 3 &times; 2 = <b>6 tiles</b>.</p><p>Packs of 4. So <b>2 packs</b>.</p>" },
       html: "<p>Tiles are measured in cm, rooms in m. Change one so they match: 50 cm = 0.5 m.</p>" +
         "<p>Floor 3 m by 2 m: 3 &divide; 0.5 = <b>6</b> along, 2 &divide; 0.5 = <b>4</b> down. 6 &times; 4 = <b>24 tiles</b>.</p>" +
         "<p>Packs of 10: 24 &divide; 10 = 2.4, so <b>3 packs</b>. Round up, always: nobody wants a gap in the floor.</p>",
@@ -461,6 +526,7 @@ function Lroom(W, H, cw, ch, p, o){
     /* ---------- chunk 4: fences and best value ---------- */
     { type: "learn", topic: "Fences and best value", title: "Fence it, then shop smart",
       fig: fenceFig(6, 4, 1, 1.8, true),
+      ez: { title: "Fence it", html: "<p>A fence goes round the <b>edge</b>: 16 m.</p><p>Panels are 2 m. 16 &divide; 2 = <b>8 panels</b>.</p>" },
       html: "<p>Jay is building Bonnie a dog run. A fence goes round the <b>edge</b>, so it is perimeter again: 6 + 4 + 6 + 4 = 20 m, minus a 1 m gate = <b>19 m</b>.</p>" +
         "<p>Panels are 1.8 m wide: 19 &divide; 1.8 = 10.6, so <b>11 panels</b>. Ten would leave a gap, and Bonnie finds every gap.</p>",
       lv: { mild: { fig: fenceFig(5, 3, 0, 2, true),
@@ -474,6 +540,7 @@ function Lroom(W, H, cw, ch, p, o){
 
     { type: "learn", topic: "Fences and best value", title: "Best value: the price of one",
       fig: valueFig([["Pack A", 18, 2], ["Pack B", 25, 3]], "m2"),
+      ez: { title: "Price of one", html: "<p>Find the <b>price of one</b>.</p><p>Deal A: &pound;6 each. Deal B: &pound;5 each. <b>B</b> wins.</p>" },
       html: "<p>Bigger packs are not always cheaper. To compare, find the <b>price of one</b>: one m&sup2;, one tile, one tin.</p>" +
         "<p>Pack A: &pound;18 &divide; 2 = &pound;9 per m&sup2;. Pack B: &pound;25 &divide; 3 = &pound;8.33 per m&sup2;. <b>Pack B</b> is better value, even though it costs more.</p>",
       lv: { mild: { fig: valueFig([["Deal A", 6, 1], ["Deal B", 10, 2]], "packs"),
@@ -498,6 +565,10 @@ function Lroom(W, H, cw, ch, p, o){
     ])
   ],
 
+  ez: {
+    realWorld: { title: "Estimators do this", html: "<p>Builders measure first. Then they order what they need.</p><p>Too little and the job stops. Too much wastes money.</p>" },
+    make: { intro: "Draw your dream room. We work out the area for you." }
+  },
   realWorld: {
     title: "Estimators do this for a living",
     html: "<p>Before any builder, decorator or flooring fitter starts a job, someone measures up and works out exactly what to order and what it will cost. That job is called an <b>estimator</b>, and it is exactly what you have just been doing.</p>" +

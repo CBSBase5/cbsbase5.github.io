@@ -104,6 +104,7 @@ function flow(a, op1, b, op2, c, label){
     /* ---------- chunk 1: total or parts? ---------- */
     { type: "learn", topic: "Total or parts?",
       title: "Do you know the total?",
+      ez: { routes: ["<p>4 [[groups]], 6 in each. Find the total: <b>multiply</b>.</p><p>4 &times; 6 = 24</p>", "<p>24 split into 4 [[groups]]. Total known: <b>divide</b>.</p><p>24 &divide; 4 = 6</p>"] },
       routes: [
         { name: "Multiply", fig: LEARN1,
           html: "<p>4 [[groups]], with 6 [[things]] in each. You know the <b>parts</b> but not the <b>total</b>.</p>" +
@@ -124,6 +125,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "mc", topic: "Total or parts?",
       q: "There are 5 [[groups]]. Each one holds 8 [[things]]. Which calculation finds how many [[things]] there are altogether?",
+      ez: { q: "5 [[groups]], 8 [[things]] in each. Which sum finds the total?", slips: { 1: "Dividing splits a total. You need the total.", 2: "5 lots of 8 is times, not add.", 3: "Nothing is taken away." }, why: "5 lots of 8: 5 &times; 8 = 40." },
       fig: bar("? altogether", 5, "8", { label: "5 parts of 8, total unknown" }),
       options: ["5 &times; 8", "8 &divide; 5", "5 + 8", "8 &minus; 5"],
       answer: 0,
@@ -149,6 +151,7 @@ function flow(a, op1, b, op2, c, label){
       buckets: ["Multiply", "Divide"],
       cards: [["3 [[groups]] with 10 [[things]] in each. How many altogether?", 0], ["20 [[things]] shared between 4 [[groups]]. How many in each?", 1], ["30 [[things]] put into [[groups]] of 5. How many [[groups]]?", 1], ["6 [[people]] each bring 2 [[things]]. How many [[things]]?", 0]],
       hint: "For each one ask: do I already know the total?",
+      ez: { hint: "Do you know the total?", why: "Total given: divide. Building a total: multiply." },
       why: "When the total is given (20, 30), you divide. When you have to build the total from equal parts, you multiply.",
       lv: {
         medium: { cards: [["Tickets are &pound;6 each. What do 15 cost?", 0], ["&pound;90 split equally between 6 [[people]]. How much each?", 1], ["A [[ride]] holds 8. How many are needed for 96 [[people]]?", 1], ["A [[ride]] travels 40 miles a day for 5 days. How far altogether?", 0], ["A 60 minute session in 12 minute slots. How many slots?", 1]] },
@@ -157,6 +160,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "mc", topic: "Total or parts?", explain: true,
       q: "Both of these use the word \"each\". Which one needs dividing?",
+      ez: { q: "Both say \"each\". Which one needs dividing?", slips: { 1: "You know the parts here. So multiply." }, hint: "Which one tells you the total?", why: "The first gives the total, 24. 24 &divide; 4 = 6." },
       options: ["24 [[things]] are shared out so each of 4 [[groups]] gets the same. How many in each?", "Each [[group]] has 4 [[things]]. There are 24 [[groups]]. How many [[things]]?"],
       answer: 0,
       slips: { 1: "Here you know the parts (4 in each) and need the total. That is multiplying, even though it says \"each\"." },
@@ -178,6 +182,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "num", topic: "Total or parts?",
       q: "48 [[things]] are packed into [[groups]], 6 in each. How many [[groups]] are filled?",
+      ez: { q: "48 [[things]], 6 in each [[group]]. How many [[groups]]?", slips: [[288, "That multiplies. You know the total, so divide."], [42, "How many 6s fit into 48?"]], hint: "How many 6s in 48?" },
       fig: bar("48 altogether", 8, "6", { label: "48 split into parts of 6" }),
       boxes: [{ label: "[[Groups]]", a: 8 }],
       slips: [[288, "That multiplies. You know the total (48), so divide."], [42, "Taking away 6 once is not enough: how many sixes fit into 48?"]],
@@ -200,6 +205,7 @@ function flow(a, op1, b, op2, c, label){
     /* ---------- chunk 2: two kinds of divide ---------- */
     { type: "learn", topic: "Sharing or grouping",
       title: "Two kinds of divide",
+      ez: { html: "<p><b>Sharing:</b> you know the groups. Find how many in each.</p><p><b>Grouping:</b> you know the size. Find how many groups.</p>" },
       fig: SHAREGROUP,
       html: "<p>Dividing comes in two flavours, and both are &divide;.</p>" +
         "<p><b>Sharing:</b> you know how many groups. Deal the [[things]] out one at a time until they are gone. The answer is <b>how many in each</b>.</p>" +
@@ -208,6 +214,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "match", topic: "Sharing or grouping",
       q: "Match each problem to its answer. Look at what the answer is counting.",
+      ez: { q: "Match each problem to its answer.", hint: "Sharing: in each. Grouping: how many groups.", why: "Same numbers. Different questions." },
       pairs: [["20 [[things]] shared between 4 [[groups]]", "20 &divide; 4 = 5 in each [[group]]"], ["20 [[things]] packed 4 to a [[group]]", "20 &divide; 4 = 5 [[groups]]"], ["4 [[groups]] with 5 [[things]] in each", "4 &times; 5 = 20 [[things]]"]],
       hint: "Sharing gives how many in each. Grouping gives how many groups.",
       why: "Same numbers, different answers to different questions. Always say what your answer is counting.",
@@ -219,6 +226,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "num", topic: "Sharing or grouping",
       q: "A [[ride]] holds 6 [[people]]. 42 [[people]] are going to [[event]]. How many [[rides]] are needed?",
+      ez: { q: "A [[ride]] holds 6. 42 [[people]] are going. How many [[rides]]?", slips: [[252, "That multiplies. You know the total, so divide."], [36, "How many 6s fit in 42?"]], hint: "How many 6s in 42?" },
       boxes: [{ label: "[[Rides]]", a: 7 }],
       slips: [[252, "That multiplies. You know the total number of [[people]], so divide."], [36, "That takes away 6 once. How many 6s fit in 42?"]],
       hint: "Grouping: how many groups of 6 in 42?",
@@ -237,6 +245,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "mc", topic: "Sharing or grouping",
       q: "Someone typed 6 &divide; 42 into a calculator for that last question and got 0.1428... What should they have typed?",
+      ez: { q: "Someone typed 6 &divide; 42 and got 0.1428... What should they type?", slips: { 1: "That multiplies. It is a divide, the other way round.", 2: "Taking away only counts one [[ride]].", 3: "0.14 of a [[ride]]? Far too small." }, hint: "Which number is the total?", why: "Total first: 42 &divide; 6 = 7." },
       options: ["42 &divide; 6", "6 &times; 42", "42 &minus; 6", "It is fine as it is"],
       answer: 0,
       slips: { 1: "That would multiply. You already know the total, so it is a divide, just the other way round.", 2: "Taking away gives how many are left after one [[ride]], not how many [[rides]].", 3: "You cannot have 0.14 of a [[ride]] for 42 [[people]]. That answer is far too small." },
@@ -255,6 +264,7 @@ function flow(a, op1, b, op2, c, label){
     /* ---------- chunk 3: leftovers ---------- */
     { type: "learn", topic: "What about the leftovers?",
       title: "Real life decides what to do with the remainder",
+      ez: { title: "What about leftovers?", html: "<p>26 [[people]], 8 in each [[ride]]. You need <b>4</b>. <b>Round up</b> so all fit.</p><p>Only full [[groups]] count? <b>Round down</b>.</p>" },
       fig: BUSES,
       html: "<p>26 [[people]], and each [[ride]] holds 8. 26 &divide; 8 = 3 remainder 2 (a calculator says 3.25).</p>" +
         "<p>Nobody gets left behind, so you need <b>4</b> [[rides]]. <b>Round up</b> when everything has to fit.</p>" +
@@ -263,6 +273,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "mc", topic: "What about the leftovers?",
       q: "26 [[people]] are going to [[event]]. Each [[ride]] holds 8. How many [[rides]] are needed?",
+      ez: { q: "26 [[people]]. Each [[ride]] holds 8. How many [[rides]]?", slips: { 1: "3 only take 24. 2 are left behind.", 2: "You cannot book part of a [[ride]].", 3: "The 2 left over still need a seat." }, hint: "Would anyone be left behind?", why: "3 carry 24. 2 more need one. Round <b>up</b> to <b>4</b>." },
       fig: BUSES,
       options: ["4", "3", "3.25", "3 remainder 2"],
       answer: 0,
@@ -285,6 +296,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "num", topic: "What about the leftovers?",
       q: "You have &pound;20. Each [[thing]] costs &pound;3. How many can you buy?",
+      ez: { q: "You have &pound;20. They cost &pound;3 each. How many can you buy?", slips: [[7, "7 &times; 3 = &pound;21. Too much. Round down."], [6.67, "Whole ones only. Round down."], [60, "That multiplies. Divide instead."]], hint: "How many 3s fit in 20?", why: "20 &divide; 3 = 6 remainder 2. Round <b>down</b> to <b>6</b>." },
       boxes: [{ label: "[[Things]]", a: 6 }],
       slips: [[7, "7 &times; 3 = &pound;21. That is &pound;1 more than you have, so round down."], [6.67, "You cannot buy part of one. Round down to whole ones."], [60, "That multiplies. You know the total money, so divide."]],
       hint: "How many 3s fit in 20? You cannot spend money you do not have.",
@@ -303,6 +315,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "sort", topic: "What about the leftovers?",
       q: "Round up or round down? Sort them.",
+      ez: { hint: "Does it all need to fit? Round up.", why: "All need to fit: up. Whole ones only: down." },
       buckets: ["Round up", "Round down"],
       cards: [["Boxes needed to pack 30 [[things]], 8 in a box", 0], ["Full [[groups]] made from 30 [[things]], 8 in each", 1], ["Tables needed for 22 [[people]], 4 at a table", 0], ["Snacks you can buy with &pound;10 at &pound;3 each", 1]],
       hint: "Does everything have to fit (up)? Or can you only count complete ones (down)?",
@@ -313,6 +326,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "num", topic: "What about the leftovers?", stretch: true,
       q: "50 [[things]] are packed into [[groups]] of 6. How many full [[groups]], and how many [[things]] are left over?",
+      ez: { q: "50 [[things]] in [[groups]] of 6. How many full [[groups]]? How many left?", slips: [[0, 9, "9 &times; 6 = 54. Too many."], [1, 4, "8 &times; 6 = 48. So 2 are left."]], hint: "How many 6s in 50?" },
       boxes: [{ label: "Full [[groups]]", a: 8 }, { label: "Left over", a: 2 }],
       slips: [[0, 9, "9 &times; 6 = 54, more than 50. Only 8 full ones."], [1, 4, "Check: 8 &times; 6 = 48, so 50 leaves 2."]],
       hint: "How many 6s in 50? What is left?",
@@ -332,6 +346,7 @@ function flow(a, op1, b, op2, c, label){
     /* ---------- chunk 4: two steps ---------- */
     { type: "learn", topic: "Two step problems",
       title: "Two steps: one at a time",
+      ez: { html: "<p>Two steps. Do <b>one at a time</b>.</p><p>5 &times; 6 = 30. Then 30 &divide; 3 = <b>10 each</b>.</p>" },
       fig: flow("5 lots of 6", "&#215;", "30 in total", "&#247; 3", "10 each", "5 groups of 6 makes 30, shared by 3 is 10 each"),
       html: "<p>Some problems need two calculations. Do them one at a time, and ask the same question each time: <b>do I know the total?</b></p>" +
         "<p><b>5 [[groups]] with 6 [[things]] in each are shared between 3 [[people]]. How many each?</b></p>" +
@@ -352,6 +367,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "num", topic: "Two step problems",
       q: "4 [[groups]] with 9 [[things]] in each are shared between 6 [[people]]. Step 1 is done for you: 4 &times; 9 = 36 [[things]]. Have a go at step 2: how many each?",
+      ez: { q: "Step 1 is done: 4 &times; 9 = 36. Share by 6. How many each?", slips: [[216, "Step 2 shares, so divide."], [30, "Sharing is dividing."]], hint: "36 &divide; 6." },
       fig: flow("4 lots of 9", "&#215;", "36 in total", "&#247; 6", "? each", "4 groups of 9 makes 36, shared by 6"),
       boxes: [{ label: "Each", a: 6 }],
       slips: [[216, "Step 2 shares the 36, so divide."], [30, "That takes away 6. Sharing between 6 is dividing."]],
@@ -373,6 +389,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "num", topic: "Two step problems", explain: true,
       q: "3 [[groups]] with 8 [[things]] in each are shared between 4 [[people]]. How many does each get?",
+      ez: { q: "3 [[groups]], 8 in each. Shared by 4 [[people]]. How many each?", slips: [[24, "That is step 1. Now share it by 4."], [96, "Step 2 shares, so divide."], [2, "Find the total of all 3 first."]] },
       boxes: [{ label: "Each", a: 6 }],
       slips: [[24, "That is step 1: the total. Now share it between 4."], [96, "Step 2 shares, so divide."], [2, "That shares one [[group]]. Find the total of all 3 first."]],
       hint: "Step 1: total. Step 2: share.",
@@ -391,6 +408,7 @@ function flow(a, op1, b, op2, c, label){
 
     { type: "mc", topic: "Two step problems",
       q: "Which is better value? Bag A: 2 [[things]] for &pound;1. Bag B: 5 [[things]] for &pound;2.",
+      ez: { q: "Better value? Bag A: 2 for &pound;1. Bag B: 5 for &pound;2.", slips: { 0: "A is 50p each. Check B too.", 2: "Find the price of one. They are different." }, hint: "Find the price of one in each.", why: "A: 50p each. B: 40p each. <b>B</b> is cheaper." },
       options: ["Bag A", "Bag B", "They are the same value"],
       answer: 1, fixed: true,
       slips: { 0: "Bag A is 50p each (&pound;1 &divide; 2). Check B the same way.", 2: "Find the price of one in each. They come out different." },
@@ -416,6 +434,11 @@ function flow(a, op1, b, op2, c, label){
       A.portal(70, 76, 54) + '<rect x="150" y="30" width="150" height="96" rx="10" fill="#ffffff" stroke="#141a33" stroke-width="2.5"/>' +
       tx(162, 56, "Supplies", 15, INK, ' font-weight="700"') + tx(162, 80, "4 people x 5 days", 13, INK) + tx(162, 102, "60 bars / 5 days", 13, INK) +
       A.jay(360, 48, 0.68, "smile"))
+  },
+
+  ez: {
+    realWorld: { title: "Every trip is a multiply or divide", html: "<p>Splitting a bill. Booking seats. Best buys.</p><p>Always ask: <b>do I know the total?</b></p>" },
+    make: { intro: "Write a problem, if you like. Multiply or divide?" }
   },
 
   make: {

@@ -67,6 +67,7 @@ function qDay(d){
     slips: { any: "Find the word <b>Date</b> on the ticket. The day is right after it." },
     hint: "Look for the word Date.",
     why: "The ticket says <b>" + d.date + "</b>, so it is on a " + d.day + ".",
+    ez: { slips: { any: "Find <b>Date</b>. The day comes next." }, why: "It says <b>" + d.date + "</b>." },
     lv: { medium: { fig: ticket(d, "medium") },
       spicy: { q: "What date should you go?", fig: ticket(d, "spicy"),
         options: [d.date, d.old, "Any day that week"],
@@ -79,6 +80,7 @@ function qStart(d){
     slips: { 1: "That is where you sit.", 2: "That is the price." },
     hint: "A time has am or pm.",
     why: "<b>" + d.start + "</b>. A time is easy to scan for: look for pm.",
+    ez: { why: "<b>" + d.start + "</b>. Look for pm." },
     lv: {
       medium: { fig: ticket(d, "medium"), options: [d.start, d.doors, d.end],
         slips: { 1: "That is when the doors open. It starts a bit later.", 2: "That is when it ends." },
@@ -93,6 +95,7 @@ function qPrice(d){
     slips: [[d.seat, "That is your seat number. Look for the pound sign."]],
     hint: "Look for the pound sign.",
     why: "The ticket says <b>&pound;" + d.adult + "</b>.",
+    ez: { slips: [[d.seat, "That is your seat. Look for &pound;."]], hint: "Look for &pound;." },
     lv: {
       medium: { q: "You are under 16. How much is your ticket?", fig: ticket(d, "medium"),
         boxes: [{ label: "Price", a: d.child, pre: "&pound;" }],
@@ -110,6 +113,7 @@ function qSeat(d){
     slips: { 1: "Swapped round. On this ticket, rows are letters and seats are numbers.", 2: "That is the start time." },
     hint: "Find the word Seat.",
     why: "<b>Row " + d.row + ", Seat " + d.seat + "</b>.",
+    ez: { slips: { 1: "Swapped round. Rows are letters here.", 2: "That is the start time." } },
     lv: {
       medium: { fig: ticket(d, "medium") },
       spicy: { q: "Which door should you use?", fig: ticket(d, "spicy"),
@@ -170,7 +174,8 @@ function fq(d, o, med, spi){
 function qEats(d){
   return fq(d, { q: "What does a " + d.name + " eat?", options: [d.eats, d.lives, d.look], answer: 0,
     slips: { 1: "That is where it lives.", 2: "That is what it looks like." },
-    hint: "Find the word Eats.", why: "<b>" + d.eats + "</b>. The label Eats takes you straight there." }, null,
+    hint: "Find the word Eats.", why: "<b>" + d.eats + "</b>. The label Eats takes you straight there.",
+    ez: { why: "<b>" + d.eats + "</b>. Look under Eats." } }, null,
     { options: [d.eats, d.lives, d.look, d.no], slips: { 1: "That is where it lives.", 2: "That is what it looks like.", 3: "Is that anywhere in the text? Only pick what you can point to." },
       hint: "No labels this time. Scan for food words.", why: "<b>" + d.eats + "</b>. With no labels, you scan for food words instead." });
 }
@@ -183,13 +188,15 @@ function qLives(d){
 function qSize(d){
   return fq(d, { q: "How long is a " + d.name + "?", boxes: [{ label: "Length", a: d.size, post: "cm" }],
     slips: [[d.n2, "That number is about something else. Find the one with cm."]],
-    hint: "Look for cm.", why: "About <b>" + d.size + " cm</b>." }, null,
+    hint: "Look for cm.", why: "About <b>" + d.size + " cm</b>.",
+    ez: { slips: [[d.n2, "Find the number with cm."]] } }, null,
     { hint: "There is more than one number. Which has cm after it?", why: "About <b>" + d.size + " cm</b>. The other number is about something else, so the cm was the clue." });
 }
 function qAny(d){
   return fq(d, { q: "Type <b>one</b> fact about the " + d.name + " from the fact file. Copy it, or use your own words.",
     need: [d.keys], model: d.Name + "s eat " + d.eats.toLowerCase() + ".",
-    hint: "Pick any row and copy it out.", why: "Anything the fact file says counts, like \"" + d.Name + "s eat " + d.eats.toLowerCase() + "\"." });
+    hint: "Pick any row and copy it out.", why: "Anything the fact file says counts, like \"" + d.Name + "s eat " + d.eats.toLowerCase() + "\".",
+    ez: { q: "Type <b>1</b> fact about the " + d.name + ".", hint: "Copy any row.", why: "Any fact from the file counts." } });
 }
 
 /* ---------- in the text or not: three short texts, one per go ---------- */
@@ -208,6 +215,7 @@ function qIn(d){
     slips: { any: "Only put it in \"says it\" if you can point to the words." },
     hint: "Can you put your finger on it?",
     why: "If you can point to it, the text says it. Sensible guesses do not count.",
+    ez: { slips: { any: "Can you point to the words?" }, why: "Point to it? Then the text says it." },
     lv: {
       medium: { cards: [[d.yes[0], 0], [d.yes[1], 0], [d.yes[2], 0], [d.no[0], 1], [d.no[1], 1]] },
       spicy: { q: P(d.text) + "Sort them. Does the text say it, say the opposite, or not say at all?",
@@ -255,7 +263,8 @@ function qIn(d){
           "<p>Texts often have lots of facts of the same kind, like three different times. Read the question carefully to know which one you want.</p>" },
         spicy: { html: "<p>A <b>fact</b> is a bit of information the text gives you. The question word tells you what kind: <b>who, where, when, how many, how much, why</b>.</p>" +
           "<p>The rest of the question narrows it down. \"When does it <b>start</b>?\" and \"When do the <b>doors open</b>?\" both want a time, but not the same one.</p>" +
-          "<p>Sometimes a fact has changed (\"moved from Friday\"), or sits at the very end of a line. Read the whole line before you answer.</p>" } } },
+          "<p>Sometimes a fact has changed (\"moved from Friday\"), or sits at the very end of a line. Read the whole line before you answer.</p>" } },
+      ez: { title: "What to hunt for", html: "<p>The <b>question word</b> tells you what to find.</p><p>Who: a person. Where: a place. When: a time. How many: a number.</p>" } },
 
     { type: "match", topic: "Question words",
       q: "Match each question word to the kind of fact it hunts for.",
@@ -263,6 +272,7 @@ function qIn(d){
       slips: { any: "Look at the picture. Each word has its own kind of answer." },
       hint: "Who is about people.",
       why: "Who: a person. Where: a place. When: a time or day. How many: a number.",
+      ez: { q: "Match each word to what it hunts for.", slips: { any: "Look at the picture." } },
       lv: {
         medium: { pairs: [["Who?", "A person"], ["Where?", "A place"], ["When?", "A time or day"], ["How many?", "A number"], ["How much?", "A price or amount"]] },
         spicy: { pairs: [["Who?", "A person"], ["Where?", "A place"], ["When?", "A time or day"], ["How many?", "A number of things"], ["How much?", "A price or amount"], ["Why?", "A reason"]] } } },
@@ -314,6 +324,7 @@ function qIn(d){
       boxes: [{ label: "Apple trees", a: 5 }],
       slips: [[12, "12 is the sunflowers. Find the words apple trees."], [3, "3 is the birds."]],
       hint: "Find the words apple trees. The number is just before.",
+      ez: { hint: "Find the words apple trees." },
       why: "\"<b>5</b> apple trees.\"",
       lv: {
         medium: { q: P("The garden club meets every Thursday. This year they planted 12 sunflowers, 5 apple trees and 8 rows of potatoes. 3 birds have already moved into the new bird box, and 2 hedgehogs visit at night.") + "How many rows of potatoes did they plant?",
@@ -340,6 +351,7 @@ function qIn(d){
         { q: P("Jay saw 7 birds on Monday. On Tuesday he saw 3. He wrote them all in his notebook.") + "How many birds did Jay see on Tuesday?",
           boxes: [{ label: "Birds", a: 3 }],
           slips: [[7, "7 is Monday."], [10, "That adds both days. The question is only about Tuesday."]],
+          ez: { slips: [[7, "7 is Monday."], [10, "Just Tuesday, not both days."]] },
           hint: "Find Tuesday.", why: "\"On Tuesday he saw <b>3</b>.\"",
           lv: {
             medium: { q: P("Jay keeps a bird notebook. On Monday he saw 7 birds, including 2 robins. On Tuesday it rained and he saw only 3. On Wednesday he saw 11, his best day.") + "How many birds did Jay see on Wednesday?",
@@ -359,8 +371,11 @@ function qIn(d){
       lv: { medium: { fig: ticket(TK[0], "medium", true) },
         spicy: { fig: ticket(TK[0], "spicy", true), html: "<p>When you hunt for a fact, <b>scan</b>: let your eyes run over the page looking for the shape of the answer. Times have pm, prices have a pound sign.</p>" +
           "<p>Small print matters. A ticket might say the date has moved, or hide a door number at the end of a line. Once you find the right line, read all of it.</p>" } },
-      vary: [ ext({ html: "<p>Here is a different ticket this time. Let your eyes <b>scan</b> for what you need, instead of reading every word.</p><p>A time has <b>pm</b>. A price has a <b>pound sign</b>. Labels like <b>Date</b> and <b>Seat</b> help too.</p>" }, tf(TK[1], true)),
-        ext({ html: "<p>Here is a different ticket this time. Let your eyes <b>scan</b> for what you need, instead of reading every word.</p><p>A time has <b>pm</b>. A price has a <b>pound sign</b>. Labels like <b>Date</b> and <b>Seat</b> help too.</p>" }, tf(TK[2], true)) ] },
+      ez: { title: "Scan for it", html: "<p>No need to read every word. <b>Scan</b> for the answer.</p><p>A time has <b>pm</b>. A price has <b>&pound;</b>.</p>" },
+      vary: [ ext({ html: "<p>Here is a different ticket this time. Let your eyes <b>scan</b> for what you need, instead of reading every word.</p><p>A time has <b>pm</b>. A price has a <b>pound sign</b>. Labels like <b>Date</b> and <b>Seat</b> help too.</p>",
+          ez: { title: "Scan for it", html: "<p>A new ticket. <b>Scan</b> for the answer.</p><p>A time has <b>pm</b>. A price has <b>&pound;</b>.</p>" } }, tf(TK[1], true)),
+        ext({ html: "<p>Here is a different ticket this time. Let your eyes <b>scan</b> for what you need, instead of reading every word.</p><p>A time has <b>pm</b>. A price has a <b>pound sign</b>. Labels like <b>Date</b> and <b>Seat</b> help too.</p>",
+          ez: { title: "Scan for it", html: "<p>A new ticket. <b>Scan</b> for the answer.</p><p>A time has <b>pm</b>. A price has <b>&pound;</b>.</p>" } }, tf(TK[2], true)) ] },
 
     S("mc", "Ticket", qDay(TK[0]), [qDay(TK[1]), qDay(TK[2])]),
     S("mc", "Ticket", qStart(TK[0]), [qStart(TK[1]), qStart(TK[2])]),
@@ -373,8 +388,10 @@ function qIn(d){
       html: "<p>A fact file puts facts under <b>labels</b>: Eats, Lives, Size. The label tells you where to look.</p><p>Have a look at this one about a bird Jay sees a lot. Then go fact hunting.</p>",
       lv: { medium: { fig: factfile(FF[0], "medium", true) },
         spicy: { fig: factfile(FF[0], "spicy", true), html: "<p>Some fact files have labels. This one is written as a paragraph, so there are no labels to help.</p><p>So scan for the kind of word you need: food words for <b>eats</b>, place words for <b>lives</b>, <b>cm</b> for size.</p>" } },
+      ez: { html: "<p>Fact files have <b>labels</b>: Eats, Lives, Size.</p><p>The label shows you where to look.</p>" },
       vary: [1, 2].map(function(k){ var d = FF[k];
         return { html: "<p>A fact file puts facts under <b>labels</b>: Eats, Lives, Size. The label tells you where to look.</p><p>This time it is the " + d.name + ". Have a look, then go fact hunting.</p>",
+          ez: { html: "<p>This time: the " + d.name + ". Fact files have <b>labels</b>.</p><p>The label shows you where to look.</p>" },
           fig: factfile(d, "mild", true), lv: { medium: { fig: factfile(d, "medium", true) },
             spicy: { fig: factfile(d, "spicy", true), html: "<p>This fact file about the " + d.name + " is a paragraph, so there are no labels to help.</p><p>Scan for the kind of word you need: food words for <b>eats</b>, place words for <b>lives</b>, <b>cm</b> for size.</p>" } } }; }) },
 
@@ -395,6 +412,7 @@ function qIn(d){
         '<circle cx="450" cy="70" r="40" fill="#ffffff" stroke="#141a33" stroke-width="2.5"/><circle cx="414" cy="122" r="8" fill="#ffffff" stroke="#141a33" stroke-width="2"/><circle cx="402" cy="140" r="5" fill="#ffffff" stroke="#141a33" stroke-width="2"/>' +
         T(450, 84, "?", 40, { a: "middle", b: 1, c: "#8a5cf6" }) + T(450, 172, "Just a guess", 14, { a: "middle", b: 1 }) + '</svg>',
       html: "<p>Some things <b>sound</b> like facts, but the text never says them.</p><p>Here is the test: can you <b>point to the words</b>? If you can, it is a fact from the text. If you cannot, it is a guess, even a sensible one.</p>",
+      ez: { html: "<p>Can you <b>point to the words</b>?</p><p>Yes: it is a fact. No: it is a guess.</p>" },
       lv: { spicy: { html: "<p>Some things <b>sound</b> like facts, but the text never says them. The test: can you <b>point to the words</b>?</p><p>There are three kinds: the text <b>says it</b>, the text <b>says the opposite</b> (so it is not true), or the text <b>does not say</b> at all. Only the first is a fact from the text.</p>" } } },
 
     S("sort", "Point to it", qIn(IN[0]), [qIn(IN[1]), qIn(IN[2])]),
@@ -440,11 +458,18 @@ function qIn(d){
       options: ["No: the text says she never catches one.", "Yes: it says she chases pigeons."], answer: 0, fixed: true,
       slips: { 1: "Chasing is not catching. Point to the words about catching." },
       hint: "Find the word catches.", why: "The text says she <b>never catches one</b>. It says the opposite.",
+      ez: { q: P("Bonnie loves the park. She chases pigeons but never catches one. She always has a drink from the fountain.") + "[[Who]] says: \"Bonnie catches lots of pigeons.\" Is that in the text?",
+        slips: { 1: "Chasing is not catching." }, why: "It says she <b>never catches one</b>." },
       lv: { spicy: { q: P("Bonnie adores the park. She has chased every pigeon in it, and she is yet to catch a single one. She always ends with a drink from the fountain.") + "[[Who]] says: \"Bonnie is a good pigeon catcher.\" Is that a fact from the text?",
         options: ["No: \"yet to catch a single one\" means she has never caught one.", "Yes: she has chased every pigeon.", "The text does not say either way."],
         slips: { 1: "Chasing is not catching.", 2: "It does say: \"yet to catch a single one\"." },
         why: "\"Yet to catch a single one\" means none so far. The text says the opposite." } } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Bus times, prices, platforms. You hunt for facts every day.</p><p>A time traveller needs facts fast. What year is it?</p>" },
+    make: { intro: "Pick anything, even Bonnie. Give it 3 facts. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Fact finding, every day",

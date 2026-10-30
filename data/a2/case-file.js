@@ -426,6 +426,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
   ],
 
   ez: {
+    blurb: "Put clues together. Which idea wins?",
     realWorld: { title: "Real detectives", html: "<p>Detectives, doctors and historians all <b>weigh clues</b>.</p><p>Time travel could settle it. Or just weigh the clues!</p>" },
     make: { intro: "Your verdict, and 2 clues that back it up." }
   },
