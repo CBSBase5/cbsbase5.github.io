@@ -155,6 +155,11 @@ function homeButton(){
   if(path === "/" || path === "/index.html" || path.indexOf("/board") === 0) return;
   if(document.querySelector(".b5home") || document.documentElement.hasAttribute("data-no-home")) return;
   var href = "/", label = "Home";
+  /* staff pages have no top bar, so the corner button leads back to the staff room */
+  if(/^\/teacher\//.test(path) && !hq){
+    if(path === "/teacher/" || path === "/teacher/index.html") label = "Student site";
+    else { href = "/teacher/"; label = "Staff room"; }
+  }
   if(hq){
     var isHqHome = path === base || path === base + "index.html";
     if(!isHqHome){ href = base; label = "HQ home"; }
@@ -163,7 +168,7 @@ function homeButton(){
   var a = document.createElement("a");
   a.className = "b5home"; a.href = href;
   a.innerHTML = HOUSE + "<span>" + label + "</span>";
-  a.setAttribute("aria-label", label === "HQ home" ? hq.who + " HQ home" : label === "Base 5" ? "Base 5 home page" : "Base 5 home page");
+  a.setAttribute("aria-label", label === "HQ home" ? hq.who + " HQ home" : label === "Staff room" ? "Back to the staff room" : "Base 5 home page");
   document.body.appendChild(a);
   /* step up out of the way of anything else in that corner (LC's read it to me) */
   function nudge(){ a.classList.toggle("up", !!document.querySelector(".lcr-btn")); }
