@@ -54,7 +54,7 @@ window.B5PARENTS = {
     ["Breathe in", "9:30", "A calm arrival. We give everyone time to settle in before anything is asked."],
     ["Brain games", "9:45", "Fifteen minutes of games like GeoGuessr and Wordle to warm up. Nothing is marked."],
     ["Cultural calendar", "10:00", "Half an hour on whatever the school is marking that week, and why people mark it."],
-    ["PHSE with Willow", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays. Talking rather than writing."],
+    ["PHSE", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays. Talking rather than writing. Willow, the school's PHSE lead, sometimes joins us."],
     ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, which I pitch at each student's level. Most days also have forest school, digital media or horticulture."],
     ["Lunch", "11:45", "A proper break. On trip days, lunch happens while the group is out."],
     ["The afternoon", "12:30 to 2:00", "Projects on the half term's big question, or GCSE work for those taking exams. Depending on the day, there is also something creative, physical world, PE or preparation for adulthood."],

@@ -96,9 +96,9 @@ window.B5TERM = {
     },
 
     phse: {
-      title:"PHSE", line:"A quarter of an hour with Willow.", type:"plain",
+      title:"PHSE", line:"A quarter of an hour of PHSE.", type:"plain",
       sub:"A quarter of an hour, after CC.",
-      body:"Talking rather than writing, and there is nothing to hand in at the end of it. Willow leads it.",
+      body:"Talking rather than writing, and there is nothing to hand in at the end of it. Willow, the school's PHSE lead, sometimes joins in.",
       options:[["Join in","Say what you think when you have something to say."],["Listen","Take it in and say nothing. That still counts."],["Step out","Leave the room and come back when you want to."]],
       links:[["PHSE shelf","/practice/shelves.html#phse"]],
       ways:["Write it down instead of saying it","Answer only the bits you want to","Sit at the edge of the room","Skip it"]
