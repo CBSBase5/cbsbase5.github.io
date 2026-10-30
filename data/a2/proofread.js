@@ -163,6 +163,7 @@ function patrolWidget(el, api){
       html: "<p>Proofreading means reading your writing slowly to catch slips. The trick: <b>check one thing at a time</b>, like a patrol sweeping an area.</p>" +
         "<p>First sweep: <b>capital letters</b>. You need one:</p>" +
         "<ul><li>at the start of every sentence</li><li>for <b>I</b> on its own</li><li>for names of people and places: Sam, [[Town]]</li><li>for days and months: Monday, June</li></ul>",
+      ez: { title: "Proofread: capitals", html: "<p>Check <b>one thing at a time</b>.</p><p>First: <b>capitals</b>. Starts, I, names, days.</p>" },
       lv: { spicy: { html: "<p>Proofreading works best in <b>sweeps</b>: one kind of slip at a time, reading slowly, ideally out loud in your head.</p>" +
           "<p>First sweep: <b>capital letters</b>. Sentence starts, <b>I</b>, and every <b>proper noun</b>: people, places, days, months, languages (French), and titles in front of a name (Aunt Sue, Doctor Khan).</p>" +
           "<p>Watch the traps: <b>my mum</b> has no capital, but <b>Mum</b> does when it is used as her name: \"Can we go, Mum?\" Seasons (summer, winter) have no capital.</p>" } } },
@@ -173,6 +174,7 @@ function patrolWidget(el, api){
       answers: [0, 1, 2, 5],
       hint: "Sentence start, a day, I on its own, and a name.",
       why: "<b>On</b> starts the sentence, <b>Friday</b> is a day, <b>I</b> is always a capital, and <b>Sam</b> is a name. Park is just a park.",
+      ez: { hint: "A start, a day, I, a name.", why: "<b>On</b>, <b>Friday</b>, <b>I</b> and <b>Sam</b>." },
       lv: { medium: { q: "Which words need a capital letter?<div class=\"a2task\">in june my friend priya and i visited the castle in edinburgh.</div>",
           options: ["in", "june", "friend", "priya", "i", "castle", "edinburgh"],
           answers: [0, 1, 3, 4, 6],
@@ -191,6 +193,7 @@ function patrolWidget(el, api){
       slips: { 1: "Look at the very first word, and at i on its own.", 2: "Days and places are names. They both need capitals." },
       hint: "Check the start, the day, I, and the place.",
       why: "<b>On</b> starts the sentence, <b>Monday</b> is a day, <b>I</b> is always capital, <b>[[Town]]</b> is a place.",
+      ez: { q: "Which has all the capitals right?", hint: "Check the start, day, I, place.", why: "On, Monday, I and [[Town]] all need capitals.", slips: { 1: "Look at the first word, and i.", 2: "Days and places need capitals." } },
       lv: { spicy: { options: ["A) In the Summer, Mum and I visited [[Town]].", "B) In the summer, Mum and I visited [[Town]].", "C) In the summer, mum and I visited [[Town]].", "D) In the summer, Mum and i visited [[townlc]]."], fixed: true,
         answer: 1,
         slips: { 0: "Seasons do not take a capital.", 2: "Here Mum is used like her name (no \"my\" in front), so it takes a capital.", 3: "I on its own, and the town, both need capitals." },
@@ -206,6 +209,7 @@ function patrolWidget(el, api){
       slips: [[2, "Close. Check the day at the end too."], [4, "One too many. Bonnie starts the sentence and is a name, but it only needs one capital."], [1, "There are more: I on its own, and a day."]],
       hint: "A name at the start, I, and a day.",
       why: "<b>B</b>onnie (the start, and a name), <b>I</b> and <b>S</b>unday: <b>3</b>. Park stays small.",
+      ez: { q: "Jay wrote: <div class=\"a2task\">bonnie and i went to the park on sunday.</div> How many capitals are missing?", hint: "A name, I, and a day.", why: "<b>B</b>onnie, <b>I</b>, <b>S</b>unday: <b>3</b>.", slips: [[null, "Close! Check the day too."], [null, "1 too many. Park stays small."], [null, "There are more. Look at i and the day."]] },
       lv: { medium: { q: "Jay wrote on the board: <div class=\"a2task\">bonnie and i went to brighton in may. we saw the sea.</div> How many capital letters are missing?",
           boxes: [{ label: "Missing capitals", a: 5 }],
           slips: [[4, "Close. Do not forget the second sentence's first word."], [6, "One too many. Sea does not need a capital."], [3, "There are more: a name, I, a place, a month, and a sentence start."]],
@@ -224,6 +228,7 @@ function patrolWidget(el, api){
         "<p><b>.</b> a full stop when it is done. <b>?</b> a question mark when it asks. <b>!</b> an exclamation mark for a strong feeling: What a [[wow]]!</p>" +
         "<p>Watch for sentences that run into each other: \"It was cold we went inside\" is two sentences. \"It was cold. We went inside.\"</p>" +
         "<p>In the wise words of Jay's late, great grandfather: stop. Ideally with a full stop.</p>",
+      ez: { title: "End marks", html: "<p>End with <b>.</b> or <b>?</b> or <b>!</b></p><p>Asking? Use <b>?</b> Strong feeling? Use <b>!</b></p>" },
       lv: { spicy: { html: "<p>Second sweep: <b>sentence boundaries</b>.</p>" +
           "<p>A <b>comma splice</b> joins two full sentences with just a comma: \"It was cold, we went inside.\" A comma is not strong enough. Fix it with a full stop (It was cold. We went inside.), a joining word (It was cold, so we went inside.) or a semicolon (It was cold; we went inside.).</p>" +
           "<p>Question trap: \"She asked where the toilets were.\" is a <b>reported</b> question, so it ends with a full stop, not a question mark.</p>" +
@@ -236,6 +241,7 @@ function patrolWidget(el, api){
       slips: { 1: "Where is... is asking something. Asking needs a question mark.", 2: "It might be urgent, but it is still a question." },
       hint: "Is it asking?",
       why: "It asks a question, so it ends with <b>?</b>",
+      ez: { why: "It asks, so use <b>?</b>", slips: { 1: "Where is... is asking. Use ?", 2: "Urgent, but still a question." } },
       lv: { medium: { q: "Which end mark? <div class=\"a2task\">What a [[wow]] that was_</div>",
           slips: { 0: "It starts with What, but it is not asking. It is a strong feeling.", 1: "A full stop is possible, but this is a strong feeling: wow." },
           answer: 2,
@@ -253,6 +259,7 @@ function patrolWidget(el, api){
       slips: [[1, "It has no full stops, but there are separate ideas in it. Each one can stand alone."], [2, "Close. Find where each new idea starts: we got... it was... we had..."]],
       hint: "Look for where a new idea starts.",
       why: "<b>3</b>: We got to [[Town]]. It was raining. We had chips.",
+      ez: { q: "How many sentences are here?<div class=\"a2task\">we got to [[Town]] it was raining we had chips</div>", hint: "Where does a new idea start?", slips: [[null, "Each idea can stand alone. Count them."], [null, "Close! We got... it was... we had..."]] },
       lv: { medium: { q: "How many full stops are needed?<div class=\"a2task\">we got to [[Town]] at ten it was raining so we went to a cafe we had chips and the bill was huge</div>",
           boxes: [{ label: "Full stops", a: 3 }],
           slips: [[2, "Do not forget the very end."], [4, "\"so we went\" and \"and the bill\" use joining words, so those ideas can stay in one sentence."], [5, "Joining words like so and and keep ideas together. Count the separate sentences."]],
@@ -271,6 +278,7 @@ function patrolWidget(el, api){
       slips: { 1: "That still runs two sentences together. It needs a full stop after cold.", 2: "The full stop is there, but each sentence needs a capital, and the end needs a full stop too." },
       hint: "Two sentences: each needs a capital and an end mark.",
       why: "Two sentences, two capitals, two full stops.",
+      ez: { q: "Which one is fixed?", hint: "A capital and end mark for each.", why: "2 sentences. 2 capitals. 2 full stops.", slips: { 1: "It still runs on. Stop after cold.", 2: "Each sentence needs a capital." } },
       lv: { spicy: { q: "Which is <b>not</b> a proper fix for \"It was cold, we went inside.\"?",
         options: ["It was cold, we went inside anyway.", "It was cold, so we went inside.", "It was cold. We went inside.", "It was cold; we went inside."],
         slips: { 1: "This one works: so is a joining word.", 2: "This one works: two separate sentences.", 3: "This one works: a semicolon can join two linked sentences." },
@@ -283,6 +291,7 @@ function patrolWidget(el, api){
       cards: [["Is the [[thing]] ready?", 0], ["What a [[wow]]!", 0], ["Where are you going.", 1], ["we left at six.", 1], ["I love [[Town]] it is great.", 1], ["We got home late.", 0]],
       hint: "Check each one: capital at the start, the right end mark, and only one sentence.",
       why: "\"Where are you going\" asks, so it needs ?. \"we\" needs a capital. \"I love [[Town]] it is great\" is two sentences run together.",
+      ez: { q: "All good, or needs fixing?", hint: "Capital? Right end mark?", why: "\"Where are you going\" asks: use ?. \"we\" needs a capital." },
       lv: { mild: { cards: [["Is the [[thing]] ready?", 0], ["Where are you going.", 1], ["we left at six.", 1], ["We got home late.", 0]],
           why: "\"Where are you going\" asks, so it needs ?. \"we\" needs a capital letter." },
         spicy: { cards: [["Is the [[thing]] ready?", 0], ["She asked if we were ready?", 1], ["It was late, we left.", 1], ["It was late, so we left.", 0], ["What a [[wow]]!", 0], ["We left at six it was dark.", 1]],
@@ -294,6 +303,7 @@ function patrolWidget(el, api){
       html: "<p>Third sweep: <b>commas and apostrophes</b>.</p>" +
         "<p><b>Lists:</b> put a comma between items, and usually just <b>and</b> before the last one. I packed my [[thing]], a drink and a coat.</p>" +
         "<p><b>Missing letters:</b> an apostrophe takes the place of the letters you leave out. do not = <b>don't</b>, I am = <b>I'm</b>, can not = <b>can't</b>.</p>",
+      ez: { title: "Commas and apostrophes", html: "<p><b>Lists:</b> my [[thing]], a drink and a coat.</p><p><b>Missing letters:</b> do not = <b>don't</b>.</p>" },
       lv: { medium: { html: "<p>Third sweep: <b>commas and apostrophes</b>.</p>" +
           "<p><b>Lists:</b> commas between items, usually just <b>and</b> before the last.</p>" +
           "<p><b>Missing letters:</b> don't, I'm, it's (it is), couldn't.</p>" +
@@ -310,6 +320,7 @@ function patrolWidget(el, api){
       model: "don't",
       hint: "Take out the o, and put an apostrophe in its place.",
       why: "do not becomes <b>don't</b>: the apostrophe sits where the o was.",
+      ez: { q: "Write <b>do not</b> short, with an apostrophe.", hint: "Take out the o.", why: "<b>don't</b>. The apostrophe is where the o was.", slips: [[null, "Nearly! Add an apostrophe where the o was."], [null, "Close. Put it between n and t."]] },
       lv: { medium: { q: "Write <b>the [[thing]] that belongs to Jay</b> in two words, using an apostrophe.",
           need: [["jay's"]],
           slips: [[["jays"], "Nearly. Add an apostrophe before the s to show it belongs to Jay."], [["jays'"], "Jay is one person, so the apostrophe goes before the s: Jay's."]],
@@ -330,6 +341,7 @@ function patrolWidget(el, api){
       slips: { 1: "Commas go between the items, not around the and.", 2: "There should be no comma straight after packed, and the last item usually has and before it." },
       hint: "Commas between items, and before the last one.",
       why: "A comma between items, and <b>and</b> before the last one.",
+      ez: { hint: "Commas between items. And before the last.", why: "Commas between items. <b>and</b> before the last.", slips: { 1: "Commas go between the items.", 2: "No comma after packed." } },
       lv: { spicy: { q: "Which one is punctuated correctly?",
         options: ["A) When we arrived, the visitors' car park was full.", "B) When we arrived the visitor's car park was full.", "C) When we arrived, the visitors car park was full.", "D) When, we arrived the visitors' car park was full."], fixed: true,
         slips: { 1: "Two slips: the opener needs a comma, and many visitors share the car park, so visitors'.", 2: "The car park belongs to the visitors, so it needs an apostrophe: visitors'.", 3: "The comma goes at the end of the opener, after arrived." },
@@ -341,6 +353,7 @@ function patrolWidget(el, api){
       pairs: [["don't", "do not"], ["I'm", "I am"], ["can't", "cannot"], ["it's", "it is"]],
       hint: "Say the long form out loud. Which letters disappear?",
       why: "The apostrophe always sits where letters were taken out.",
+      ez: { q: "Match the short and long forms.", hint: "Say it long. Which letters go?", why: "The apostrophe sits where letters went." },
       lv: { medium: { pairs: [["couldn't", "could not"], ["it's", "it is"], ["Jay's bird", "the bird belonging to Jay"], ["my brother's phone", "the phone of my brother"]],
           why: "Some apostrophes show missing letters; some show belonging." },
         spicy: { pairs: [["the dog's bowl", "one dog owns it"], ["the dogs' bowls", "more than one dog own them"], ["it's", "it is, or it has"], ["its", "belonging to it"]],
@@ -353,6 +366,7 @@ function patrolWidget(el, api){
       slips: { 1: "I am loses the a, and the apostrophe takes its place: I'm.", 2: "The a is missing, so it should not be there: I'm." },
       hint: "I am with the a taken out.",
       why: "<b>I'm</b> = I am. The apostrophe replaces the a.",
+      ez: { hint: "I am, without the a.", why: "<b>I'm</b> means I am.", slips: { 1: "Add an apostrophe where the a was.", 2: "The a has gone: I'm." } },
       lv: { medium: { q: "Which one is right?",
           options: ["It's a long way to [[Town]].", "Its a long way to [[Town]].", "It's' a long way to [[Town]]."],
           slips: { 1: "It is shortens to it's, with an apostrophe.", 2: "Only one apostrophe, where the i of is was." },
@@ -369,6 +383,7 @@ function patrolWidget(el, api){
       html: "<p>Now for a whole piece. On a real patrol:</p>" +
         "<ol><li>Read it all once, just for sense.</li><li>Sweep for <b>capitals</b>.</li><li>Sweep for <b>end marks</b>.</li><li>Sweep for <b>commas</b> and <b>apostrophes</b>.</li></ol>" +
         "<p>Going slowly is the whole trick. Pointing at each word helps.</p>",
+      ez: { title: "Check a whole piece", html: "<p>Read it once. Then check <b>capitals</b>, <b>end marks</b> and <b>commas</b>.</p><p>Go slowly!</p>" },
       lv: { spicy: { html: "<p>Now for a whole piece. Inspector method:</p>" +
           "<ol><li>Read for sense, listening for where sentences really end.</li><li>Sweep: capitals and proper nouns.</li><li>Sweep: end marks and comma splices.</li><li>Sweep: commas after openers, apostrophes (owner count, its or it's).</li></ol>" +
           "<p>Professional proofreaders read backwards sometimes, one sentence at a time, so the meaning does not carry them past a slip.</p>" } } },
@@ -376,6 +391,7 @@ function patrolWidget(el, api){
     { type: "widget", topic: "On patrol", unscored: true,
       title: "Patrol: tap the slips",
       html: "<p>A postcard from [[Town]]. Tap anything that needs fixing, then check your patrol. Nothing here is marked; it is just a chance to practise.</p>",
+      ez: { html: "<p>A postcard from [[Town]]. Tap the slips. Then check.</p>" },
       mount: patrolWidget,
       report: function(d){ var n = d && d.flags ? d.flags.filter(Boolean).length : 0; return d && d.checked ? "Patrol: flagged " + n + " and checked." : ""; } },
 
@@ -385,6 +401,7 @@ function patrolWidget(el, api){
       answers: [1, 2, 4],
       hint: "Sweep for capitals, then end marks.",
       why: "\"the\" needs a capital; \"Have you ever been here\" asks, so it needs ?; and Monday is a day, so it needs a capital.",
+      ez: { q: "Which sentences need fixing? Pick <b>all</b>.", hint: "Capitals, then end marks.", why: "\"the\" and Monday need capitals. The question needs ?." },
       lv: { medium: { options: ["We arrived in [[Town]] on Friday.", "Its a lovely place.", "My sisters hat blew away.", "I bought a map, a hat and a [[thing]].", "Are you coming next time?"],
           answers: [1, 2],
           hint: "Sweep for apostrophes: missing letters and belonging.",
@@ -401,11 +418,18 @@ function patrolWidget(el, api){
       slips: { 1: "The first word needs a capital.", 2: "It needs commas in the list and a full stop at the end.", 3: "There should be no comma straight after and." },
       hint: "Capital, list commas, full stop.",
       why: "A capital, commas between the list items, and a full stop.",
+      ez: { q: "Which sentence is perfect?", why: "A capital, list commas and a full stop.", slips: { 1: "The first word needs a capital.", 2: "It needs commas and a full stop.", 3: "No comma after and." } },
       lv: { spicy: { options: ["A) After lunch, we visited the children's museum; it's free on Sundays.", "B) After lunch we visited the childrens museum, its free on Sundays.", "C) After lunch, we visited the childrens' museum; its free on Sundays.", "D) After lunch, we visited the children's museum, it's free on sundays."], fixed: true,
         slips: { 1: "Four slips: opener comma, children's, a comma splice, and it's.", 2: "children is already plural, so children's; and it is free needs it's.", 3: "Two slips: the comma joining two sentences is a splice, and Sundays needs a capital." },
         hint: "Check the opener, the apostrophes, the join, and the day.",
         why: "Opener comma, children's, a semicolon to join two sentences, it's (it is), and Sundays with a capital." } } }
   ],
+
+  ez: {
+    blurb: "Catch the slips: capitals, end marks, commas.",
+    realWorld: { title: "Proofreaders are real", html: "<p>Every book and sign gets <b>checked</b> first.</p><p>\"Let's eat, Grandma!\" One comma saves Grandma.</p>" },
+    make: { intro: "A sentence with a slip. Then your fixed one." }
+  },
 
   realWorld: {
     title: "Proofreaders are a real job",

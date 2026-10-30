@@ -161,6 +161,7 @@ function mountSquare(el, api){
       html: "<p><b>Divisible by 2</b> means it splits into pairs with none left over. Numbers like that are <b>even</b>.</p>" +
         "<p>7 dots make 3 pairs and one left over, so 7 is odd. 8 would pair up exactly.</p>" +
         "<p>The clue: you only need the <b>last digit</b>. If it is <b>0, 2, 4, 6 or 8</b>, the whole number is even, however big it is.</p>",
+      ez: { title: "Splits by 2", html: "<p><b>Even</b> numbers split into pairs.</p><p>Look at the <b>last digit</b>: 0, 2, 4, 6 or 8.</p>" },
       lv: { spicy: { html: "<p><b>Divisible by 2</b> means it splits into pairs with none left over. Those are the <b>even</b> numbers.</p>" +
         "<p>Why does the last digit decide it? Every ten splits into pairs already (10 = 5 pairs), so the tens, hundreds and thousands never leave anything over. Only the ones can.</p>" +
         "<p>So 3 458 is even because 8 is even. Nothing else matters.</p>" } } },
@@ -172,6 +173,7 @@ function mountSquare(el, api){
       answer: 0,
       slips: { 1: "35 ends in 5. 5 is odd, so there would be one left over.", 2: "37 ends in 7, which is odd.", 3: "41 ends in 1, which is odd. The 4 at the front does not count." },
       hint: "Which one ends in 0, 2, 4, 6 or 8?",
+      ez: { q: "Which one splits by 2?", hint: "Which ends in 0, 2, 4, 6 or 8?", why: "34 ends in 4. It is <b>even</b>.", slips: { 1: "35 ends in 5. That is odd.", 2: "37 ends in 7. That is odd.", 3: "41 ends in 1. Only the last digit counts." } },
       why: "34 ends in 4, which is even. So 34 splits into 17 pairs.",
       lv: {
         medium: { fig: lens(5318, "Look at the last digit"), options: ["5318", "4627", "8883", "2045"],
@@ -186,6 +188,7 @@ function mountSquare(el, api){
       buckets: ["Even (splits by 2)", "Odd (one left over)"],
       cards: [["16", 0], ["23", 1], ["40", 0], ["58", 0], ["71", 1], ["19", 1]],
       hint: "Even numbers end in 0, 2, 4, 6 or 8.",
+      ez: { q: "Even or odd?", why: "16, 40 and 58 end in 6, 0 and 8. <b>Even</b>." },
       why: "16, 40 and 58 end in 6, 0 and 8. 23, 71 and 19 end in odd digits.",
       lv: {
         medium: { cards: [["316", 0], ["823", 1], ["1040", 0], ["2 589", 1], ["7 772", 0], ["6 001", 1]], why: "Only the last digit decides: 6, 0 and 2 are even; 3, 9 and 1 are odd." },
@@ -196,6 +199,7 @@ function mountSquare(el, api){
       boxes: [{ label: "Next even number", a: 48 }],
       slips: [[49, "49 ends in 9, which is odd. Even numbers end in 0, 2, 4, 6 or 8."], [46, "46 is even, but it comes before 47. You want the one after."], [50, "50 is even, but there is one closer."]],
       hint: "Count on one at a time from 47 until the last digit is even.",
+      ez: { q: "What even number comes after 47?", hint: "Count on from 47.", why: "<b>48</b> ends in 8. Even!", slips: [[null, "49 ends in 9. That is odd."], [null, "46 comes before 47."], [null, "50 is even, but there is a closer one."]] },
       why: "48 ends in 8, so it is even. It is the very next number.",
       lv: {
         medium: { q: "What is the biggest even number below 1000?", boxes: [{ label: "Biggest even number", a: 998 }],
@@ -212,6 +216,7 @@ function mountSquare(el, api){
       html: "<p>Count in fives and look at the last digits: 5, 10, 15, 20, 25, 30. They only ever end in <b>5 or 0</b>.</p>" +
         "<p>Count in tens: 10, 20, 30. They always end in <b>0</b>.</p>" + CLUES +
         "<p>So a number ending in 0 passes both clues. A number ending in 5 passes the 5 clue but not the 10 clue.</p>",
+      ez: { title: "5s and 10s", html: "<p>Fives end in <b>5 or 0</b>. Tens end in <b>0</b>.</p>" + CLUES },
       lv: { medium: { html: "<p>Count in fives and look at the last digits: 5, 10, 15, 20, 25, 30. They only ever end in <b>5 or 0</b>.</p>" +
           "<p>Count in tens: they always end in <b>0</b>.</p>" + CLUES +
           "<p>Here is a neat one: a number that splits by <b>both 2 and 5</b> always splits by 10, because 2 &times; 5 = 10. It must end in 0.</p>" },
@@ -224,6 +229,7 @@ function mountSquare(el, api){
       options: ["35", "50", "53", "85", "58"],
       answers: [0, 1, 3],
       hint: "Look for a last digit of 0 or 5. The first digit does not matter.",
+      ez: { q: "Pick <b>all</b> that split by 5.", hint: "Last digit 0 or 5.", why: "35, 50 and 85 end in <b>5 or 0</b>." },
       why: "35, 50 and 85 end in 5 or 0. 53 and 58 have a 5 at the front, but the clue is at the end.",
       lv: {
         medium: { options: ["2 345", "7 000", "5 553", "9 995", "5 008"], answers: [0, 1, 3], why: "2 345, 7 000 and 9 995 end in 5 or 0. The others have fives at the front, but end in 3 and 8." },
@@ -235,6 +241,7 @@ function mountSquare(el, api){
       buckets: ["Splits by 10 (and 5)", "Splits by 5 but not 10", "Neither"],
       cards: [["40", 0], ["90", 0], ["25", 1], ["65", 1], ["32", 2], ["57", 2]],
       hint: "Ends in 0: first drawer. Ends in 5: middle drawer. Anything else: neither.",
+      ez: { q: "Sort them into the drawers.", hint: "Ends in 0? Ends in 5? Or neither?", why: "40 and 90 end in 0. 25 and 65 end in 5." },
       why: "40 and 90 end in 0. 25 and 65 end in 5. 32 and 57 end in neither.",
       lv: {
         medium: { cards: [["4 070", 0], ["1 900", 0], ["3 335", 1], ["8 005", 1], ["5 052", 2], ["5 501", 2]], why: "Ends in 0: by 10. Ends in 5: by 5 only. 5 052 and 5 501 end in 2 and 1, whatever the other digits say." },
@@ -247,6 +254,7 @@ function mountSquare(el, api){
       answer: 0, fixed: true,
       slips: { 1: "Count in tens: 70, 80. 75 is in between, so there would be 5 left over.", 2: "75 does split by 5: it ends in 5. It just does not split by 10." },
       hint: "Count in tens. Do you land on 75?",
+      ez: { q: "Jay says 75 splits by 10. What is the slip?", hint: "Count in tens. Do you hit 75?", why: "Tens end in <b>0</b>. 75 does not.", slips: { 1: "Count in tens: 70, 80. 75 is not there.", 2: "75 ends in 5, so it does split by 5." } },
       why: "Tens always end in 0. 75 splits by 5 (15 fives) but not by 10.",
       lv: { spicy: { q: "Jay says: \"7 510 splits by 5 but not by 10.\" What is the slip?",
         fig: '<svg viewBox="0 0 420 140" role="img" aria-label="Jay thinking">' + A2ART.jay(90, 44, 0.85, "hmm") + A2ART.bubble(170, 20, 220, 52, "7 510 splits by 5,\nbut not by 10?", 182) + '</svg>',
@@ -260,6 +268,7 @@ function mountSquare(el, api){
       fig: lens(130, "Ends in 0: passes 2, 5 and 10"),
       html: "<p>One number can pass more than one clue. 130 ends in 0, so it splits by 2, by 5 and by 10.</p>" +
         "<p>135 ends in 5: it passes the 5 clue only. 134 ends in 4: it passes the 2 clue only.</p>",
+      ez: { title: "Clues together", html: "<p>130 ends in <b>0</b>. It splits by 2, 5 and 10.</p><p>135 ends in 5. Only the 5 clue.</p>" },
       lv: { spicy: { fig: CLUES34,
         html: "<p>Two more clues for Inspectors.</p>" +
           "<p><b>Splits by 3:</b> add up the digits. If the total is in the 3 times table, so is the number. 471: 4 + 7 + 1 = 12, and 12 is in the 3s, so 471 splits by 3.</p>" +
@@ -268,6 +277,7 @@ function mountSquare(el, api){
     { type: "widget", topic: "Case files", unscored: true,
       title: "The detective's hundred square",
       html: "<p>Choose a clue, then tap every number you think it catches. Reveal shows how you did. Try as many clues as you like.</p>",
+      ez: { html: "<p>Pick a clue. Tap the numbers it catches. Then Reveal.</p>" },
       mount: mountSquare },
 
     { type: "mc", topic: "Case files",
@@ -276,6 +286,7 @@ function mountSquare(el, api){
       answer: 0, fixed: true,
       slips: { 1: "60 ends in 0. Zero is even, but it also passes the 5 and 10 clues.", 2: "It ends in 0, which counts for 5 but also for 2 and 10.", 3: "It does split by 10, and by 2 and 5 as well." },
       hint: "What do numbers ending in 0 pass?",
+      ez: { q: "Which clues does 60 pass?", hint: "What do numbers ending in 0 pass?", why: "60 ends in 0. It passes <b>all 3</b>.", slips: { 1: "0 passes the 5 and 10 clues too.", 2: "0 passes the 2 and 10 clues too.", 3: "It passes 2 and 5 too." } },
       why: "60 ends in 0, and 0 is in all three clues.",
       lv: {
         medium: { q: "Which clues does 2 465 pass?", options: ["5 only", "2 and 5", "5 and 10", "2, 5 and 10"],
@@ -291,6 +302,7 @@ function mountSquare(el, api){
       boxes: [{ label: "The number", a: 45 }],
       slips: [[40, "40 splits by 5, but it is not between 41 and 49."], [50, "50 splits by 5, but it is not between 41 and 49."]],
       hint: "It must end in 0 or 5.",
+      ez: { q: "Which number from 41 to 49 splits by 5?", why: "Only <b>45</b> ends in 5.", slips: [[null, "40 is not between 41 and 49."], [null, "50 is not between 41 and 49."]] },
       why: "Between 41 and 49, the only number ending in 0 or 5 is <b>45</b>.",
       lv: {
         medium: { q: "How many numbers from 301 to 349 split by 10?", boxes: [{ label: "How many", a: 4 }],
@@ -305,6 +317,7 @@ function mountSquare(el, api){
       q: "Match each number to the best description.",
       pairs: [["70", "Splits by 2, 5 and 10"], ["55", "Splits by 5 only"], ["38", "Splits by 2 only"], ["91", "None of these clues"]],
       hint: "Check the last digit of each.",
+      ez: { q: "Match each number to its clues." },
       why: "70 ends in 0. 55 ends in 5. 38 ends in 8. 91 ends in 1.",
       lv: {
         medium: { pairs: [["6 080", "Splits by 2, 5 and 10"], ["3 005", "Splits by 5 only"], ["5 554", "Splits by 2 only"], ["5 057", "None of these clues"]],
@@ -315,6 +328,7 @@ function mountSquare(el, api){
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Fair shares", title: "Detectives at work: fair shares",
       fig: strip(5, 21, 40, "Can 34 be shared into fives? 34 is not yellow."),
+      ez: { title: "Fair shares", html: "<p>Can 34 [[items]] go in [[groups]] of 5?</p><p>34 ends in 4. So <b>no</b>. Some are left over.</p>" },
       html: "<p>The clues answer real questions. Can [[who]] share 34 [[items]] into [[groups]] of 5 with none left over?</p>" +
         "<p>34 ends in 4, not 0 or 5. So no: there would be some left over. You did not even need to divide.</p>" },
 
@@ -324,6 +338,7 @@ function mountSquare(el, api){
       answer: 0, fixed: true,
       slips: { 1: "A 5 at the end passes the 5 clue, not the 10 clue.", 2: "Only numbers ending in 0 split into tens exactly." },
       hint: "What do numbers that split by 10 end in?",
+      ez: { q: "[[Who]] has 45 [[items]]. Can they go in [[groups]] of 10, none left over?", hint: "Tens end in?", why: "45 ends in 5. So <b>5 are left over</b>.", slips: { 1: "A 5 at the end is the 5 clue, not 10.", 2: "Only numbers ending in 0 split into tens." } },
       why: "45 ends in 5, so 4 [[groups]] of 10 use 40 and 5 are left over.",
       lv: {
         medium: { q: "[[Who]] has 1 236 [[items]]. Which [[groups]] would leave none over?", options: ["[[Groups]] of 2", "[[Groups]] of 5", "[[Groups]] of 10"],
@@ -337,6 +352,7 @@ function mountSquare(el, api){
       boxes: [{ label: "Extra [[items]]", a: 2 }],
       slips: [[7, "That gets to 30. There is a closer five."], [3, "23 + 3 = 26, which ends in 6. You want a 0 or a 5."], [5, "That gets to 28. You want a number ending in 0 or 5."]],
       hint: "What is the next number after 23 that ends in 0 or 5?",
+      ez: { q: "[[Who]] has 23 [[items]]. They want [[groups]] of 5, none left over. How many more do they need?", hint: "Next number ending in 0 or 5?", why: "23 + <b>2</b> = 25.", slips: [[null, "That gets to 30. 25 is closer."], [null, "26 ends in 6. You want 0 or 5."], [null, "28 ends in 8. You want 0 or 5."]] },
       why: "The next five is 25. 23 + <b>2</b> = 25.",
       lv: {
         medium: { q: "[[Who]] has 1 347 [[items]] and wants [[groups]] of 10 with none left over. What is the fewest extra [[items]] needed?", boxes: [{ label: "Extra [[items]]", a: 3 }],
@@ -352,6 +368,7 @@ function mountSquare(el, api){
       model: "85, because it ends in 5 and not 0.",
       slips: [[["0 at the end", "ends in 0", "ends with 0"], "A number ending in 0 splits by 10 as well. Try one ending in 5."]],
       hint: "It needs to end in 5.",
+      ez: { q: "Write a number that splits by 5 but <b>not</b> by 10. Say how you know.", why: "Any number ending in <b>5</b> works, like 85.", slips: [[null, "Ending in 0 splits by 10 too. Try 5."]] },
       why: "Any number ending in 5 works: 15, 85, 1 005. They split by 5, but the last digit is not 0, so not by 10.",
       lv: { spicy: { q: "Your own case. Write a number that splits by 3 and by 5 but <b>not</b> by 2, and say how you know.",
         need: [["5"], ["add", "total", "digits", "sum", "3"]],
@@ -361,6 +378,10 @@ function mountSquare(el, api){
         why: "Numbers like 15, 45, 75 or 105 work: they end in 5 (so odd, but split by 5) and their digits add to a number in the 3 times table." } } }
   ],
 
+  ez: {
+    realWorld: { title: "Where detectives use this", html: "<p>Sharing tickets. Packing boxes of 10.</p><p>The last digit tells you <b>before</b> you start.</p>" },
+    make: { intro: "Pick a number. Which clues does it pass?" }
+  },
   realWorld: {
     title: "Where detectives use this",
     html: "<p>Sharing tickets between a group, packing things in boxes of 10, checking if a bill splits evenly, or whether a team can pair up for a drill: the last digit tells you before you start.</p>" +

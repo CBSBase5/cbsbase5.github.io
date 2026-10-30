@@ -19,9 +19,11 @@ function lvl(v){
   if(!v.mild) return v;
   var o = {};
   Object.keys(v.mild).forEach(function(k){ o[k] = v.mild[k]; });
-  o.lv = { medium: v.medium || v.mild, spicy: v.spicy || v.mild };
+  o.lv = { medium: noEz(v.medium || v.mild), spicy: noEz(v.spicy || v.mild) };
   return o;
 }
+/* easy read (LC): ez only ever rides on the first level, so it is taken off the copies used for the other levels */
+function noEz(v){ if(!v || !v.ez) return v; var o = {}; Object.keys(v).forEach(function(k){ if(k !== "ez") o[k] = v[k]; }); return o; }
 /* a step from versions: the first is the original, the rest become vary */
 function S(type, topic, vs, extra){
   var s = lvl(vs[0]);
@@ -32,16 +34,16 @@ function S(type, topic, vs, extra){
 }
 
 /* likely slips for one fact in box k */
-function factSlips(k, a, b){
+function factSlips(k, a, b, ez){
   var p = r6(a * b), out = [], f = a + X + b;
-  function add(v, msg){ v = r6(v); if(v !== p && v > 0 && !out.some(function(o){ return o[1] === v; })) out.push([k, v, msg]); }
+  function add(v, msg, sh){ v = r6(v); if(v !== p && v > 0 && !out.some(function(o){ return o[1] === v; })) out.push([k, v, ez ? sh : msg]); }
   if(a === Math.round(a) && b === Math.round(b) && a <= 12 && b <= 12){
-    add(a + b, "For " + f + ": that is " + a + " + " + b + ". Times means " + a + " groups of " + b + ".");
-    add(p - b, "For " + f + ": that is one group of " + b + " short.");
-    add(p + b, "For " + f + ": that is one group of " + b + " too many.");
+    add(a + b, "For " + f + ": that is " + a + " + " + b + ". Times means " + a + " groups of " + b + ".", "For " + f + ", that adds. Try " + a + " groups of " + b + ".");
+    add(p - b, "For " + f + ": that is one group of " + b + " short.", "For " + f + ", that is one group short.");
+    add(p + b, "For " + f + ": that is one group of " + b + " too many.", "For " + f + ", that is one group too many.");
   } else {
-    add(p * 10, "For " + f + ": check the place value. That is ten times too big.");
-    add(p / 10, "For " + f + ": check the place value. That is ten times too small.");
+    add(p * 10, "For " + f + ": check the place value. That is ten times too big.", "For " + f + ", that is 10 times too big.");
+    add(p / 10, "For " + f + ": check the place value. That is ten times too small.", "For " + f + ", that is 10 times too small.");
   }
   return out;
 }
@@ -49,9 +51,12 @@ function factSlips(k, a, b){
 function reps(q, pairs, hint){
   var slips = [];
   pairs.forEach(function(p, k){ slips = slips.concat(factSlips(k, p[0], p[1])); });
+  var ezs = [];
+  pairs.forEach(function(p, k){ ezs = ezs.concat(factSlips(k, p[0], p[1], true)); });
   return { q: q, fig: "",
     boxes: pairs.map(function(p){ return { label: p[0] + X + p[1] + " =", a: r6(p[0] * p[1]) }; }),
     slips: slips, hint: hint,
+    ez: { q: q.replace("Three quick reps. Take them in any order you like.", "3 quick reps. Any order you like."), hint: hint.replace(" if that helps.", "."), slips: ezs },
     why: pairs.map(function(p){ return p[0] + X + p[1] + " = <b>" + r6(p[0] * p[1]) + "</b>"; }).join(", ") + "." };
 }
 /* mc builder: right answer first, wrongs as [text, slip]; the engine shuffles */
@@ -64,24 +69,35 @@ function MC(q, right, wrongs, hint, why, fig){
 function N(q, boxes, slips, hint, why, fig){ return { q: q, fig: fig || "", boxes: boxes, slips: slips, hint: hint, why: why }; }
 
 /* a groups of b: the usual slips */
-function grp(a, b, unit){
+function grp(a, b, unit, ez){
   var p = r6(a * b);
-  return [[r6(a + b), "That is " + a + " + " + b + ". Multiply instead."], [r6(p - b), "That is " + (a - 1) + X + b + ", one " + unit + " short."], [r6(p + b), "That is " + (a + 1) + X + b + ", one " + unit + " too many."]]
+  return [[r6(a + b), ez ? "That adds. Times it instead." : "That is " + a + " + " + b + ". Multiply instead."], [r6(p - b), ez ? "One " + unit + " short." : "That is " + (a - 1) + X + b + ", one " + unit + " short."], [r6(p + b), ez ? "One " + unit + " too many." : "That is " + (a + 1) + X + b + ", one " + unit + " too many."]]
     .filter(function(r){ return r[0] !== p && r[0] > 0; });
 }
 /* spot the fact with a slip: list of [a, b, claimed], exactly one claimed is off */
 function oddQ(list, hint){
   function f(x){ return x[0] + X + x[1] + " = " + x[2]; }
   var bad = list.filter(function(x){ return r6(x[0] * x[1]) !== x[2]; })[0];
-  return MC("One of these came out of the gym with a slip. Which one?", f(bad),
+  var m = MC("One of these came out of the gym with a slip. Which one?", f(bad),
     list.filter(function(x){ return x !== bad; }).map(function(x){ return [f(x), "That one checks out: " + f(x) + ". Look again at the others."]; }),
     hint, bad[0] + X + bad[1] + " is <b>" + r6(bad[0] * bad[1]) + "</b>, not " + bad[2] + ".");
+  var es = {}; Object.keys(m.slips).forEach(function(k){ es[k] = "That one checks out. Try another."; });
+  m.ez = { q: "One has a slip. Which one?", slips: es };
+  return m;
 }
-function WAY(t, right, wrongs, hint, why){ return MC("Stuck on " + t + "? Which is a good way to build it?", right, wrongs, hint, why); }
+function WAY(t, right, wrongs, hint, why, ez){
+  var m = MC("Stuck on " + t + "? Which is a good way to build it?", right, wrongs, hint, why);
+  var es = {}; Object.keys(m.slips).forEach(function(k){ es[k] = m.slips[k].replace(/^That puts the digits side by side\. /, ""); });
+  m.ez = { q: "Stuck on " + t + "? Which way works?", slips: es };
+  if(ez) Object.keys(ez).forEach(function(k){ m.ez[k] = ez[k]; });
+  return m;
+}
 function rowsQ(r, c, hint){
   var p = r * c;
-  return N("[[Who]] lines up [[items]] in rows at [[place]]: " + r + " rows of " + c + ". How many [[items]] altogether?", [{ label: "[[Items]]", a: p }],
+  var n = N("[[Who]] lines up [[items]] in rows at [[place]]: " + r + " rows of " + c + ". How many [[items]] altogether?", [{ label: "[[Items]]", a: p }],
     grp(r, c, "row"), hint, r + X + c + " = <b>" + p + "</b>.", arr(r, c));
+  n.ez = { q: r + " rows of " + c + " [[items]]. How many altogether?", slips: grp(r, c, "row", true) };
+  return n;
 }
 function trayQ(r, c, t, hint){
   var p = r * c;
@@ -90,8 +106,10 @@ function trayQ(r, c, t, hint){
     r + X + c + " = <b>" + p + "</b>, and " + p + X + t + " = <b>" + p * t + "</b>.", arr(r, c));
 }
 function feedQ(n, k, hint){
-  return N("Jay fills " + n + " bird feeders with " + k + " fat balls each. How many fat balls is that?", [{ label: "Fat balls", a: n * k }],
+  var q = N("Jay fills " + n + " bird feeders with " + k + " fat balls each. How many fat balls is that?", [{ label: "Fat balls", a: n * k }],
     grp(n, k, "feeder"), hint, n + X + k + " = <b>" + n * k + "</b>. The birds are very pleased.", feeders(n, k));
+  q.ez = { q: "Jay fills " + n + " feeders. " + k + " fat balls in each. How many?", slips: grp(n, k, "feeder", true) };
+  return q;
 }
 function tubQ(t){
   var p = 12 * t;
@@ -103,9 +121,11 @@ function dblQ(m, n){
   var times = { 4: 2, 8: 3, 16: 4 }[m], v = n, list = [];
   for(var i = 0; i < times; i++){ v = r6(v * 2); list.push(v); }
   var p = list[times - 1];
-  return N("No steps this time. What is " + m + X + n + "?", [{ label: m + X + n + " =", a: p }],
+  var q = N("No steps this time. What is " + m + X + n + "?", [{ label: m + X + n + " =", a: p }],
     [[list[times - 2], "That is " + (m / 2) + X + n + ". One more double."], [r6(m + n), "That is " + m + " + " + n + ". Double " + n + " instead."], [r6(p - n), "That is " + (m - 1) + X + n + ". One more " + n + "."]],
     "Double " + n + " " + ["", "", "twice", "three times", "four times"][times] + ".", list.join(", ").replace(/, ([^,]*)$/, ", <b>$1</b>") + ".");
+  q.ez = { q: "What is " + m + X + n + "?", slips: [[list[times - 2], "One more double."], [r6(m + n), "That adds. Double " + n + " instead."], [r6(p - n), "One more " + n + "."]] };
+  return q;
 }
 function nineQ(nn, n){
   var p = nn * n, ten = (nn + 1) * n, w = [[String(ten), "That is " + (nn + 1) + X + n + ". Take away one " + n + "."]];
@@ -117,24 +137,36 @@ function nineQ(nn, n){
     w.push([String(ten + n), "That adds " + n + ". 99 lots is one lot fewer than 100, so take it away."]);
     w.push([String(90 * n), "That is 90" + X + n + ". It is 99, nearly 100."]);
   }
-  return MC("Use the nines trick. What is " + nn + X + n + "?", String(p), w, (nn + 1) + X + n + ", then take away " + n + ".", ten + " take away " + n + " is <b>" + p + "</b>.");
+  var m = MC("Use the nines trick. What is " + nn + X + n + "?", String(p), w, (nn + 1) + X + n + ", then take away " + n + ".", ten + " take away " + n + " is <b>" + p + "</b>.");
+  m.ez = { q: "Nines trick. What is " + nn + X + n + "?" };
+  if(nn === 9 && p < 100 && +sw !== p) m.ez.slips = { 2: "The digits are swapped round." };
+  return m;
 }
 function halfQ(m, n){
   var big = r6(m * 2), bp = r6(big * n), p = r6(m * n);
-  return N("One more trick: <b>" + m + " lots is half of " + big + (big === 1 ? " lot" : " lots") + "</b>. " + big + X + n + " is " + bp + ". What is " + m + X + n + "?", [{ label: m + X + n + " =", a: p }],
+  var q = N("One more trick: <b>" + m + " lots is half of " + big + (big === 1 ? " lot" : " lots") + "</b>. " + big + X + n + " is " + bp + ". What is " + m + X + n + "?", [{ label: m + X + n + " =", a: p }],
     [[bp, "That is " + big + X + n + ". Halve it."], [r6(m + n), "That is " + m + " + " + n + "."], [r6(bp + m), "That adds " + m + ". Halve " + bp + " instead."]],
     "Half of " + bp + ".", "Half of " + bp + " is <b>" + p + "</b>.");
+  q.ez = { q: "<b>" + m + " lots is half of " + big + (big === 1 ? " lot" : " lots") + "</b>. " + big + X + n + " = " + bp + ". What is " + m + X + n + "?", slips: [[bp, "Now halve it."], [r6(m + n), "That adds. Halve " + bp + "."], [r6(bp + m), "Halve " + bp + " instead."]] };
+  return q;
 }
 function knowQ(k, t, b, flip){
   var kp = k * b, tp = t * b, up = t > k, f = function(g){ return flip ? b + X + g : g + X + b; };
-  return N("Fewer steps now. You know " + f(k) + " = " + kp + ". What is " + f(t) + "?", [{ label: f(t) + " =", a: tp }],
+  var q = N("Fewer steps now. You know " + f(k) + " = " + kp + ". What is " + f(t) + "?", [{ label: f(t) + " =", a: tp }],
     [[up ? kp + 1 : kp - 1, "That " + (up ? "adds" : "takes away") + " 1. " + (up ? "Add" : "Take away") + " one " + b + "."], [up ? kp + t : kp - t, "That " + (up ? "adds " : "takes away ") + t + ". " + (up ? "Add" : "Take away") + " one " + b + "."], [(2 * k - t) * b, "That goes the wrong way. " + f(t) + " is " + (up ? "one more" : "one fewer") + " " + b + "."]]
       .filter(function(r){ return r[0] !== tp && r[0] > 0; }),
     f(t) + " is " + f(k) + (up ? " and one more " : ", take away one ") + b + ".", kp + (up ? " + " : " take away ") + b + " = <b>" + tp + "</b>.");
+  q.ez = { q: "You know " + f(k) + " = " + kp + ". What is " + f(t) + "?",
+    slips: [[up ? kp + 1 : kp - 1, (up ? "Add" : "Take away") + " one " + b + ", not 1."], [up ? kp + t : kp - t, (up ? "Add" : "Take away") + " one " + b + "."], [(2 * k - t) * b, "Other way. " + (up ? "One more " : "One fewer ") + b + "."]]
+      .filter(function(r){ return r[0] !== tp && r[0] > 0; }) };
+  return q;
 }
-function ownQ(a, b, hint){
-  return N("On your own now. [[Who]] packs " + a + " [[boxes]] with " + b + " [[items]] in each. How many [[items]]?", [{ label: "[[Items]]", a: a * b }],
+function ownQ(a, b, hint, ezHint){
+  var q = N("On your own now. [[Who]] packs " + a + " [[boxes]] with " + b + " [[items]] in each. How many [[items]]?", [{ label: "[[Items]]", a: a * b }],
     grp(a, b, "group"), hint, a + X + b + " = <b>" + a * b + "</b>.");
+  q.ez = { q: a + " [[boxes]]. " + b + " [[items]] in each. How many [[items]]?", slips: grp(a, b, "group", true) };
+  if(ezHint) q.ez.hint = ezHint;
+  return q;
 }
 
 /* ---------- pictures ---------- */
@@ -271,6 +303,7 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     /* ---------- chunk 1: warm up ---------- */
     S("learn", "Warm up", [{
       mild: { title: "Welcome to the gym",
+        ez: { html: "<p>No clock here. Take your time.</p><p>4" + X + "3 means <b>4 rows of 3</b>. Count: 3, 6, 9, 12.</p>" },
         html: "<p>Times facts are like reps at the gym. Every time you come back, they get a bit stronger. There is no clock here, so take each one at whatever pace suits you.</p>" +
           "<p>A times fact means <b>groups of</b>. 4" + X + "3 means <b>4 rows of 3</b>. Count them in the picture: 3, 6, 9, 12.</p>",
         fig: arr(4, 3, "4" + X + "3 = 12") },
@@ -324,6 +357,7 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     /* ---------- chunk 2: patterns and tricks ---------- */
     S("learn", "Patterns and tricks", [{
       mild: { title: "Worked example: the doubling trick",
+        ez: { title: "The doubling trick", html: "<p>To times by 4, <b>double, then double again</b>.</p><p class=\"a2task\">4" + X + "6: double 6 is 12. Double 12 is <b>24</b>.</p>" },
         html: "<p>The 4s are <b>double the 2s</b>. So to times by 4, double and then double again.</p>" +
           "<p class=\"a2task\"><b>Worked example: 4" + X + "6</b><br>Step 1: double 6 is 12.<br>Step 2: double 12 is 24.<br>So 4" + X + "6 = <b>24</b>.</p>",
         fig: ladder(6) },
@@ -344,10 +378,13 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
         var slips = [];
         if(r6(n + 2) !== vals[0]) slips.push([0, r6(n + 2), "That is " + n + " + 2. Doubling means " + n + " + " + n + "."]);
         for(var k = 1; k < times; k++) slips.push([k, vals[k - 1], "That is the same as the box before. Double it once more."]);
-        return N("Your turn, with the steps laid out. Work out " + m + X + n + " by doubling.",
+        var ezs = slips.map(function(s){ return [s[0], s[1], s[0] ? "Same as before. Double it again." : "Doubling means " + n + " + " + n + "."]; });
+        var q = N("Your turn, with the steps laid out. Work out " + m + X + n + " by doubling.",
           vals.map(function(x, k){ return { label: k ? "Double again =" : "Double " + n + " =", a: x }; }),
           slips, "Doubling means adding a number to itself.",
           "Double " + n + " is " + vals.join(", then ") + ". So " + m + X + n + " = <b>" + vals[times - 1] + "</b>.");
+        q.ez = { q: "Your turn. Work out " + m + X + n + " by doubling.", hint: "Add the number to itself.", slips: ezs };
+        return q;
       }
       return [
         { mild: dbl(4, 7), medium: dbl(8, 6), spicy: dbl(8, 45) },
@@ -364,6 +401,7 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
 
     S("learn", "Patterns and tricks", [{
       mild: { title: "The nines pattern",
+        ez: { html: "<p>9 lots is <b>10 lots, take one away</b>.</p><p>9" + X + "4: 40 take away 4 is 36.</p>" },
         html: "<p>Look along the 9s. The <b>tens go up</b> by one each time and the <b>ones go down</b> by one. The digits always add up to 9.</p>" +
           "<p>Another trick: <b>9 lots is 10 lots, take one away</b>. 9" + X + "4: 10" + X + "4 is 40, take away 4 is 36.</p>",
         fig: NINES },
@@ -388,6 +426,7 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     /* ---------- chunk 3: build from a fact you know ---------- */
     S("learn", "Build from a fact you know", [{
       mild: { title: "Worked example: build it from a fact you know",
+        ez: { title: "Start from a fact you know", html: "<p>Start from a fact you <b>know</b>.</p><p class=\"a2task\">3" + X + "6: 2" + X + "6 = 12. One more 6 is <b>18</b>.</p>" },
         html: "<p>Stuck on a fact? Start from one you <b>do</b> know, then add or take away a group.</p>" +
           "<p class=\"a2task\"><b>Worked example: 3" + X + "6</b><br>Step 1: I know 2" + X + "6 = 12.<br>Step 2: 3" + X + "6 is one more 6: 12 + 6 = 18.<br>So 3" + X + "6 = <b>18</b>.</p>",
         fig: arr(3, 6, "2 rows of 6, and 1 more row", 2) },
@@ -404,10 +443,12 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     S("num", "Build from a fact you know", (function(){
       function two(a, b){ /* (a-1) x b, then one more b */
         var p1 = (a - 1) * b, p = a * b;
-        return N("Your turn, with the steps laid out. Work out " + a + X + b + ".",
+        var q = N("Your turn, with the steps laid out. Work out " + a + X + b + ".",
           [{ label: "Step 1: " + (a - 1) + X + b + " =", a: p1 }, { label: "Step 2: one more " + b + " =", a: p }],
           [[1, p1 + 1, "That adds 1. Add one more " + b + "."], [1, p1 + a, "That adds " + a + ". Add one more " + b + "."]].filter(function(r){ return r[1] !== p; }),
           "Step 2 is step 1 plus " + b + ".", (a - 1) + X + b + " = " + p1 + ", and " + p1 + " + " + b + " = <b>" + p + "</b>.", arr(a, b, "", a - 1));
+        q.ez = { q: "Your turn. Work out " + a + X + b + "." };
+        return q;
       }
       function three(a, b, split){ /* split a into split and a-split */
         var r = a - split, p1 = split * b, p2 = r * b;
@@ -430,16 +471,16 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     ]),
 
     S("num", "Build from a fact you know", [
-      { mild: ownQ(3, 9, "Any trick you like: 2" + X + "9 and one more 9, or 3" + X + "10 take away 3."), medium: ownQ(7, 9, "Any trick you like: 7" + X + "10 take away 7 works well."), spicy: ownQ(13, 9, "Split 13 into 10 and 3, or do 13" + X + "10 take away 13.") },
+      { mild: ownQ(3, 9, "Any trick you like: 2" + X + "9 and one more 9, or 3" + X + "10 take away 3.", "2" + X + "9, then one more 9."), medium: ownQ(7, 9, "Any trick you like: 7" + X + "10 take away 7 works well."), spicy: ownQ(13, 9, "Split 13 into 10 and 3, or do 13" + X + "10 take away 13.") },
       { mild: ownQ(6, 3, "5" + X + "3 and one more 3."), medium: ownQ(6, 12, "6" + X + "10 and 6" + X + "2."), spicy: ownQ(12, 16, "10" + X + "16 and 2" + X + "16.") },
       { mild: ownQ(4, 7, "Double 7, then double again."), medium: ownQ(8, 7, "Double 7 three times, or 5" + X + "7 and 3" + X + "7."), spicy: ownQ(21, 8, "20" + X + "8 and one more 8.") }
     ]),
 
     S("mc", "Build from a fact you know", [
-      { mild: WAY("3" + X + "8", "2" + X + "8 = 16, then add one more 8", [["2" + X + "8 = 16, then add 3", "Add a whole group of 8, not the 3."], ["3 + 8 = 11", "That adds instead of times."], ["Write 38", "That puts the digits side by side. 3" + X + "8 means 3 groups of 8."]], "3 groups of 8 is 2 groups and one more group.", "16 + 8 = <b>24</b>."),
+      { mild: WAY("3" + X + "8", "2" + X + "8 = 16, then add one more 8", [["2" + X + "8 = 16, then add 3", "Add a whole group of 8, not the 3."], ["3 + 8 = 11", "That adds instead of times."], ["Write 38", "That puts the digits side by side. 3" + X + "8 means 3 groups of 8."]], "3 groups of 8 is 2 groups and one more group.", "16 + 8 = <b>24</b>.", { hint: "2 groups of 8, and 1 more." }),
         medium: WAY("7" + X + "9", "7" + X + "10 = 70, then take away 7", [["7" + X + "10 = 70, then take away 9", "Take away one group of 7. There are 7 groups."], ["7" + X + "10 = 70, then take away 1", "Each of the 7 groups is 1 smaller, so take away 7."], ["7 + 9 = 16", "That adds instead of times."]], "7 groups of 10, but each group is one less.", "70 take away 7 is <b>63</b>."),
         spicy: WAY("19" + X + "8", "20" + X + "8 = 160, then take away 8", [["20" + X + "8 = 160, then take away 1", "There is one group of 8 too many, so take away 8."], ["19" + X + "10 = 190, then take away 8", "That would need to take away 2" + X + "19, not 8."], ["9" + X + "8 + 10 = 82", "That loses most of the groups. 19 lots is 10 lots and 9 lots."]], "20 lots is one lot too many.", "160 take away 8 is <b>152</b>.") },
-      { mild: WAY("6" + X + "4", "5" + X + "4 = 20, then add one more 4", [["5" + X + "4 = 20, then add 6", "Add a whole group of 4, not the 6."], ["6 + 4 = 10", "That adds instead of times."], ["Write 64", "That puts the digits side by side. 6" + X + "4 means 6 groups of 4."]], "6 groups of 4 is 5 groups and one more group.", "20 + 4 = <b>24</b>."),
+      { mild: WAY("6" + X + "4", "5" + X + "4 = 20, then add one more 4", [["5" + X + "4 = 20, then add 6", "Add a whole group of 4, not the 6."], ["6 + 4 = 10", "That adds instead of times."], ["Write 64", "That puts the digits side by side. 6" + X + "4 means 6 groups of 4."]], "6 groups of 4 is 5 groups and one more group.", "20 + 4 = <b>24</b>.", { hint: "5 groups of 4, and 1 more." }),
         medium: WAY("8" + X + "6", "8" + X + "5 = 40, then add 8", [["8" + X + "5 = 40, then add 6", "8" + X + "6 is 8 lots of 6, which is 8 lots of 5 plus 8 lots of 1. Add 8."], ["8" + X + "5 = 40, then add 1", "Each of the 8 groups grows by 1, so add 8."], ["8 + 6 = 14", "That adds instead of times."]], "8 groups of 6 is 8 groups of 5, with 1 more in each group.", "40 + 8 = <b>48</b>."),
         spicy: WAY("29" + X + "6", "30" + X + "6 = 180, then take away 6", [["30" + X + "6 = 180, then take away 1", "There is one group of 6 too many, so take away 6."], ["30" + X + "6 = 180, then take away 29", "Take away one group of 6, not 29."], ["20" + X + "6 + 9 = 129", "That only adds 9, not 9 lots of 6."]], "30 lots is one lot too many.", "180 take away 6 is <b>174</b>.") },
       { mild: WAY("9" + X + "5", "10" + X + "5 = 50, then take away 5", [["10" + X + "5 = 50, then take away 9", "Take away one group of 5."], ["10" + X + "5 = 50, then add 5", "9 lots is fewer than 10 lots, so take away."], ["9 + 5 = 14", "That adds instead of times."]], "9 lots is 10 lots, take one away.", "50 take away 5 is <b>45</b>."),
@@ -450,6 +491,7 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     /* ---------- chunk 4: turn it round ---------- */
     S("learn", "Turn it round", [{
       mild: { title: "Worked example: two divides for free",
+        ez: { title: "Two divides for free", html: "<p>4" + X + "5 = 20 gives you <b>two divides</b>.</p><p class=\"a2task\">20" + D + "5 = 4. 20" + D + "4 = 5.</p>" },
         html: "<p>Every times fact gives you <b>two divide facts</b> for free.</p>" +
           "<p class=\"a2task\"><b>Worked example</b><br>I know 4" + X + "5 = 20.<br>So 20" + D + "5 = 4, and 20" + D + "4 = 5.</p>" +
           "<p>Stuck on a divide? Turn it into a times question. 20" + D + "5 means <b>how many 5s make 20?</b></p>",
@@ -468,11 +510,13 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     S("num", "Turn it round", (function(){
       function fam(a, b){
         var p = a * b;
-        return N("Your turn. You know " + a + X + b + " = " + p + ". Use it for both divides.",
+        var q = N("Your turn. You know " + a + X + b + " = " + p + ". Use it for both divides.",
           [{ label: p + D + b + " =", a: a }, { label: p + D + a + " =", a: b }],
           [[0, p - b, "That takes away instead of dividing."], [1, p - a, "That takes away instead of dividing."], [0, p * b, "That times instead of dividing."]].filter(function(r){ return r[1] !== (r[0] ? b : a) && r[1] > 0; }),
           "How many " + b + "s make " + p + "? How many " + a + "s make " + p + "?",
           p + D + b + " = <b>" + a + "</b> and " + p + D + a + " = <b>" + b + "</b>.", tri(p, a, b, true));
+        q.ez = { q: "You know " + a + X + b + " = " + p + ". Do both divides.", hint: "How many " + b + "s make " + p + "?" };
+        return q;
       }
       function famS(a, b, big, small){ /* big: p*10 / b ; small: p/10 / a */
         var p = a * b;
@@ -492,10 +536,13 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     S("num", "Turn it round", (function(){
       function share(n, k){
         var a = n / k;
-        return N("On your own now. [[Who]] shares " + n + " [[items]] equally between " + k + " [[boxes]]. How many in each?",
+        var q = N("On your own now. [[Who]] shares " + n + " [[items]] equally between " + k + " [[boxes]]. How many in each?",
           [{ label: "In each [[box]]", a: a }],
           [[n - k, "That takes " + k + " away. Share them out instead."], [n + k, "That adds. Share them out instead."], [n * k, "That times. Share them out instead."], [a + 1, "One too many. Check: " + k + X + (a + 1) + " is " + k * (a + 1) + "."], [a - 1, "One too few. Check: " + k + X + (a - 1) + " is " + k * (a - 1) + "."]],
           "Turn it round: " + k + X + "what = " + n + "?", k + X + a + " = " + n + ", so there are <b>" + a + "</b> in each.");
+        q.ez = { q: "Share " + n + " [[items]] between " + k + " [[boxes]]. How many in each?",
+          slips: [[n - k, "That takes away. Share them out."], [n + k, "That adds. Share them out."], [n * k, "That times. Share them out."], [a + 1, "One too many."], [a - 1, "One too few."]] };
+        return q;
       }
       return [
         { mild: share(32, 4), medium: share(63, 7), spicy: share(840, 12) },
@@ -508,7 +555,8 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
       function M(list){
         return { q: "Match each times fact to a divide fact it gives you for free.",
           pairs: list.map(function(x){ var p = r6(x[0] * x[1]); return [x[0] + X + x[1] + " = " + p, x[3] || (p + D + x[0] + " = " + x[1])]; }),
-          hint: "Look for the same three numbers.", why: "Each pair uses the same three numbers. That is what makes them one family." };
+          hint: "Look for the same three numbers.", why: "Each pair uses the same three numbers. That is what makes them one family.",
+          ez: { q: "Match each times fact to its divide fact.", hint: "Look for the same 3 numbers.", why: "Same 3 numbers. One family." } };
       }
       return [
         { mild: M([[2, 6], [5, 3], [4, 10], [3, 9]]), medium: M([[6, 7], [8, 9], [12, 4], [7, 7]]),
@@ -531,7 +579,8 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
         if(ans === 2) say[1] = "Check Jay's with a times fact.";
         OPTS.forEach(function(o, k){ if(k !== ans) sl[k] = say[k]; });
         return { q: "Jay says: \"" + jay + "\" Bonnie gives a little woof that means: \"" + bon + "\" Who is right?", fig: BJ,
-          options: OPTS, answer: ans, slips: sl, hint: "Turn each divide into a times fact and check it.", why: why };
+          options: OPTS, answer: ans, slips: sl, hint: "Turn each divide into a times fact and check it.", why: why,
+          ez: { q: "Jay: \"" + jay + "\" Bonnie's woof: \"" + bon + "\" Who is right?", hint: "Check each one with a times fact." } };
       }
       return [
         { mild: JB("I know 4" + X + "5 = 20, so 20" + D + "4 = 5.", "So 20" + D + "5 = 4 too.", 0, "Both are right. One times fact gives two divides."),
@@ -550,11 +599,14 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
       function cool(a, b, c, d, e, f){
         /* a x b, c / d, ? x e = f */
         var p = r6(a * b), q = r6(c / d), m = r6(f / e);
-        return N("Cool down: one of each kind. Take them in any order.",
+        var s = N("Cool down: one of each kind. Take them in any order.",
           [{ label: a + X + b + " =", a: p }, { label: c + D + d + " =", a: q }, { label: "Missing number: ?" + X + e + " = " + f, a: m }],
           factSlips(0, a, b).concat([[1, r6(c - d), "For " + c + D + d + ": that takes away. Share instead."], [2, r6(f - e), "For the missing number: that takes away. Ask what times " + e + " makes " + f + "."]].filter(function(r){ return r[1] > 0; })),
           "The last one is a divide in disguise: " + f + D + e + ".",
           a + X + b + " = <b>" + p + "</b>, " + c + D + d + " = <b>" + q + "</b>, and <b>" + m + "</b>" + X + e + " = " + f + ".");
+        s.ez = { q: "Cool down. Any order you like.", hint: "The last one is " + f + D + e + ".",
+          slips: factSlips(0, a, b, true).concat([[1, r6(c - d), "That takes away. Share instead."], [2, r6(f - e), "That takes away. What times " + e + " makes " + f + "?"]].filter(function(r){ return r[1] > 0; })) };
+        return s;
       }
       return [
         { mild: cool(6, 5, 20, 4, 3, 27), medium: cool(8, 7, 84, 12, 9, 108), spicy: cool(0.8, 9, 630, 7, 12, 1.44) },
@@ -569,6 +621,11 @@ var SHILLING = '<svg viewBox="0 0 520 170" role="img" aria-label="An old shillin
     html: "<p>Packs of 6 and 12, a crate of 24, a bus every 12 minutes: times facts turn up whenever things come in groups.</p>" +
       "<p>For our big question: if you travelled back to Britain before 1971, you would really need your 12s. There were <b>12 pennies in a shilling</b>, so 3 shillings was 36 pennies. Would you cope with the shopping? Jay reckons you would.</p>",
     fig: SHILLING
+  },
+
+  ez: {
+    realWorld: { title: "Old money", html: "<p>Before 1971 there were <b>12 pennies</b> in a shilling.</p><p>Time travel back? You would need your 12s!</p>" },
+    make: { intro: "Your best fact, and the trick that helps." }
   },
 
   make: {

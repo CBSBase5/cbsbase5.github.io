@@ -132,6 +132,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
     { type: "learn", topic: "One stop, one paragraph",
       title: "New stop, new paragraph",
       fig: ROUTE,
+      ez: { html: "<p><b>New place, new paragraph.</b></p><p class=\"a2task\">" + P(1) + "</p><p class=\"a2task\">" + P(2) + "</p><p>Two stops, two paragraphs.</p>" },
       html: "<p>A <b>travelogue</b> is writing about a journey. This one is about [[trip]].</p>" +
         "<p>The simplest rule: <b>every time you arrive somewhere new, start a new paragraph</b>. The gap tells the reader \"we have moved on\", like a stop on a map.</p>" +
         "<p class=\"a2task\">" + P(1) + "</p><p class=\"a2task\">" + P(2) + "</p>" +
@@ -143,6 +144,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "order", topic: "One stop, one paragraph",
       q: "Here are the four paragraphs of the travelogue, jumbled up. Put them in journey order.",
+      ez: { q: "Put the 4 stops in order.", hint: "Where are we? What time is it?", why: "[[Stop1]], then [[stop2]], [[stop3]] and [[stop4]]." },
       items: [P(1), P(2), P(3), P(4)],
       hint: "Look at the first sentence of each one. Where are we, and what time is it?",
       why: "The first sentence of each paragraph says where we are: [[stop1]], [[stop2]], [[stop3]], then [[stop4]].",
@@ -152,6 +154,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "mc", topic: "One stop, one paragraph",
       q: "One sentence in this paragraph has wandered in from a different stop. Which one?<p class=\"a2task\">[[A2]] [[B2]] [[X4]] [[C2]]</p>",
+      ez: { q: "Which sentence is from a different stop?<p class=\"a2task\">[[A2]] [[B2]] [[X4]] [[C2]]</p>", slips: { 0: "That one says we are at [[stop2]].", 1: "That one belongs at [[stop2]].", 3: "That one belongs at [[stop2]]." }, hint: "Which one is somewhere else?", why: "That one is from [[stop4]]." },
       options: ["[[A2]]", "[[B2]]", "[[X4]]", "[[C2]]"],
       answer: 2, fixed: true,
       slips: { 0: "That is the topic sentence: it tells us we are at [[stop2]].", 1: "That one belongs: it describes [[stop2]].", 3: "That one belongs: it happens at [[stop2]]." },
@@ -166,6 +169,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "mc", topic: "One stop, one paragraph", explain: true,
       q: "The writer starts a new paragraph between these two sentences. Why?<p class=\"a2task\">...[[C2]]</p><p class=\"a2task\">[[A3]]...</p>",
+      ez: { q: "Why is there a new paragraph here?<p class=\"a2task\">...[[C2]]</p><p class=\"a2task\">[[A3]]...</p>", slips: { 1: "Length does not matter. Look at the place.", 2: "It is not about space. Look at the place.", 3: "There is no fixed number." }, hint: "Where are we in each one?", why: "We move from [[stop2]] to [[stop3]]. New place, new paragraph." },
       options: ["The place changes", "The second sentence is longer", "The writer ran out of room", "Paragraphs always have three sentences"],
       answer: 0,
       slips: { 1: "Sentence length is not a reason for a new paragraph. Look at where we are.", 2: "Paragraphs are not about space on the page. They show a change.", 3: "There is no fixed number. A paragraph lasts as long as the stop does." },
@@ -181,6 +185,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
     { type: "learn", topic: "Topic sentences",
       title: "The first sentence is a signpost",
       fig: TOPIC,
+      ez: { title: "Topic sentences", html: "<p>The first sentence is the <b>topic sentence</b>. It says where we are.</p><p class=\"a2task\"><b>[[A3]]</b> [[B3]] [[C3]]</p>" },
       html: "<p>The first sentence of a paragraph is the <b>topic sentence</b>. In a travelogue it usually tells the reader <b>where we are now</b>, and often when.</p>" +
         "<p class=\"a2task\"><b>[[A3]]</b> [[B3]] [[C3]]</p>" +
         "<p>The bold sentence moves the reader to the new stop. The others add the detail.</p>",
@@ -190,6 +195,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "mc", topic: "Topic sentences",
       q: "This paragraph has lost its first sentence. Which one makes the best topic sentence?<p class=\"a2task\">________ [[B4]] [[C4]]</p>",
+      ez: { q: "Which is the best first sentence?<p class=\"a2task\">________ [[B4]] [[C4]]</p>", slips: { 1: "Nice where? Name the place.", 2: "Where is somewhere else?", 3: "That is from [[stop2]]." }, hint: "Which one says where we are?", why: "It names the stop. Now the reader knows where we are." },
       options: ["[[A4]]", "It was nice.", "And then we went somewhere else.", "[[X2]]"],
       answer: 0,
       slips: { 1: "\"It was nice\" could be about anywhere. The reader needs to know where we are.", 2: "That does not say where \"somewhere else\" is.", 3: "That belongs at [[stop2]], earlier in the trip." },
@@ -203,6 +209,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "match", topic: "Topic sentences",
       q: "Match each topic sentence to the stop it starts.",
+      ez: { q: "Match each first sentence to its stop.", why: "Each topic sentence names its stop." },
       pairs: [["[[A1]]", "Stop 1: [[stop1]]"], ["[[A2]]", "Stop 2: [[stop2]]"], ["[[A3]]", "Stop 3: [[stop3]]"], ["[[A4]]", "Stop 4: [[stop4]]"]],
       hint: "Each topic sentence names its place.",
       why: "Each topic sentence names its stop. That is why a reader can skim the first sentences and follow the whole route.",
@@ -217,6 +224,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "text", topic: "Topic sentences",
       q: "The journey gets one more stop. <b>The next stop is [[stop5]].</b> Write a topic sentence to start that paragraph. Say where you are, and when if you like.",
+      ez: { q: "<b>The next stop is [[stop5]].</b> Write a first sentence for it.", slips: [[["it was nice", "it was good", "then we went", "somewhere"], "Name the place."]], hint: "Try: \"Next, we...\" Name the place.", why: "Name the new place. Like this: \"[[Model5]]\"" },
       need: [["[[Key5]]"], ["we", "i", "our", "my", "us"]],
       model: "[[Model5]]",
       slips: [[["it was nice", "it was good", "then we went", "somewhere"], "That could be anywhere. Name the place so the reader knows where we are."]],
@@ -227,6 +235,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
     { type: "learn", topic: "Split the block",
       title: "Find the turning points",
       fig: SPLIT,
+      ez: { title: "Find the turning points", html: "<p>Look for a <b>new place</b> or a <b>time change</b>.</p><p class=\"a2task\">[[A2]] [[B2]] [[C2]] <b>[[A3]]</b> [[B3]] [[C3]]</p><p>The bold one starts a new paragraph.</p>" },
       html: "<p>Sometimes writing comes out as one long block. To split it, hunt for the <b>turning points</b>:</p>" +
         "<p><b>New place:</b> we reached, we arrived at, inside, next. <b>Time moves on:</b> by lunchtime, later, at two o'clock, on the way home.</p>" +
         "<p class=\"a2task\">[[A2]] [[B2]] [[C2]] <b>[[A3]]</b> [[B3]] [[C3]]</p>" +
@@ -234,6 +243,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "mc", topic: "Split the block",
       q: "This part was written as one block. Where should the new paragraph start?<p class=\"a2task\">[[A1]] [[B1]] [[A2]] [[B2]]</p>",
+      ez: { q: "Where should the new paragraph start?<p class=\"a2task\">[[A1]] [[B1]] [[A2]] [[B2]]</p>", slips: { 0: "Still at [[stop1]].", 2: "One sentence earlier." }, hint: "Where do we arrive somewhere new?", why: "\"[[A2]]\" moves us to [[stop2]]." },
       options: ["[[B1]]", "[[A2]]", "[[B2]]"],
       answer: 1, fixed: true,
       slips: { 0: "That is still at [[stop1]]. It adds detail.", 2: "That is a detail about [[stop2]]. The break comes one sentence earlier." },
@@ -254,6 +264,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "sort", topic: "Split the block",
       q: "Sort these sentences into the right paragraph.",
+      ez: { why: "Each stop keeps its own details." },
       buckets: ["[[Stop1]]", "[[Stop2]]"],
       cards: [["[[A1]]", 0], ["[[X1]]", 0], ["[[A2]]", 1], ["[[X2]]", 1]],
       hint: "Picture where each one happens.",
@@ -266,6 +277,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "mc", topic: "Split the block",
       q: "Which of these is a signal that a new paragraph might be coming?",
+      ez: { q: "Which one could start a new paragraph?", slips: { 1: "And joins things.", 2: "Because explains.", 3: "Very makes a word stronger." }, why: "\"Later that afternoon\" moves time on." },
       options: ["Later that afternoon,", "and", "because", "very"],
       answer: 0,
       slips: { 1: "\"And\" joins things inside a sentence. It does not move the journey on.", 2: "\"Because\" explains. It stays in the same moment.", 3: "\"Very\" just makes a word stronger." },
@@ -286,6 +298,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
     { type: "learn", topic: "Make each paragraph count",
       title: "Build a paragraph",
       fig: BUILD,
+      ez: { html: "<p><b>Where</b> we are. <b>Details</b>. How it <b>felt</b>.</p><p class=\"a2task\">[[A4]] [[B4]] [[C4]]</p>" },
       html: "<p>A good travelogue paragraph has three parts:</p>" +
         "<p><b>Topic sentence:</b> where are we? <b>Details:</b> what did you see, hear or smell? <b>Feeling:</b> what was it like for you?</p>" +
         "<p class=\"a2task\">[[A4]] [[B4]] [[C4]]</p>" +
@@ -298,12 +311,14 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
 
     { type: "order", topic: "Make each paragraph count",
       q: "Put these sentences in order to build the paragraph.",
+      ez: { q: "Put the sentences in order.", hint: "Where first. Feeling last.", why: "Where, then details, then the ending." },
       items: ["[[A4]]", "[[B4]]", "[[C4]]"],
       hint: "Topic sentence first. The feeling or ending last.",
       why: "Where we are, then the detail, then how it ended. Readers expect that shape." },
 
     { type: "mc", topic: "Make each paragraph count", explain: true,
       q: "Three writers wrote about [[stop3]]. Which paragraph does the best job?",
+      ez: { q: "Which paragraph about [[stop3]] is best?", slips: { 1: "It says where, but nothing else.", 2: "Two stops squashed together." }, hint: "Which has details and stays at one stop?", why: "It says where, adds details, and stays put." },
       options: ["[[A3]] [[B3]] [[C3]]", "[[A3]]", "We went to [[stop3]]. It was good. Then we went to [[stop4]]. It was good too."],
       answer: 0,
       slips: { 1: "One sentence tells us where, but nothing about what it was like.", 2: "That squashes two stops into one paragraph and says \"good\" twice without saying why." },
@@ -321,6 +336,7 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
       starters: ["Our first stop was", "By lunchtime, we had reached", "When we arrived at", "Next, we"],
       checklist: ["Starts with where you are", "At least two details (see, hear, smell)", "Ends with how it felt", "Stays at one stop"],
       minWords: 35,
+      ez: { q: "If you like: write about one stop. Where, details, feeling." },
       lv: {
         mild: { minWords: 20, checklist: ["Starts with where you are", "One or two details", "How it felt"] },
         spicy: { q: "Your turn, if you fancy it. Write two paragraphs about two stops on a journey (real, or [[trip]]). Give each a clear topic sentence, and give the second one a different focus: the people, the food, or a moment that surprised you.",
@@ -337,6 +353,11 @@ function P(k){ return "[[A" + k + "]] [[B" + k + "]] [[C" + k + "]]"; }
       A.portal(70, 76, 54) +
       '<rect x="150" y="28" width="150" height="100" rx="8" fill="#ffffff" stroke="#141a33" stroke-width="2.5"/>' + lines(164, 42, 122, 3) + lines(164, 84, 122, 3, "#ffd23f") +
       A.jay(360, 50, 0.68, "smile") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Where you would use this", html: "<p>Trip reports and reviews: one stop, one paragraph.</p><p>Your travelogue could be a <b>source</b> one day!</p>" },
+    make: { intro: "One stop, one paragraph, on a postcard." }
   },
 
   make: {

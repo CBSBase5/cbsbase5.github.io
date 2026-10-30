@@ -124,6 +124,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
         "<p>But when <b>several details point the same way</b>, you can build an <b>interpretation</b>: your reading of what is going on.</p>" +
         "<p class=\"a2task\">[[Who]] checked the clock for the fourth time. Their foot tapped under the table. They had put their coat on an hour before they needed to leave.</p>" +
         "<p>Clock, tapping, coat: all three point to one idea. [[Who]] is keen to get going.</p>",
+      ez: { title: "Clues add up", html: "<p>When <b>clues</b> point the same way, you can work it out.</p><p class=\"a2task\">Clock. Tapping foot. Coat on.</p><p>[[Who]] wants to go.</p>" },
       lv: {
         mild: { html: "<p>A <b>clue</b> is a detail that helps you work something out.</p>" +
           "<p>When <b>a few clues point the same way</b>, you can say what you think is going on.</p>" +
@@ -141,6 +142,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: { 1: "Only the coat fits that. The clock and the tapping do not.", 2: "The coat went on an hour early, so they are not late.", 3: "Checking the clock four times does not sound restful." },
       hint: "Find the idea that fits the clock, the tapping and the coat.",
       why: "All three details fit \"keen to get going\". Each other idea fits one detail at most.",
+      ez: { hint: "Clock, tapping, coat. Add them up.", why: "[[Who]] <b>wants to go</b>. All 3 clues fit.", slips: { 1: "Coat fits cold. The clock does not.", 2: "Tapping feet? Not asleep." } },
       lv: {
         mild: { q: "What do the clues tell you?<p class=\"a2task\">[[Who]] looked at the clock. Their foot tapped. They had their coat on already.</p>",
           options: ["[[Who]] wants to go.", "[[Who]] is cold.", "[[Who]] is asleep."],
@@ -158,6 +160,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       answers: [0, 1, 2],
       hint: "Which details sound like someone with a lot on their mind?",
       why: "Waking early, ironing twice and not eating all suggest nerves. Singing does not really fit (more on that next).",
+      ez: { q: "<b>[[Who]] is nervous.</b> Pick the clues that show it.<p class=\"a2task\">[[Who]] woke up at five. They could not eat breakfast. Their hands shook. The sky was blue.</p>", hint: "Which ones are about [[who]]?", why: "5am, no breakfast, shaking hands. Not the sky." },
       lv: { mild: { q: "Here is an idea: <b>[[Who]] is nervous.</b> Pick the clues that back it up.<p class=\"a2task\">[[Who]] woke up at five. They could not eat breakfast. Their hands shook. The sky was blue.</p>",
         options: ["Woke up at five", "Could not eat breakfast", "Their hands shook", "The sky was blue"],
         hint: "Which clues are about how [[who]] feels or acts?",
@@ -170,6 +173,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: { 1: "Waking at five does back it up: nerves can stop you sleeping.", 2: "Ironing twice backs it up: checking things over and over is a nervous habit.", 3: "Leaving food backs it up: nerves can kill your appetite." },
       hint: "Three of these sound worried. One sounds cheerful.",
       why: "Singing along sounds cheerful, so on its own it does not back up nervous.",
+      ez: { q: "Which clue does <b>not</b> show nerves?", hint: "Which is not about [[who]]?", why: "The sky is just the <b>weather</b>.", slips: { 1: "Shaking hands can mean nerves.", 2: "Nerves can stop you eating." } },
       lv: {
         mild: { q: "Which clue does <b>not</b> tell you that [[who]] is nervous?",
           options: ["The sky was blue.", "Their hands shook.", "They could not eat breakfast."],
@@ -189,6 +193,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: [[["sad", "upset", "angry", "worried", "nervous"], "Humming, waving and dancing do not sound like that. What mood do they show?"]],
       hint: "Humming, waving, dancing. How would you feel if you did all three?",
       why: "All three details point to a happy, upbeat mood.",
+      ez: { q: "How does [[who]] feel? A few words is fine.<p class=\"a2task\">[[Who]] hummed all the way to [[place]]. They waved at everyone they passed. When they got there, they did a little dance by the door.</p>", hint: "Humming, waving, dancing.", why: "<b>Happy</b>. All 3 clues show a good mood.", slips: [[null, "Humming and dancing? What mood is that?"]] },
       lv: { spicy: { q: "What do these details suggest about [[who]]? Name the idea <b>and</b> one detail that backs it up.<p class=\"a2task\">[[Who]] hummed all the way to [[place]]. They waved at everyone they passed. When they got there, they did a little dance by the door.</p>",
         need: [["happy", "cheerful", "good mood", "great mood", "excited", "joy", "glad", "pleased", "buzzing", "upbeat", "delighted", "thrilled"], ["hum", "wave", "waving", "waved", "danc"]],
         model: "They are in a really good mood, because they waved at everyone they passed.",
@@ -203,6 +208,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
         "<p><b>Point:</b> [[Who]] is more worried than they let on.<br>" +
         "<b>Evidence:</b> they \"had not touched their breakfast\" and grabbed the phone \"before the second ring\".<br>" +
         "<b>Explain:</b> not eating suggests nerves, and grabbing the phone so fast suggests they are waiting for news. Together they show that \"I'm fine\" is not the whole story.</p>",
+      ez: { title: "I think, because", html: "<p><b>I think</b> [[who]] is worried <b>because</b> they did not eat.</p><p><b>This shows</b> they are too worried to be hungry.</p>" },
       lv: {
         mild: { fig: PEE_MILD,
           html: "<p class=\"a2task\">\"I'm fine,\" said [[who]]. They did not eat their breakfast. They kept looking at their phone.</p>" +
@@ -220,6 +226,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       items: ["Point: [[Who]] is waiting for news.", "Evidence: they grabbed the phone \"before the second ring\".", "Explain: grabbing it that fast suggests they were expecting a message.", "So \"I'm fine\" does not tell the whole story."],
       hint: "Say what you think, then the detail, then how the detail shows it.",
       why: "Point first, then the evidence, then the explanation that links them, then what it all adds up to.",
+      ez: { q: "Put this case in order.", hint: "I think. Because. This shows.", why: "What you think. The clue. What it shows." },
       lv: { mild: { items: ["I think [[who]] is waiting for a message", "because they \"kept looking at their phone\".", "This shows they really want it to buzz."],
         why: "I think, because, this shows: what you think, the clue, and how the clue shows it." } } },
 
@@ -230,6 +237,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: [[["fine"], "They say they are fine, but the point is that they are worried. How does the breakfast show that?"]],
       hint: "Why might someone who is worried not eat?",
       why: "Something like: not eating suggests they are too nervous to feel hungry. The explain part links the detail back to the point.",
+      ez: { q: "Finish the <b>This shows</b> part.<p class=\"a2task\"><b>I think</b> [[who]] is worried<br><b>because</b> they \"did not eat their breakfast\".<br><b>This shows</b> ...</p>", hint: "Why might worry stop you eating?", why: "It shows they are <b>too worried</b> to eat.", slips: [[null, "They say fine. How does breakfast show worry?"]] },
       lv: {
         mild: { q: "Have a go at the <b>This shows</b> part.<p class=\"a2task\"><b>I think</b> [[who]] is worried<br><b>because</b> they \"did not eat their breakfast\".<br><b>This shows</b> ...</p>",
           model: "This shows they feel too worried to eat." },
@@ -245,6 +253,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       cards: [["had not touched their breakfast", 0], ["grabbed the phone before the second ring", 0], ["laughed a little too loudly", 0], ["it was the morning", 1], ["a joke was told", 1]],
       hint: "Ask of each one: does this tell me anything about how [[who]] feels?",
       why: "The breakfast, the phone and the loud laugh all hint at worry. The time of day and the joke itself tell you nothing about [[who]]'s feelings.",
+      ez: { q: "<b>[[Who]] is worried.</b> Sort the clues.", hint: "Does it show how [[who]] feels?", why: "Breakfast and phone show worry. The others do not." },
       lv: {
         mild: { cards: [["did not eat their breakfast", 0], ["kept looking at their phone", 0], ["it was the morning", 1], ["the kitchen had a kettle", 1]] },
         spicy: { buckets: ["Backs it up", "Does not help", "Seems to go against it"],
@@ -259,6 +268,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: { 1: "That goes round in a circle. Which one uses details from the text?", 2: "A feeling is a start, but a case needs evidence from the text.", 3: "That is about the writing, not about [[who]]." },
       hint: "Look for the one with details from the text.",
       why: "It uses two details and says what they suggest. That is a case.",
+      ez: { q: "Which one uses a clue?", hint: "Find a because and a clue.", why: "It says what you think, then a clue.", slips: { 1: "Where is the clue?", 2: "\"I just do\" is not a clue." } },
       lv: {
         mild: { q: "Which sentence uses a clue to back up the idea?",
           options: ["I think they are worried because they did not eat their breakfast.", "I think they are worried.", "I think they are worried because I just do."],
@@ -274,6 +284,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Two readings", title: "Weigh up two readings",
       fig: BONNIE_DOOR,
+      ez: { title: "Two ideas", routes: ["<p class=\"a2task\">Bonnie ran to the door. She barked and spun. She jumped up at Jay.</p><p>Scared or <b>excited</b>? Most clues say <b>excited</b>.</p>", "<p>The side with <b>more clues</b> wins.</p><p>For Bonnie, excited wins.</p>"] },
       routes: [
         { name: "Read it", html: "<p>A text can often be read <b>two ways</b>. To judge which reading is <b>better supported</b>:</p>" +
           "<p>1. List the details that back up each reading.<br>2. Look for details that <b>go against</b> each one.<br>3. The better supported reading has more, and stronger, evidence, and less against it.</p>" +
@@ -291,6 +302,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: { 1: "Leaving early fits upset, but it fits tired too. Look at the yawns, the early start, and the smile." },
       hint: "Count the details that only fit one reading.",
       why: "Yawning and the early start back up tired. The smile and the hug go against upset.",
+      ez: { hint: "Yawning. Getting up early.", why: "<b>Tired</b>. Yawning and an early start.", slips: { 1: "Smiling and waving do not sound upset." } },
       lv: {
         mild: { q: "Which idea has more clues?<p class=\"a2task\">[[Who]] left [[event]] early. They yawned. They said, \"I have to get up early.\" They smiled and waved goodbye.</p><p><b>Idea A:</b> [[Who]] was upset.<br><b>Idea B:</b> [[Who]] was tired.</p>",
           options: ["Idea B: tired", "Idea A: upset"],
@@ -309,6 +321,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       answers: [0, 1],
       hint: "Which details are about being sleepy or needing bed?",
       why: "Yawning and an early start point to tired. Leaving early and the drink could fit either reading; the smile is about mood.",
+      ez: { q: "Pick the clues that show <b>tired</b>.", hint: "Which ones are about sleep?", why: "Yawning and getting up early." },
       lv: { mild: { options: ["They yawned", "They have to get up early", "They smiled", "They waved goodbye"],
         why: "Yawning and getting up early both point to tired." } } },
 
@@ -319,6 +332,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: { 1: "Leaving early fits upset, as well as tired. It does not go against A.", 2: "A half full drink could fit either reading.", 3: "Yawning backs up B, but it does not really go against A." },
       hint: "Which detail sounds like someone in a good mood?",
       why: "Someone upset and desperate to leave is unlikely to smile and hug the host.",
+      ez: { q: "Which clue goes <b>against</b> upset?", hint: "Which one sounds happy?", why: "Smiling and waving do not fit upset.", slips: { 1: "Leaving early could fit upset.", 2: "Yawning shows tired. It does not go against upset." } },
       lv: {
         mild: { options: ["They smiled and waved goodbye.", "They left early.", "They yawned."],
           slips: { 1: "Leaving early could fit upset. It does not go against it.", 2: "Yawning points to tired, but it does not go against upset." } },
@@ -335,6 +349,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: [[["upset"], "Upset has a little support, but less. Which one do the yawns and the early start back up?"]],
       hint: "Name the reading, then say \"because\" and give a detail or two.",
       why: "Something like: B is better supported because they yawned and had an early start, and the smile goes against A.",
+      ez: { q: "Which idea wins, tired or upset? Say why.", hint: "Say the idea, then because.", why: "<b>Tired</b>, because they yawned and get up early.", slips: [[null, "Upset has less. What do the yawns show?"]] },
       lv: { spicy: { q: "Write a judging sentence that names the better supported reading, gives evidence for it, <b>and</b> says what goes against the other one.",
         need: [["tired", "reading b", "b is"], ["yawn", "early", "start", "sleep"], ["smil", "hug", "quiet"]],
         model: "Reading B is better supported: they were tired, as they yawned twice and had an early start, while smiling and hugging the host goes against A.",
@@ -347,6 +362,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       html: "<p>Last case. Read it through once, then weigh it up, detective.</p>" +
         "<p class=\"a2task\"><b>Strange lights at [[landmark]]</b><br>For three nights running, people on Harbour Road have seen lights moving inside [[landmark]] after midnight. \"It is [[legend]], no doubt about it,\" said one neighbour, who did not want to be named. Others are not so sure. A white van with ladders on the roof has been parked by the side gate each evening. On Tuesday, the bin outside was full of empty boxes for light bulbs. The council website says safety work on [[landmark]] will take place this month, at night, to avoid disruption.</p>" +
         "<p><b>Reading A:</b> it is [[legend]]. <b>Reading B:</b> workers are doing repairs at night.</p>",
+      ez: { html: "<p class=\"a2task\"><b>Strange lights at [[landmark]]</b><br>People have seen lights in [[landmark]] at night. A neighbour said, \"It is [[legend]]!\" A van with ladders is parked by the gate. The bin is full of boxes from new light bulbs.</p><p><b>A:</b> it is [[legend]]. <b>B:</b> workers are fixing the lights.</p>" },
       lv: {
         mild: { html: "<p>Last case. Read it, then weigh it up, detective.</p>" +
           "<p class=\"a2task\"><b>Strange lights at [[landmark]]</b><br>People have seen lights in [[landmark]] at night. A neighbour said, \"It is [[legend]]!\" A van with ladders is parked by the gate. The bin is full of boxes from new light bulbs.</p>" +
@@ -361,6 +377,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       cards: [["A neighbour says it is [[legend]]", 0], ["A van with ladders by the side gate", 1], ["Empty light bulb boxes in the bin", 1], ["The council says safety work will happen at night", 1]],
       hint: "Which details could you actually check?",
       why: "Only the neighbour's claim points to [[legend]]. The van, the boxes and the council notice all point to repairs.",
+      ez: { q: "Which idea does each clue point to?", hint: "Which could you check?", why: "Only the neighbour says [[legend]]. The rest say workers." },
       lv: {
         mild: { cards: [["A neighbour said it is [[legend]]", 0], ["A van with ladders by the gate", 1], ["Boxes from new light bulbs", 1]] },
         spicy: { buckets: ["Points to [[legend]]", "Points to night repairs", "Could fit either"],
@@ -375,6 +392,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: { 1: "Spooky, but only one person says so, and nobody is named. Look at the van, the boxes and the council notice.", 2: "Count up what backs each one. One side has much more." },
       hint: "Weigh it: how many details back each reading?",
       why: "Three checkable details back repairs: the van, the boxes and the council notice. Only one unnamed person backs [[legend]].",
+      ez: { q: "Which idea has more clues?", hint: "Count the clues for each.", why: "<b>Repairs</b>. The van and the boxes back it.", slips: { 1: "Spooky! But only 1 person says so.", 2: "Count them. One side has more." } },
       lv: { spicy: { why: "Repairs is backed by four checkable details (van, boxes, council notice, weekdays only). [[Legend]] is backed by an unnamed opinion and old stories. Moving lights and tapping fit both, so they do not decide it. Case closed, probably." } } },
 
     { type: "mc", topic: "Case closed",
@@ -384,6 +402,7 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       slips: { 1: "Short quotes can be strong evidence. The problem is what kind of statement it is.", 2: "Speech marks just show someone said it. That is not the problem.", 3: "That is a bit unfair on neighbours. The problem is this particular claim." },
       hint: "Could you check what the neighbour says? Do you know who they are?",
       why: "It is an opinion from someone we cannot identify, with no detail to check. The van, the boxes and the notice are all things you could check.",
+      ez: { q: "Which clue shows <b>workers</b> most clearly?", hint: "What is in the bin?", why: "New bulb boxes mean new lights went in.", slips: { 1: "Lights at night fit both.", 2: "That clue points to [[legend]]." } },
       lv: {
         mild: { q: "Which clue points <b>most clearly</b> to workers fixing the lights?",
           options: ["Boxes from new light bulbs in the bin", "People have seen lights at night", "A neighbour said, \"It is [[legend]]!\""],
@@ -401,9 +420,16 @@ var BONNIE_DOOR = '<svg viewBox="0 0 440 180" role="img" aria-label="Bonnie by t
       starters: ["I think the lights are", "The strongest evidence is", "This suggests", "The other reading is weaker because"],
       checklist: ["Say which reading you think is better supported", "Use at least two details from the text", "Explain what the details show", "Say why the other reading is weaker"],
       minWords: 40,
+      ez: { q: "Your verdict, if you like. Which idea wins, and why?" },
       lv: { mild: { starters: ["I think the lights are", "because", "This shows"], checklist: ["Say what you think", "Give a clue from the text"], minWords: 20 },
         spicy: { minWords: 60, checklist: ["Name the better supported reading", "Use two or three details, quoted", "Explain how they build together", "Deal with the evidence for the other reading", "Use careful words like suggests or hints"] } } }
   ],
+
+  ez: {
+    blurb: "Put clues together. Which idea wins?",
+    realWorld: { title: "Real detectives", html: "<p>Detectives, doctors and historians all <b>weigh clues</b>.</p><p>Time travel could settle it. Or just weigh the clues!</p>" },
+    make: { intro: "Your verdict, and 2 clues that back it up." }
+  },
 
   realWorld: {
     title: "Detectives, juries and historians do this for real",

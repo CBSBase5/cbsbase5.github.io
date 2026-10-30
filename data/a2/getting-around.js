@@ -197,6 +197,7 @@ function tripWidget(el, api){
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Ways to get around", title: "Lots of ways to get around",
+      ez: { title: "Ways to get around", html: "<p><b>Public transport</b> is for anyone to use.</p><p>Bus. Train. Tram. Coach. Taxi. Ferry.</p>" },
       fig: SIX,
       html: "<p><b>Public transport</b> is transport anyone can pay to use. You do not need to drive.</p>" +
         "<p>The big ones are the <b>bus</b>, <b>train</b>, <b>tram</b>, <b>coach</b>, <b>taxi</b> and <b>ferry</b>. Each one has its own job.</p>",
@@ -212,6 +213,7 @@ function tripWidget(el, api){
       slips: { 1: "A bus runs on the road, with tyres. Look under this one: rails.", 2: "A ferry floats on water. This one is on rails." },
       hint: "Look at what it is sitting on.",
       why: "It runs on rails and stops at stations. That is a train.",
+      ez: { why: "Rails and stations: a <b>train</b>.", slips: { 1: "A bus has tyres. This one has rails." } },
       lv: { medium: { q: "Which one runs on rails through city streets, sharing the road with cars?", fig: one("tram"),
           options: ["A tram", "A coach", "A taxi"],
           slips: { 1: "A coach uses roads and tyres, not rails.", 2: "A taxi is a car. No rails." },
@@ -227,6 +229,7 @@ function tripWidget(el, api){
       q: "Where do you get on? Match each one.",
       pairs: [["Bus", "A bus stop"], ["Train", "A station platform"], ["Ferry", "A port"], ["Taxi", "A taxi rank, or book one"]],
       hint: "Think about where you would stand and wait for each one.",
+      ez: { hint: "Where would you wait for each one?", why: "Each one has its own place to get on." },
       why: "Buses stop at bus stops, trains at platforms, ferries at ports, and taxis wait at a rank or come when booked.",
       lv: { spicy: { pairs: [["Bus", "A bus stop"], ["Train", "A station platform"], ["Ferry", "A port"], ["Taxi", "A taxi rank, or book one"], ["Coach", "A coach station"]] } } },
 
@@ -254,11 +257,13 @@ function tripWidget(el, api){
       answer: 0,
       slips: { 1: "If the driver cannot see anyone waiting, the bus might not stop.", 2: "Too late by then. Signal while it is still coming towards you." },
       hint: "How does the driver know someone wants this bus?",
-      why: "Hold your hand out clearly as it comes. In the wise words of Jay's late, great grandfather: stop." },
+      why: "Hold your hand out clearly as it comes. In the wise words of Jay's late, great grandfather: stop.",
+      ez: { hint: "How does the driver know?", why: "Hold your hand out. In the words of Jay's late, great grandfather: stop.", slips: { 1: "The driver needs to see you.", 2: "Too late. Signal while it is coming." } } },
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Which one for the job?", title: "Pick the transport for the trip",
       fig: DIST,
+      ez: { title: "Pick the transport", html: "<p>Across town: <b>bus</b>. Another city: <b>train</b> or <b>coach</b>.</p><p>Over the sea: <b>ferry</b>. A <b>taxi</b> costs the most.</p>" },
       html: "<p>Short trips: <b>walk or cycle</b>. Across town: <b>bus or tram</b>. To another city: <b>train or coach</b>. Over the sea: <b>ferry or plane</b>.</p>" +
         "<p>A <b>taxi</b> can go anywhere, door to door, but it costs the most.</p>",
       lv: { medium: { html: "<p>Short trips: <b>walk or cycle</b>. Across town: <b>bus or tram</b>. To another city: <b>train or coach</b>. Over the sea: <b>ferry or plane</b>.</p>" +
@@ -273,6 +278,7 @@ function tripWidget(el, api){
       slips: { 1: "Planes are for very long trips, often to other countries.", 2: "A ferry crosses water. Is there sea in the way?" },
       hint: "Across town is not very far.",
       why: "A bus is made for trips around town, with stops all over the place.",
+      ez: { q: "You are going across town to [[place]]. Which one?", why: "A <b>bus</b> is made for trips around town.", slips: { 1: "Planes are for very long trips." } },
       lv: { medium: { q: "You are going to [[city]], 150 miles away, and you want to get there as fast as you can. Which one?",
           options: ["The train", "The coach", "The local bus"],
           slips: { 1: "Coaches are usually cheaper, but usually slower than the train.", 2: "A local bus would take all day and need lots of changes." },
@@ -290,6 +296,7 @@ function tripWidget(el, api){
       cards: [["To the shops in town", 0], ["To [[place]] across town", 0], ["To [[city]], 2 hours away", 1], ["To visit family in a city 100 miles away", 1]],
       hint: "Could you get there in about half an hour on a bus?",
       why: "Across town is a bus or tram trip. Another city is a train or coach trip.",
+      ez: { hint: "Half an hour on a bus?", why: "Town: bus. Another city: train or coach." },
       lv: { medium: { q: "Which is the best fit? Sort the trips.",
           buckets: ["Bus", "Train", "Ferry"],
           cards: [["Across town to the cinema", 0], ["Between two big cities", 1], ["Out to an island", 2], ["To [[place]] across town", 0], ["To [[city]], 150 miles away", 1]],
@@ -308,6 +315,7 @@ function tripWidget(el, api){
       slips: { 1: "A taxi burns fuel just like a car, and drives to you first.", 2: "One car for one person makes lots of pollution per person." },
       hint: "Which one has no engine at all?",
       why: "No engine, no fumes. And it is free.",
+      ez: { slips: { 1: "A taxi burns fuel, like a car.", 2: "One car for one person makes lots." } },
       lv: { spicy: { q: "Why is a full bus usually better for the air than lots of cars?",
           options: ["One engine moves lots of people", "Buses do not use any fuel", "Buses go faster than cars"],
           slips: { 1: "Most buses still use fuel or electricity. It is about sharing it.", 2: "Speed is not the point. Buses are often slower." },
@@ -321,6 +329,7 @@ function tripWidget(el, api){
       slips: { 1: "If the last bus has gone, waiting will not bring it back.", 2: "After the last bus, no more come until the morning." },
       hint: "The bus has already gone. What else comes to you?",
       why: "When the buses stop, a booked taxi or a lift is the safe way home. Sorting it before you go saves a worry later.",
+      ez: { q: "[[Event]] ends at 11pm. The last bus is 10.30pm. What is a good plan?", hint: "What else can come to you?", why: "Book a taxi or a lift before you go.", slips: { 1: "The last bus has gone.", 2: "No more buses until morning." } },
       lv: { spicy: { q: "[[Event]] ends at 11pm. The last train home is at 10.45pm. What are the two sensible choices?",
           options: ["Leave a little early, or book a taxi or lift in advance", "Run for the train after it ends", "Sleep in the station"],
           slips: { 1: "It ends after the train leaves. No amount of running will fix that.", 2: "Not safe or comfy. There are better plans." },
@@ -328,6 +337,7 @@ function tripWidget(el, api){
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "What does it cost?", title: "Single, return or day ticket",
+      ez: { routes: ["<p><b>Single:</b> one way. <b>Return:</b> there and back.</p><p><b>Day ticket:</b> all day.</p>", "<p>2 singles at &pound;2 is &pound;4. A return is &pound;3.50.</p><p>The <b>return</b> saves 50p.</p>"] },
       routes: [
         { name: "The tickets", fig: TICKETS,
           html: "<p>A <b>single</b> takes you one way. A <b>return</b> takes you there and back. A <b>day ticket</b> lets you hop on and off all day.</p>" +
@@ -343,6 +353,7 @@ function tripWidget(el, api){
       slips: [[2, "That is just one way. You need to come back too."], [6, "That is three singles. There and back is two."]],
       hint: "One single there, one single back.",
       why: "&pound;2 + &pound;2 = <b>&pound;4</b>.",
+      ez: { q: "A single is &pound;2. How much for there and back?", slips: [[2, "That is one way. Come back too."], [6, "That is 3 singles. You need 2."]] },
       lv: { medium: { q: "A single costs &pound;2.50. A return costs &pound;4.20. How much do you save with the return?",
           boxes: [{ label: "Saved", a: 0.8, pre: "&pound;" }],
           slips: [[1.7, "That is the return take away one single. Compare the return with <b>two</b> singles."], [5, "That is two singles. Now take away the return."], [0.2, "Check the subtraction: 5.00 take away 4.20."]],
@@ -360,6 +371,7 @@ function tripWidget(el, api){
       slips: [[5, "Count up in 2s: 2, 4, 6."], [2, "That is just one trip. You make three."]],
       hint: "&pound;2 three times.",
       why: "&pound;2 + &pound;2 + &pound;2 = <b>&pound;6</b>. A day ticket for &pound;5 would save you a pound.",
+      ez: { q: "3 bus trips. Each single is &pound;2. What is the total?", slips: [[5, "Count up in 2s: 2, 4, 6."], [2, "That is 1 trip. You make 3."]] },
       lv: { medium: { q: "You make 3 bus trips today. Singles are &pound;2.50 each. A day ticket is &pound;6. How much does the day ticket save?",
           boxes: [{ label: "Saved", a: 1.5, pre: "&pound;" }],
           slips: [[7.5, "That is the three singles. Now take away the day ticket."], [3.5, "That compares the day ticket with one single. Compare it with all three singles."], [0.5, "Three singles cost &pound;7.50, not &pound;6.50."]],
@@ -378,6 +390,7 @@ function tripWidget(el, api){
       slips: { 1: "A single only gets you there. You need to get home too.", 2: "A day ticket is for lots of trips. You only make two." },
       hint: "There and back.",
       why: "There and back is exactly what a return is for.",
+      ez: { q: "Going to [[place]] and straight back. Which ticket?", slips: { 1: "A single only gets you there.", 2: "A day ticket is for lots of trips." } },
       lv: { medium: { q: "You go into town, then on to [[place]], then home. Three trips on the same bus company. Which ticket is likely to be best?",
           options: ["A day ticket", "A return", "One single"],
           slips: { 1: "A return covers two trips. You are making three.", 2: "One single only covers the first trip." },
@@ -392,6 +405,7 @@ function tripWidget(el, api){
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Your trip challenge", title: "Before you go",
       fig: BEFORE,
+      ez: { title: "Before you go", html: "<p>Check <b>where and when</b>. Have a <b>ticket</b>. Charge your <b>phone</b>.</p><p>Tell <b>someone</b>. Have a <b>plan B</b>.</p>" },
       html: "<p>A good trip starts before you leave. Check <b>where and when</b>, have a <b>ticket or money</b>, <b>charge your phone</b>, tell <b>someone</b> where you are going, and have a <b>plan B</b>.</p>" +
         "<p>Then there is a challenge to try away from the screen, if you like.</p>" },
 
@@ -408,6 +422,7 @@ function tripWidget(el, api){
       slips: { 1: "Buses run late sometimes. It happens to everyone, Jay included.", 2: "Someone might worry. Keep them in the loop." },
       hint: "What would help you, and help the people waiting for you?",
       why: "Check the timetable or the sign for the next bus, and let someone know. Most problems shrink once you have a plan B.",
+      ez: { hint: "What helps you, and the people waiting?", why: "Check for the next bus. Let someone know.", slips: { 2: "Someone might worry. Let them know." } },
       lv: { spicy: { q: "Your train is cancelled. Which is the most useful first step?",
           options: ["Ask staff or check the board for the next train, and tell whoever is expecting you", "Book an expensive taxi straight away", "Go home without telling anyone"],
           slips: { 1: "Maybe later, but there could be a free next train on your ticket. Check first.", 2: "Someone might be waiting and worried." },
@@ -416,6 +431,7 @@ function tripWidget(el, api){
     { type: "widget", topic: "Your trip challenge", unscored: true,
       title: "Trip challenge",
       html: "<p>Pick a challenge for away from the screen, and tick things off whenever you do them.</p>",
+      ez: { html: "<p>Pick a challenge. Tick things off when you do them.</p>" },
       mount: tripWidget,
       report: function(d){ if(!d || !d.pick) return ""; var c = CH.filter(function(x){ return x.id === d.pick; })[0]; var t = (d.ticks && d.ticks[d.pick]) || []; var n = t.filter(Boolean).length; return c ? "Trip challenge (" + c.name + "): " + n + " of " + c.ticks.length + " ticked." : ""; } },
 
@@ -423,7 +439,8 @@ function tripWidget(el, api){
       q: "After your challenge, or about a trip you have done before, tell Jay how it went, if you like. Where did you go, how did you get there, and what would you do the same next time?",
       starters: ["I went to", "I got there by", "It cost", "Next time I would"],
       checklist: ["Where I went", "The transport I used", "What it cost, if I know", "One thing for next time"],
-      minWords: 25 }
+      minWords: 25,
+      ez: { q: "Only if you like: tell Jay about a trip. How did you get there?" } }
   ],
 
   realWorld: {
@@ -432,6 +449,11 @@ function tripWidget(el, api){
       "<p>For our big question: before trains, most people hardly ever went far from the town they were born in. Trains changed that in a few years. If we could time travel, should we? Someone from 1800 would think a bus pass was magic.</p>",
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="A train coming out of a time portal, with Jay watching">' + A2ART.portal(90, 75, 60) +
       '<g transform="translate(170 104) scale(1.1)">' + ICON.train + '</g>' + A2ART.jay(330, 50, 0.8, "wow") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Getting around opens doors", html: "<p>College, work, friends: getting there means more choices.</p><p>Someone from 1800 would think a bus pass was magic!</p>" },
+    make: { intro: "Make a ticket for a trip. Keep it, or send it to Jay." }
   },
 
   make: {

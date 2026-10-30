@@ -21,20 +21,24 @@ function task(h){ return '<div class="a2task">' + h + '</div>'; }
    slips. Version 1 is the base; the rest become vary, each with every level written out. */
 function res(v, L, vi){
   var o = {};
-  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0) o[k] = v[k]; });
+  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0 && k !== "ez") o[k] = v[k]; });
   if(v[L]) ext(o, v[L]);
+  /* easy read (LC): a version's ez is for the first level only; its s list maps like s */
+  var ez = (L === START && v.ez) ? ext({}, v.ez) : null;
   if(o.o){
     var right = o.o[0], rest = o.o.slice(1), t = vi % o.o.length, opts = rest.slice(), sl = {};
     opts.splice(t, 0, right);
     (o.s || []).forEach(function(m, j){ if(m) sl[j < t ? j : j + 1] = m; });
     o.options = opts; o.answer = t; o.slips = sl; delete o.o; delete o.s;
+    if(ez && ez.s){ var es = {}; ez.s.forEach(function(m, j){ if(m) es[j < t ? j : j + 1] = m; }); ez.slips = es; delete ez.s; }
   }
+  if(ez) o.ez = ez;
   return o;
 }
 function Q(type, topic, flags, vers){
   var all = [], R = vers.map(function(v, vi){ var r = {}; LVS.forEach(function(L){ r[L] = res(v, L, vi); all.push(r[L]); }); return r; });
   var keys = {}; all.forEach(function(o){ Object.keys(o).forEach(function(k){ keys[k] = 1; }); });
-  all.forEach(function(o){ Object.keys(keys).forEach(function(k){ if(!(k in o)) o[k] = null; }); });
+  all.forEach(function(o){ Object.keys(keys).forEach(function(k){ if(!(k in o) && k !== "ez") o[k] = null; }); });
   /* lab: options that differ only in punctuation get letters, in a fixed order */
   if(flags && flags.lab) all.forEach(function(o){ if(o.options) o.options = o.options.map(function(t, i){ return "<b>" + "ABCD".charAt(i) + ".</b> " + t; }); });
   function others(r){ var lv = {}; LVS.forEach(function(L){ if(L !== START) lv[L] = r[L]; }); return lv; }
@@ -129,6 +133,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
 
     /* ---------- chunk 1: capitals and full stops ---------- */
     { type: "learn", topic: "Front and back", title: "Capital at the front, stop at the back",
+      ez: { title: "Capital and stop", html: "<p>A sentence is a bus. <b>Capital</b> at the front. <b>Full stop</b> at the end.</p><p><b>Bonnie likes carrots.</b></p>" },
       fig: BUS,
       html: "<p>A sentence is like a bus. The <b>capital letter</b> is the front. The <b>full stop</b> is the stop at the end.</p>" +
         "<p><b>Bonnie likes carrots.</b> Capital B at the front. Full stop at the back.</p>" +
@@ -144,6 +149,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
     Q("mc", "Front and back", { fixed: true, lab: true }, [
       { q: "Which sentence is punctuated correctly?",
         o: ["Bonnie likes carrots.", "bonnie likes carrots.", "Bonnie likes carrots"],
+        ez: { q: "Which one is right?", hint: "Check the front and the end.", why: "Capital at the front. Full stop at the end.", s: ["Bonnie needs a capital B.", "The stop at the end is missing."] },
         s: ["The front of the bus is missing: Bonnie needs a capital B.", "The stop is missing at the end."],
         hint: "Check the front and the back.",
         why: "Capital at the front, full stop at the back.",
@@ -154,6 +160,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           why: "A comma plus a joining word (so) can link two sentences. A comma on its own cannot." } },
       { q: "Which sentence is punctuated correctly?",
         o: ["The birds are singing.", "the birds are singing.", "The birds are singing"],
+        ez: { q: "Which one is right?", hint: "Check the front and the end.", why: "Capital at the front. Full stop at the end.", s: ["It needs a capital T.", "It needs a full stop."] },
         s: ["The sentence needs a capital T at the front.", "It needs a full stop at the end."],
         hint: "Check the front and the back.",
         why: "Capital at the front, full stop at the back.",
@@ -163,6 +170,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           s: ["Comma splice: two full sentences joined with only a comma.", "The full stop is in an odd spot, and it changes the meaning."] } },
       { q: "Which sentence is punctuated correctly?",
         o: ["We went to the park.", "we went to the park.", "We went to the park"],
+        ez: { q: "Which one is right?", hint: "Check the front and the end.", why: "Capital at the front. Full stop at the end.", s: ["It needs a capital W.", "It needs a full stop."] },
         s: ["The sentence needs a capital W at the front.", "It needs a full stop at the end."],
         hint: "Check the front and the back.",
         why: "Capital at the front, full stop at the back.",
@@ -176,6 +184,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "What is missing?" + task("the cat is asleep."),
         o: ["A capital letter at the front", "A full stop at the end", "Nothing, it is fine"],
         s: ["The full stop is there. Look at the front.", "Look at the very first letter."],
+        ez: { hint: "Look at the first letter.", why: "It needs a capital: <b>The cat is asleep.</b>", s: ["The stop is there. Look at the front.", "Look at the first letter."] },
         hint: "Look at the very first letter.",
         why: "It needs a capital: <b>The cat is asleep.</b>",
         medium: { q: "What is missing from the <b>second</b> sentence?" + task("The cat is asleep. it is on the sofa."),
@@ -188,6 +197,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "What is missing?" + task("Bonnie is eating a sock"),
         o: ["A full stop at the end", "A capital letter at the front", "Nothing, it is fine"],
         s: ["Bonnie has a capital. Look at the end.", "Look at the very end."],
+        ez: { hint: "Look at the end.", s: ["Bonnie has a capital. Look at the end.", "Look at the end."] },
         hint: "Look at the very end.",
         why: "It needs a full stop: <b>Bonnie is eating a sock.</b> Again.",
         medium: { q: "What is missing from the <b>first</b> sentence?" + task("Bonnie is eating a sock She looks very happy."),
@@ -199,6 +209,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           why: "Run on. <b>Bonnie is eating a sock. She looks very happy.</b>" } },
       { q: "What is missing?" + task("my bag is red"),
         o: ["A capital and a full stop", "Only a full stop", "Only a capital letter"],
+        ez: { hint: "Check the front and the end.", s: ["Look at the front too.", "Look at the end too."] },
         s: ["Look at the front too.", "Look at the end too."],
         hint: "Check the front and the back.",
         why: "Both: <b>My bag is red.</b>",
@@ -213,6 +224,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
 
     Q("num", "Front and back", null, [
       { q: "How many sentences are hiding in here?" + task("it was raining bonnie stayed in"),
+        ez: { q: "How many sentences?" + task("it was raining bonnie stayed in"), hint: "Read it aloud. Where do you stop?", why: "2: <b>It was raining. Bonnie stayed in.</b>", slips: [[1, "Read it aloud. A new idea starts after raining."], [3, "Close. Bonnie stayed in is 1 sentence."]] },
         boxes: [{ label: "Sentences", a: 2 }],
         slips: [[1, "Read it aloud. Where would you stop for a breath? There is a new idea after raining."], [3, "Close. Bonnie stayed in is one sentence."]],
         hint: "Read it aloud. Where would you take a breath?",
@@ -226,6 +238,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           slips: [[2, "Look again after an hour."], [4, "The and joins two ideas into one sentence, so that part only counts once."]],
           why: "Three: <b>It was raining and Bonnie did not want to go out. She sat by the door for an hour. Then she fell asleep.</b>" } },
       { q: "How many sentences are hiding in here?" + task("jay filled the feeder a robin came"),
+        ez: { q: "How many sentences?" + task("jay filled the feeder a robin came"), hint: "Read it aloud. Where do you stop?", why: "2: <b>Jay filled the feeder. A robin came.</b>", slips: [[1, "Read it aloud. A new idea starts at a robin."], [3, "Close. A robin came is 1 sentence."]] },
         boxes: [{ label: "Sentences", a: 2 }],
         slips: [[1, "Read it aloud. A new idea starts at a robin."], [3, "Close. A robin came is one sentence."]],
         hint: "Read it aloud. Where would you take a breath?",
@@ -239,6 +252,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           slips: [[2, "Look again after straight away."], [5, "Each and joins ideas inside one sentence."]],
           why: "Three: <b>Jay filled the feeder and hung it up. A robin came straight away. It ate all the seed and then it flew off.</b>" } },
       { q: "How many sentences are hiding in here?" + task("we went to [[place]] it was great"),
+        ez: { q: "How many sentences?" + task("we went to [[place]] it was great"), hint: "Read it aloud. Where do you stop?", why: "2: <b>We went to [[Place]]. It was great.</b>", slips: [[1, "Read it aloud. A new idea starts at it was."], [3, "Close. It was great is 1 sentence."]] },
         boxes: [{ label: "Sentences", a: 2 }],
         slips: [[1, "Read it aloud. A new idea starts at it was."], [3, "Close. It was great is one sentence."]],
         hint: "Read it aloud. Where would you take a breath?",
@@ -255,6 +269,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
 
     /* ---------- chunk 2: capitals for names ---------- */
     { type: "learn", topic: "Capitals for names", title: "Names always get a capital",
+      ez: { title: "Names get a capital", html: "<p><b>Names</b> always get a capital.</p><p><b>I. Bonnie. Leeds. Monday. July.</b></p>" },
       fig: NAMES,
       html: "<p>Some words <b>always</b> get a capital letter, even in the middle of a sentence:</p>" +
         "<p><b>I</b> (when it means me), <b>people and pets</b> (Bonnie, Jay), <b>places</b> (Leeds), <b>days</b> (Monday) and <b>months</b> (July).</p>" +
@@ -269,6 +284,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
 
     Q("multi", "Capitals for names", null, [
       { q: "Pick <b>all</b> the words that need a capital letter." + task("on friday i saw bonnie."),
+        ez: { q: "Pick <b>all</b> the words that need a capital." + task("on friday i saw bonnie."), hint: "First word, days, I and names.", slips: { any: "4 of them. The start, a day, I and a name." } },
         options: ["on", "friday", "i", "saw", "bonnie"],
         answers: [0, 1, 2, 4],
         slips: { any: "Four of them. The start of the sentence, a day, I, and a name." },
@@ -282,6 +298,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           slips: { any: "Four. Mum after my is not being used as a name, and seasons do not get capitals." },
           why: "<b>Last July, my mum and I visited [[Place]] in the summer holidays.</b>" } },
       { q: "Pick <b>all</b> the words that need a capital letter." + task("jay and i like birds."),
+        ez: { q: "Pick <b>all</b> the words that need a capital." + task("jay and i like birds."), hint: "First word, I and names.", slips: { any: "2 of them. A name, and I." } },
         options: ["jay", "and", "i", "like", "birds"],
         answers: [0, 2],
         slips: { any: "Two of them. Jay is a name and the start of the sentence, and I always gets a capital." },
@@ -294,6 +311,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           options: ["in", "autumn", "jay", "i", "heron", "river", "[[place]]"], answers: [0, 2, 3, 6],
           slips: { any: "Four. Autumn is a season, and heron and river are not names here." } } },
       { q: "Pick <b>all</b> the words that need a capital letter." + task("we went to [[place]] in may."),
+        ez: { q: "Pick <b>all</b> the words that need a capital." + task("we went to [[place]] in may."), hint: "First word, places and months.", slips: { any: "3 of them. The start, a place and a month." } },
         options: ["we", "went", "[[place]]", "in", "may"],
         answers: [0, 2, 4],
         slips: { any: "Three of them. The start, a place, and a month." },
@@ -311,6 +329,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Does it need a capital letter? Sort them.",
         buckets: ["Always a capital", "No capital"],
         cards: [["monday", 0], ["bonnie", 0], ["london", 0], ["dog", 1], ["day", 1], ["city", 1]],
+        ez: { hint: "Is it a name?", why: "Monday, Bonnie and London are names." },
         hint: "Is it the name of one particular thing?",
         why: "Monday, Bonnie and London are names. Dog, day and city are not.",
         medium: { cards: [["monday", 0], ["bonnie", 0], ["london", 0], ["march", 0], ["dog", 1], ["day", 1], ["city", 1], ["month", 1]] },
@@ -319,6 +338,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Does it need a capital letter? Sort them.",
         buckets: ["Always a capital", "No capital"],
         cards: [["i (meaning me)", 0], ["jay", 0], ["june", 0], ["bird", 1], ["boy", 1], ["summer", 1]],
+        ez: { hint: "Is it a name?", why: "I, Jay and June always get a capital." },
         hint: "Is it a name? Seasons are not names.",
         why: "I, Jay and June always get capitals. Bird, boy and summer do not.",
         medium: { cards: [["i (meaning me)", 0], ["jay", 0], ["june", 0], ["wales", 0], ["bird", 1], ["boy", 1], ["summer", 1], ["country", 1]] },
@@ -327,6 +347,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Does it need a capital letter? Sort them.",
         buckets: ["Always a capital", "No capital"],
         cards: [["[[place]]", 0], ["[[who]]", 0], ["friday", 0], ["town", 1], ["friend", 1], ["week", 1]],
+        ez: { hint: "Is it a name?", why: "Names get capitals. Town, friend and week are not names." },
         hint: "Is it the name of one particular person, place or day?",
         why: "Names get capitals. Town, friend and week are not names.",
         medium: { cards: [["[[place]]", 0], ["[[who]]", 0], ["friday", 0], ["december", 0], ["town", 1], ["friend", 1], ["week", 1], ["year", 1]] },
@@ -337,6 +358,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
     Q("mc", "Capitals for names", null, [
       { q: "Why does <b>[[Place]]</b> have a capital letter in this sentence?" + task("We went to [[Place]]."),
         o: ["It is the name of a place", "It is at the end", "It is a long word"],
+        ez: { q: "Why does <b>[[Place]]</b> have a capital?" + task("We went to [[Place]]."), why: "It is a place name. Names get a capital." },
         s: ["Words at the end do not need capitals.", "Long words do not need capitals."],
         hint: "What kind of word is it?",
         why: "It is the name of a place. Names always get a capital.",
@@ -345,6 +367,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           s: ["Exclamation marks do not change capitals before them.", "Commas do not make capitals."] } },
       { q: "Why does <b>I</b> have a capital letter in this sentence?" + task("Bonnie and I went out."),
         o: ["I always has a capital when it means me", "It is at the start", "It is a short word"],
+        ez: { q: "Why does <b>I</b> have a capital?" + task("Bonnie and I went out."), why: "I always gets a capital." },
         s: ["It is not at the start here.", "Short words like and do not."],
         hint: "Is it at the start?",
         why: "I (meaning me) always gets a capital.",
@@ -353,6 +376,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           s: ["The end of a sentence does not need a capital.", "Two words is not the reason."] } },
       { q: "Why does <b>Monday</b> have a capital letter in this sentence?" + task("I see Jay on Monday."),
         o: ["It is the name of a day", "It is at the end", "It starts with M"],
+        ez: { q: "Why does <b>Monday</b> have a capital?" + task("I see Jay on Monday."), why: "Days are names. They get a capital.", s: ["Words at the end do not need capitals.", "Morning starts with M. It has no capital."] },
         s: ["Words at the end do not need capitals.", "Lots of M words do not get capitals, like morning."],
         hint: "What kind of word is it?",
         why: "Days are names, so they always get a capital.",
@@ -363,6 +387,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
 
     /* ---------- chunk 3: question and exclamation marks ---------- */
     { type: "learn", topic: "Asking or shouting?", title: "Three end marks, three jobs",
+      ez: { title: "3 end marks", html: "<p><b>.</b> for telling. <b>?</b> for asking.</p><p><b>!</b> for a strong feeling.</p>" },
       fig: MARKS,
       html: "<p>Sentences can end in three ways.</p>" +
         "<p><b>.</b> A <b>full stop</b> for calm telling: <b>It is raining.</b><br><b>?</b> A <b>question mark</b> for asking: <b>Is it raining?</b><br><b>!</b> An <b>exclamation mark</b> for a strong feeling, or shouting: <b>It is pouring!</b></p>",
@@ -379,6 +404,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Which end mark would each one need? (The end marks are missing.)",
         buckets: ["Full stop . (telling)", "Question mark ? (asking)"],
         cards: [["My coat is red", 0], ["Bonnie is asleep", 0], ["Where is my coat", 1], ["Can Bonnie come", 1]],
+        ez: { q: "Which end mark does each one need?", why: "Telling gets <b>.</b> Asking gets <b>?</b>" },
         hint: "Is it asking something?",
         why: "Telling gets a full stop. Asking gets a question mark.",
         medium: { buckets: ["Full stop . (telling)", "Question mark ? (asking)", "Exclamation mark ! (strong feeling)"],
@@ -390,6 +416,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Which end mark would each one need? (The end marks are missing.)",
         buckets: ["Full stop . (telling)", "Question mark ? (asking)"],
         cards: [["The bus is late", 0], ["I like toast", 0], ["What time is it", 1], ["Do you like toast", 1]],
+        ez: { q: "Which end mark does each one need?", why: "Telling gets <b>.</b> Asking gets <b>?</b>" },
         hint: "Is it asking something?",
         why: "Telling gets a full stop. Asking gets a question mark.",
         medium: { buckets: ["Full stop . (telling)", "Question mark ? (asking)", "Exclamation mark ! (strong feeling)"],
@@ -400,6 +427,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Which end mark would each one need? (The end marks are missing.)",
         buckets: ["Full stop . (telling)", "Question mark ? (asking)"],
         cards: [["The heron is grey", 0], ["We are going home", 0], ["Is that a heron", 1], ["Why are we going home", 1]],
+        ez: { q: "Which end mark does each one need?", why: "Telling gets <b>.</b> Asking gets <b>?</b>" },
         hint: "Is it asking something?",
         why: "Telling gets a full stop. Asking gets a question mark.",
         medium: { buckets: ["Full stop . (telling)", "Question mark ? (asking)", "Exclamation mark ! (strong feeling)"],
@@ -414,6 +442,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Which end mark does this need?" + task("Help, the goblin has my hat"),
         o: ["An exclamation mark !", "A question mark ?", "A full stop ."],
         s: ["It is not asking anything.", "This is not calm! Jay is shouting for help."],
+        ez: { why: "A shout for help: <b>Help, the goblin has my hat!</b>", s: ["It is not asking anything.", "This is not calm! Jay is shouting."] },
         hint: "Is it calm, asking, or shouting?",
         why: "Shouting for help is a strong feeling: <b>Help, the goblin has my hat!</b>",
         spicy: { q: "Which end mark does this need?" + task("I wonder whether Bonnie is hungry"),
@@ -423,6 +452,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Which end mark does this need?" + task("What time is it"),
         o: ["A question mark ?", "An exclamation mark !", "A full stop ."],
         s: ["It is asking, not shouting.", "It is asking something, so it needs a question mark."],
+        ez: { why: "It asks: <b>What time is it?</b>", s: ["It is asking, not shouting.", "It is asking. It needs <b>?</b>"] },
         hint: "Is it asking?",
         why: "It is asking: <b>What time is it?</b>",
         spicy: { q: "Which end mark does this need?" + task("What a brilliant goal that was"),
@@ -432,6 +462,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       { q: "Which end mark does this need?" + task("The film starts at six"),
         o: ["A full stop .", "A question mark ?", "An exclamation mark !"],
         s: ["It is not asking anything.", "It is calm telling, not a strong feeling."],
+        ez: { why: "It is calm telling: <b>The film starts at six.</b>", s: ["It is not asking anything.", "It is calm, not a strong feeling."] },
         hint: "Is it calm, asking, or shouting?",
         why: "It is calm telling: <b>The film starts at six.</b>",
         spicy: { q: "Which end mark does this need?" + task("Jay asked whether the film started at six"),
@@ -443,6 +474,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
     Q("mc", "Asking or shouting?", { explain: true, fixed: true, lab: true }, [
       { q: "Same words, different marks. Which one is <b>asking</b>?",
         o: ["You ate the cake?", "You ate the cake.", "You ate the cake!"],
+        ez: { q: "Which one is <b>asking</b>?", why: "The <b>?</b> makes it a question." },
         s: ["That is calm telling.", "That is shouting with surprise."],
         hint: "Which one has the asking mark?",
         why: "The question mark makes it a question. Say it aloud: your voice goes up at the end.",
@@ -452,6 +484,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           why: "One exclamation mark, on the exciting bit." } },
       { q: "Same words, different marks. Which one shows <b>surprise</b>?",
         o: ["It is snowing!", "It is snowing.", "Is it snowing?"],
+        ez: { q: "Which one shows <b>surprise</b>?", why: "The <b>!</b> shows the surprise." },
         s: ["That is calm telling.", "That is asking."],
         hint: "Which one has the strong feeling mark?",
         why: "The exclamation mark shows the surprise.",
@@ -461,6 +494,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           why: "One exclamation mark, on the big news." } },
       { q: "Same words, different marks. Which one is <b>calm telling</b>?",
         o: ["The bus is here.", "The bus is here!", "Is the bus here?"],
+        ez: { q: "Which one is <b>calm telling</b>?", why: "The full stop is calm." },
         s: ["That is excited.", "That is asking."],
         hint: "Which one has the calm mark?",
         why: "The full stop is calm.",
@@ -472,6 +506,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
 
     /* ---------- chunk 4: fix it (worked example, then fade) ---------- */
     { type: "learn", topic: "Fix it", title: "Watch a message get fixed",
+      ez: { title: "Fix a message", html: "<p>Fix it in <b>3 steps</b>.</p><p>1 Find the ends. 2 Add end marks. 3 Add capitals.</p>" },
       fig: FIX,
       html: "<p>Here is a message with no punctuation at all:</p>" + task("where are you i found bonnie she was in the garden") +
         "<p><b>1. Find the ends.</b> Read it aloud. Where does each idea finish? <b>where are you / i found bonnie / she was in the garden</b></p>" +
@@ -487,6 +522,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
     Q("mc", "Fix it", null, [
       { q: "<b>Step 1 is done</b>: the ends are marked with /. Step 2: which end marks go in?" + task("can you come to the park / bonnie wants to play"),
         o: ["question mark, then full stop", "full stop, then question mark", "exclamation mark, then question mark"],
+        ez: { q: "The ends have a /. Which end marks go in?" + task("can you come to the park / bonnie wants to play"), s: ["The first part asks. The second tells.", "The first part asks. It does not shout."] },
         s: ["The first part is asking, and the second is telling.", "The first part is asking, not shouting."],
         hint: "Which part is asking?",
         why: "<b>Can you come to the park? Bonnie wants to play.</b>",
@@ -499,6 +535,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           why: "<b>Jay asked if we could come. Can you make it? It starts at six.</b>" } },
       { q: "<b>Step 1 is done</b>: the ends are marked with /. Step 2: which end marks go in?" + task("watch out / there is a wasp"),
         o: ["exclamation mark, then full stop", "question mark, then full stop", "full stop, then question mark"],
+        ez: { q: "The ends have a /. Which end marks go in?" + task("watch out / there is a wasp"), s: ["Watch out is not asking anything.", "Watch out is a warning, not calm."] },
         s: ["Watch out is not asking anything.", "Watch out is a warning, not calm."],
         hint: "Which part is a warning?",
         why: "<b>Watch out! There is a wasp.</b>",
@@ -510,6 +547,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           s: ["I wonder where... is an indirect question, so it takes a full stop.", "Watch out is a warning, so it needs an exclamation mark."] } },
       { q: "<b>Step 1 is done</b>: the ends are marked with /. Step 2: which end marks go in?" + task("i saw a heron / did you see it"),
         o: ["full stop, then question mark", "question mark, then full stop", "exclamation mark, then exclamation mark"],
+        ez: { q: "The ends have a /. Which end marks go in?" + task("i saw a heron / did you see it"), s: ["The first part tells. The second asks.", "Neither part is shouting."] },
         s: ["The first part is telling and the second is asking.", "Neither part is shouting."],
         hint: "Which part is asking?",
         why: "<b>I saw a heron. Did you see it?</b>",
@@ -523,6 +561,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
 
     Q("multi", "Fix it", null, [
       { q: "<b>Steps 1 and 2 are done.</b> Step 3: pick <b>all</b> the words that need a capital letter." + task("can you come to the park? bonnie wants to play."),
+        ez: { q: "Now pick <b>all</b> the words that need a capital." + task("can you come to the park? bonnie wants to play."), slips: { any: "2 of them. The first word, and Bonnie." } },
         options: ["can", "come", "park", "bonnie", "play"],
         answers: [0, 3],
         slips: { any: "Two. The start of the first sentence, and Bonnie (a name, and the start of the second)." },
@@ -535,6 +574,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           options: ["can", "[[place]]", "saturday", "mum", "bonnie", "i", "dark", "autumn"], answers: [0, 1, 2, 3, 4, 5],
           slips: { any: "Six. Mum starts a sentence, so it gets a capital anyway. Dark is not a name, and autumn is a season." } } },
       { q: "<b>Steps 1 and 2 are done.</b> Step 3: pick <b>all</b> the words that need a capital letter." + task("watch out! there is a wasp."),
+        ez: { q: "Now pick <b>all</b> the words that need a capital." + task("watch out! there is a wasp."), slips: { any: "2 of them. Each sentence starts with a capital." } },
         options: ["watch", "out", "there", "wasp"],
         answers: [0, 2],
         slips: { any: "Two. Each sentence starts with a capital." },
@@ -547,6 +587,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           options: ["watch", "dad (after watch out)", "there", "[[who]]", "dad (after my)", "wasps"], answers: [0, 1, 2, 3],
           slips: { any: "Four. The first Dad is used as a name. The second comes after my, so it is not." } } },
       { q: "<b>Steps 1 and 2 are done.</b> Step 3: pick <b>all</b> the words that need a capital letter." + task("i saw a heron. did you see it?"),
+        ez: { q: "Now pick <b>all</b> the words that need a capital." + task("i saw a heron. did you see it?"), slips: { any: "2 of them. I, and the next sentence start." } },
         options: ["i", "saw", "heron", "did", "see"],
         answers: [0, 3],
         slips: { any: "Two. I, and the start of the second sentence." },
@@ -563,6 +604,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
     Q("mc", "Fix it", { explain: true, fixed: true, lab: true }, [
       { q: "<b>All three steps, on your own.</b> Which is the correctly fixed version?" + task("where is jay i need to tell him something"),
         o: ["Where is Jay? I need to tell him something.", "where is jay? i need to tell him something.", "Where is Jay. I need to tell him something?"],
+        ez: { q: "Now all 3 steps. Which one is right?" + task("where is jay i need to tell him something"), why: "<b>?</b> for the question. <b>.</b> for telling. Capitals too.", s: ["The marks are right. The capitals are missing.", "The marks are swapped. The first part asks."] },
         s: ["The end marks are right, but the capitals are missing.", "The marks are swapped: the first part asks, the second tells."],
         hint: "Check the ends, then the capitals.",
         why: "A question mark for the question, a full stop for the telling, capitals for each start, Jay and I.",
@@ -575,6 +617,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           why: "Question mark, then a colon (or a full stop) to separate the news. And Bonnie is in trouble." } },
       { q: "<b>All three steps, on your own.</b> Which is the correctly fixed version?" + task("help the feeder has fallen down"),
         o: ["Help! The feeder has fallen down.", "help! the feeder has fallen down.", "Help? The feeder has fallen down!"],
+        ez: { q: "Now all 3 steps. Which one is right?" + task("help the feeder has fallen down"), s: ["The marks are right. Add the capitals.", "Help is a shout, not a question."] },
         s: ["The marks are right, but each sentence needs a capital.", "Help is a shout, not a question."],
         hint: "Check the ends, then the capitals.",
         why: "Help is a shout, then calm telling.",
@@ -586,6 +629,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
           s: ["Comma splices: three sentences joined with commas.", "There is still a comma splice before can."] } },
       { q: "<b>All three steps, on your own.</b> Which is the correctly fixed version?" + task("i love [[place]] do you"),
         o: ["I love [[Place]]. Do you?", "i love [[place]]. do you?", "I love [[Place]]? Do you."],
+        ez: { q: "Now all 3 steps. Which one is right?" + task("i love [[place]] do you"), why: "Telling, then asking. Plus capitals.", s: ["The marks are right. Add the capitals.", "The marks are swapped. The second part asks."] },
         s: ["The marks are right, but I, the place and the start of each sentence need capitals.", "The marks are swapped: the first part tells, the second asks."],
         hint: "Check the ends, then the capitals.",
         why: "Telling, then asking. Capitals for I, the place and each start.",
@@ -602,6 +646,7 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       starters: ["Hi Jay.", "Guess what!", "Did you know", "Have you seen"],
       checklist: ["Every sentence starts with a capital letter", "I used a full stop, a question mark and an exclamation mark", "Names and I have capitals"],
       minWords: 12,
+      ez: { q: "Only if you fancy it. Write Jay a short message. Use <b>.</b> <b>?</b> and <b>!</b>" },
       lv: { medium: { minWords: 25, checklist: ["Every sentence starts with a capital and has an end mark", "I used . ? and !", "Names, days, places and I have capitals"] },
         spicy: { q: "Only if you fancy it: write a short message to Jay about something exciting, using one exclamation mark only, one question, and no comma splices.", minWords: 40,
           checklist: ["No comma splices or run ons", "Exactly one exclamation mark, on the exciting bit", "At least one name, place or day with a capital"] } } }
@@ -615,6 +660,11 @@ var FIX = '<svg viewBox="0 0 540 230" role="img" aria-label="A message with no p
       '<rect x="150" y="34" width="190" height="84" rx="6" fill="#f3e2b8" stroke="#141a33" stroke-width="2.5"/><rect x="140" y="28" width="16" height="96" rx="8" fill="#b88a4a" stroke="#141a33" stroke-width="2"/><rect x="334" y="28" width="16" height="96" rx="8" fill="#b88a4a" stroke="#141a33" stroke-width="2"/>' +
       T(168, 66, "WHEREAREYOUIFOUND", 12, { b: 1, c: "#5a3a14" }) + T(168, 90, "BONNIESHEWASIN", 12, { b: 1, c: "#5a3a14" }) +
       A.bird(398, 76, 0.8, "#3a8fd6") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Where you use this", html: "<p>Texts, emails, job forms and signs.</p><p>Long ago, writing had no full stops at all!</p>" },
+    make: { intro: "Write 3 sentences. One tells, one asks, one shouts.", fields: [{ label: "Telling ." }, { label: "Asking ?" }, { label: "Strong feeling !" }] }
   },
 
   make: {

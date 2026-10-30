@@ -104,6 +104,7 @@ var EDGE = {
       html: "<p>Texts do not always tell you everything. Sometimes you <b>work it out</b> from clues. That is your idea.</p>" +
         "<p>To <b>prove</b> your idea, point to the words in the text that made you think it.</p>" + ANGRY.mild +
         "<p>Idea: they are <b>angry</b>. Proof: they <b>slammed the door</b>.</p>",
+      ez: { title: "Clue and idea", html: "<p>Use <b>clues</b> to work out an idea.</p>" + ANGRY.mild + "<p>Idea: <b>angry</b>. Proof: <b>slammed the door</b>.</p>" },
       lv: { medium: { html: "<p>Texts do not always tell you everything. You <b>work it out</b> from clues: that is an inference.</p>" +
               "<p>To prove an inference, point to the exact words in the text that made you think it.</p>" + ANGRY.medium +
               "<p>The text never says \"angry\". But <b>slammed the door</b> and <b>folded their arms</b> are clues that prove it.</p>" },
@@ -115,6 +116,7 @@ var EDGE = {
       options: ["Angry", "Excited", "Sleepy"], answer: 0,
       slips: { 1: "Excited people might rush in, but would they slam the door and throw things?", 2: "Sleepy people move slowly. Stomping and slamming are loud and cross." },
       hint: "What do people do when they slam doors?",
+      ez: { q: "How is [[who]] feeling?" + ANGRY.mild, hint: "Why do people slam doors?", why: "Stomping and slamming show <b>angry</b>.", slips: { 1: "Would excited people slam doors?", 2: "Sleepy people are slow. Slamming is loud." } },
       why: "Stomping, slamming and throwing are what people do when they are <b>angry</b>.",
       lv: { medium: { q: "Read it again. How do you think [[who]] is feeling?" + ANGRY.medium,
               options: ["Angry or upset", "Excited", "Sleepy"],
@@ -130,6 +132,7 @@ var EDGE = {
       options: ["\"They slammed the door.\"", "\"into [[place]]\"", "\"on the floor\""], answer: 0,
       slips: { 1: "Those words say where they went, not how they feel.", 2: "Those words are in the text, but they do not show anger on their own." },
       hint: "Which words show a feeling through an action?",
+      ez: { q: "Which words <b>prove</b> [[who]] is angry?", hint: "Which action shows a feeling?", why: "Slamming a door is a cross action. That is the <b>proof</b>.", slips: { 1: "That says where, not how they feel.", 2: "That does not show anger." } },
       why: "Slamming a door is a loud, cross action. That is the proof.",
       lv: { medium: { options: ["\"folded their arms and stared at the wall\"", "\"walked into [[place]]\"", "\"When someone asked if they were OK\""],
               slips: { 1: "Walking into a room does not show a feeling.", 2: "That is what someone else did. Look at what [[who]] does." },
@@ -145,6 +148,7 @@ var EDGE = {
       model: "They slammed the door.",
       slips: [[["happy", "excited", "sad", "sleepy"], "That is a feeling word. The question wants words copied from the text."]],
       hint: "Look back at the text. Copy the action that shows the feeling.",
+      ez: { q: "Copy words from the text that show how [[who]] feels.", hint: "Copy the action.", why: "Any action works, like <b>slammed the door</b>.", slips: [[null, "That is a feeling word. Copy words from the text."]] },
       why: "Any of the actions works: <b>stomped</b>, <b>slammed the door</b>, <b>threw their [[thing]]</b>.",
       lv: { spicy: { q: "Copy a <b>different</b> detail from the text that also shows [[who]] is nervous.",
         need: [["glanc", "clock", "jump", "check"]],
@@ -158,6 +162,7 @@ var EDGE = {
       fig: STRENGTH,
       html: "<p>Not every detail proves your idea. The best proof points to <b>your idea and nothing else</b>.</p>" + EMPTY.mild +
         "<p>Idea: nobody has been here for years. A calendar from 1999 proves that much better than \"silent\": a room can be silent for one night.</p>",
+      ez: { title: "The best proof", html: "<p>The best proof points to <b>your idea</b> only.</p>" + EMPTY.mild },
       lv: { medium: { html: "<p>Not every detail proves your idea. The best proof points to <b>your idea and nothing else</b>.</p>" + EMPTY.medium +
               "<p>Idea: nobody has been here for years. Which details prove it, and which ones would not?</p>" },
             spicy: { html: "<p>The strongest evidence is <b>specific</b> and points to your idea and <b>nothing else</b>. Weaker evidence fits other ideas too.</p>" + EMPTY.spicy +
@@ -168,6 +173,7 @@ var EDGE = {
       options: ["Nobody has been there for a long time.", "It is busy every day.", "It was built last week."], answer: 0,
       slips: { 1: "Busy places do not have thick dust and cobwebs.", 2: "A calendar from 1999 is a clue it has been there much longer." },
       hint: "Think about the dust, the calendar and the cobwebs.",
+      ez: { hint: "Look at the dust, calendar and cobwebs.", why: "Dust, an old calendar, cobwebs. Nobody for <b>a long time</b>.", slips: { 1: "Busy places have no thick dust.", 2: "The calendar says 1999." } },
       why: "Dust, an old calendar and cobwebs all point to a place nobody has used for a long time.",
       lv: { medium: { q: "Look at the footprints. What could you work out from them?",
               options: ["Somebody has been there once, recently.", "Lots of people visit every day.", "Nobody has ever been there."],
@@ -184,6 +190,7 @@ var EDGE = {
       q: "Pick the <b>two</b> details that best prove nobody has been there for years.",
       options: ["A calendar still said March 1999.", "Dust lay thick on the [[dusty]].", "It was silent.", "There was a door."], answers: [0, 1],
       hint: "Which ones take a long time to happen?",
+      ez: { q: "Pick <b>2</b> details that prove nobody has been there for years.", hint: "Which ones take a long time?", why: "An old calendar and thick dust take <b>years</b>." },
       why: "An old calendar and thick dust both take years. Silence and a door could be anywhere.",
       lv: { medium: { options: ["A calendar still showed March 1999.", "Cobwebs hung across every doorway, unbroken.", "The corridor was silent.", "A single set of footprints led away."],
               why: "The old calendar and the unbroken cobwebs prove nobody has been in or out for years. The footprints actually suggest someone has." },
@@ -196,6 +203,7 @@ var EDGE = {
       buckets: ["Proves it", "Does not prove it"],
       cards: [["Thick dust", 0], ["A calendar from 1999", 0], ["Cobwebs across the door", 0], ["It was silent", 1], ["There was a [[dusty]]", 1]],
       hint: "Ask: would this only happen if nobody had been there for years?",
+      ez: { q: "Does it prove nobody has been there for years?", hint: "Would it only happen after years?", why: "Dust, the calendar and cobwebs take time. Silence does not." },
       why: "Dust, the old calendar and cobwebs build up over time. Silence and the [[dusty]] being there do not prove anything about time.",
       lv: { spicy: { buckets: ["Strong proof", "Weak proof", "Points the other way"],
         cards: [["Calendar showing March 1999", 0], ["Clock stopped at ten past four", 0], ["Unbroken cobwebs", 0], ["It was silent", 1], ["There was a [[dusty]]", 1], ["The strip lights hum", 2]],
@@ -207,6 +215,7 @@ var EDGE = {
       html: "<p>When you write your proof down, build it like a burger:</p>" +
         "<p><b>Point</b>: say your idea. <b>Evidence</b>: copy the words from the text, in speech marks. <b>Explain</b>: say how those words show your idea.</p>" +
         "<p class=\"a2task\"><b>Worked example</b><br>Point: I think nobody has been to [[old]] for years.<br>Evidence: It says \"a calendar on the wall still showed March 1999\".<br>Explain: This shows nobody has turned the page since 1999, so the place has been empty all that time.</p>",
+      ez: { title: "Idea, because, proof", html: "<p><b>My idea</b>, because it says <b>\"words from the text\"</b>.</p><p class=\"a2task\">Nobody has been there, because it says \"dust lay thick\".</p>" },
       lv: { mild: { html: "<p>When you write your proof down, use two parts joined by <b>because</b>:</p>" +
               "<p><b>My idea</b>, because it says <b>\"the words from the text\"</b>.</p>" +
               "<p class=\"a2task\"><b>Worked example</b><br>I think nobody has been there for years, because it says \"dust lay thick on the [[dusty]]\".</p>" +
@@ -219,6 +228,7 @@ var EDGE = {
       q: "Put the proof burger together. Top bun first.",
       items: ["I think [[who]] was angry.", "It says they \"slammed the door\".", "This shows they were cross, because people slam doors when they are in a temper."],
       hint: "Idea first, then the words from the text, then how they show it.",
+      ez: { q: "Build the proof. Top bun first.", hint: "Idea, because, then the words." },
       why: "Point, evidence, explain. The evidence sits in the middle, like the filling.",
       lv: { mild: { items: ["I think [[who]] was angry,", "because it says", "\"they slammed the door\"."],
               hint: "Idea first, then because, then the words from the text.",
@@ -231,6 +241,7 @@ var EDGE = {
       q: "Match each part of the proof to its job.",
       pairs: [["I think nobody has been there for years.", "Point: my idea"], ["It says \"cobwebs hung across every doorway\".", "Evidence: words from the text"], ["This shows nobody has walked through, or the cobwebs would be broken.", "Explain: how the proof shows it"]],
       hint: "Which one has speech marks? That is the evidence.",
+      ez: { q: "Match each part to its job.", hint: "Speech marks show the proof." },
       why: "The point is your idea, the evidence is copied from the text, and the explain joins them up.",
       lv: { mild: { pairs: [["I think nobody has been there for years", "My idea"], ["\"Dust lay thick\"", "Proof from the text"], ["because", "The word that joins them"]],
               why: "Your idea, then because, then the proof in speech marks." },
@@ -241,6 +252,7 @@ var EDGE = {
       options: ["This shows nobody has changed the calendar since 1999, so the place has been empty all that time.", "The calendar showed March 1999.", "I like calendars."], answer: 0,
       slips: { 1: "That repeats the evidence. The explain says what it shows.", 2: "That is about you, not the text." },
       hint: "The explain starts \"This shows...\" and links back to the idea.",
+      ez: { hint: "Look for speech marks.", slips: { 1: "That is the idea again.", 2: "True, but it proves nothing." } },
       why: "A good explain says how the evidence proves the point: the calendar was never changed, so nobody was there.",
       lv: { mild: { q: "Which is the best way to finish this?<p class=\"a2task\">I think nobody has been there for years, because...</p>",
               options: ["it says \"dust lay thick on the [[dusty]]\".", "I think so.", "it is a story."],
@@ -259,6 +271,7 @@ var EDGE = {
       model: "This shows they were angry, because people slam doors when they are cross.",
       slips: [[["slammed the door"], "That repeats the evidence. Say what slamming shows about how they feel."]],
       hint: "What does slamming a door tell you about how someone feels?",
+      ez: { why: "Any action proves it, like <b>slammed the door</b>.", slips: [[null, "That is the idea again. Copy words from the text."]] },
       why: "The explain links the evidence back to the idea: slamming is loud and forceful, which is what people do when they are angry.",
       lv: { mild: { q: "Finish the proof.<p class=\"a2task\">I think [[who]] was angry, because it says...</p>",
               need: [["slam", "threw", "throw", "stomp"]],
@@ -278,6 +291,7 @@ var EDGE = {
       fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay with a speech bubble saying prove it">' + A.jay(120, 54, 0.95, "wink") + A.bubble(190, 14, 150, 52, "Go on then.\nProve it.", 200) +
         A.bonnie(330, 112, 0.6, "sit") + '</svg>',
       html: "<p>Last one. Here is a short moment. Read it, decide what you think, then prove it.</p>" + EDGE.medium,
+      ez: { title: "Your turn", html: "<p>Read it. What do you think? Prove it.</p>" + EDGE.mild },
       lv: { mild: { html: "<p>Last one. Read it, decide what you think, then prove it.</p>" + EDGE.mild },
             spicy: { html: "<p>Last one. Here is a moment where something <b>changes</b>. Read it closely, then build your proof.</p>" + EDGE.spicy } } },
 
@@ -286,6 +300,7 @@ var EDGE = {
       options: ["Nervous", "Bored", "Angry"], answer: 0,
       slips: { 1: "Bored people do not tremble or have a dry mouth.", 2: "Nothing is slammed or thrown. Shaking knees and a dry mouth are signs of something else." },
       hint: "What makes knees shake and mouths go dry?",
+      ez: { hint: "Why do knees shake?", why: "Shaking knees and a dry mouth: <b>nervous</b>.", slips: { 1: "Bored people do not shake.", 2: "Nothing is slammed. Shaking knees mean something else." } },
       why: "Shaking knees and a dry mouth are signs of being <b>nervous</b>.",
       lv: { spicy: { q: "How do [[who]]'s feelings <b>change</b>?",
         options: ["From nervous to confident", "From confident to nervous", "From angry to calm", "They stay nervous the whole time"],
@@ -299,6 +314,7 @@ var EDGE = {
       model: "Their knees were trembling.",
       slips: [[["grin", "smile", "shoulders", "chin"], "That is from the end, after the change. Look at the start."]],
       hint: "Look at the first two sentences.",
+      ez: { q: "Copy a detail that shows they are nervous at the start.", hint: "Look at the first 2 sentences.", why: "<b>Knees shaking</b> or a <b>dry mouth</b> show nerves.", slips: [[null, "That is from the end. Look at the start."]] },
       why: "<b>Knees trembling</b>, a <b>dry mouth</b>, and wiping their hands all show nerves.",
       lv: { mild: { model: "Their knees were shaking." },
             spicy: { q: "Copy the detail that best proves they have <b>stopped</b> being nervous.",
@@ -310,6 +326,7 @@ var EDGE = {
 
     { type: "write", topic: "Prove it yourself",
       q: "Write your own proof about [[who]]. Use the starters if you like. It goes to Jay only if you choose to send it.",
+      ez: { q: "Write your own proof about [[who]]. Use the starters if you like." },
       starters: ["I think [[who]] is...", "It says \"...\"", "This shows..."],
       checklist: ["I said my idea", "I copied words from the text in speech marks", "I explained how the words show my idea"],
       minWords: 25,
@@ -319,6 +336,10 @@ var EDGE = {
               checklist: ["Point about the change", "Evidence from before and after", "Explain for each", "A zoom on one word"], minWords: 50 } } }
   ],
 
+  ez: {
+    realWorld: { title: "Proof is everywhere", html: "<p>Job interviews ask for proof. So do good arguments.</p><p>Should we time travel? Make your point, then prove it.</p>" },
+    make: { intro: "Pick a text. Fill in your point, evidence and explain." }
+  },
   realWorld: {
     title: "Proof is everywhere",
     html: "<p>\"Give an example of a time when...\" is one of the most common job interview questions. It is point, evidence, explain. So is a good complaint, a strong argument with a friend, or a review that people actually trust.</p>" +

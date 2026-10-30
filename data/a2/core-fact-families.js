@@ -28,7 +28,11 @@ function clean(o){
 }
 function G(type, topic, sets, extra){
   sets.forEach(function(v){ v.forEach(clean); });
-  function one(v){ var o = {}; Object.keys(v[0]).forEach(function(k){ o[k] = v[0][k]; }); o.lv = { mild: v[1], spicy: v[2] }; return o; }
+  function one(v){
+    /* easy read for LC: only the first level's (mild) ez is kept, at the top of the step or version */
+    var e = v[1].ez; v.forEach(function(x){ delete x.ez; });
+    if(e && e.slips && v[1].boxes) e.slips = clean({ boxes: v[1].boxes, slips: e.slips }).slips;
+    var o = {}; Object.keys(v[0]).forEach(function(k){ o[k] = v[0][k]; }); o.lv = { mild: v[1], spicy: v[2] }; if(e) o.ez = e; return o; }
   var s = { type: type, topic: topic }, b = one(sets[0]);
   Object.keys(b).forEach(function(k){ s[k] = b[k]; });
   if(sets.length > 1) s.vary = sets.slice(1).map(one);
@@ -101,6 +105,8 @@ function shareFig(n, size, egg, quiet){
 }
 
 /* ---------- question makers ---------- */
+/* easy read for LC: the same slips (same numbers), with shorter messages */
+function ezs(sl, msgs){ return sl.map(function(r, i){ var c = r.slice(); c[c.length - 1] = msgs[i]; return c; }); }
 
 function triQ(a, b, hide){
   var p = r6(a * b), ans = hide === "p" ? p : hide === "a" ? a : b, other = hide === "a" ? b : a, sl = [];
@@ -109,7 +115,11 @@ function triQ(a, b, hide){
   return { q: hide === "p" ? "What goes at the top of this family triangle?" : "Find the missing number in this family triangle.",
     fig: triFig(a, b, hide), boxes: [{ label: "Missing number", a: ans }], slips: sl,
     hint: hide === "p" ? "Multiply the two bottom numbers." : "Cover the missing one: " + fm(p) + D + fm(other) + ".",
-    why: hide === "p" ? mul(a, b) + ", so <b>" + fm(p) + "</b> goes at the top." : fm(p) + D + fm(other) + " = <b>" + fm(ans) + "</b>, because " + mul(other, ans) + "." };
+    why: hide === "p" ? mul(a, b) + ", so <b>" + fm(p) + "</b> goes at the top." : fm(p) + D + fm(other) + " = <b>" + fm(ans) + "</b>, because " + mul(other, ans) + ".",
+    ez: { q: hide === "p" ? "What goes at the top?" : "Find the missing number.", hint: hide === "p" ? "Multiply the bottom two." : "Try " + fm(p) + D + fm(other) + ".",
+      why: hide === "p" ? mul(a, b) + ". <b>" + fm(p) + "</b> goes on top." : fm(p) + D + fm(other) + " = <b>" + fm(ans) + "</b>.",
+      slips: ezs(sl, hide === "p" ? ["That adds. Multiply the bottom two.", "Close. Check: " + mul(a, b) + "."] :
+        ["That takes away. Try " + fm(p) + D + fm(other) + ".", "That multiplies. Divide instead.", "Check: " + fm(other) + X + fm(ans + 1) + " = " + fm(other * (ans + 1)) + ".", "Check: " + fm(other) + X + fm(ans - 1) + " = " + fm(other * (ans - 1)) + "."]) } };
 }
 function fam4(a, b){
   var p = r6(a * b);
@@ -118,28 +128,38 @@ function fam4(a, b){
     boxes: [{ label: fm(b) + X + fm(a) + " =", a: p }, { label: fm(p) + D + fm(a) + " =", a: b }, { label: fm(p) + D + fm(b) + " =", a: a }],
     slips: [[1, a, "That is the number you divided by. " + fm(p) + D + fm(a) + " asks how many " + fm(a) + "s make " + fm(p) + "."], [2, b, "That is the number you divided by. " + fm(p) + D + fm(b) + " asks how many " + fm(b) + "s make " + fm(p) + "."], [0, r6(a + b), "Times, not add. Swapping the order does not change the answer."]],
     hint: "Times works in any order. Divide the top by one bottom number to get the other.",
-    why: mul(b, a) + ", " + dv(p, a) + ", " + dv(p, b) + ". All four use the same three numbers." };
+    why: mul(b, a) + ", " + dv(p, a) + ", " + dv(p, b) + ". All four use the same three numbers.",
+    ez: { q: "Family: <b>" + fm(a) + ", " + fm(b) + " and " + fm(p) + "</b>. Fill in the other 3 facts.", hint: "Divide the top by a bottom number.",
+      why: mul(b, a) + ", " + dv(p, a) + ", " + dv(p, b) + ".",
+      slips: ["How many " + fm(a) + "s make " + fm(p) + "?", "How many " + fm(b) + "s make " + fm(p) + "?", "Times, not add."].map(function(m, i){ return [[1, a], [2, b], [0, r6(a + b)]][i].concat([m]); }) } };
 }
 function oddOut(a, b){
   var p = r6(a * b), opts = [fm(a) + D + fm(p) + " = " + fm(b), fm(b) + X + fm(a) + " = " + fm(p), fm(p) + D + fm(b) + " = " + fm(a), fm(p) + D + fm(a) + " = " + fm(b)];
   return { q: "Which one is <b>not</b> a true fact in the family of " + fm(a) + ", " + fm(b) + " and " + fm(p) + "?", options: opts, answer: 0,
     slips: { 1: "That one is true: times works in any order.", 2: "That one is true: " + fm(b) + X + fm(a) + " = " + fm(p) + ".", 3: "That one is true: " + fm(a) + X + fm(b) + " = " + fm(p) + "." },
     hint: "In a divide fact, the biggest number (the top of the triangle) comes first.",
-    why: "<b>" + opts[0] + "</b> is back to front. Dividing the small number by the big one does not give " + fm(b) + ". The family's divide facts always start with " + fm(p) + "." };
+    why: "<b>" + opts[0] + "</b> is back to front. Dividing the small number by the big one does not give " + fm(b) + ". The family's divide facts always start with " + fm(p) + ".",
+    ez: { q: "Which is <b>not</b> true for " + fm(a) + ", " + fm(b) + " and " + fm(p) + "?", hint: "Divide facts start with the biggest number.", why: "<b>" + opts[0] + "</b> is back to front.",
+      slips: { 1: "True. Times works any way round.", 2: "True: " + fm(b) + X + fm(a) + " = " + fm(p) + ".", 3: "True: " + fm(a) + X + fm(b) + " = " + fm(p) + "." } } };
 }
 function bonnieQ(rows, per, seen){
   var tot = rows * per;
   return { q: "There are <b>" + tot + "</b> dots altogether, in rows of " + per + ". Bonnie has lain down on the bottom rows. How many rows are there?",
     fig: arrayFig(rows, per, rows - seen), boxes: [{ label: "Rows", a: rows }],
     slips: [[seen, "That is just the rows you can see. Bonnie is hiding more: use " + tot + D + per + "."], [r6(tot - per), "That took away one row. Divide to find how many rows of " + per + " make " + tot + "."], [rows * per * per, "That multiplied. Divide instead."]],
-    hint: "How many " + per + "s make " + tot + "?", why: tot + D + per + " = <b>" + rows + " rows</b>, because " + mul(rows, per) + ". Bonnie was hiding " + (rows - seen) + " of them." };
+    hint: "How many " + per + "s make " + tot + "?", why: tot + D + per + " = <b>" + rows + " rows</b>, because " + mul(rows, per) + ". Bonnie was hiding " + (rows - seen) + " of them.",
+    ez: { q: "<b>" + tot + "</b> dots, in rows of " + per + ". Bonnie is lying on some! How many rows?", why: tot + D + per + " = <b>" + rows + " rows</b>.",
+      slips: [[seen, "Bonnie is hiding more rows. Try " + tot + D + per + "."], [r6(tot - per), "That took away. Try dividing."], [rows * per * per, "That multiplied. Divide instead."]] } };
 }
 function machineQ(op, n, out){
   var ans = op === "&#215;" ? r6(out / n) : r6(out * n), back = op === "&#215;" ? fm(out) + " &#247; " + fm(n) : fm(out) + " &#215; " + fm(n);
   return { q: "A number went into the machine and <b>" + fm(out) + "</b> came out. Run it backwards to find what went in: " + (op === "&#215;" ? fm(out) + D + fm(n) : fm(out) + X + fm(n)) + ".",
     fig: machineFig(op, n, out, back), boxes: [{ label: "What went in", a: ans }],
     slips: [[op === "&#215;" ? r6(out * n) : r6(out / n), "That ran the machine forwards again. Backwards means the opposite: " + (op === "&#215;" ? "divide." : "times.")], [r6(out - n), "Taking away does not undo a " + (op === "&#215;" ? "times" : "divide") + "."]],
-    hint: "Times and divide undo each other.", why: back.replace("&#247;", "&divide;").replace("&#215;", "&times;") + " = <b>" + fm(ans) + "</b>. Check: " + fm(ans) + " " + (op === "&#215;" ? "&times;" : "&divide;") + " " + fm(n) + " = " + fm(out) + "." };
+    hint: "Times and divide undo each other.", why: back.replace("&#247;", "&divide;").replace("&#215;", "&times;") + " = <b>" + fm(ans) + "</b>. Check: " + fm(ans) + " " + (op === "&#215;" ? "&times;" : "&divide;") + " " + fm(n) + " = " + fm(out) + ".",
+    ez: { q: "<b>" + fm(out) + "</b> came out. What went in? Try " + (op === "&#215;" ? fm(out) + D + fm(n) : fm(out) + X + fm(n)) + ".",
+      why: back.replace("&#247;", "&divide;").replace("&#215;", "&times;") + " = <b>" + fm(ans) + "</b>.",
+      slips: [[op === "&#215;" ? r6(out * n) : r6(out / n), "That runs it forwards. Go backwards."], [r6(out - n), "Taking away does not undo it."]] } };
 }
 function missing(kind, a, b){
   /* kind: "x?" means ? x a = b ; "/?" means ? / a = b ; "?/" means b / ? = a style */
@@ -149,7 +169,10 @@ function missing(kind, a, b){
   else { ans = r6(a / b); q = fm(a) + " " + D.trim() + " ? = " + fm(b); sl = [[r6(a * b), "That multiplied. How many lots of " + fm(b) + " make " + fm(a) + "? Divide."], [r6(a - b), "Take away does not help here. " + fm(a) + D + fm(b) + "."]]; }
   return { q: "Find the missing number: <b>" + q + "</b>", boxes: [{ label: "?", a: ans }], slips: sl,
     hint: kind === "x" ? "What times " + fm(a) + " makes " + fm(b) + "?" : kind === "d" ? "What number, shared into " + fm(a) + ", gives " + fm(b) + " each? Times to undo." : fm(a) + " shared into how many lots gives " + fm(b) + "?",
-    why: q.replace("?", "<b>" + fm(ans) + "</b>") + ". " + (kind === "x" ? "Undo with " + dv(b, a) : kind === "d" ? "Undo with " + mul(b, a) : dv(a, b)) + "." };
+    why: q.replace("?", "<b>" + fm(ans) + "</b>") + ". " + (kind === "x" ? "Undo with " + dv(b, a) : kind === "d" ? "Undo with " + mul(b, a) : dv(a, b)) + ".",
+    ez: { hint: kind === "x" ? "What times " + fm(a) + " makes " + fm(b) + "?" : kind === "d" ? "Undo it: " + fm(b) + X + fm(a) + "." : "How many " + fm(b) + "s make " + fm(a) + "?",
+      why: q.replace("?", "<b>" + fm(ans) + "</b>") + ".",
+      slips: ezs(sl, kind === "x" ? ["That multiplied. Try " + fm(b) + D + fm(a) + ".", "Take away does not undo times."] : kind === "d" ? ["That divided again. Try " + fm(b) + X + fm(a) + ".", "Add does not undo divide."] : ["That multiplied. Divide instead.", "Take away does not help. Try " + fm(a) + D + fm(b) + "."]) } };
 }
 function mcUndo(n, out, two){
   var opts = [fm(out) + D + fm(n), fm(out) + X + fm(n), fm(out) + " &minus; " + fm(n), fm(n) + D + fm(out)];
@@ -159,7 +182,11 @@ function mcUndo(n, out, two){
     slips: two ? { 1: "Undo the last thing first. He added " + two + " last, so take " + two + " away first, then divide.", 2: "He added " + two + ", so undo it by taking away, not adding.", 3: "That runs it forwards. Go backwards: take away, then divide." } :
       { 1: "That runs it forwards. Backwards means divide.", 2: "Taking away does not undo a times.", 3: "That divides the small number by the big one. Start with " + fm(out) + "." },
     hint: two ? "Undo the steps in reverse order, like taking off socks and shoes." : "What undoes times?",
-    why: two ? "Undo the + " + two + " first: " + fm(out) + " &minus; " + two + " = " + fm(out - two) + ". Then undo the " + X.trim() + " " + fm(n) + ": " + fm(out - two) + D + fm(n) + " = <b>" + fm((out - two) / n) + "</b>." : fm(out) + D + fm(n) + " = <b>" + fm(out / n) + "</b>." };
+    why: two ? "Undo the + " + two + " first: " + fm(out) + " &minus; " + two + " = " + fm(out - two) + ". Then undo the " + X.trim() + " " + fm(n) + ": " + fm(out - two) + D + fm(n) + " = <b>" + fm((out - two) / n) + "</b>." : fm(out) + D + fm(n) + " = <b>" + fm(out / n) + "</b>.",
+    ez: { q: two ? "Jay's number " + X.trim() + " " + fm(n) + ", then + " + two + ", makes " + fm(out) + ". Which sum finds it?" : "Jay's number " + X.trim() + " " + fm(n) + " = " + fm(out) + ". Which sum finds his number?",
+      hint: two ? "Undo the last step first." : "What undoes times?",
+      slips: two ? { 1: "Take away the " + two + " first. Then divide.", 2: "He added " + two + ". So take it away.", 3: "That runs it forwards." } :
+        { 1: "That runs it forwards. Divide instead.", 2: "Taking away does not undo times.", 3: "Start with the big number, " + fm(out) + "." } } };
 }
 function twoStep(n, add, out, how){
   var ans = r6((out - add) / n), sl = [[r6(out / n - add), "Undo in reverse order: take away the " + add + " first, then divide."], [r6((out + add) / n), "The " + add + " was added, so undo it by taking away."], [r6(out - add), "That is halfway. Now undo the " + X.trim() + " " + fm(n) + " too."]];
@@ -175,7 +202,10 @@ function scaleFade(a, b, big, by){
     boxes: [{ label: fm(a) + X + fm(b) + " =", a: p }, { label: fm(big) + D + fm(by) + " =", a: ans }],
     slips: [[1, r6(ans * 10), "Ten times too big. Check: does your answer " + X.trim() + " " + fm(by) + " make " + fm(big) + "?"], [1, r6(ans / 10), "Ten times too small. Check: does your answer " + X.trim() + " " + fm(by) + " make " + fm(big) + "?"], [0, r6(a + b), "Times, not add."]],
     hint: "Same digits as the fact. Then check the size by multiplying back.",
-    why: mul(a, b) + ". So " + fm(big) + D + fm(by) + " = <b>" + fm(ans) + "</b>. Check: " + mul(ans, by) + "." };
+    why: mul(a, b) + ". So " + fm(big) + D + fm(by) + " = <b>" + fm(ans) + "</b>. Check: " + mul(ans, by) + ".",
+    ez: { q: "<b>" + fm(a) + X + fm(b) + "</b> first. Then <b>" + fm(big) + D + fm(by) + "</b>.", hint: "Same digits. Times back to check.",
+      why: mul(a, b) + ". So " + fm(big) + D + fm(by) + " = <b>" + fm(ans) + "</b>.",
+      slips: [[1, r6(ans * 10), "10 times too big. Times back to check."], [1, r6(ans / 10), "10 times too small. Times back to check."], [0, r6(a + b), "Times, not add."]] } };
 }
 function scaleQ(a, b, big, by){
   var ans = r6(big / by);
@@ -183,37 +213,53 @@ function scaleQ(a, b, big, by){
     boxes: [{ label: fm(big) + D + fm(by) + " =", a: ans }],
     slips: [[r6(ans * 10), "Ten times too big. Multiply back to check: " + fm(ans * 10) + X + fm(by) + " = " + fm(ans * 10 * by) + "."], [r6(ans / 10), "Ten times too small. Multiply back to check: " + fm(ans / 10) + X + fm(by) + " = " + fm(ans / 10 * by) + "."], [r6(ans * 100), "A hundred times too big. Multiply back to check."], [r6(ans / 100), "A hundred times too small. Multiply back to check."]],
     hint: "Which digits will the answer have? Then multiply back to check the size.",
-    why: fm(big) + D + fm(by) + " = <b>" + fm(ans) + "</b>, because " + mul(ans, by) + ". Same digits as " + mul(a, b) + "." };
+    why: fm(big) + D + fm(by) + " = <b>" + fm(ans) + "</b>, because " + mul(ans, by) + ". Same digits as " + mul(a, b) + ".",
+    ez: { q: "You know " + mul(a, b) + ". So what is <b>" + fm(big) + D + fm(by) + "</b>?", hint: "Same digits. Times back to check.",
+      why: fm(big) + D + fm(by) + " = <b>" + fm(ans) + "</b>. Check: " + mul(ans, by) + ".",
+      slips: [[r6(ans * 10), "10 times too big. Times back to check."], [r6(ans / 10), "10 times too small. Times back to check."], [r6(ans * 100), "100 times too big."], [r6(ans / 100), "100 times too small."]] } };
 }
 function mcHelp(big, by, a, b, c, d){
   var ans = r6(big / by), opts = [mul(a, b), mul(c, d), fm(by) + " + " + fm(ans) + " = " + fm(by + ans), "Half of " + fm(big) + " is " + fm(big / 2)];
   return { q: "Which fact helps you work out <b>" + fm(big) + D + fm(by) + "</b>?", options: opts, answer: 0,
     slips: { 1: "That fact has different digits. Look for one with the digits of " + fm(big) + " and " + fm(by) + ".", 2: "Adding does not help with a divide. You need a times fact.", 3: "Halving only helps when you divide by 2. You need a times fact with these digits." },
-    hint: "Look for a times fact that uses the same digits.", why: "<b>" + opts[0] + "</b> has the right digits. " + fm(big) + D + fm(by) + " = " + fm(ans) + "." };
+    hint: "Look for a times fact that uses the same digits.", why: "<b>" + opts[0] + "</b> has the right digits. " + fm(big) + D + fm(by) + " = " + fm(ans) + ".",
+    ez: { q: "Which fact helps with <b>" + fm(big) + D + fm(by) + "</b>?", hint: "Find the same digits.", why: "<b>" + opts[0] + "</b> has the right digits.",
+      slips: { 1: "Different digits. Look again.", 2: "Adding does not help here.", 3: "Halving only helps with " + D.trim() + " 2." } } };
 }
 function matchScale(pairs){ return { q: "Match each divide to its answer. They all come from one family.", pairs: pairs,
-  hint: "Find the fact first, then check the size of each answer by multiplying back.", why: "Same digits every time. Multiplying back checks each answer is the right size." }; }
+  hint: "Find the fact first, then check the size of each answer by multiplying back.", why: "Same digits every time. Multiplying back checks each answer is the right size.",
+  ez: { q: "Match each divide to its answer.", hint: "Find the fact. Then check the size.", why: "Same digits every time." } }; }
 function shareQ(n, g, money){
   var ans = r6(n / g);
   return { q: money ? "[[Who]] shares &pound;" + mo(n) + " equally between " + g + " [[people]]. How much does each get?" : "[[Who]] shares " + fm(n) + " [[things]] equally between " + g + " [[groups]]. How many in each?",
     boxes: [{ label: "Each", a: ans, pre: money ? "&pound;" : "", show: money ? mo(ans) : fm(ans) }],
     slips: [[r6(n * g), "That multiplied. Sharing is dividing."], [r6(n - g), "That took away. Sharing equally is dividing: " + fm(n) + D + g + "."], [r6(ans * 10), "Ten times too big. Check: " + fm(ans * 10) + X + g + " is too much."], [r6(ans / 10), "Ten times too small. Multiply back to check."]],
-    hint: "Which times fact has " + g + " and " + fm(n) + " in it?", why: fm(n) + D + g + " = <b>" + (money ? "&pound;" + mo(ans) : fm(ans)) + "</b> each, because " + mul(ans, g) + "." };
+    hint: "Which times fact has " + g + " and " + fm(n) + " in it?", why: fm(n) + D + g + " = <b>" + (money ? "&pound;" + mo(ans) : fm(ans)) + "</b> each, because " + mul(ans, g) + ".",
+    ez: { q: money ? "&pound;" + mo(n) + " shared between " + g + " [[people]]. How much each?" : fm(n) + " [[things]] shared between " + g + " [[groups]]. How many in each?",
+      why: fm(n) + D + g + " = <b>" + (money ? "&pound;" + mo(ans) : fm(ans)) + "</b> each.",
+      slips: [[r6(n * g), "That multiplied. Sharing is dividing."], [r6(n - g), "That took away. Try " + fm(n) + D + g + "."], [r6(ans * 10), "10 times too big."], [r6(ans / 10), "10 times too small."]] } };
 }
 function leftQ(n, size){
   var full = Math.floor(n / size), left = n - full * size;
   return { q: "[[Who]] packs " + n + " [[things]] into [[groups]], " + size + " in each. How many full [[groups]], and how many [[things]] are left over?",
     fig: n <= 30 ? shareFig(n, size, false, true) : "", boxes: [{ label: "Full [[groups]]", a: full }, { label: "Left over", a: left }],
     slips: [[0, full + 1, "That would need " + (full + 1) * size + ". There are only " + n + "."], [1, size - left, "That is how many more you would need for another one. Left over is what remains: " + n + " &minus; " + (full * size) + "."], [0, r6(n / size), "Whole [[groups]] only. The bit after the point is the leftovers."]],
-    hint: "Biggest times fact for " + size + " that fits under " + n + ".", why: mul(full, size) + ", and " + n + " &minus; " + (full * size) + " = " + left + ". So <b>" + full + "</b> full and <b>" + left + "</b> left over." };
+    hint: "Biggest times fact for " + size + " that fits under " + n + ".", why: mul(full, size) + ", and " + n + " &minus; " + (full * size) + " = " + left + ". So <b>" + full + "</b> full and <b>" + left + "</b> left over.",
+    ez: { q: "Pack " + n + " [[things]], " + size + " in each. How many full? How many left over?", hint: "Which " + size + "s fact fits under " + n + "?",
+      why: mul(full, size) + ". <b>" + full + "</b> full, <b>" + left + "</b> left over.",
+      slips: [[0, full + 1, "That needs " + (full + 1) * size + ". There are only " + n + "."], [1, size - left, "Left over is what is left: " + n + " &minus; " + (full * size) + "."], [0, r6(n / size), "Whole ones only."]] } };
 }
-function mcRem(n, size, up, ctx){
+function mcRem(n, size, up, ctx, ezctx){
   var full = Math.floor(n / size), left = n % size, ans = up ? full + 1 : full, opts = [String(ans), String(up ? full : full + 1), fa(n / size), full + " remainder " + left];
   return { q: ctx, options: opts, answer: 0,
     slips: up ? { 1: "Then " + left + " would be left behind. You need one more for them.", 2: "You cannot have part of one. Decide: round up or down?", 3: "That is the sum, but the answer needs a whole number. The leftovers still need somewhere to go." } :
       { 1: "That one would not be full. Only count the complete ones.", 2: "You cannot have part of one. Only whole ones count.", 3: "That is the sum, but the question wants whole ones only." },
     hint: up ? "Does everyone (or everything) need a place?" : "Only complete ones count.",
-    why: n + D + size + " = " + full + " remainder " + left + ". " + (up ? "The " + left + " left over still need one, so round <b>up</b> to <b>" + ans + "</b>." : "The " + left + " left over cannot make a full one, so round <b>down</b> to <b>" + ans + "</b>.") };
+    why: n + D + size + " = " + full + " remainder " + left + ". " + (up ? "The " + left + " left over still need one, so round <b>up</b> to <b>" + ans + "</b>." : "The " + left + " left over cannot make a full one, so round <b>down</b> to <b>" + ans + "</b>."),
+    ez: { q: ezctx || ctx, hint: up ? "Does everyone need a place?" : "Only full ones count.",
+      why: n + D + size + " = " + full + " remainder " + left + ". " + (up ? "Round <b>up</b> to <b>" + ans + "</b>." : "Round <b>down</b> to <b>" + ans + "</b>."),
+      slips: up ? { 1: "Then " + left + " would be left behind.", 2: "You need a whole number.", 3: "True, but the leftovers need a place too." } :
+        { 1: "That one would not be full.", 2: "Only whole ones count.", 3: "True, but only count full ones." } } };
 }
 function packsQ(need, per, price, what){
   var pk = Math.ceil(need / per - 1e-9), c = r6(pk * price);
@@ -221,7 +267,10 @@ function packsQ(need, per, price, what){
     boxes: [{ label: "Packs", a: pk }, { label: "Cost", a: c, pre: "&pound;", show: mo(c) }],
     slips: [[0, Math.floor(need / per), "That leaves Jay a few short. Round up."], [0, r6(need / per), "Shops only sell whole packs."], [1, r6(need * price), "That priced every single one. The price is for a pack."], [1, r6(need / per * price), "Price the whole packs (" + pk + ")."]],
     hint: need + D + per + ", round up, then times the price.",
-    why: need + D + per + " = " + fa(need / per) + ", so <b>" + pk + " packs</b>. " + pk + X + "&pound;" + mo(price) + " = <b>&pound;" + mo(c) + "</b>." };
+    why: need + D + per + " = " + fa(need / per) + ", so <b>" + pk + " packs</b>. " + pk + X + "&pound;" + mo(price) + " = <b>&pound;" + mo(c) + "</b>.",
+    ez: { q: what + ": packs of " + per + ", &pound;" + mo(price) + " a pack. Jay needs " + need + ". How many packs? What is the cost?", hint: need + D + per + ". Round up. Then times the price.",
+      why: "<b>" + pk + " packs</b>. " + pk + X + "&pound;" + mo(price) + " = <b>&pound;" + mo(c) + "</b>.",
+      slips: [[0, Math.floor(need / per), "A few short. Round up."], [0, r6(need / per), "Shops sell whole packs."], [1, r6(need * price), "That prices each one. The price is for a pack."], [1, r6(need / per * price), "Price " + pk + " whole packs."]] } };
 }
 
 (window.A2PACKS = window.A2PACKS || {})["core-fact-families"] = {
@@ -261,7 +310,8 @@ function packsQ(need, per, price, what){
           html: "<p>A <b>fact family</b> is three numbers that belong together: 5, 3 and 15.</p><p>Multiply the bottom two to get the top: 5 &times; 3 = 15. Cover one at the bottom and divide: 15 &divide; 5 = 3, 15 &divide; 3 = 5.</p>" },
         spicy: { fig: triFig(0.6, 7, "", "0.6 &#215; 7 = 4.2, 4.2 &#247; 7 = 0.6, 4.2 &#247; 0.6 = 7", true),
           html: "<p>Fact families work for any numbers, decimals included. 0.6, 7 and 4.2 are a family, because 0.6 &times; 7 = 4.2.</p>" +
-            "<p>So 4.2 &divide; 7 = 0.6 and 4.2 &divide; 0.6 = 7, straight away, from one times fact you already know (6 &times; 7 = 42).</p>" } } },
+            "<p>So 4.2 &divide; 7 = 0.6 and 4.2 &divide; 0.6 = 7, straight away, from one times fact you already know (6 &times; 7 = 42).</p>" } } ,
+      ez: { title: "Three numbers, four facts", html: "<p>5, 3 and 15 are a <b>fact family</b>.</p><p>5 &times; 3 = 15. 15 &divide; 5 = 3. 15 &divide; 3 = 5.</p>" } },
 
     G("num", "Family triangles", [
       [triQ(8, 7, "b"), triQ(5, 4, "p"), triQ(0.8, 7, "b")],
@@ -294,7 +344,8 @@ function packsQ(need, per, price, what){
         "<p>If a number went into a &times; 6 machine and 54 came out, run it backwards with &divide; 6: 54 &divide; 6 = <b>9</b> went in.</p>" +
         "<p>Missing numbers work the same way. ? &times; 6 = 54? Undo with 54 &divide; 6. And ? &divide; 6 = 9? Undo with 9 &times; 6 = 54.</p>",
       lv: { mild: { fig: machineFig("&#215;", 5, 35, "35 &#247; 5 = 7"),
-        html: "<p>Times and divide <b>undo</b> each other.</p><p>A number went into a &times; 5 machine and 35 came out. Run it backwards: 35 &divide; 5 = <b>7</b> went in.</p>" } } },
+        html: "<p>Times and divide <b>undo</b> each other.</p><p>A number went into a &times; 5 machine and 35 came out. Run it backwards: 35 &divide; 5 = <b>7</b> went in.</p>" } } ,
+      ez: { html: "<p>Times and divide <b>undo</b> each other.</p><p>&times; 5 gave 35? Then 35 &divide; 5 = 7 went in.</p>" } },
 
     G("num", "Undo it", [
       [machineQ("&#215;", 8, 72), machineQ("&#215;", 2, 16), machineQ("&#215;", 0.4, 2.8)],
@@ -330,7 +381,8 @@ function packsQ(need, per, price, what){
           html: "<p>A fact you know helps with bigger numbers. 3 &times; 5 = 15, so 30 &times; 5 = 150 (ten times bigger).</p><p>And in the same family: 150 &divide; 5 = 30.</p>" },
         spicy: { fig: ladderFig([["6 &#215; 8 = 48", "the fact"], ["4.8 &#247; 8 = 0.6", "&#247; 10"], ["4.8 &#247; 0.6 = 8", "same family"], ["0.48 &#247; 6 = 0.08", "&#247; 100"]]),
           html: "<p>The same family works smaller too. 6 &times; 8 = 48, so 0.6 &times; 8 = 4.8, which means 4.8 &divide; 8 = <b>0.6</b> and 4.8 &divide; 0.6 = <b>8</b>.</p>" +
-            "<p>Keep the digits and check the size by multiplying back: 0.08 &times; 6 = 0.48, so 0.48 &divide; 6 = <b>0.08</b>.</p>" } } },
+            "<p>Keep the digits and check the size by multiplying back: 0.08 &times; 6 = 0.48, so 0.48 &divide; 6 = <b>0.08</b>.</p>" } } ,
+      ez: { html: "<p>3 &times; 5 = 15. So 30 &times; 5 = 150.</p><p>Same <b>digits</b>. 10 times bigger.</p>" } },
 
     G("num", "Bigger facts", [
       [scaleFade(9, 4, 360, 4), scaleFade(5, 3, 150, 3), scaleFade(7, 6, 4.2, 6)],
@@ -366,7 +418,8 @@ function packsQ(need, per, price, what){
     { type: "learn", topic: "Fair shares", title: "Sharing out, and what is left over",
       fig: shareFig(23, 4, true),
       html: "<p>Real sharing does not always come out exactly. 23 shared into groups of 4: 4 &times; 5 = 20, so <b>5 groups and 3 left over</b>.</p>" +
-        "<p>Then the question decides what to do with the leftovers. Need a place for everyone, like seats? <b>Round up</b>: 6 cars. Only counting full groups, like full teams? <b>Round down</b>: 5.</p>" },
+        "<p>Then the question decides what to do with the leftovers. Need a place for everyone, like seats? <b>Round up</b>: 6 cars. Only counting full groups, like full teams? <b>Round down</b>: 5.</p>" ,
+      ez: { title: "Sharing out", html: "<p>23 in 4s: 5 groups and <b>3 left over</b>.</p><p>A seat for everyone? Round <b>up</b>. Full groups only? Round <b>down</b>.</p>" } },
 
     G("num", "Fair shares", [
       [shareQ(72, 8), shareQ(20, 5), shareQ(132, 12)],
@@ -382,13 +435,13 @@ function packsQ(need, per, price, what){
 
     G("mc", "Fair shares", [
       [mcRem(60, 8, true, "60 [[people]] are going on a trip. Each of the [[rides]] holds 8. How many [[rides]] are needed?"),
-       mcRem(22, 5, true, "22 [[people]] are going on a trip. Each of the [[rides]] holds 5. How many [[rides]] are needed?"),
+       mcRem(22, 5, true, "22 [[people]] are going on a trip. Each of the [[rides]] holds 5. How many [[rides]] are needed?", "22 [[people]]. Each of the [[rides]] holds 5. How many [[rides]]?"),
        mcRem(50, 11, false, "50 [[people]] turn up. How many full teams of 11 can they make?")],
       [mcRem(45, 6, false, "45 [[things]] are packed into [[groups]] of 6. How many <b>full</b> [[groups]] are there?"),
-       mcRem(13, 2, true, "13 [[people]] need a partner seat, 2 to a bench. How many benches are needed?"),
+       mcRem(13, 2, true, "13 [[people]] need a partner seat, 2 to a bench. How many benches are needed?", "13 [[people]]. 2 fit on a bench. How many benches?"),
        mcRem(100, 12, true, "100 [[people]] are going on a trip. Each of the [[rides]] holds 12. How many [[rides]] are needed?")],
       [mcRem(75, 9, true, "75 [[people]] are going on a trip. Each of the [[rides]] holds 9. How many [[rides]] are needed?"),
-       mcRem(19, 5, false, "19 [[things]] are packed into [[groups]] of 5. How many <b>full</b> [[groups]] are there?"),
+       mcRem(19, 5, false, "19 [[things]] are packed into [[groups]] of 5. How many <b>full</b> [[groups]] are there?", "19 [[things]], 5 in each. How many <b>full</b> [[groups]]?"),
        mcRem(250, 30, false, "A coach has &pound;250 to spend on footballs at &pound;30 each. How many can be bought?")]
     ]),
 
@@ -406,6 +459,11 @@ function packsQ(need, per, price, what){
     fig: pic(420, 150, "Jay at a time portal holding a clay tablet", A.portal(80, 75, 56) + A.jay(250, 50, 0.85, "wow") +
       '<g transform="translate(160 92) rotate(-6)"><rect width="56" height="46" rx="8" fill="#c9a27a" stroke="' + INK + '" stroke-width="2"/><path d="M10 12h10M28 12h6M10 24h14M30 24h12M10 36h8M24 36h16" stroke="#7a5532" stroke-width="3"/></g>' +
       A.bubble(296, 8, 118, 52, "4000 years\nold. Wow.", 300))
+  },
+
+  ez: {
+    realWorld: { html: "<p>Times tables are 4000 years old!</p><p>Students in Babylon wrote them on clay.</p>" },
+    make: { intro: "Pick 2 numbers. See their whole family." }
   },
 
   make: {

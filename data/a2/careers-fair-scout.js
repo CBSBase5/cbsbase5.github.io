@@ -184,6 +184,7 @@ function bingoWidget(el, api){
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "What is a careers fair?", title: "A room full of jobs",
+      ez: { title: "A room full of jobs", html: "<p>A <b>careers fair</b> is a room full of <b>stalls</b>.</p><p>Look round. Ask a question if you like.</p>" },
       fig: FAIR,
       html: "<p>A <b>careers fair</b> is a big room full of <b>stalls</b>. At each stall there are people who do a job, or people from a college or a company.</p>" +
         "<p>You can walk round, look, pick up a leaflet, and ask a question if you like. Nobody expects you to know what job you want.</p>" +
@@ -199,6 +200,7 @@ function bingoWidget(el, api){
       slips: { 1: "There is no test. It is a place to look around.", 2: "Nobody has to sign up for anything. You are just finding out." },
       hint: "Think about what a scout does: looks and finds out.",
       why: "A careers fair is for finding out. Looking, picking up leaflets and asking questions are all you need to do.",
+      ez: { hint: "A scout looks and finds out.", why: "You look round, and ask if you like.", slips: { 1: "No test. You just look round.", 2: "No signing up. You just find out." } },
       lv: { spicy: { q: "What is the main point of going to a careers fair?",
         options: ["To gather information about jobs and the ways into them.", "To get a job offer on the day.", "To collect as many free pens as possible.", "To prove you already know what you want to be."],
         slips: { 1: "Some people do get offers, but that is not the point. Finding out comes first.", 2: "Free pens are a bonus, not a plan.", 3: "Most people do not know yet. That is exactly why fairs exist." },
@@ -210,6 +212,7 @@ function bingoWidget(el, api){
       cards: [["Leaflets about jobs", 0], ["A swimming pool", 1], ["People who do a job", 0], ["A maths test", 1]],
       hint: "A careers fair is about finding out about jobs.",
       why: "Leaflets and people who do the job help you find out. Pools and tests are somewhere else.",
+      ez: { hint: "It is all about jobs.", why: "Leaflets and people help. No pools or tests." },
       lv: { medium: { cards: [["Leaflets about jobs", 0], ["A swimming pool", 1], ["People who do a job", 0], ["A maths test", 1], ["A college stall", 0], ["A job you must take", 1]] },
             spicy: { cards: [["Information about apprenticeships", 0], ["A job you must accept", 1], ["Employers looking for future staff", 0], ["An exam to get in", 1], ["College course leaflets", 0], ["A rule that you ask every stall a question", 1]],
               why: "Fairs are full of information and people. Nothing there is compulsory: no exams, no forced jobs, and no rule about questions." } } },
@@ -222,12 +225,14 @@ function bingoWidget(el, api){
       slips: { 1: "A job you have never heard of could be the best one there. Have a look.", 2: "Pretending means you learn nothing. Asking is fine." },
       hint: "A scout is curious.",
       why: "New jobs are the whole point. Stopping, looking or asking is how you find out.",
+      ez: { q: "Jay has never heard of a [[job2]]. What could he do?", hint: "A scout is curious.", why: "Stop and look, or ask. That is how you find out.", slips: { 1: "A new job could be the best one!", 2: "Pretending means you learn nothing." } },
       lv: { spicy: { options: ["Ask what a normal day is like for a [[job2]].", "Walk past: if he has not heard of it, it cannot be for him.", "Take a leaflet without reading it so it looks like he visited.", "Ask whether the [[job2]] earns more than everyone else there."],
         slips: { 1: "Lots of great jobs are ones people have never heard of.", 2: "That collects paper, not information.", 3: "Pay matters, but it is a strange first question and they will not know everyone else's pay." },
         why: "An open question about the day tells you what the job is really like." } } },
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Good questions", title: "Questions open up a job",
+      ez: { title: "Good questions", html: "<p>Good questions start with <b>What</b>, <b>How</b> or <b>Why</b>.</p><p>Listening counts too.</p>" },
       fig: QWORDS,
       html: "<p>Good questions often start with <b>What</b>, <b>How</b> or <b>Why</b>.</p>" +
         "<ul><li>What do you do in a normal day?</li><li>What do you like about your job?</li><li>How did you get into it?</li><li>What would I need to learn?</li></ul>" +
@@ -246,6 +251,7 @@ function bingoWidget(el, api){
       slips: { 1: "\"Is it good?\" gets a yes or no. You learn very little.", 2: "Free pens are nice, but you learn nothing about the job." },
       hint: "Which one makes them talk about their work?",
       why: "Asking about a normal day gets them describing the real job.",
+      ez: { hint: "Which makes them talk about work?", why: "A normal day tells you the real job.", slips: { 1: "That gets a yes or no.", 2: "A pen tells you nothing about the job." } },
       lv: { spicy: { q: "The [[job]] says: \"I work weekends in the summer.\" Which is the best follow up?",
         options: ["What is a summer weekend like for you?", "Do you like weekends?", "OK, thanks.", "Is that bad?"],
         slips: { 1: "Closed: yes or no, and it is about weekends, not the job.", 2: "That ends the chat just as it gets useful.", 3: "Closed, and it pushes them to judge it. Open questions let them explain." },
@@ -256,6 +262,7 @@ function bingoWidget(el, api){
       pairs: [["What do you do in a normal day?", "What the job is like"], ["How did you get into it?", "How to get the job"], ["What do you like about it?", "The best bits"]],
       hint: "Read each question and think what the answer would be about.",
       why: "Each question unlocks a different part of the job.",
+      ez: { hint: "What would the answer be about?", why: "Each question finds out something different." },
       lv: { medium: { pairs: [["What do you do in a normal day?", "What the job is like"], ["How did you get into it?", "How to get the job"], ["What do you like about it?", "The best bits"], ["What would I need to learn?", "Skills and courses"]] },
             spicy: { pairs: [["What do you do in a normal day?", "What the job is like"], ["How did you get into it?", "The route in"], ["What is the hardest part?", "The tricky bits"], ["What would I need to learn?", "Skills and courses"]] } } },
 
@@ -265,6 +272,7 @@ function bingoWidget(el, api){
       cards: [["What do you do all day?", 0], ["Where is the toilet?", 1], ["How did you start?", 0], ["Do you like cake?", 1]],
       hint: "Is it about the job?",
       why: "Questions about the day and how they started tell you about the job. Toilets and cake do not (even if cake is important).",
+      ez: { why: "Questions about the job help. Toilets and cake do not." },
       lv: { medium: { q: "Sort into open and closed questions.", fig: DOORS,
           buckets: ["Open: gets a real answer", "Closed: gets yes or no"],
           cards: [["What do you do all day?", 0], ["Do you like it?", 1], ["How did you start?", 0], ["Is it hard?", 1], ["Why did you choose this job?", 0], ["Do you work weekends?", 1]],
@@ -283,6 +291,7 @@ function bingoWidget(el, api){
       model: "What do you do in a normal day?",
       hint: "Start with What, How or Why.",
       why: "Any question about the job works. What, How and Why ones get the longest answers.",
+      ez: { q: "Write 1 question for the [[job]], if you like.", why: "Any job question works. What, How and Why are best.", slips: [[null, "Hi! Now ask about the job."]] },
       lv: { medium: { q: "Write one <b>open</b> question you could ask the [[job]]. It goes on your scout sheet.",
           need: [["what", "how", "why", "tell", "which"]],
           slips: [[["do you", "is it", "are you", "can i"], "That one might get a yes or no. Try starting with What, How or Why."]],
@@ -296,6 +305,7 @@ function bingoWidget(el, api){
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Scout plan", title: "Before, during and after",
+      ez: { title: "Before, during, after", html: "<p><b>Before</b>: pick stalls. <b>During</b>: look, and take breaks.</p><p><b>After</b>: write down 3 jobs.</p>" },
       fig: PLAN,
       html: "<p><b>Before:</b> look at the list of stalls and star a few that sound interesting. Pack your kit.</p>" +
         "<p><b>During:</b> start with a stall you like the look of. It is fine to take a break, step out, or sit in a quiet spot. You can go round with Jay or a friend.</p>" +
@@ -309,6 +319,7 @@ function bingoWidget(el, api){
       items: ["Look at the list of stalls", "Pack your scout sheet and pen", "Visit a stall and look around", "Ask a question or pick up a leaflet", "Write down three jobs that caught your eye"],
       hint: "Before the fair, then during, then after.",
       why: "Plan and pack first, visit and ask during, then write your jobs down after.",
+      ez: { hint: "Before, then during, then after.", why: "Look at the list. Visit. Then write." },
       lv: { mild: { items: ["Look at the list of stalls", "Visit a stall and look around", "Write down three jobs"] } } },
 
     { type: "multi", topic: "Scout plan",
@@ -319,6 +330,7 @@ function bingoWidget(el, api){
       slips: { any: "Unhand me, goblin! Lovely idea, but a bag does the job. Have another look at the picture." },
       hint: "Look at the picture.",
       why: "Sheet, pen, water and a bag. The goblin and the duvet can stay at home.",
+      ez: { q: "What is worth taking? Pick <b>all</b>.", why: "A sheet and a pen. The duvet stays home.", slips: { any: "2 things help. The duvet can stay home." } },
       lv: { mild: { options: ["A scout sheet", "A pen", "Your duvet"], answers: [0, 1], why: "A sheet and a pen to write your jobs down. The duvet can stay at home." } } },
 
     { type: "mc", topic: "Scout plan",
@@ -328,6 +340,7 @@ function bingoWidget(el, api){
       slips: { 1: "Your feelings are useful information. A break helps you get more out of the fair.", 2: "Shouting will not make the hall quieter. A break will help more." },
       hint: "What is the chill zone for?",
       why: "Breaks are part of the plan. Lots of people use them, and you can carry on afterwards, or not.",
+      ez: { hint: "What is a quiet spot for?", why: "Take a break. Carry on after, if you want.", slips: { 1: "A break helps. Your feelings matter.", 2: "Shouting will not make it quieter." } },
       lv: { spicy: { options: ["Take a break somewhere quieter, then pick one starred stall to go back to.", "Leave and decide fairs are not for you.", "Keep going at full speed so you see every stall.", "Stand in the busiest spot until it feels normal."],
         slips: { 1: "One loud moment does not decide the whole thing. A break first.", 2: "Seeing every stall is not the goal. Good notes on a few is better.", 3: "That just uses up your energy. Pace yourself." },
         why: "Pacing yourself and coming back with a clear target is how experienced scouts do it." } } },
@@ -339,6 +352,7 @@ function bingoWidget(el, api){
       slips: { 1: "Sweets are a bonus, not a plan.", 2: "Waiting by the door means you miss out. Even one stall is a good start." },
       hint: "What do you enjoy? Is there a stall linked to it?",
       why: "Starting with what you enjoy is a great way in. If you like [[sl]], [[stall]] is a good place to start.",
+      ez: { q: "How could you choose which stalls?", hint: "What do you enjoy?", why: "Start with what you enjoy. Try [[stall]]!", slips: { 1: "Sweets are a bonus, not a plan.", 2: "Even 1 stall is a good start." } },
       lv: { spicy: { q: "You only have time for four stalls. Which plan is the smartest?",
         options: ["Three linked to things you enjoy, and one you know nothing about.", "Four stalls in a row, starting nearest the door.", "The four stalls with the longest queues.", "Only the stall your friend wants to see."],
         slips: { 1: "Near the door is easy, but it is not linked to you at all.", 2: "A long queue tells you what is popular, not what suits you.", 3: "Your friend's choice is fine for one stall, but this is your scouting mission." },
@@ -346,6 +360,7 @@ function bingoWidget(el, api){
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Three jobs", title: "Come away with three jobs",
+      ez: { title: "3 jobs", html: "<p>Your mission: find <b>3 jobs</b> you like.</p><p>Note the <b>job</b>, what they <b>do</b>, and <b>why</b> you like it.</p>" },
       fig: SHEET,
       html: "<p>Your mission: come away with <b>three jobs</b> that caught your eye.</p>" +
         "<p>For each one, write three things: the <b>job</b>, one thing they <b>do</b>, and <b>why</b> it caught your eye.</p>" +
@@ -361,6 +376,7 @@ function bingoWidget(el, api){
       slips: { 1: "Next week you will not remember which job that was.", 2: "A stall number will not mean much next week. Write the job down." },
       hint: "Which one has the job, what they do, and why?",
       why: "It has the job name, what they do and why you liked it. Future you will thank you.",
+      ez: { q: "Which note will help you next week?", hint: "Job, what they do, and why.", why: "It has the job, what they do, and why.", slips: { 1: "You will forget which job that was.", 2: "Write the job, not the stall number." } },
       lv: { spicy: { options: ["[[Job]]: they [[does1]]. Way in: college then an apprenticeship. Liked it because [[eye]].", "[[Job]]: seemed good.", "[[Job]], [[job2]], [[job3]].", "Loads of jobs. Some were good."],
         slips: { 1: "It has the name, but \"seemed good\" will not help you decide anything later.", 2: "Three names but no details. You will forget what they do.", 3: "Nothing here to follow up on." },
         why: "Name, what they do, the route in and why it caught your eye. That is a note you can act on." } } },
@@ -370,6 +386,7 @@ function bingoWidget(el, api){
       pairs: [["[[Job]]", "[[Does1]]"], ["[[Job2]]", "[[Does2]]"], ["[[Job3]]", "[[Does3]]"]],
       hint: "Look for a word in the job name that links to the work.",
       why: "Every job on your scout sheet needs a line like these, so you remember what it is.",
+      ez: { hint: "Find a word that links to the work.", why: "Each job needs a note like this." },
       lv: { spicy: { q: "Match each way into a job to what it means.",
         pairs: [["Apprenticeship", "Training at work while you get paid"], ["College course", "Learning skills for a job, often for one or two years"], ["University degree", "Studying a subject in depth, usually for three years"], ["Straight to work", "Starting a job and learning as you go"]],
         hint: "Which one says you get paid while you train?",
@@ -377,6 +394,7 @@ function bingoWidget(el, api){
 
     { type: "widget", topic: "Three jobs", unscored: true,
       title: "Take it with you: scout bingo",
+      ez: { title: "Scout bingo", html: "<p>A challenge for the real fair. Your ticks save here.</p>" },
       html: "<p>This is your challenge for the real fair, away from the screen. Use it on a phone or print the page, whatever suits. Your ticks save here and can go to Jay.</p>",
       mount: bingoWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Scout bingo: " + n + " of " + BINGO.length + " ticked." : ""; } },
@@ -385,10 +403,16 @@ function bingoWidget(el, api){
       q: "After the fair (or now, if you would rather imagine it), write about your three jobs, if you like. Name each one and say why it caught your eye. Jay would love to read it.",
       starters: ["The first job that caught my eye was", "They", "I liked it because", "Another job I spotted was"],
       checklist: ["Three jobs", "What each one does", "Why it caught my eye"],
+      ez: { q: "Tell Jay about your 3 jobs, if you like." },
       minWords: 20,
       lv: { spicy: { q: "After the fair (or now, imagining it), write up your three jobs, if you like. For each: what they do, the way in, and why it caught your eye. End with one next step. Jay would love to read it.",
         checklist: ["Three jobs", "What each one does", "The way in", "Why it caught my eye", "One next step"], minWords: 50 } } }
   ],
+
+  ez: {
+    realWorld: { title: "Scouting for a living", html: "<p>Careers advisers help people find new jobs.</p><p>100 years ago, lots of today's jobs did not exist!</p>" },
+    make: { intro: "Your 3 jobs on a card.", fields: [null, null, null, { label: "The one I want to know more about" }, null] }
+  },
 
   realWorld: {
     title: "Careers advisers scout for a living",

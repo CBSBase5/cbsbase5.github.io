@@ -96,6 +96,25 @@ function pathNext(){
 }
 var A2LEVELS = [{ id: "mild", name: "Mild" }, { id: "medium", name: "Medium" }, { id: "spicy", name: "Spicy" }];
 function a2(){ return !!(cfg && cfg.a2); }
+/* ---------- easy read (LC, 30 Oct 2026) ----------
+   LC has significant dyslexia, so his HQ (window.HQ.easyRead) gets
+   very little text: a short start screen, no optional writing extras,
+   bigger chunks of audio, and plain words. Any step, version, level
+   or the activity itself can carry ez: { ...same keys, shorter words }
+   (q, html, title, hint, why, model, wrong, routes, blurb, realWorld,
+   make, escape...). Only LC's HQ uses them; everyone else sees the
+   original. On a level other than the first, only that level's own
+   ez is used, so plain words never land on the wrong level. */
+var EASY = !!(window.HQ && window.HQ.easyRead);
+function isPlain(v){ return v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype; }
+function mergeEz(a, b){
+  if(b === undefined || b === null) return a;
+  if(Array.isArray(a) && Array.isArray(b)) return a.map(function(x, i){ return i < b.length ? mergeEz(x, b[i]) : x; });
+  if(isPlain(a) && typeof b === "string" && "html" in a){ var r = {}; Object.keys(a).forEach(function(k){ r[k] = a[k]; }); r.html = b; return r; }
+  if(isPlain(a) && isPlain(b)){ var o = {}; Object.keys(a).forEach(function(k){ o[k] = a[k]; }); Object.keys(b).forEach(function(k){ o[k] = mergeEz(a[k], b[k]); }); return o; }
+  return b;
+}
+function ezStep(s){ if(!EASY || !s || !s.ez) return s; var o = mergeEz(s, s.ez); delete o.ez; return o; }
 function reads(){ return !!HQ.readAloud && (!a2() || HQ.who === "LC"); }
 function lvList(){ return (cfg.levels && cfg.levels.length) ? cfg.levels : A2LEVELS; }
 function lvName(id){ var l = lvList().filter(function(x){ return x.id === id; })[0]; return l ? l.name : id; }
@@ -122,21 +141,30 @@ function resolveStep(s){
   if(s.lv && s.lv[A2LV]) Object.keys(s.lv[A2LV]).forEach(function(k){ if(k !== "topic") o[k] = s.lv[A2LV][k]; });
   /* vary: other versions of the same question; each fresh go takes the next one, so a replay gets new questions.
      A version can carry its own lv overrides too. */
+  var vv = null;
   if(Array.isArray(s.vary) && s.vary.length){
-    var vv = s.vary[((state && state.round) || 0) % (s.vary.length + 1) - 1];
+    vv = s.vary[((state && state.round) || 0) % (s.vary.length + 1) - 1];
     if(vv){ Object.keys(vv).forEach(function(k){ if(k !== "topic" && k !== "type" && k !== "lv") o[k] = vv[k]; });
       if(vv.lv && vv.lv[A2LV]) Object.keys(vv.lv[A2LV]).forEach(function(k){ if(k !== "topic" && k !== "type") o[k] = vv.lv[A2LV][k]; }); }
   }
   delete o.vary;
+  var ez = null;
+  if(EASY){
+    var mild = !a2() || A2LV === lvList()[0].id;
+    var lvEz = vv ? (vv.lv && vv.lv[A2LV] && vv.lv[A2LV].ez) : (s.lv && s.lv[A2LV] && s.lv[A2LV].ez);
+    ez = lvEz || (mild ? (vv ? vv.ez : s.ez) : null) || null;
+  }
+  delete o.ez;
   var out = {};
   Object.keys(o).forEach(function(k){ out[k] = typeof o[k] === "function" ? o[k] : tok(o[k]); });
+  if(ez) out = mergeEz(out, tok(ez));
   return out;
 }
 function a2Pick(){
   var ids = lvList().map(function(x){ return x.id; });
   var q = (location.search.match(/[?&]lv=([a-z]+)/) || [])[1];
   var hqLast = null; try{ hqLast = localStorage.getItem(PREFIX + "a2level.v1"); }catch(e){}
-  A2LV = [state.level, q, hqLast, ids[1], ids[0]].filter(function(x){ return x && ids.indexOf(x) >= 0; })[0];
+  A2LV = [state.level, q, hqLast].concat(EASY ? [ids[0]] : [ids[1], ids[0]]).filter(function(x){ return x && ids.indexOf(x) >= 0; })[0];
   var tids = cfg.themes ? Object.keys(cfg.themes) : [];
   A2TH = [state.theme, (cfg.themeFor || {})[HQ.who], tids[0]].filter(function(x){ return x && tids.indexOf(x) >= 0; })[0] || null;
   state.level = A2LV; if(A2TH) state.theme = A2TH;
@@ -466,7 +494,7 @@ function build(){
   root.innerHTML =
     '<div class="board">' +
       '<div class="card w12" id="startCard">' +
-        '<span class="kicker">' + cfg.subject + (cfg.mins ? ' &middot; about ' + cfg.mins + ' minutes in all' : '') + '</span>' +
+        '<span class="kicker">' + cfg.subject + (cfg.mins && !EASY ? ' &middot; about ' + cfg.mins + ' minutes in all' : '') + '</span>' +
         (cfg.escape ?
           '<h3>Escape room</h3>' +
           '<div class="lead escapeintro">' + (cfg.escape.intro || cfg.blurb) + '</div>' +
@@ -507,7 +535,7 @@ function build(){
         '<div class="fb hidden" id="qFb" aria-live="polite"></div>' +
         '<div class="qnav">' +
           '<button class="btn btn-quiet" id="backBtn">Back</button>' +
-          '<button class="btn btn-quiet" id="skipBtn">Skip for now</button>' +
+          '<button class="btn btn-quiet" id="skipBtn">' + (EASY ? 'Skip' : 'Skip for now') + '</button>' +
           '<button class="btn btn-quiet hidden" id="showBtn">Show me</button>' +
           '<button class="btn" id="checkBtn">Check</button>' +
           '<button class="btn btn-orange hidden" id="nextBtn">Next</button>' +
@@ -635,7 +663,8 @@ function showStart(){
   if(cfg.review) return;
   var any = !!(state.answers && Object.keys(state.answers).length);
   $("resumeBtn").classList.toggle("hidden", !any);
-  $("beginBtn").textContent = any ? "Start again from scratch" : (cfg.escape ? "Enter the first room" : "Begin with chunk 1");
+  $("beginBtn").textContent = EASY ? (any ? "Start again" : "Start") : any ? "Start again from scratch" : (cfg.escape ? "Enter the first room" : "Begin with chunk 1");
+  if(EASY) $("resumeBtn").textContent = "Carry on";
   $("beginBtn").className = any ? "btn btn-quiet" : "btn";
   $("resumeBtn").className = any ? "btn" : "btn btn-quiet hidden";
   drawChunkMap();
@@ -837,9 +866,10 @@ function go(i){
   var renderer = R[s.type];
   renderer(s, body, i);
   if(reads()) addReader(body, body);
+  if(EASY) autoRead(body);
   if(a2() && cfg.sure && scored(s) && s.type !== "widget" && !resolved(i) && !(state.answers[i] && state.answers[i].tries)){
     var sr = h("div", "a2sure");
-    sr.innerHTML = '<span class="a2lab">How sure are you? <small>(only if you like)</small></span>' +
+    sr.innerHTML = '<span class="a2lab">' + (EASY ? 'How sure?' : 'How sure are you? <small>(only if you like)</small>') + '</span>' +
       '<button type="button" data-s="guess">Guessing</button><button type="button" data-s="think">Think so</button><button type="button" data-s="certain">Certain</button>';
     sr.onclick = function(e){
       var b = e.target.closest("button"); if(!b) return;
@@ -871,7 +901,7 @@ function go(i){
 }
 /* "How did you get that?" now and then, never required */
 function a2Explain(s, i){
-  if($("a2Why")) return;
+  if(EASY || $("a2Why")) return;
   var a = state.answers[i];
   var d = h("details", "a2why");
   d.id = "a2Why";
@@ -915,13 +945,32 @@ function addReader(where, what){
   };
   where.insertBefore(b, where.firstChild);
 }
+/* easy read: an "every one" switch beside the speaker reads each screen out as it opens */
+function autoKey(){ return (window.HQ && window.HQ.prefix || "b5.") + "autoread.v1"; }
+function autoOn(){ try{ return localStorage.getItem(autoKey()) === "1"; }catch(e){ return false; } }
+function autoRead(where){
+  if(!window.speechSynthesis) return;
+  var rb = where.querySelector(".readme"); if(!rb) return;
+  var t = h("button", "readauto", "");
+  t.type = "button";
+  function draw(){ var on = autoOn(); t.setAttribute("aria-pressed", on ? "true" : "false"); t.innerHTML = '<i aria-hidden="true"></i>' + (on ? "Every one: on" : "Every one"); t.title = on ? "Reading each screen out. Tap to stop." : "Read each screen out as it opens"; }
+  t.onclick = function(){
+    var on = !autoOn();
+    try{ localStorage.setItem(autoKey(), on ? "1" : "0"); }catch(e){}
+    draw();
+    if(on){ if(speakBtn !== rb) rb.click(); } else speakStop();
+  };
+  draw();
+  rb.parentNode.insertBefore(t, rb.nextSibling);
+  if(autoOn()) setTimeout(function(){ if(document.body.contains(rb) && speakBtn !== rb) rb.click(); }, 350);
+}
 /* visible text only, skipping the reader button and pictures */
 function textOf(el){
   var out = [];
   (function walk(n){
     if(n.nodeType === 3){ out.push(n.nodeValue); return; }
     if(n.nodeType !== 1) return;
-    if(n.classList && n.classList.contains("readme")) return;
+    if(n.classList && (n.classList.contains("readme") || n.classList.contains("readauto"))) return;
     var tag = n.tagName.toLowerCase();
     if(tag === "svg" || tag === "script" || tag === "style") return;
     var cs = window.getComputedStyle ? getComputedStyle(n) : null;
@@ -946,7 +995,7 @@ function setButtons(s, i){
   $("nextBtn").classList.toggle("hidden", !(learn || done || write) || (learn && revealPending));
   $("skipBtn").classList.toggle("hidden", !!(learn || done));
   var lastInChunk = i === steps.length - 1 || chunkOf[i + 1] !== chunkOf[i];
-  $("nextBtn").textContent = learn ? "Got it, next" : (i === steps.length - 1 ? "Finish" : lastInChunk ? "Finish this chunk" : "Next");
+  $("nextBtn").textContent = EASY ? (i === steps.length - 1 || lastInChunk ? "Done" : "Next") : learn ? "Got it, next" : (i === steps.length - 1 ? "Finish" : lastInChunk ? "Finish this chunk" : "Next");
   if(write) $("skipBtn").classList.add("hidden");
 }
 
@@ -974,7 +1023,7 @@ var R = {};
 /* Learn cards show one short bit at a time, so a long card is
    never a wall of text. "Show it all" is always there instead. */
 var revealPending = false;
-var BIT_WORDS = 60;
+var BIT_WORDS = EASY ? 30 : 60;
 R.learn = function(s, body, i){
   if(s.routes && s.routes.length){
     /* two or more ways into the same idea: read it, see it, try it */
@@ -1489,7 +1538,7 @@ function check(giveUp){
   if(!cur) return;
   var a = state.answers[i] || { tries: 0 };
   if(!giveUp && cur.empty()){
-    flash(cur.emptyMsg || "Pop an answer in first, or tap Skip for now.");
+    flash(EASY ? "Pick an answer first, or tap Skip." : (cur.emptyMsg || "Pop an answer in first, or tap Skip for now."));
     return;
   }
   var firstGo = !a.tries && a.status !== "trying";
@@ -1558,6 +1607,7 @@ function showFeedback(s, status, quiet){
   var streak = !quiet && status === "right1" && state.streak >= 3 ? ' <span class="tiny">That is ' + state.streak + ' first go in a row.</span>' : "";
   fb.innerHTML = plus + head + streak + (s.why ? '<div class="why">' + s.why + '</div>' : "") + extra;
   if(reads()) addReader(fb, fb);
+  if(EASY && !quiet && autoOn()) setTimeout(function(){ var rb = fb.querySelector(".readme"); if(rb && !fb.classList.contains("hidden")) rb.click(); }, 300);
 }
 
 function flash(msg){
@@ -1568,6 +1618,7 @@ function flash(msg){
 
 /* ---------- results ---------- */
 function makeQuestion(){
+  if(EASY) return;
   var S = window.B5Site, box = $("makeQ");
   if(!box || !S || !S.call || !S.syncUrl || S.guest || !S.hq || S.bridgeDown()) return;
   box.classList.remove("hidden");
@@ -1894,6 +1945,23 @@ function buildReviewStart(){
 /* ---------- start ---------- */
 function run(c){
   var reviewMode = (location.hash || "") === "#review";
+  if(EASY && c.ez){ var ce = c.ez; c = mergeEz(c, ce); delete c.ez; }
+  if(EASY && !c.a2 && c.steps){ var cs = {}; Object.keys(c).forEach(function(k){ cs[k] = c[k]; }); cs.steps = c.steps.map(ezStep); c = cs; }
+  if(EASY && !document.getElementById("ezcss")){
+    document.documentElement.classList.add("ez");
+    var ezc = document.createElement("style"); ezc.id = "ezcss";
+    ezc.textContent =
+      "html.ez #startCard>h3,html.ez #startCard>.lead:not(.escapeintro),html.ez #startCard .howlist,html.ez #startCard .chiplabel,html.ez #startStats,html.ez #a2LvLine," +
+      "html.ez .chunksend,html.ez #chunkCard>p.tiny,html.ez #makeQ,html.ez .a2was{display:none !important}" +
+      "html.ez .readme{font-size:1rem;padding:9px 14px;gap:8px;display:inline-flex;margin:0 0 12px 0;vertical-align:top}html.ez .readme svg{width:22px;height:22px}" +
+      "html.ez .chunkmap small{display:none}html.ez .fb .readme{margin:8px 0 0}" +
+      "html.ez .readauto{display:inline-flex;align-items:center;gap:7px;margin:0 0 12px 8px;padding:8px 12px;border-radius:999px;border:2px solid currentColor;background:transparent;color:inherit;font:inherit;font-weight:700;font-size:.92rem;cursor:pointer;opacity:.85;vertical-align:top}" +
+      "html.ez .readauto i{width:30px;height:16px;border-radius:99px;background:rgba(127,127,127,.35);position:relative;flex:none}" +
+      "html.ez .readauto i:after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .15s}" +
+      "html.ez .readauto[aria-pressed=true]{opacity:1}html.ez .readauto[aria-pressed=true] i{background:#39d98a}html.ez .readauto[aria-pressed=true] i:after{left:16px}" +
+      "html.ez .learnbody,html.ez .prompt,html.ez .why{line-height:1.7;word-spacing:.08em}html.ez .learnbody p,html.ez .prompt p{max-width:58ch}";
+    document.head.appendChild(ezc);
+  }
   if(c.a2){
     /* level and theme come from the activity's own save, even in a second look */
     cfg = c;

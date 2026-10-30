@@ -93,6 +93,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Pauses and punch", title: "Marks that change the mood",
       fig: MARKS,
+      ez: { title: "Marks change the mood", html: "<p><b>...</b> makes you pause. <b>!</b> shows surprise. <b>?</b> makes you wonder.</p><p>\"I opened the door and saw... [[thing]].\"</p>" },
       html: "<p>Punctuation controls how a sentence <b>sounds</b> in the reader's head.</p>" +
         "<p><b>Ellipsis (...)</b> makes the reader pause: suspense, or a thought trailing off. \"I opened the door and saw... [[thing]].\"</p>" +
         "<p><b>Exclamation mark (!)</b> adds surprise or strong feeling. Use one, at the big moment. \"[[Sound]]!\"</p>" +
@@ -103,6 +104,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "mc", topic: "Pauses and punch", explain: true,
       q: "Which version builds the most <b>suspense</b>?",
+      ez: { q: "Which one builds the most <b>suspense</b>?", slips: { 1: "It tells you straight away.", 2: "No pause before the reveal." }, hint: "Which one makes you wait?", why: "The ... makes you pause before the reveal." },
       options: ["I opened the door and saw... [[thing]].", "I opened the door and saw [[thing]].", "I opened the door. I saw [[thing]] there."],
       answer: 0,
       slips: { 1: "Correct, but it tells you straight away. Nothing makes you wait.", 2: "Two short sentences are clear, but there is no pause before the reveal." },
@@ -115,12 +117,14 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "match", topic: "Pauses and punch",
       q: "Match each mark to the job it does best.",
+      ez: { q: "Match each mark to its job.", hint: "Read each one aloud.", why: "Each mark changes how it sounds." },
       pairs: [["Ellipsis ( ... )", "A pause for suspense"], ["Exclamation mark ( ! )", "Surprise or strong feeling"], ["Question mark ( ? )", "Makes the reader wonder"]],
       hint: "Think about how each one sounds when you read it aloud.",
       why: "Each mark changes the voice in the reader's head in a different way." },
 
     { type: "mc", topic: "Pauses and punch",
       q: "Which is the most effective use of an exclamation mark?",
+      ez: { q: "Which uses <b>!</b> best?", slips: { 1: "When everything shouts, nothing stands out." }, hint: "Which is a big moment?", why: "One ! at a real shock. Then calm." },
       options: ["[[Sound]]! Nobody moved.", "We had lunch! Then we walked! It was nice!", "The bus left at 9am!"],
       answer: 0,
       slips: { 1: "When everything shouts, nothing stands out. Save it for the big moment.", 2: "A bus time is not a shock. The exclamation mark has nothing to do here." },
@@ -131,6 +135,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Colons: the drumroll", title: "The colon is a drumroll",
       fig: COLON,
+      ez: { html: "<p>A <b>colon</b> is two dots. It says \"here it comes\".</p><p>Then a reveal, a list, or a reason.</p>" },
       html: "<p>A <b>colon (:)</b> says \"here it comes\". The part <b>before</b> it must be a full sentence. After it comes one of three things:</p>" +
         "<ul><li><b>A reveal:</b> I turned round and there it was: [[thing]].</li>" +
         "<li><b>A list:</b> I packed three things: [[list]].</li>" +
@@ -141,6 +146,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "mc", topic: "Colons: the drumroll",
       q: "Which sentence uses a colon for a <b>reveal</b>?",
+      ez: { q: "Which colon gives a <b>reveal</b>?", slips: { 1: "That one starts a list.", 2: "That one gives a reason." }, hint: "Which saves a surprise for the end?", why: "It saves one surprise for the end." },
       options: ["There was only one thing in [[place]]: [[thing]].", "I packed three things: [[list]].", "I was tired: we had walked for hours."],
       answer: 0,
       slips: { 1: "Good colon, but that one introduces a list.", 2: "Good colon, but that one gives an explanation." },
@@ -149,12 +155,14 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "match", topic: "Colons: the drumroll",
       q: "What is each colon doing?",
+      ez: { hint: "Lots of things? A surprise? A reason?", why: "Same mark, 3 jobs." },
       pairs: [["I opened the box and there it was: [[thing]].", "A reveal"], ["I packed three things: [[list]].", "A list"], ["I was soaked: it had rained all night.", "An explanation"]],
       hint: "Several things? A surprise? A reason why?",
       why: "Same mark, three different jobs. The words after the colon tell you which." },
 
     { type: "multi", topic: "Colons: the drumroll",
       q: "Pick <b>all</b> the sentences where the colon is used correctly.",
+      ez: { q: "Pick the one where the colon works.", slips: { any: "Could the words before the colon stand alone?" }, hint: "Cover the end. Is the start a full sentence?", why: "\"We needed\" is not a full sentence." },
       options: ["I knew one thing for certain: we were lost.", "We needed: a map and a torch.", "[[Place]] had one rule: no running.", "The best bit was: the end."],
       answers: [0, 2],
       slips: { any: "Check the words before each colon. Could they stand alone as a sentence?" },
@@ -167,6 +175,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Semicolons: the balance", title: "The semicolon is a seesaw",
       fig: SEMI,
+      ez: { html: "<p>A <b>semicolon</b> joins 2 full sentences.</p><p>\"[[S1]]; [[s2]].\"</p>" },
       html: "<p>A <b>semicolon (;)</b> joins two <b>full sentences</b> that are closely linked. It is stronger than a comma, softer than a full stop.</p>" +
         "<p>\"[[S1]]; [[s2]].\" Each side could be a sentence on its own. The semicolon puts them side by side so you feel the <b>contrast</b>.</p>" +
         "<p>Check: is there a full sentence on <b>both</b> sides?</p>",
@@ -176,6 +185,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "mc", topic: "Semicolons: the balance",
       q: "Which uses a semicolon correctly?",
+      ez: { slips: { 1: "\"Because it was late\" is not a full sentence.", 2: "Neither side is a full sentence." }, why: "Both sides are full sentences." },
       options: ["[[S1]]; [[s2]].", "[[S1]]; because it was late.", "We bought; three tickets."],
       answer: 0,
       slips: { 1: "\"Because it was late\" cannot stand alone as a sentence.", 2: "\"We bought\" is not a full sentence, and \"three tickets\" is not either." },
@@ -184,6 +194,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "sort", topic: "Semicolons: the balance",
       q: "Does the semicolon work?",
+      ez: { hint: "A full sentence on each side?", why: "Full sentences on both sides work." },
       buckets: ["The semicolon works", "The semicolon does not work"],
       cards: [["[[S1]]; [[s2]].", 0], ["The tea was cold; the cake was stale.", 0], ["We waited for ages; and then left.", 1], ["After the show; we went home.", 1]],
       hint: "Full sentence on each side, and no joining word straight after.",
@@ -194,6 +205,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "mc", topic: "Semicolons: the balance",
       q: "Compare \"[[S1]]. [[S2]].\" with \"[[S1]]; [[s2]].\" What does the semicolon add?",
+      ez: { slips: { 1: "Only a question mark does that.", 2: "Lists use colons or commas." }, hint: "2 sentences, or one picture?", why: "It links them. You feel the contrast more." },
       options: ["It links the two ideas, so the contrast hits harder", "It turns it into a question", "It starts a list"],
       answer: 0,
       slips: { 1: "Only a question mark does that.", 2: "Lists come after colons or use commas." },
@@ -206,6 +218,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Brackets and choosing", title: "Brackets whisper",
       fig: BRACK,
+      ez: { html: "<p><b>Brackets</b> hold an extra bit, like a whisper.</p><p>\"[[Place]] ([[aside]]) was our first stop.\"</p>" },
       html: "<p><b>Brackets ( )</b> hold an <b>aside</b>: extra information, a joke, or a little comment, like whispering to the reader.</p>" +
         "<p>\"[[Place]] ([[aside]]) was our first stop.\" Take the brackets out and the sentence still works.</p>" +
         "<p>Last skill: punctuation can make meaning <b>clear</b>. Then choose the mark that gives the effect you want.</p>",
@@ -215,6 +228,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "mc", topic: "Brackets and choosing",
       q: "Which sentence uses brackets well?",
+      ez: { slips: { 1: "The sentence needs \"went\".", 2: "Take that out and it falls apart." }, hint: "Take the extra words out. Does it work?", why: "Take the extra out. It still works." },
       options: ["[[Place]] ([[aside]]) was our first stop.", "We (went) to [[place]].", "(We arrived at) [[place]] at noon."],
       answer: 0,
       slips: { 1: "\"Went\" is not extra. The sentence needs it.", 2: "Take that bit out and the sentence falls apart. Brackets are for extras only." },
@@ -223,6 +237,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "mc", topic: "Brackets and choosing",
       q: "\"I like cooking my family and my dog.\" What is the problem, and the fix?",
+      ez: { q: "\"I like cooking my family and my dog.\" What is the fix?", slips: { 1: "It is not a question.", 2: "The list needs commas." }, hint: "What is being cooked?", why: "Add 2 commas and Bonnie is safe." },
       fig: '<svg viewBox="0 0 420 160" role="img" aria-label="Bonnie the poodle looking alarmed">' + A2ART.bonnie(110, 96, 1.2, "sit") + A2ART.bubble(180, 16, 220, 52, "Cooking ME?\nUnhand me, goblin!", 190) + '</svg>',
       options: ["It sounds like I cook my family: add commas after cooking and family", "It needs a question mark at the end", "It needs brackets round my dog"],
       answer: 0,
@@ -232,6 +247,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
 
     { type: "mc", topic: "Brackets and choosing", explain: true,
       q: "\"Then I saw it __ [[thing]].\" Which mark makes the best drumroll for this reveal?",
+      ez: { q: "\"Then I saw it __ [[thing]].\" Which mark is the best drumroll?", slips: { 1: "A semicolon needs a full sentence after it.", 2: "Brackets whisper. That is the opposite." }, why: "A colon says \"here it comes\"." },
       options: ["A colon", "A semicolon", "Brackets"],
       answer: 0,
       slips: { 1: "A semicolon needs a full sentence after it. \"[[Thing]]\" is not a sentence.", 2: "Brackets would make the big reveal sound like a whispered extra. The opposite of a drumroll." },
@@ -247,6 +263,7 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
       starters: ["We set off at dawn:", "I will never forget", "Then, without warning...", "[[Place]] (", "Was it worth it?"],
       checklist: ["An ellipsis for suspense", "A colon for a reveal or a list", "A semicolon to balance two ideas", "Brackets for an aside", "One exclamation or question at the right moment"],
       minWords: 60,
+      ez: { q: "If you like: write about a journey. Use 3 different marks." },
       lv: { mild: { minWords: 40, checklist: ["An ellipsis for suspense", "A colon for a reveal or a list", "Brackets for an aside"] },
             spicy: { minWords: 90, q: "Have a go at a travelogue paragraph about a journey, if you like: through time, or a real trip. Use at least four different marks, each chosen for a reason you could explain. Jay would love to read it." } } }
   ],
@@ -257,6 +274,11 @@ var BRACK = '<svg viewBox="0 0 540 220" role="img" aria-label="Brackets hold an 
       "<p>For our big question, if we could time travel, should we? Imagine the travelogue you would write after the trip. Which moment would get the ellipsis?</p>",
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay by a time portal, building suspense">' + A2ART.portal(80, 75, 58) + A2ART.jay(240, 46, 0.85, "wow") +
       A2ART.bubble(290, 6, 124, 52, "And then...", 294) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Writers do this on purpose", html: "<p>Writers choose every mark on purpose.</p><p>Which time travel moment gets the ...?</p>" },
+    make: { intro: "A postcard with 3 marks used on purpose." }
   },
 
   make: {

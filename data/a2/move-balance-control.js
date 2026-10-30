@@ -214,6 +214,7 @@ function tryWidget(el, api){
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Big moves, small moves", title: "Your body does big moves and small moves",
+      ez: { title: "Big moves, small moves", html: "<p><b>Big moves</b>: jump, throw, balance.</p><p><b>Small moves</b>: laces, zips, pens.</p>" },
       fig: BIGSMALL,
       html: "<p><b>Big moves</b> use the big muscles in your legs, arms and middle: balancing, jumping, throwing, running.</p>" +
         "<p><b>Small moves</b> use your hands and fingers: laces, zips, buttons, cutlery and pens.</p>" +
@@ -228,6 +229,7 @@ function tryWidget(el, api){
       cards: [["Jumping over a puddle", 0], ["Doing up a zip", 1], ["Throwing a [[ball]]", 0], ["Tying laces", 1], ["Standing on one leg", 0], ["Writing your name", 1]],
       hint: "Does it use your whole body, or mainly your fingers?",
       why: "Jumping, throwing and balancing use the whole body. Zips, laces and writing are mostly fingers.",
+      ez: { hint: "Whole body, or fingers?", why: "Jump, throw, balance: whole body. Zips, laces, writing: fingers." },
       lv: { spicy: { q: "Gross motor or fine motor?", buckets: ["Gross motor", "Fine motor"],
         cards: [["Jumping over a puddle", 0], ["Doing up a zip", 1], ["Throwing a [[ball]]", 0], ["Threading a needle", 1], ["Walking along a low wall", 0], ["Cutting with a knife and fork", 1], ["Climbing stairs", 0]] } } },
 
@@ -237,7 +239,7 @@ function tryWidget(el, api){
       answer: 0,
       slips: { 1: "Standing still uses a little balance, but your fingers are not doing much.", 2: "Very restful. Not many moves at all." },
       hint: "Which one needs your body to get there and your fingers to grip?",
-      why: "You move your body to where the ball is going, then close your fingers round it. Big and small together." },
+      why: "You move your body to where the ball is going, then close your fingers round it. Big and small together.", ez: { hint: "Body to get there. Fingers to grip.", why: "Move to the ball. Close your fingers. Both!", slips: { 1: "Standing still is not much moving.", 2: "Very restful. Not many moves!" } } },
 
     { type: "multi", topic: "Big moves, small moves",
       q: "Which of these could help <b>any</b> move get easier? Pick all that fit.",
@@ -245,10 +247,11 @@ function tryWidget(el, api){
       answers: [0, 1, 2],
       slips: { any: "Think about how you got good at something you can already do." },
       hint: "Think about how you got good at something you can already do.",
-      why: "Little and often, small steps, and watching slowly all help. One go is a start, not the end." },
+      why: "Little and often, small steps, and watching slowly all help. One go is a start, not the end.", ez: { q: "What helps a move get easier? Pick <b>all</b>.", hint: "How did you get good at things?", why: "Little and often, small steps, and watching.", slips: { any: "How did you get good at something?" } } },
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Balance", title: "Tricks for balance",
+      ez: { title: "Balance tricks", html: "<p><b>Feet apart</b>. <b>Arms out</b>. <b>Eyes on a spot</b>.</p><p>A wider red line is steadier.</p>" },
       fig: STANCES,
       html: "<p>Three tricks make balancing easier:</p>" +
         "<p><b>Feet apart</b>: a wider base is steadier. <b>Arms out</b>: they help you correct wobbles. <b>Eyes on one spot</b>: pick something still to look at.</p>" +
@@ -266,6 +269,7 @@ function tryWidget(el, api){
       slips: { 1: "Feet together gives a small base. Look at the red lines.", 2: "One leg is the smallest base of all. Look at the red lines." },
       hint: "Look at how long each red line is.",
       why: "B has the widest base, so B is the steadiest. That is why surfers and goalkeepers stand with feet apart.",
+      ez: { q: "Who is the steadiest?", hint: "Look at each red line.", why: "B has the widest base. B is steadiest.", slips: { 1: "Feet together is a small base.", 2: "One leg is the smallest base." } },
       lv: { spicy: { q: "Someone on a moving bus starts to wobble. Which change helps most, and why?",
         fig: STANCES_SPICY,
         options: ["Feet apart and knees bent: wider base, lower centre of gravity", "Stand on tiptoes: it makes you lighter", "Feet together: it keeps you neat", "Look at the moving traffic outside"],
@@ -280,18 +284,21 @@ function tryWidget(el, api){
       slips: { any: "Arms, eyes and knees can all help. Which ones calm the wobble, and which ones add to it?" },
       hint: "Which ones calm the wobble, and which ones add to it?",
       why: "Arms out, a still spot and soft knees all help. Spinning and shutting your eyes make balance much harder.",
+      ez: { hint: "Which calm the wobble?", why: "Arms out and eyes on a spot help.", slips: { any: "2 of them help. Which calm the wobble?" } },
       lv: { mild: { q: "Standing on one leg. Pick the <b>two</b> things that help.",
         options: ["Arms out to the sides", "Eyes on one still spot", "Spinning round", "Shutting your eyes"], answers: [0, 1],
         why: "Arms out and eyes on one spot help. Spinning and shutting your eyes make it harder." } } },
 
     { type: "widget", topic: "Balance", unscored: true,
       title: "Try it: one leg balance",
+      ez: { html: "<p>Have a go if you can stand up. Or save it for later.</p>" },
       html: "<p>If you are somewhere you can stand up, have a go. If not, save it for later.</p>",
       mount: timerWidget,
       report: function(d){ return d && (d.left || d.right) ? "Balance: left " + (d.left || "-") + " s, right " + (d.right || "-") + " s." : ""; } },
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Jump and throw", title: "Jumps and throws have steps",
+      ez: { title: "Jumps and throws", routes: ["<p><b>Ready</b>. <b>Step</b> with the <b>opposite</b> foot.</p><p><b>Swing</b> the arm. <b>Follow through</b> to [[target]].</p>", "<p><b>Bend</b> your knees. <b>Swing</b> your arms and <b>push</b>.</p><p><b>Land soft</b>, like a spring.</p>"] },
       routes: [
         { name: "Throw", fig: THROW, html: "<p>A good throw has four parts:</p><p><b>1 Ready:</b> stand side on, eyes on [[target]]. <b>2 Step:</b> step forward with the <b>opposite</b> foot to your throwing arm. <b>3 Swing:</b> bring the arm over fast. <b>4 Follow through:</b> let your arm keep going towards the target.</p>" },
         { name: "Jump", fig: JUMP, html: "<p>A good standing jump:</p><p><b>Bend</b> your knees. <b>Swing</b> your arms back, then forward and up as you <b>push</b>. <b>Land soft</b>: bend your knees as your feet touch down, like a spring.</p>" }
@@ -305,7 +312,7 @@ function tryWidget(el, api){
       q: "Put the four parts of a throw in order.",
       items: ["Ready: side on, eyes on [[target]]", "Step with the opposite foot", "Swing the arm over", "Follow through towards [[target]]"],
       hint: "You get ready first and follow through last.",
-      why: "Ready, step, swing, follow through. Unhand me, goblin: that [[ball]] is going in." },
+      why: "Ready, step, swing, follow through. Unhand me, goblin: that [[ball]] is going in.", ez: { hint: "Ready first. Follow through last.", why: "Ready, step, swing, follow through." } },
 
     { type: "mc", topic: "Jump and throw",
       q: "You throw with your right arm. Which foot steps forward?",
@@ -314,7 +321,7 @@ function tryWidget(el, api){
       answer: 0,
       slips: { 1: "Same side feels natural, but it blocks your hips from turning. Try the opposite foot.", 2: "Feet together means no step, so you lose the power from your legs." },
       hint: "It is the opposite foot to the throwing arm.",
-      why: "Right arm, left foot. The opposite foot lets your body turn and add power." },
+      why: "Right arm, left foot. The opposite foot lets your body turn and add power.", ez: { hint: "The opposite foot to your arm.", why: "Right arm, left foot.", slips: { 1: "Same side blocks your hips. Try the other.", 2: "No step means less power." } } },
 
     { type: "mc", topic: "Jump and throw", explain: true,
       q: "Why do you bend your knees when you land from a jump?",
@@ -324,6 +331,7 @@ function tryWidget(el, api){
       slips: { 1: "It might look cool, but there is a better reason. Think about your knees.", 2: "That can help a bit, but the main reason is the landing itself." },
       hint: "Think about what straight, stiff legs would feel like on landing.",
       why: "Bent knees soak up the bump, so your joints do not take a big jolt.",
+      ez: { q: "Why bend your knees when you land?", hint: "Think of stiff legs landing. Ouch!", why: "Bent knees soak up the bump.", slips: { 1: "Maybe! But think about your knees.", 2: "Think about the landing itself." } },
       lv: { spicy: { q: "Why does landing with bent knees protect your joints?",
         options: ["It makes the stopping take longer, so the force at each moment is smaller", "It makes you lighter as you land", "It stops gravity working", "It makes the ground softer"],
         slips: { 1: "Your weight stays the same whatever your knees do.", 2: "Gravity keeps working the whole time.", 3: "The ground does not change. Your legs do." },
@@ -332,6 +340,7 @@ function tryWidget(el, api){
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Small skills", title: "Small skills have tricks too",
+      ez: { title: "Small skill tricks", html: "<p><b>Zips</b>: hold the bottom, pull up. <b>Cutlery</b>: fork holds, knife saws.</p><p><b>Pens</b>: a <b>tripod grip</b>. <b>Laces</b>: bunny ears.</p>" },
       fig: SMALL,
       html: "<p><b>Laces:</b> the bunny ears way makes two loops and ties them. <b>Zips:</b> hook the bottom in, hold it with one hand, pull up with the other. " +
         "<b>Cutlery:</b> fork holds still, knife saws gently. <b>Pens:</b> a <b>tripod grip</b>, with the pen resting on the middle finger and pinched by the thumb and first finger.</p>" +
@@ -342,13 +351,14 @@ function tryWidget(el, api){
       fig: LACES,
       items: ["Cross the laces and tuck one under", "Make two loops, like bunny ears", "Cross the loops over", "Tuck one loop through and pull both tight"],
       hint: "Look at the four pictures.",
-      why: "Cross and tuck, two loops, cross the loops, tuck and pull." },
+      why: "Cross and tuck, two loops, cross the loops, tuck and pull.", ez: { hint: "Look at the 4 pictures.", why: "Cross, 2 loops, cross the loops, pull tight." } },
 
     { type: "match", topic: "Small skills",
       q: "Match each small skill to its trick.",
       pairs: [["Zip", "Hold the bottom still, pull up"], ["Knife and fork", "Fork holds, knife saws"], ["Pen", "Tripod grip"], ["Laces", "Two bunny ear loops"]],
       hint: "Think about what each hand is doing.",
       why: "Each small skill has a trick. Lots of them are about one hand holding still while the other moves.",
+      ez: { hint: "What is each hand doing?", why: "A hand holds still. The other moves." },
       lv: { spicy: { pairs: [["Zip", "Hold the bottom still, pull up"], ["Knife and fork", "Fork holds, knife saws"], ["Pen", "Tripod grip"], ["Laces", "Two bunny ear loops"], ["Buttons", "Push halfway, pinch from the other side"]] } } },
 
     { type: "mc", topic: "Small skills",
@@ -358,6 +368,7 @@ function tryWidget(el, api){
       slips: { 1: "Watch someone do a zip. The other hand is busy.", 2: "That would make the zip very tricky." },
       hint: "Think of the zip, or the fork.",
       why: "One hand holds still, the other does the fiddly bit. The fork holds while the knife cuts. The bottom of the zip is held while the other hand pulls.",
+      ez: { q: "What is the <b>other</b> hand doing?", hint: "Think of the zip.", why: "Holding still, like the fork.", slips: { 1: "Watch a zip. The other hand is busy.", 2: "Waving makes a zip very tricky!" } },
       lv: { spicy: { q: "Writing gets tiring fast. Which is the most likely fix to try first?",
         options: ["Loosen the grip and rest the side of the hand on the table", "Press harder so the pen does not slip", "Write faster to finish sooner", "Hold the pen right at the very top"],
         slips: { 1: "Pressing harder makes the hand muscles tire faster.", 2: "Speed usually means tighter muscles and messier writing.", 3: "Holding at the top gives you less control, not more." },
@@ -366,10 +377,16 @@ function tryWidget(el, api){
 
     { type: "widget", topic: "Small skills", unscored: true,
       title: "Try it challenge",
+      ez: { html: "<p>Away from the screen, when you are ready.</p>" },
       html: "<p>Away from the screen, whenever you are ready. Results can go to Jay with the rest if you send it.</p>",
       mount: tryWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Try it challenge: had a go at " + n + " of " + TRY.length + "." : ""; } }
   ],
+
+  ez: {
+    realWorld: { title: "Where you use this", html: "<p>Getting dressed. Eating. Getting on a bus.</p><p>On a wobbly time ship: feet apart, knees bent!</p>" },
+    make: { intro: "Write what you tried and how it went." }
+  },
 
   realWorld: {
     title: "Where you use this",

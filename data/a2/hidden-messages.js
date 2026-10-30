@@ -144,6 +144,30 @@ function huntWidget(el, api){
     list.appendChild(lab);
   });
 }
+/* easy read for LC: the same hunt, in fewer words */
+var HUNT_EZ = [
+  "Ask someone at home for an old story from their family",
+  "Ask them what its hidden message is",
+  "Tell someone a story from today. Can they spot the message?",
+  "Spot a hidden message in a film, song or advert",
+  "Find a modern urban myth. What does it warn about?"
+];
+function huntWidgetEz(el, api){
+  var d = api.data || {};
+  if(!Array.isArray(d.ticks)) d.ticks = [];
+  el.innerHTML = '<div class="a2task"><h4>Legend hunt</h4><p>Away from the screen. Pick any you like. One is plenty.</p><div class="xlist"></div>' +
+    '<p class="tiny" style="margin-top:8px">Jot it on the card at the end, if you like.</p></div>';
+  var list = el.querySelector(".xlist");
+  HUNT_EZ.forEach(function(t, k){
+    var lab = document.createElement("label");
+    lab.style.cssText = "display:flex;gap:10px;align-items:flex-start;margin:8px 0;font-size:1rem;cursor:pointer";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!d.ticks[k];
+    cb.style.cssText = "width:22px;height:22px;flex:none;margin-top:2px";
+    cb.onchange = function(){ d.ticks[k] = cb.checked; try{ api.save(); }catch(err){} if(!api.resolved()) api.done("done"); };
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(t));
+    list.appendChild(lab);
+  });
+}
 
 function esc(t){ return String(t).replace(/[&<>]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
 function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.forEach(function(x){ if((cur + " " + x).trim().length > n){ if(cur.trim()) out.push(cur.trim()); cur = x; } else cur += " " + x; }); if(cur.trim()) out.push(cur.trim()); return out.slice(0, max || 3); }
@@ -235,13 +259,15 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       lv: {
         mild: { html: "<p>Old stories have a <b>hidden message</b>. The story is trying to teach you something.</p><p>A <b>moral</b>: how to behave. A <b>warning</b>: what to watch out for. A <b>value</b>: what matters to people.</p>" },
         spicy: { html: "<p>Before writing was common, stories were how people passed things on. A <b>myth</b> often explains the world (gods, the sun, the seasons). A <b>legend</b> is about a hero or a place, sometimes based on something real. A <b>fable</b> is a short story, often with animals, built around one lesson.</p>" +
-          "<p>The hidden message is usually a <b>moral</b> (how to behave), a <b>warning</b> (what to fear or avoid) or a <b>value</b> (what the group cares about). Spotting it tells you as much about the people who told the story as about the story itself.</p>" } } },
+          "<p>The hidden message is usually a <b>moral</b> (how to behave), a <b>warning</b> (what to fear or avoid) or a <b>value</b> (what the group cares about). Spotting it tells you as much about the people who told the story as about the story itself.</p>" } } ,
+      ez: { title: "Every old story has a job", html: "<p>Old stories hide a <b>message</b>.</p><p><b>Moral</b>: how to act. <b>Warning</b>: watch out. <b>Value</b>: what matters.</p>" } },
 
     { type: "sort", topic: "Stories with a secret job",
       q: "Sort these hidden messages. Moral, warning or value?",
       buckets: ["Moral: how to behave", "Warning: watch out", "Value: what matters"],
       cards: [["Share what you have", 0], ["Do not swim in the deep pool", 1], ["Family matters most", 2], ["Help people who need it", 0], ["Stay out of the forest after dark", 1], ["Being brave is important", 2]],
       hint: "A moral says how to act. A warning says what to avoid. A value says what is important.",
+      ez: { q: "Moral, warning or value? Sort them.", hint: "Moral is how to act. Warning is danger.", why: "Sharing is a moral. Pool and forest are warnings. Family is a value." },
       why: "Sharing and helping are how to behave. The pool and the forest are dangers. Family and bravery are things people care about.",
       lv: {
         mild: { cards: [["Share what you have", 0], ["Do not swim in the deep pool", 1], ["Family matters most", 2], ["Stay out of the forest after dark", 1]] },
@@ -260,6 +286,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       slips: { 1: "Wolves are in the story, but the story is not really about wolves. What happens to the boy, and why?", 2: "He was bored, but that is how it starts, not what it teaches." },
       hint: "Why did nobody come on the third day?",
       why: "Nobody came because he had lied twice. The message: lies cost you trust.",
+      ez: { q: "What is the hidden message?", hint: "Why did nobody come at the end?", why: "He lied twice. So nobody believed him.", slips: { 1: "There is a wolf. But why did nobody help?" } },
       lv: {
         mild: { options: ["If you tell lies, people stop believing you", "Wolves are dangerous"],
           slips: { 1: "There is a wolf in it, but why did nobody come to help?" } },
@@ -276,6 +303,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       slips: { 1: "That sets the scene. Look for the moment the boy pays for what he did.", 2: "That is exciting, but look for what the villagers did." },
       hint: "Look near the end, where things go badly for the boy.",
       why: "Nobody coming is the result of his lies. That is where the message shows.",
+      ez: { q: "Which part shows the message best?", hint: "Look at the end.", why: "Nobody came because of his lies.", slips: { 1: "That is the start. Look at the end." } },
       lv: {
         mild: { options: ["Nobody came", "He was looking after sheep"],
           slips: { 1: "That is how it starts. Look at the end." } },
@@ -302,7 +330,8 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       answer: 0,
       slips: { 1: "Night is not in the story. Look at the first picture.", 2: "He was not alone: they flew together. Look at what his father said." },
       hint: "Look at the first picture.",
-      why: "Too high, and the sun would melt the wax. (Too low, and the sea would soak the feathers.)" },
+      why: "Too high, and the sun would melt the wax. (Too low, and the sea would soak the feathers.)" ,
+      ez: { why: "Too high. The sun would melt the wax.", slips: { 1: "Night is not in it. Look at picture 1.", 2: "They flew together. What did Dad say?" } } },
 
     { type: "mc", topic: "Find the clue",
       q: "What is the hidden message in the Icarus myth?",
@@ -311,6 +340,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       slips: { 1: "Flying went fine at first. The trouble came from one choice. Which one?", 2: "True, but that is a fact in the story, not what it teaches about how to live." },
       hint: "What did Icarus forget, and what happened?",
       why: "He forgot his father's advice when he got carried away, and it cost him everything.",
+      ez: { q: "What is the hidden message?", hint: "What did Icarus forget?", why: "He forgot Dad's advice. It cost him.", slips: { 1: "Flying was fine. Going too high was not." } },
       lv: {
         mild: { options: ["Listen to good advice", "Never try to fly"],
           slips: { 1: "Flying was fine. The trouble came when he went too high." } },
@@ -325,6 +355,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       answers: [0, 1],
       hint: "Look for the warning, and the choice that ignores it.",
       why: "The warning and the choice to ignore it point straight at the message. The feathers and the island are just the setting.",
+      ez: { q: "Which detail is the biggest clue?", hint: "Look for the warning.", why: "The warning is the clue." },
       lv: {
         mild: { q: "Which detail is the biggest clue to the message?",
           options: ["Dad says do not fly too high", "The wings have feathers"], answers: [0],
@@ -339,7 +370,8 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       need: [["listen", "advice", "warn", "careful", "told", "show", "too", "high", "proud", "confident", "rule", "dad", "father", "parent", "safe", "danger", "limit", "carried", "ignore", "sensible", "unstoppable"]],
       model: "Listen to good advice, even when you are having fun.",
       hint: "Think about what Icarus should have done.",
-      why: "Anything like \"listen to advice\" or \"do not get carried away\" fits. Different words, same message." },
+      why: "Anything like \"listen to advice\" or \"do not get carried away\" fits. Different words, same message." ,
+      ez: { q: "What is Icarus trying to teach us? A few words is plenty.", hint: "What should Icarus have done?", why: "Like <b>listen to advice</b>. Any words that mean that." } },
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Still true today?", title: "An old message in a new world",
@@ -356,6 +388,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       slips: { 1: "Midas had loads of gold and was miserable. The story says the opposite.", 2: "He did wash in the river, but that is how the wish ended, not what the story teaches." },
       hint: "Did all that gold make Midas happy?",
       why: "His greed turned his food and drink to gold. More was not better.",
+      ez: { q: "What is the hidden message?", hint: "Did the gold make him happy?", why: "Too much gold. He could not even eat.", slips: { 1: "He could not eat. Was that good?" } },
       lv: {
         mild: { options: ["Wanting too much can go badly", "Gold is the best thing to have"],
           slips: { 1: "He had lots of gold and could not even eat. Was that good?" } },
@@ -368,6 +401,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       pairs: [["The boy who shouted wolf", "Someone keeps faking being ill, so nobody believes them when they really are"], ["Icarus", "Someone speeds because it feels great, even though they were told to slow down"], ["The golden touch", "Someone spends every penny on stuff and has nothing left for food"]],
       hint: "Lies, ignoring advice, and greed. Which modern one matches each?",
       why: "Lies lose trust. Ignoring advice when you are carried away is dangerous. Greed costs you what matters. Same messages, new places.",
+      ez: { q: "Match each old story to a story today.", hint: "Lies. Not listening. Greed.", why: "Same messages, new places." },
       lv: {
         spicy: { q: "Why might people have told each story? Match each one to a likely reason.",
           pairs: [["A water spirit pulls children into the river", "To keep children away from dangerous water"], ["A small hero wins by being clever, not strong", "To show the people valued quick thinking"], ["A king loses everything through greed", "To warn rulers not to grab too much"], ["A liar is not believed when it matters", "To keep a small village honest"]],
@@ -381,6 +415,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       slips: { 1: "Magic is not real, but people chasing more and more is very real.", 2: "Gold is still worth a lot, and anyway the message is not really about gold." },
       hint: "Is greed still around today?",
       why: "A story can be made up and still be true about people. That is what makes a hidden message last for thousands of years.",
+      ez: { q: "Someone says: \"Midas is just magic. It teaches nothing.\" What is the best reply?", hint: "Are people still greedy today?", why: "Made up, but still true about people.", slips: { 1: "Magic is not real. But wanting too much is." } },
       lv: {
         mild: { options: ["The message about wanting too much still fits today", "Magic is not real, so it is useless"],
           slips: { 1: "Magic is not real, but people wanting too much is." } },
@@ -401,7 +436,8 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       answer: 0,
       slips: { 1: "That might be true, but it is not what the story is trying to teach. Look at what happens to the main character.", 2: "That is the setting, not the message. What choice gets someone into trouble?" },
       hint: "Look for the choice someone makes, and what happens after.",
-      why: "[[Msg]]. The trouble at the end shows it." },
+      why: "[[Msg]]. The trouble at the end shows it." ,
+      ez: { hint: "What choice causes trouble?", why: "[[Msg]]. Look at the trouble at the end.", slips: { 1: "Maybe true, but look at what happens.", 2: "That is the setting. What choice causes trouble?" } } },
 
     { type: "mc", topic: "Legends of your world", explain: true,
       q: "Which detail is the biggest clue to that message?",
@@ -409,13 +445,15 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       answer: 0,
       slips: { 1: "That sets the scene. Look for a choice and what it leads to.", 2: "That is a detail, but it does not point to the message. Look for the choice." },
       hint: "Choice, then what happens. Find both.",
-      why: "[[Clue]]: a choice and what it led to. That is where the message lives." },
+      why: "[[Clue]]: a choice and what it led to. That is where the message lives." ,
+      ez: { q: "Which detail is the biggest clue?", hint: "A choice, then what happens.", why: "[[Clue]]. A choice, then trouble.", slips: { 1: "That sets the scene. Find a choice.", 2: "A detail, but not the clue. Find a choice." } } },
 
     { type: "write", topic: "Legends of your world",
       q: "Get ready for the legend hunt. Think of a myth, legend, fable, or even a film or song you know. What is its hidden message? Is it a moral, a warning or a value? Write as much or as little as you like. It only goes to Jay if you choose.",
       fig: TYPES,
       starters: ["A story I know is", "I think its hidden message is", "The clue is when", "It is a moral / warning / value because", "I think it is still true today because"],
       checklist: ["I named a story", "I said what I think its message is"],
+      ez: { q: "Only if you like: think of a story, film or song. What is its hidden message?" },
       minWords: 15,
       lv: {
         mild: { minWords: 6, starters: ["A story I know is", "I think it teaches us", "The clue is when"] },
@@ -426,6 +464,7 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       title: "Your challenge, away from the screen",
       html: "<p>A real world task for whenever you are ready. Results can go to Jay with the rest, if you send it.</p>",
       mount: huntWidget,
+      ez: { title: "Away from the screen", html: "<p>A real world task. Only if you like.</p>", mount: huntWidgetEz },
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Legend hunt: had a go at " + n + " of " + HUNT.length + "." : ""; } }
   ],
 
@@ -438,6 +477,11 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
       '<text x="270" y="74" text-anchor="middle" ' + F + ' font-size="14" font-weight="700" fill="#5a3a1a">Not too high!</text>' +
       '<text x="270" y="96" text-anchor="middle" ' + F + ' font-size="13" fill="#5a3a1a">love, the past</text></g>' +
       A2ART.bird(380, 32, 0.7, "#3a8fd6") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>Films, songs and adverts hide messages too.</p><p>Icarus is over 2000 years old. Its warning still works today!</p>" },
+    make: { intro: "One story and its hidden message. Is it still true today?" }
   },
 
   make: {

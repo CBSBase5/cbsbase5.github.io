@@ -21,12 +21,23 @@ var X = " &times; ", SQ = "&sup2;";
 function u2(u){ return u === "cm" ? " cm" + SQ : " m" + SQ; }
 
 function clean(o){
-  if(o.boxes && Array.isArray(o.slips)) o.slips = o.slips.filter(function(r){ var b = r.length === 3 ? r[0] : 0; return !(o.boxes[b] && Math.abs(r[r.length - 2] - o.boxes[b].a) < 1e-9); });
+  if(o.boxes && Array.isArray(o.slips)){
+    var keep = o.slips.map(function(r){ var b = r.length === 3 ? r[0] : 0; return !(o.boxes[b] && Math.abs(r[r.length - 2] - o.boxes[b].a) < 1e-9); });
+    o.slips = o.slips.filter(function(r, i){ return keep[i]; });
+    /* easy read (LC): short slips line up one for one, so drop the same ones */
+    if(o.ez && Array.isArray(o.ez.slips)) o.ez.slips = o.ez.slips.filter(function(r, i){ return keep[i]; });
+  }
   return o;
 }
+/* easy read (LC): short slip messages, one per slip, same order and shape */
+function zs(sl, msgs){ return sl.map(function(r, i){ return r.length === 3 ? [null, null, msgs[i]] : [null, msgs[i]]; }); }
+function zs2(msgs){ return msgs.map(function(m){ return [null, m]; }); }
+function zs3(msgs){ return msgs.map(function(m){ return [null, null, m]; }); }
+function noEz(x){ if(!x || !x.ez) return x; var o = {}; Object.keys(x).forEach(function(k){ if(k !== "ez") o[k] = x[k]; }); return o; }
 function G(type, topic, sets, extra){
   sets.forEach(function(v){ v.forEach(clean); });
-  function one(v){ var o = {}; Object.keys(v[0]).forEach(function(k){ o[k] = v[0][k]; }); o.lv = { mild: v[1], spicy: v[2] }; return o; }
+  /* easy read (LC): only the first level's ez (v[1], mild) goes on top; ez never sits in lv */
+  function one(v){ var o = {}; Object.keys(v[0]).forEach(function(k){ if(k !== "ez") o[k] = v[0][k]; }); o.lv = { mild: noEz(v[1]), spicy: noEz(v[2]) }; if(v[1].ez) o.ez = v[1].ez; return o; }
   var s = { type: type, topic: topic }, b = one(sets[0]);
   Object.keys(b).forEach(function(k){ s[k] = b[k]; });
   if(sets.length > 1) s.vary = sets.slice(1).map(one);
@@ -107,7 +118,9 @@ function rectQ(w, h, u, grid){
     slips: [[0, pe, "That is the perimeter (all the way round). Area is the space inside: length " + X.trim() + " width."], [0, r6(w + h), "Those were added. Area is length " + X.trim() + " width."],
             [1, r6(w + h), "That is only two sides. A rectangle has four: " + fm(w) + " + " + fm(h) + " + " + fm(w) + " + " + fm(h) + "."], [1, a, "That is the area. Perimeter is the distance round the edge."], [1, r6(2 * w + h), "One side is missing. Add all four."]],
     hint: "Area: multiply. Perimeter: add all four sides.",
-    why: "Area " + fm(w) + X + fm(h) + " = <b>" + fm(a) + u2(u) + "</b>. Perimeter " + fm(w) + " + " + fm(h) + " + " + fm(w) + " + " + fm(h) + " = <b>" + fm(pe) + " " + u + "</b>." };
+    why: "Area " + fm(w) + X + fm(h) + " = <b>" + fm(a) + u2(u) + "</b>. Perimeter " + fm(w) + " + " + fm(h) + " + " + fm(w) + " + " + fm(h) + " = <b>" + fm(pe) + " " + u + "</b>.",
+    ez: { q: "A rectangle " + fm(w) + " " + u + " by " + fm(h) + " " + u + ". Find the area and perimeter.", hint: "Area: times. Perimeter: add 4 sides.",
+      slips: zs3(["That is the perimeter. Area is inside.", "That adds. Area is length " + X.trim() + " width.", "Only 2 sides. Add all 4.", "That is the area. Perimeter goes round.", "1 side is missing. Add all 4."]) } };
 }
 function sideA(a, s, u, grid){
   var ans = r6(a / s);
@@ -115,7 +128,9 @@ function sideA(a, s, u, grid){
     fig: fig(Rsh(s, ans), { unit: u, grid: grid, hide: { 1: "?" }, skip: [2, 3] }),
     boxes: [{ label: "Other side", a: ans, post: " " + u }],
     slips: [[r6(a * s), "That multiplied. You want " + fm(s) + X + "? = " + fm(a) + ", so divide."], [r6(a - s), "That took away. Think: " + fm(s) + X + "? = " + fm(a) + "."], [r6(a / 2 - s), "That treated the area like a perimeter. Area is side " + X.trim() + " side."]],
-    hint: fm(s) + X + "? = " + fm(a), why: fm(a) + " &divide; " + fm(s) + " = <b>" + fm(ans) + " " + u + "</b>. Check: " + fm(s) + X + fm(ans) + " = " + fm(a) + "." };
+    hint: fm(s) + X + "? = " + fm(a), why: fm(a) + " &divide; " + fm(s) + " = <b>" + fm(ans) + " " + u + "</b>. Check: " + fm(s) + X + fm(ans) + " = " + fm(a) + ".",
+    ez: { q: "The area is " + fm(a) + u2(u) + ". A side is " + fm(s) + " " + u + ". Find the other side.", why: fm(a) + " &divide; " + fm(s) + " = <b>" + fm(ans) + " " + u + "</b>.",
+      slips: zs2(["That multiplied. Divide instead.", "That took away. Divide instead.", "Area is not a perimeter. Divide."]) } };
 }
 function sideP(pe, s, u){
   var o = r6(pe / 2 - s), a = r6(o * s);
@@ -133,14 +148,16 @@ function cmp(wa, ha, wb, hb, ask, u){
   return { q: "Which rectangle has " + word + "?", fig: twoFig(Rsh(wa, ha), Rsh(wb, hb), { unit: u, grid: u === "cm" }, { unit: u, grid: u === "cm" }),
     options: ["A", "B", "They are the same"], answer: ans, fixed: true, slips: sl,
     hint: ask === "area" ? "Area: multiply the two sides." : "Perimeter: add all four sides.",
-    why: how + (ans === 2 ? " <b>The same</b>." : " So <b>" + "AB".charAt(ans) + "</b>.") + (ask === "area" && r6(2 * (wa + ha)) === r6(2 * (wb + hb)) ? " Same perimeter, different areas: the two do not go together." : "") + (ask !== "area" && r6(wa * ha) === r6(wb * hb) ? " Same area, different perimeters." : "") };
+    why: how + (ans === 2 ? " <b>The same</b>." : " So <b>" + "AB".charAt(ans) + "</b>.") + (ask === "area" && r6(2 * (wa + ha)) === r6(2 * (wb + hb)) ? " Same perimeter, different areas: the two do not go together." : "") + (ask !== "area" && r6(wa * ha) === r6(wb * hb) ? " Same area, different perimeters." : ""),
+    ez: { why: how + (ans === 2 ? " <b>The same</b>." : " So <b>" + "AB".charAt(ans) + "</b>."), slips: (function(){ var z = {}; Object.keys(sl).forEach(function(k){ z[k] = "Work them out. " + how; }); return z; })() } };
 }
 function squareQ(kind, n, u, grid){
   var side = kind === "side" ? n : kind === "perim" ? r6(n / 4) : r6(Math.sqrt(n)), pe = r6(4 * side), a = r6(side * side);
   if(kind === "side") return { q: "A square has sides of " + fm(n) + " " + u + ". Find its perimeter and its area.", fig: fig(Rsh(side, side), { unit: u, grid: grid }),
     boxes: [{ label: "Perimeter", a: pe, post: " " + u }, { label: "Area", a: a, post: u2(u) }],
     slips: [[0, r6(2 * side), "That is only two sides. A square has four."], [1, pe, "That is the perimeter. Area is side " + X.trim() + " side."], [1, r6(2 * side), "Area is side " + X.trim() + " side, not side + side."]],
-    hint: "All four sides of a square are the same.", why: "Perimeter " + fm(side) + X + "4 = <b>" + fm(pe) + " " + u + "</b>. Area " + fm(side) + X + fm(side) + " = <b>" + fm(a) + u2(u) + "</b>." };
+    hint: "All four sides of a square are the same.", why: "Perimeter " + fm(side) + X + "4 = <b>" + fm(pe) + " " + u + "</b>. Area " + fm(side) + X + fm(side) + " = <b>" + fm(a) + u2(u) + "</b>.",
+    ez: { hint: "All 4 sides are the same.", slips: zs3(["Only 2 sides. A square has 4.", "That is the perimeter. Area is side " + X.trim() + " side.", "Area is side " + X.trim() + " side."]) } };
   if(kind === "perim") return { q: "A square has a perimeter of " + fm(n) + " " + u + ". How long is each side, and what is the area?", fig: fig(Rsh(side, side), { unit: u, hide: { 0: "?", 1: "?", 2: "?", 3: "?" } }),
     boxes: [{ label: "Side", a: side, post: " " + u }, { label: "Area", a: a, post: u2(u) }],
     slips: [[0, r6(n / 2), "That is half the perimeter, two sides' worth. A square has four equal sides: divide by 4."], [1, r6(n * n / 4), "Find the side first (divide by 4), then side " + X.trim() + " side."], [1, n, "That is the perimeter again. Area is side " + X.trim() + " side."]],
@@ -152,17 +169,19 @@ function squareQ(kind, n, u, grid){
 }
 /* missing lengths: hide {edge: letter}; fade gives the first one worked */
 function missQ(p, hide, u, grid, fade, how){
-  var L = edges(p), bb = box(p), keys = Object.keys(hide).map(Number), bx = keys.map(function(k){ return { label: "Side " + hide[k], a: L[k], post: " " + u }; }), sl = [];
+  var L = edges(p), bb = box(p), keys = Object.keys(hide).map(Number), bx = keys.map(function(k){ return { label: "Side " + hide[k], a: L[k], post: " " + u }; }), sl = [], zm = [];
   keys.forEach(function(k, j){
     var horiz = p[k][1] === p[(k + 1) % p.length][1], full = horiz ? bb[0] : bb[1];
-    if(full !== L[k]) sl.push([j, full, "That is the whole " + (horiz ? "width" : "height") + ". Side " + hide[k] + " is only part of it: take the other parts away."]);
-    if(r6(2 * full - L[k]) !== L[k]) sl.push([j, r6(2 * full - L[k]), "It looks like those were added. Take the known parts away from the whole length."]);
+    if(full !== L[k]){ sl.push([j, full, "That is the whole " + (horiz ? "width" : "height") + ". Side " + hide[k] + " is only part of it: take the other parts away."]); zm.push("That is the whole " + (horiz ? "width" : "height") + ". Take the other parts away."); }
+    if(r6(2 * full - L[k]) !== L[k]){ sl.push([j, r6(2 * full - L[k]), "It looks like those were added. Take the known parts away from the whole length."]); zm.push("Those were added. Take away instead."); }
   });
   return { q: "Find the missing sides." + (fade ? " Side " + hide[keys[0]] + " is done for you: " + how + ". Now have a go at side " + hide[keys[1]] + "." : " Opposite sides of the whole shape add up to the same amount."),
     fig: fig(p, { unit: u, grid: grid, hide: hide }),
     boxes: bx, slips: sl,
     hint: "Look straight across the shape. The pieces on one side add up to the whole length on the other side.",
-    why: keys.map(function(k){ return "Side " + hide[k] + " = <b>" + fm(L[k]) + " " + u + "</b>"; }).join(", ") + ". Check: the pieces across the top add up to the bottom, and the pieces down one side add up to the other." };
+    why: keys.map(function(k){ return "Side " + hide[k] + " = <b>" + fm(L[k]) + " " + u + "</b>"; }).join(", ") + ". Check: the pieces across the top add up to the bottom, and the pieces down one side add up to the other.",
+    ez: { q: fade ? "Side " + hide[keys[0]] + " is done: " + String(how).replace(/ \(.*\)/, "") + ". Now find side " + hide[keys[1]] + "." : "Find the missing sides.",
+      hint: "The pieces add up to the whole side.", why: keys.map(function(k){ return "Side " + hide[k] + " = <b>" + fm(L[k]) + " " + u + "</b>"; }).join(". ") + ".", slips: zs(sl, zm) } };
 }
 function mcSide(W, o, n, H, d, u){
   var p = Ush(W, H, o, n, d), a = r6(W - o - n);
@@ -170,7 +189,9 @@ function mcSide(W, o, n, H, d, u){
     options: [fm(W) + " &minus; " + fm(o) + " &minus; " + fm(n), fm(W) + " &minus; " + fm(o), fm(W) + " + " + fm(o) + " + " + fm(n), fm(H) + " &minus; " + fm(d)], answer: 0,
     slips: { 1: "That leaves the notch (" + fm(n) + " " + u + ") in. Take that away too.", 2: "Side a is shorter than the bottom, so take away, do not add.", 3: "Those are up and down lengths. Side a goes across." },
     hint: "Across the top: " + fm(o) + " + notch " + fm(n) + " + a = the bottom, " + fm(W) + ".",
-    why: "The bottom is " + fm(W) + ". Along the top there is " + fm(o) + ", then the notch " + fm(n) + ", then a. So a = " + fm(W) + " &minus; " + fm(o) + " &minus; " + fm(n) + " = <b>" + fm(a) + " " + u + "</b>." };
+    why: "The bottom is " + fm(W) + ". Along the top there is " + fm(o) + ", then the notch " + fm(n) + ", then a. So a = " + fm(W) + " &minus; " + fm(o) + " &minus; " + fm(n) + " = <b>" + fm(a) + " " + u + "</b>.",
+    ez: { hint: "The top pieces add up to the bottom.", why: "a = " + fm(W) + " &minus; " + fm(o) + " &minus; " + fm(n) + " = <b>" + fm(a) + " " + u + "</b>.",
+      slips: { 1: "Take the notch away too.", 2: "Side a is shorter. Take away.", 3: "Those go up and down. Side a goes across." } } };
 }
 function areaFade(W, a, o, s, b, u, grid){
   var p = Tsh(W, a, o, s, b), A1 = r6(W * a), A2 = r6(s * b), tot = r6(A1 + A2);
@@ -179,7 +200,9 @@ function areaFade(W, a, o, s, b, u, grid){
     boxes: [{ label: "Stem", a: A2, post: u2(u) }, { label: "Total area", a: tot, post: u2(u) }],
     slips: [[0, r6(s + b), "Those were added. Area is length " + X.trim() + " width."], [0, r6(s * (a + b)), "That stem is too tall: the top bar already covers the first " + fm(a) + " " + u + "."], [1, r6(W * (a + b)), "That is the whole outside rectangle, including the empty corners."], [1, A1, "That is only the top bar. Add the stem."], [1, perim(p), "That is the perimeter. Area is the inside."]],
     hint: "Stem: its width " + X.trim() + " its height. Then add the two areas.",
-    why: "Top bar " + fm(A1) + ", stem " + fm(s) + X + fm(b) + " = " + fm(A2) + ". Total <b>" + fm(tot) + u2(u) + "</b>." };
+    why: "Top bar " + fm(A1) + ", stem " + fm(s) + X + fm(b) + " = " + fm(A2) + ". Total <b>" + fm(tot) + u2(u) + "</b>.",
+    ez: { q: "Top bar: " + fm(W) + X + fm(a) + " = " + fm(A1) + u2(u) + ". Find the stem, then the total.", hint: "Stem: width " + X.trim() + " height. Then add.",
+      slips: zs3(["That adds. Area is width " + X.trim() + " height.", "Too tall. The top bar covers some.", "That is the whole rectangle, corners too.", "That is just the top bar. Add the stem.", "That is the perimeter. Area is inside."]) } };
 }
 function areaU(W, H, o, n, d, u, grid){
   var p = Ush(W, H, o, n, d), ans = area(p);
@@ -188,7 +211,9 @@ function areaU(W, H, o, n, d, u, grid){
     boxes: [{ label: "Area", a: ans, post: u2(u) }],
     slips: [[r6(W * H), "That is the whole rectangle with the notch still in. Take the notch (" + fm(n) + X + fm(d) + ") away."], [r6(W * H + n * d), "The notch is missing, so take it away rather than adding."], [perim(p), "That is the perimeter. Area is the space inside."], [r6(W * H - n * H), "The notch is only " + fm(d) + " " + u + " deep, not the full height."]],
     hint: "Big rectangle " + fm(W) + X + fm(H) + ", then take away the notch.",
-    why: "Big rectangle " + fm(W) + X + fm(H) + " = " + fm(W * H) + ". Notch " + fm(n) + X + fm(d) + " = " + fm(n * d) + ". Area <b>" + fm(ans) + u2(u) + "</b>. Splitting gives the same answer." };
+    why: "Big rectangle " + fm(W) + X + fm(H) + " = " + fm(W * H) + ". Notch " + fm(n) + X + fm(d) + " = " + fm(n * d) + ". Area <b>" + fm(ans) + u2(u) + "</b>. Splitting gives the same answer.",
+    ez: { q: "Find the area of this U shape.", hint: "Big rectangle, then take the notch away.", why: fm(W * H) + " take away " + fm(n * d) + " = <b>" + fm(ans) + u2(u) + "</b>.",
+      slips: zs2(["Take the notch away.", "Take the notch away, do not add it.", "That is the perimeter. Area is inside.", "The notch is only " + fm(d) + " " + u + " deep."]) } };
 }
 function mcSplit(W, H, w1, h1, w2, h2, u){
   var p = Ssh(W, H, w1, h1, w2, h2), h3 = r6(H - h1 - h2), ok = fm(w1) + X + fm(h1) + " + " + fm(w1 + w2) + X + fm(h2) + " + " + fm(W) + X + fm(h3);
@@ -197,7 +222,9 @@ function mcSplit(W, H, w1, h1, w2, h2, u){
     options: [ok, fm(W) + X + fm(H), fm(w1) + X + fm(h1) + " + " + fm(w2) + X + fm(h2) + " + " + fm(r6(W - w1 - w2)) + X + fm(h3), fm(w1) + " + " + fm(h1) + " + " + fm(w1 + w2) + " + " + fm(h2) + " + " + fm(W) + " + " + fm(h3)], answer: 0,
     slips: { 1: "That is the whole outside rectangle, empty steps included.", 2: "Each strip goes all the way to the left edge, so the middle strip is " + fm(w1 + w2) + " wide and the bottom one is " + fm(W) + " wide.", 3: "That adds lengths. Each strip needs width " + X.trim() + " height." },
     hint: "Each strip is a rectangle that starts at the left edge.",
-    why: ok + " = " + fm(w1 * h1) + " + " + fm((w1 + w2) * h2) + " + " + fm(W * h3) + " = <b>" + fm(area(p)) + u2(u) + "</b>." };
+    why: ok + " = " + fm(w1 * h1) + " + " + fm((w1 + w2) * h2) + " + " + fm(W * h3) + " = <b>" + fm(area(p)) + u2(u) + "</b>.",
+    ez: { q: "Jay split the stairs into 3 strips. Which sum gives the area?", hint: "Each strip starts at the left edge.",
+      slips: { 1: "That is the whole rectangle, empty steps too.", 2: "Each strip goes to the left edge.", 3: "That adds lengths. Use width " + X.trim() + " height." } } };
 }
 function floorQ(p, u, price, grid, note){
   var a = area(p), c = r6(a * price), bb = box(p);
@@ -206,18 +233,23 @@ function floorQ(p, u, price, grid, note){
     boxes: [{ label: "Area", a: a, post: u2(u) }, { label: "Cost", a: c, pre: "&pound;", show: mo(c) }],
     slips: [[0, r6(bb[0] * bb[1]), "That is the whole outer rectangle. Some of it is not floor."], [0, perim(p), "That is the perimeter. Carpet covers the area."], [1, r6(bb[0] * bb[1] * price), "That cost includes floor that is not there."], [1, r6(a + price), "Multiply the area by the price."]],
     hint: "Split it into rectangles, find each area, add, then multiply by the price.",
-    why: "Area <b>" + fm(a) + u2(u) + "</b>. " + fm(a) + X + "&pound;" + mo(price) + " = <b>&pound;" + mo(c) + "</b>." };
+    why: "Area <b>" + fm(a) + u2(u) + "</b>. " + fm(a) + X + "&pound;" + mo(price) + " = <b>&pound;" + mo(c) + "</b>.",
+    ez: { q: "Carpet is &pound;" + mo(price) + " per " + (u === "cm" ? "square" : "m" + SQ) + ". Find the area, then the cost.", hint: "Find the area. Then times by the price.",
+      slips: zs3(["That is the whole rectangle. Some is not floor.", "That is the perimeter. Carpet covers the area.", "That cost has floor that is not there.", "Times the area by the price."]) } };
 }
 function perimQ(p, hide, u, grid, fade, how){
   var L = edges(p), keys = Object.keys(hide).map(Number), pe = perim(p), bb = box(p), shown = r6(pe - keys.reduce(function(a, k){ return a + L[k]; }, 0));
   var bx = (fade ? keys : []).map(function(k){ return { label: "Side " + hide[k], a: L[k], post: " " + u }; }).concat([{ label: "Perimeter", a: pe, post: " " + u }]), last = bx.length - 1;
   var sl = [[last, shown, "Nearly. Add the sides you had to work out, too."], [last, area(p), "That is the area. Perimeter is the distance round the edge."]];
-  if(r6(2 * (bb[0] + bb[1])) !== pe) sl.push([last, r6(2 * (bb[0] + bb[1])), "That is the outer rectangle. The notch has edges inside it that count too."]);
+  var zm = ["Nearly. Add the sides you worked out too.", "That is the area. Perimeter goes round."];
+  if(r6(2 * (bb[0] + bb[1])) !== pe){ sl.push([last, r6(2 * (bb[0] + bb[1])), "That is the outer rectangle. The notch has edges inside it that count too."]); zm.push("That is the outer rectangle. Count the notch edges."); }
   return { q: (fade ? "Walk round the edge. Side " + hide[keys[0]] + " is done for you: " + how + ". Find side " + hide[keys[1]] + ", then the perimeter." : "Find the perimeter. Work out any missing sides first."),
     fig: fig(p, { unit: u, grid: grid, hide: hide, walk: true }),
     boxes: bx, slips: sl,
     hint: "Start at a corner and add every side as you go round, including the ones inside notches.",
-    why: "All the sides: " + L.map(fm).join(" + ") + " = <b>" + fm(pe) + " " + u + "</b>." };
+    why: "All the sides: " + L.map(fm).join(" + ") + " = <b>" + fm(pe) + " " + u + "</b>.",
+    ez: { q: fade ? "Side " + hide[keys[0]] + " is done: " + how + ". Find side " + hide[keys[1]] + ", then the perimeter." : "Find the perimeter.",
+      hint: "Start at a corner. Add every side.", slips: zs(sl, zm) } };
 }
 function edgeQ(p, u, price){
   var pe = perim(p), c = r6(pe * price);
@@ -226,7 +258,9 @@ function edgeQ(p, u, price){
     boxes: [{ label: "Length", a: pe, post: " " + u }, { label: "Cost", a: c, pre: "&pound;", show: mo(c) }],
     slips: [[0, area(p), "That is the area. Trim goes round the edge."], [0, r6(2 * (box(p)[0] + box(p)[1])), "That is the outer rectangle. Include the edges that go into the notch."], [1, r6(area(p) * price), "That cost used the area. Use the length round the edge."]],
     hint: "Add every edge, then multiply by the price per metre.",
-    why: edges(p).map(fm).join(" + ") + " = " + fm(pe) + " " + u + ". " + fm(pe) + X + "&pound;" + mo(price) + " = <b>&pound;" + mo(c) + "</b>." };
+    why: edges(p).map(fm).join(" + ") + " = " + fm(pe) + " " + u + ". " + fm(pe) + X + "&pound;" + mo(price) + " = <b>&pound;" + mo(c) + "</b>.",
+    ez: { q: "[[Trim]] goes round the edge. It is &pound;" + mo(price) + " a metre. How much, and the cost?", hint: "Add every edge. Then times by the price.",
+      slips: zs3(["That is the area. Trim goes round.", "That is the outer rectangle. Count the notch edges.", "That cost used the area. Use the edge."]) } };
 }
 function cmpShape(pa, pb, u, grid){
   var a = perim(pa), b = perim(pb), ans = a > b ? 0 : b > a ? 1 : 2, how = "A: " + fm(a) + " " + u + ". B: " + fm(b) + " " + u + ".", sl = {};
@@ -234,7 +268,8 @@ function cmpShape(pa, pb, u, grid){
   return { q: "Which shape has the longer <b>perimeter</b>?", fig: twoFig(pa, pb, { unit: u, grid: grid }, { unit: u, grid: grid }),
     options: ["A", "B", "They are the same"], answer: ans, fixed: true, slips: sl,
     hint: "Cutting a piece off a corner moves edges without changing their total. Cutting into the middle of a side adds new edges.",
-    why: how + (ans === 2 ? " <b>The same</b>, even though the areas are different." : " So <b>" + "AB".charAt(ans) + "</b>.") };
+    why: how + (ans === 2 ? " <b>The same</b>, even though the areas are different." : " So <b>" + "AB".charAt(ans) + "</b>."),
+    ez: { hint: "Walk round each one. Add the sides.", why: how + (ans === 2 ? " <b>The same</b>." : " So <b>" + "AB".charAt(ans) + "</b>.") } };
 }
 
 var LEARN2 = fig(Ush(10, 6, 3, 4, 2), { hide: { 4: "a", 7: "b" }, note: "Across: 3 + 4 + a = 10, so a = 3. Down: b = 6." });
@@ -268,6 +303,7 @@ var LEARN2 = fig(Ush(10, 6, 3, 4, 2), { hide: { 4: "a", 7: "b" }, note: "Across:
 
     /* ---------- chunk 1: one rectangle ---------- */
     { type: "learn", topic: "One rectangle", title: "Inside and around",
+      ez: { title: "Area and perimeter", html: "<p><b>Area</b>: the squares inside. 5 &times; 3 = <b>15</b>.</p><p><b>Perimeter</b>: round the edge. 5 + 3 + 5 + 3 = <b>16 cm</b>.</p>" },
       fig: fig(Rsh(6, 4), { grid: true, unit: "m", note: "Area: 24 squares inside. Perimeter: 6 + 4 + 6 + 4 = 20 m.",
         extra: A.egg(A.bird(470, 36, 0.55, "#19c39a"), "A green finch landed on the room plan. It walked the perimeter, 20 m, and then had a lie down.") }),
       html: "<p><b>Area</b> is the space inside, measured in squares (m&sup2;). For a rectangle, length &times; width: 6 &times; 4 = <b>24 m&sup2;</b>.</p>" +
@@ -302,6 +338,7 @@ var LEARN2 = fig(Ush(10, 6, 3, 4, 2), { hide: { 4: "a", 7: "b" }, note: "Across:
 
     /* ---------- chunk 2: missing lengths ---------- */
     { type: "learn", topic: "Missing lengths", title: "Across one side equals across the other",
+      ez: { title: "Missing sides", html: "<p>Count the squares along the edge.</p><p>Or take away: 6 &minus; 2 &minus; 2 = <b>2 cm</b>.</p>" },
       fig: LEARN2,
       html: "<p>Plans often leave some sides off. You can always find them, because the shape is made of rectangles.</p>" +
         "<p><b>Across:</b> the pieces along the top add up to the whole bottom. 3 + 4 + <b>a</b> = 10, so a = 10 &minus; 3 &minus; 4 = <b>3 m</b>.</p>" +
@@ -341,6 +378,7 @@ var LEARN2 = fig(Ush(10, 6, 3, 4, 2), { hide: { 4: "a", 7: "b" }, note: "Across:
 
     /* ---------- chunk 3: split it up ---------- */
     { type: "learn", topic: "Split it up", title: "Split into rectangles, then add",
+      ez: { title: "Split it up", html: "<p><b>Split</b> into rectangles. Then <b>add</b>.</p><p>12 + 6 = <b>18 squares</b>.</p>" },
       fig: fig(Tsh(10, 3, 3, 4, 5), { rects: [[0, 0, 10, 3, "10 x 3 = 30"], [3, 3, 4, 5, "4 x 5 = 20"]], note: "30 + 20 = 50 m&#178;" }),
       html: "<p>To find the area of a shape made from rectangles, <b>split it</b> into rectangles, find each area, and <b>add</b>.</p>" +
         "<p>The T: top bar 10 &times; 3 = 30, stem 4 &times; 5 = 20. Area <b>50 m&sup2;</b>.</p>" +
@@ -374,6 +412,7 @@ var LEARN2 = fig(Ush(10, 6, 3, 4, 2), { hide: { 4: "a", 7: "b" }, note: "Across:
 
     /* ---------- chunk 4: round the edge ---------- */
     { type: "learn", topic: "Round the edge", title: "Walk all the way round",
+      ez: { title: "Walk round", html: "<p>Walk round the edge. <b>Add</b> every side.</p><p>The edges inside the gap count too.</p>" },
       fig: fig(Ush(10, 6, 3, 4, 2), { walk: true, note: "3 + 2 + 4 + 2 + 3 + 6 + 10 + 6 = 36 m" }),
       html: "<p>Perimeter: start at a corner and walk round, adding every side. Find any missing sides first.</p>" +
         "<p>The U: 3 + 2 + 4 + 2 + 3 + 6 + 10 + 6 = <b>36 m</b>. Do not forget the edges <b>inside</b> the notch: they are part of the walk.</p>" +
@@ -411,6 +450,11 @@ var LEARN2 = fig(Ush(10, 6, 3, 4, 2), { hide: { 4: "a", 7: "b" }, note: "Across:
       [cmpShape(Rsh(10, 4), Ush(10, 4, 4, 2, 3), "m"), cmpShape(Rsh(4, 2), Rsh(3, 3), "cm", true), cmpShape(Ssh(9.2, 6.5, 3.1, 2.4, 2.8, 1.7), Rsh(9.2, 6.5), "m")]
     ])
   ],
+
+  ez: {
+    realWorld: { title: "Floor plans", html: "<p>House adverts show the area of each room.</p><p>Castles and Roman villas had floor plans too.</p>" },
+    make: { intro: "Design a room. The card works out the area and perimeter." }
+  },
 
   realWorld: {
     title: "Floor plans are everywhere",

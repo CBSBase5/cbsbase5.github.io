@@ -160,6 +160,7 @@ function mountGlue(el, api){
         "<p><b>First, next, after that, finally</b> put things in order. <b>Later that morning, by the evening, the next day</b> jump time forward. <b>Meanwhile</b> means at the same time, somewhere else.</p>" +
         "<p class=\"a2task\">" + GLUED + "</p>" +
         "<p>They are perfect for the start of a new paragraph.</p>",
+      ez: { title: "Words that say when", html: "<p><b>Time markers</b> say when.</p><p><b>First</b>. <b>Later that morning</b>. <b>Finally</b>.</p>" },
       lv: { spicy: { html: "<p>Time markers hold a travelogue together across paragraphs. At this level, pick them for <b>precision</b>, not just to fill a gap:</p>" +
         "<p><b>As soon as</b> (straight after), <b>within an hour</b> (how long), <b>by the time</b> (one thing finished before another), <b>meanwhile</b> (same time, elsewhere), <b>looking back</b> (a shift from telling to reflecting).</p>" +
         "<p class=\"a2task\">" + GLUED + "</p>" +
@@ -171,6 +172,7 @@ function mountGlue(el, api){
       answer: 0,
       slips: { 1: "\"Finally\" is for the end of the trip. This is the very start.", 2: "\"Meanwhile\" means at the same time as something else. Nothing has happened yet.", 3: "\"In the end\" is for the finish." },
       hint: "Is this the start, the middle or the end of the trip?",
+      ez: { q: "Which word fits the gap?<p class=\"a2task\">______, we set off for [[place]].</p>", hint: "Start, middle or end?", why: "Setting off is the start. <b>First</b>.", slips: { 1: "Finally is for the end.", 2: "Meanwhile means at the same time.", 3: "In the end is for the finish." } },
       why: "Setting off is the start, so <b>First</b> fits.",
       lv: {
         medium: { q: "Which time marker fits the gap?<p class=\"a2task\">We arrived at [[place]] at ten. ______, the sky was dark and we were heading home.</p>",
@@ -188,6 +190,7 @@ function mountGlue(el, api){
       q: "These paragraph openers are jumbled. Use the time markers to put them in order.",
       items: ["First, we set off for [[place]].", "Next, we met [[crew]].", "After that, they showed us a [[thing]].", "Finally, we climbed back on [[ride]]."],
       hint: "First, next, after that, finally.",
+      ez: { q: "Put the openers in order.", why: "The markers give the order." },
       why: "The markers do the ordering for you: First, Next, After that, Finally.",
       lv: {
         medium: { items: ["Early that morning, we set off for [[place]].", "By lunchtime, we had met [[crew]].", "Later that afternoon, they showed us a [[thing]].", "By the evening, we were back on [[ride]]."],
@@ -205,6 +208,7 @@ function mountGlue(el, api){
       answer: 1,
       slips: { 0: "\"Then\" in every sentence is glue, but weak glue. It does not say how much time passed.", 2: "Commas between full sentences do not glue them. The reader cannot tell when anything happened." },
       hint: "Which one tells you how the time moves?",
+      ez: { q: "Which one holds together best?", hint: "Which shows how time moves?", why: "Different markers show the start, middle and end.", slips: { 0: "Then, then, then is weak glue.", 2: "Commas do not glue full sentences." } },
       why: "Different markers show the start, the time jump and the end. \"Then then then\" says nothing new each time.",
       lv: { spicy: { q: "Which paragraph opener glues best to the paragraph before it, which ended with a two hour wait?",
         options: ["Then we went to [[place]].", "After that long wait, we finally reached [[place]].", "We went to [[place]].", "Also, [[place]] was good."],
@@ -218,12 +222,14 @@ function mountGlue(el, api){
       model: "Later that afternoon, we headed down to the gift shop.",
       slips: [[["and then", "and"], "Try a marker that tells the reader when: later that afternoon, after lunch, by the evening."]],
       hint: "Try: \"Later that afternoon,\" or \"After lunch,\" then say what happened.",
+      ez: { q: "After a morning at [[place]], what next? Start with a time marker.", hint: "Try: Later that afternoon,", why: "Any when word works. \"Later that afternoon,\"", slips: [[null, "Try a when word, like later that afternoon."]] },
       why: "Any marker that tells the reader when works. \"Later that afternoon,\" is a good one: it moves time on and suits the start of a paragraph." },
 
     /* ---------- chunk 2: pointing words ---------- */
     { type: "learn", topic: "Pointing words",
       title: "Words that point back",
       fig: POINT,
+      ez: { title: "Pointing words", html: "<p><b>They</b> points to a group. <b>It</b> points to one thing.</p><p>[[Crew]] found a [[thing]]. <b>They</b> said <b>it</b> was old.</p>" },
       html: "<p>Saying the same name again and again sounds clunky. <b>Pointing words</b> stand in for something you have already mentioned.</p>" +
         "<p><b>They</b> points back to a group. <b>It</b> points back to one thing. <b>There</b> points back to a place.</p>" +
         "<p class=\"a2task\">[[Crew]] showed us a [[thing]]. <b>They</b> said <b>it</b> was hundreds of years old.</p>" +
@@ -244,6 +250,7 @@ function mountGlue(el, api){
       answer: 0,
       slips: { 1: "[[Crew]] are a group. A group would be \"they\".", 2: "The day is not mentioned in this sentence.", 3: "[[Place]] is not in this sentence." },
       hint: "\"It\" is one thing. Which single thing has just been mentioned?",
+      ez: { q: "What does <b>it</b> point to?<p class=\"a2task\">[[Crew]] showed us a [[thing]], and it was even better than I had imagined.</p>", hint: "It is 1 thing. Which one?", why: "<b>It</b> means the [[thing]].", slips: { 1: "A group would be they.", 2: "The day is not in the sentence.", 3: "[[Place]] is not in the sentence." } },
       why: "\"It\" points back to the [[thing]]: the one thing just mentioned.",
       lv: {
         medium: { q: "What does <b>This</b> point back to?<p class=\"a2task\">[[Ride]] broke down twice on the way to [[place]]. This meant we missed the start.</p>",
@@ -263,6 +270,7 @@ function mountGlue(el, api){
       answer: 1,
       slips: { 0: "That repeats both names. It sounds clunky.", 2: "The pointing words are swapped: \"It\" would mean the [[thing]] was talking." },
       hint: "\"They\" for the group, \"it\" for the thing.",
+      ez: { q: "Which one does not repeat itself?", hint: "They for the group. It for the thing.", why: "<b>They</b> means [[crew]]. <b>It</b> means the [[thing]].", slips: { 0: "That repeats both names.", 2: "Swapped! It would mean the [[thing]] talks." } },
       why: "\"They\" points to [[crew]] and \"it\" points to the [[thing]]. Same meaning, no repeats.",
       lv: {
         medium: { q: "Which fills the gap best?<p class=\"a2task\">We waited two hours for [[ride]]. ______ made us late for everything.</p>",
@@ -281,6 +289,7 @@ function mountGlue(el, api){
       options: ["there", "they", "It", "noon", "brilliant", "hours"],
       answers: [0, 1, 2],
       hint: "Look for small words that stand in for a place, a group or a thing.",
+      ez: { q: "Pick <b>all</b> the pointing words.<p class=\"a2task\">We reached [[place]] at noon. We stayed there for hours. [[Crew]] were brilliant, and they made us laugh. Then they showed us a [[thing]]. It was the best part of the trip.</p>", hint: "Small words for a place, group or thing.", why: "<b>There</b>, <b>they</b> and <b>It</b> point back." },
       why: "\"There\" points to [[place]], \"they\" to [[crew]] and \"It\" to the [[thing]]. The others are ordinary describing words.",
       lv: { spicy: { q: "Pick <b>all</b> the words that point back to something earlier.<p class=\"a2task\">We reached [[place]] at noon. We stayed there for hours. [[Crew]] were brilliant, and they made us laugh. This was the best part of the trip. These are the moments I will remember.</p>",
         options: ["there", "they", "This", "These", "brilliant", "moments"],
@@ -295,6 +304,7 @@ function mountGlue(el, api){
         "<p><b>Adding:</b> and, also. <b>Contrast:</b> but, although. <b>Reason or result:</b> because, so. <b>Time:</b> when, while, until.</p>" +
         "<p class=\"a2task\">We were starving, <b>so</b> we found [[food]]. The queue was long, <b>but</b> it was worth it.</p>" +
         "<p>Pick the one that matches how the two ideas connect.</p>",
+      ez: { title: "Joining words", html: "<p><b>Joining words</b> glue ideas in a sentence.</p><p>We were starving, <b>so</b> we found [[food]].</p>" },
       lv: { spicy: { html: "<p>Joining words show exactly how two ideas relate. At this level, reach past and and but:</p>" +
         "<p><b>Contrast:</b> although, whereas, however. <b>Reason or result:</b> because, therefore, as a result. <b>Adding:</b> also, furthermore. <b>Time:</b> while, until, once.</p>" +
         "<p class=\"a2task\"><b>Although</b> it was freezing, nobody wanted to leave. The tickets sold out in an hour; <b>as a result</b>, the queue went round the block.</p>" +
@@ -306,6 +316,7 @@ function mountGlue(el, api){
       answer: 0,
       slips: { 1: "\"But\" is for a contrast. Being hungry and finding food go together.", 2: "\"Although\" sets up a surprise. There is no surprise here.", 3: "\"Until\" is about time. Here one thing causes the other." },
       hint: "Does the first idea cause the second?",
+      ez: { hint: "Does one cause the other?", why: "Hungry is the reason. <b>So</b> joins it to the result.", slips: { 1: "But is for a contrast.", 2: "Although sets up a surprise.", 3: "Until is about time." } },
       why: "Being hungry is the reason, finding food is the result. <b>So</b> joins a reason to its result.",
       lv: {
         medium: { q: "Pick the glue word.<p class=\"a2task\">We had to queue for an hour, ______ the view from the top was worth it.</p>",
@@ -324,6 +335,7 @@ function mountGlue(el, api){
       buckets: ["Adding", "Contrast", "Reason or result", "Time"],
       cards: [["and", 0], ["also", 0], ["but", 1], ["because", 2], ["so", 2], ["when", 3]],
       hint: "Adding puts more on. Contrast pushes against. Reason explains why. Time says when.",
+      ez: { q: "Sort the glue words by their job.", hint: "More, against, why, or when?", why: "And, also add. But is a contrast. Because, so give a reason. When is time." },
       why: "And, also: adding. But: contrast. Because, so: reason or result. When: time.",
       lv: {
         medium: { cards: [["and", 0], ["also", 0], ["but", 1], ["although", 1], ["because", 2], ["so", 2], ["when", 3], ["while", 3]] },
@@ -336,6 +348,7 @@ function mountGlue(el, api){
       model: "We were exhausted, but we kept walking.",
       slips: [[["because", "so "], "That would mean being tired made you keep walking. Try a contrast word: but, although."], [["and"], "\"And\" joins them, but it misses the surprise. Try \"but\"."]],
       hint: "Tired, yet still walking: that is a contrast.",
+      ez: { q: "Join them with a glue word.<p class=\"a2task\">We were hungry. We bought [[food]].</p>", why: "<b>So</b> joins the reason to the result.", slips: [[null, "Because means the food made you hungry. Try so."], [null, "But is for a contrast. Try so."]] },
       why: "\"But\" or \"although\" shows the surprise: tired, yet still going.",
       lv: {
         mild: { q: "Join these into one sentence with a glue word.<p class=\"a2task\">We were hungry. We bought [[food]].</p>",
@@ -355,6 +368,7 @@ function mountGlue(el, api){
     { type: "learn", topic: "Glue it together",
       title: "From choppy to glued",
       fig: BEFORE,
+      ez: { title: "Choppy to glued", html: "<p>Choppy writing stops and starts.</p><p><b>Glue words</b> make it flow like a journey.</p>" },
       html: "<p>Here is a choppy version. Every sentence stands on its own:</p>" +
         "<p class=\"a2task\">" + CHOPPY + "</p>" +
         "<p>And the glued version, with time markers, pointing words and joining words in bold:</p>" +
@@ -364,6 +378,7 @@ function mountGlue(el, api){
     { type: "widget", topic: "Glue it together", unscored: true,
       title: "The glue gun",
       html: "<p>Pick a glue word for each gap. You will see the whole thing glued together at the end, and a note on any gap worth another look.</p>",
+      ez: { html: "<p>Pick a glue word for each gap.</p>" },
       mount: mountGlue },
 
     { type: "mc", topic: "Glue it together",
@@ -374,6 +389,7 @@ function mountGlue(el, api){
       answer: 1,
       slips: { 0: "Choppy: no markers, no pointing words, and [[crew]] gets repeated.", 2: "Lots of \"and\", and \"it\" does not point at anything clear. Too much weak glue makes one long string." },
       hint: "Look for a time marker, a pointing word and a joining word, used well.",
+      ez: { q: "Which one is best glued?", hint: "Look for when, they, so and finally.", why: "<b>When</b>, <b>They</b>, <b>so</b> and <b>Finally</b> glue it.", slips: { 0: "Choppy. No glue words.", 2: "Too many ands. It is one long string." } },
       why: "\"When\" joins, \"They\" points back, \"so...that\" shows a result, and \"Finally\" marks the end.",
       lv: { spicy: { q: "A writer wants to improve the glue in this paragraph. Which change helps most?<p class=\"a2task\">We reached [[place]]. Then we met [[crew]]. Then they showed us a [[thing]]. Then it started to rain, then we left.</p>",
         options: ["Swap the run of \"then\" for varied markers and joins: \"As soon as...\", \"Within minutes...\", \"so\"", "Add more \"then\" so the order is extra clear", "Replace every pointing word with the full name", "Split every sentence into its own paragraph"],
@@ -385,6 +401,7 @@ function mountGlue(el, api){
     { type: "write", topic: "Glue it together",
       q: "Your turn, if you fancy it. Rewrite the choppy version in your own words, with glue: at least one time marker, one pointing word and one joining word. Change any details you like.",
       fig: BEFORE,
+      ez: { q: "Your turn, if you like. Rewrite the choppy one with glue words." },
       starters: ["First,", "Later that morning,", "They", "Meanwhile,", "Finally,"],
       checklist: ["A time marker or two", "A pointing word (they, it, this)", "A joining word (so, but, because)", "It reads like one journey"],
       minWords: 40,
@@ -395,6 +412,10 @@ function mountGlue(el, api){
           minWords: 70 } } }
   ],
 
+  ez: {
+    realWorld: { title: "Where you would use this", html: "<p>News, match reports, texts to a friend. They all need glue.</p><p>\"Meanwhile, back in the present...\" is time travel glue!</p>" },
+    make: { intro: "3 sentences about a trip, with glue words." }
+  },
   realWorld: {
     title: "Where you would use this",
     html: "<p>News reports, match reports, instructions, history books and texts to a friend explaining what happened: anything that tells events in order needs glue, or the reader gets lost.</p>" +

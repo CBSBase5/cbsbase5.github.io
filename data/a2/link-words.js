@@ -167,7 +167,8 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
         spicy: { html: "<p>Writers hold a text together with <b>cohesive devices</b>: words and phrases that link one idea to the next.</p>" +
           "<p>Some work inside a sentence (<b>but, because</b>). Some start a new sentence (<b>As a result, ...</b>). Some open a whole paragraph and tell you how it connects to the one before (<b>However, ...</b> or <b>On the other hand, ...</b>).</p>" +
           "<p>Others point back to something already said, so the writer does not repeat it: <b>it, they, this, these effects</b>.</p>" +
-          "<p>Formal ones to know: <b>furthermore, nevertheless, consequently, similarly, overall</b>.</p>" } } },
+          "<p>Formal ones to know: <b>furthermore, nevertheless, consequently, similarly, overall</b>.</p>" } } ,
+      ez: { title: "Link words", html: "<p>A <b>link word</b> joins 2 ideas: and, but, because, then.</p><p>[[Hero]] was tired, <b>but</b> [[pr]] kept going.</p>" } },
 
     { type: "mc", topic: "Joining ideas",
       q: "Which word is the link word? \"[[Hero]] was cold, but [[pr]] stayed outside.\"",
@@ -176,6 +177,8 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "Cold describes how they felt. Which word joins the two ideas?", 2: "Stayed is something they did. Look for the word in the middle that joins the two halves.", 3: "Outside is a place. Which word is the bridge?" },
       hint: "Find the word that joins the two halves of the sentence.",
       why: "<b>But</b> joins \"was cold\" and \"stayed outside\", and shows a surprise.",
+      ez: { hint: "Find the word in the middle.", why: "<b>But</b> joins the two halves.",
+        slips: { 1: "Cold is a feeling. Find the joining word.", 2: "Stayed is a doing word. Find the joiner.", 3: "Outside is a place. Find the joiner." } },
       lv: { medium: { q: "Which is the link phrase? \"[[Pr]] practised every day. As a result, [[pr]] felt ready.\"",
           options: ["As a result", "practised", "every day", "felt ready"],
           slips: { 1: "Practised is what they did. Look at the start of the second sentence.", 2: "Every day tells you how often. Which phrase joins the second sentence to the first?", 3: "Felt ready is the idea, not the link." },
@@ -194,6 +197,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "But shows a surprise. Packing a coat for rain is not a surprise. It is a reason.", 2: "Then means next in time. Here the rain is the reason for the coat." },
       hint: "Why did they pack a coat?",
       why: "The rain is the <b>reason</b> for the coat, so <b>because</b> fits.",
+      ez: { hint: "Why pack a coat?", why: "Rain is the <b>reason</b>. So <b>because</b>.", slips: { 1: "But is for a surprise. This is a reason.", 2: "Then is for next. This is a reason." } },
       lv: { medium: { q: "Which link phrase fits? \"[[Hero]] practised every day. ___, [[pr]] felt ready.\"",
           options: ["As a result", "However", "For example"],
           slips: { 1: "However shows a contrast. Feeling ready after practice is not a surprise; it is a result.", 2: "For example gives an example. Feeling ready is not an example of practising." },
@@ -210,6 +214,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       pairs: [["and", "adds another idea"], ["but", "shows a difference"], ["because", "gives a reason"], ["then", "says what happens next"]],
       hint: "Try each word in a sentence: I was hungry ___ I had a sandwich.",
       why: "<b>And</b> adds, <b>but</b> contrasts, <b>because</b> gives a reason, <b>then</b> moves time on.",
+      ez: { hint: "Try each one in a sentence.", why: "And adds. But turns. Because says why. Then is next." },
       lv: { medium: { pairs: [["also", "adds another idea"], ["however", "shows a contrast"], ["as a result", "shows what happened because of it"], ["for example", "gives an example"], ["meanwhile", "at the same time, somewhere else"]],
           why: "Each phrase does a different job. Picking the right one tells the reader exactly how ideas connect." },
         spicy: { pairs: [["furthermore", "adds a further point"], ["nevertheless", "even so, despite that"], ["consequently", "this happened because of that"], ["similarly", "compares two alike things"], ["subsequently", "after that, later"]],
@@ -222,6 +227,8 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       model: "It was raining, but [[hero]] went outside anyway.",
       hint: "Which link word shows a difference or a surprise?",
       why: "<b>But</b> (or however, or although) tells the reader the second idea is surprising.",
+      ez: { q: "Join them with a <b>surprise</b> word: \"It was raining. [[Hero]] went outside.\"", hint: "Which word shows a surprise?", why: "<b>But</b> shows a surprise.",
+        slips: [[[], "Because is a reason. Try a surprise word, like but."], [[], "And just adds. Try but."]] },
       lv: { spicy: { q: "Rewrite as one or two sentences with a formal link that shows \"even so\": \"It was raining. [[Hero]] went outside.\"",
         model: "It was raining. Nevertheless, [[hero]] went outside.",
         why: "<b>Nevertheless</b>, <b>however</b> and <b>even so</b> all keep the surprise; nevertheless is the most formal." } } },
@@ -239,7 +246,8 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
         spicy: { fig: jobsFig(5),
           html: "<p>Link words and phrases do five main jobs: <b>add</b>, <b>contrast</b>, <b>reason</b>, <b>result</b> and <b>time</b>. Formal writing adds <b>compare</b> (similarly, likewise) and <b>sum up</b> (overall, in conclusion).</p>" +
             "<p>The job matters more than the word. \"Nevertheless\" and \"but\" do the same job; one just sounds more formal.</p>" +
-            "<p>When you read, the link tells you what is coming before you get there. <b>However</b> warns you the writer is about to turn.</p>" } } },
+            "<p>When you read, the link tells you what is coming before you get there. <b>However</b> warns you the writer is about to turn.</p>" } } ,
+      ez: { title: "Every link has a job", html: "<p><b>And</b> adds. <b>But</b> turns. <b>Because</b> says why.</p><p>It was raining, <b>but</b> [[pr]] did not mind.</p>" } },
 
     { type: "sort", topic: "Picking the right link",
       q: "Sort the link words by their job, if you like.",
@@ -247,6 +255,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       cards: [["also", 0], ["in addition", 0], ["however", 1], ["on the other hand", 1], ["as a result", 2], ["because", 2], ["meanwhile", 3], ["finally", 3]],
       hint: "Ask: does it add, turn, explain, or move time on?",
       why: "Also and in addition add. However and on the other hand turn. Because and as a result explain. Meanwhile and finally move time.",
+      ez: { q: "Sort the link words by job.", hint: "More, different, or why?", why: "And and also add. But turns. Because says why." },
       lv: { mild: { buckets: ["Add", "Contrast", "Reason"],
           cards: [["and", 0], ["also", 0], ["but", 1], ["because", 2]],
           hint: "Add means more. Contrast means a difference. Reason means why.",
@@ -262,6 +271,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "But shows a surprise. The second part explains the feeling, so it is a reason.", 2: "And then moves time on. The second part is why they felt that way." },
       hint: "Does the second part explain why?",
       why: "The second part explains the feeling: a reason, so <b>because</b>.",
+      ez: { hint: "Does part 2 say why?", why: "Part 2 says why. So <b>because</b>.", slips: { 1: "But is a surprise. This says why.", 2: "And then is for next. This says why." } },
       lv: { medium: { q: "Which link phrase fits? \"[[Hero]] had practised every day. ___, [[pr]] [[practice]].\"",
           options: ["For example", "As a result", "Meanwhile"],
           slips: { 1: "As a result shows what happened because of something. This sentence shows one kind of practice.", 2: "Meanwhile means at the same time, somewhere else. This sentence is about the same person's practice." },
@@ -280,6 +290,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "Because gives a reason. Here the second thing simply happens next.", 2: "But shows a difference. Here one thing just follows another." },
       hint: "What happened after packing?",
       why: "One thing after another: a time link, so <b>Then</b>.",
+      ez: { hint: "What came after packing?", why: "One thing, then the next. <b>Then</b>.", slips: { 1: "Because is a reason. This is just next.", 2: "But is a surprise. This is just next." } },
       lv: { medium: { q: "Which link word fits? \"[[Problem]]. ___, [[mw]].\"",
           options: ["Meanwhile", "For example", "Because"],
           slips: { 1: "For example would need an example of the problem. This is something else happening at the same time.", 2: "Because gives a reason. The second sentence is happening at the same time, somewhere else." },
@@ -295,6 +306,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
     { type: "learn", topic: "Following the links", title: "Links help you follow a text",
       fig: CHAIN,
       html: "<p>Read this. The link words are in bold. They tell you the order, the surprise and the reason.</p>" + MILD_TEXT,
+      ez: { title: "Follow the links", html: "<p>Read this. Link words are in <b>bold</b>.</p>" + MILD_TEXT },
       lv: { medium: { html: "<p>Read this. The link words and phrases are in bold. Some link sentences inside a paragraph; one links the two paragraphs.</p>" + MED_TEXT },
         spicy: { fig: ARTMAP,
           html: "<p>Read this short article. Look at how each paragraph opens: the first words tell you how it connects to the one before.</p>" + ARTICLE } } },
@@ -305,6 +317,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       answers: [0, 1, 2, 3],
       hint: "Look for the words that join ideas or move time on.",
       why: "<b>First</b>, <b>Then</b>, <b>but</b> and <b>because</b> link the ideas. Raining and packed are not links.",
+      ez: { q: "Pick <b>all</b> the link words.<div class=\"a2task\">" + plain(MILD_TEXT).replace(/<\/?p[^>]*>/g, "") + "</div>", hint: "Words that join, or say next.", why: "<b>First</b>, <b>Then</b>, <b>but</b> and <b>because</b>." },
       lv: { medium: { q: "Pick <b>all</b> the link phrases from the text.<div class=\"a2task\">" + plain(MED_TEXT).replace(/<\/?p[^>]*>/g, "") + "</div>",
           options: ["For example", "As a result", "However", "Meanwhile", "planned for weeks", "on the day"],
           answers: [0, 1, 2, 3],
@@ -321,6 +334,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       items: ["First, [[hero]] packed [[pos]] [[kit]].", "Next, [[pr]] set off for [[place]].", "After that, [[pr]] arrived and got ready.", "Finally, [[event]] began."],
       hint: "First, next, after that, finally.",
       why: "The link words give the order away: <b>First</b>, <b>Next</b>, <b>After that</b>, <b>Finally</b>.",
+      ez: { q: "Put these in order. Use the link words.", why: "First, Next, After that, Finally." },
       lv: { medium: { q: "Use the link words to put the second paragraph in order.",
           items: ["However, on the day, nothing went to plan.", "[[Problem]].", "Meanwhile, [[mw]].", "In the end, [[ending]]."],
           hint: "However turns the story. In the end finishes it.",
@@ -337,6 +351,8 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "A reason would need because. But shows a surprise.", 2: "But is not a time word. It shows a difference." },
       hint: "But shows something different from what you would expect.",
       why: "<b>But</b> tells you to expect a surprise: rain, and yet [[pr]] did not mind.",
+      ez: { q: "\"It was raining, <b>but</b> [[pr]] did not mind.\" What does <b>but</b> tell you?", hint: "But shows a surprise.", why: "Rain, and yet [[pr]] did not mind. A surprise.",
+        slips: { 1: "A reason needs because.", 2: "But is not a time word." } },
       lv: { medium: { q: "The second paragraph starts with <b>However</b>. What does that tell the reader?",
           options: ["Things are about to go differently from the first paragraph", "The second paragraph gives an example", "The second paragraph happens first"],
           slips: { 1: "An example would start with For example. However signals a turn.", 2: "However is not a time word. It signals a contrast." },
@@ -361,7 +377,8 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
         spicy: { fig: ARTMAP,
           html: "<p>Across a whole text, writers link in three ways:</p>" +
             "<ul><li><b>Topic sentences</b>: the first sentence of each paragraph says what it is about.</li><li><b>Link phrases</b> between paragraphs: However, On the other hand, Overall.</li><li><b>Referencing</b>: words that point back. \"<b>This dream</b> appears in hundreds of films\" points back to visiting the past.</li></ul>" +
-            "<p>Here is the article again.</p>" + ARTICLE } } },
+            "<p>Here is the article again.</p>" + ARTICLE } } ,
+      ez: { title: "Words that point back", html: "<p>Some words <b>point back</b>.</p><p>[[Hero]] packed the [[kit]]. <b>It</b> was heavy. <b>It</b> means the [[kit]].</p>" } },
 
     { type: "mc", topic: "Words that point back",
       q: "\"[[Hero]] packed the [[kit]]. It was heavy.\" What does <b>It</b> point back to?",
@@ -370,6 +387,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "[[Place]] is not in these two sentences. Look just before It.", 2: "The rain is not in these two sentences. What was packed?" },
       hint: "What was just packed?",
       why: "<b>It</b> points back to the [[kit]]. The writer does not need to say \"the [[kit]]\" twice.",
+      ez: { why: "<b>It</b> means the [[kit]].", slips: { 1: "That is not in there. Look just before It.", 2: "No rain here. What was packed?" } },
       lv: { medium: { q: "\"[[Problem]]. This was a disaster.\" What does <b>This</b> point back to?",
           options: ["The whole problem in the first sentence", "Only the last word of the first sentence", "Something in the next paragraph"],
           slips: { 1: "This can point back to a whole idea, not just one word.", 2: "Pointing words point back, not forward." },
@@ -392,6 +410,8 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "The class is more than one person, so it would be they, not he.", 2: "The music cannot mean anything. Who was talking?" },
       hint: "Who said it?",
       why: "<b>He</b> points back to Jay, the person who spoke. Outrageous music, apparently.",
+      ez: { q: "Jay told the class, \"My ears are not a toilet!\" He meant the music was far too loud. Who is <b>He</b>?", why: "<b>He</b> means Jay. He was talking.",
+        slips: { 1: "The class is lots of people. That would be they.", 2: "Music cannot mean things. Who was talking?" } },
       lv: { spicy: { q: "Paragraph 3 says: \"For this reason, some people argue that a careful visit would be worth the risk.\" What reason does <b>For this reason</b> point back to?",
         fig: null,
         options: ["Historians could see what really happened", "A tiny change could have huge effects", "Many people dream of the past", "The question is not simple"],
@@ -406,6 +426,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       slips: { 1: "A reason would need because.", 2: "A surprise would need but." },
       hint: "Then is a time word.",
       why: "<b>Then</b> links the two sentences in time: one thing, then the next.",
+      ez: { q: "\"First, [[pr]] packed. Then [[pr]] set off.\" What does <b>Then</b> do?", why: "<b>Then</b> says what is next." },
       lv: { medium: { q: "\"As a result, [[pr]] felt ready.\" As a result of what?",
           options: ["Practising every day", "Nothing going to plan", "[[Problem]]"],
           slips: { 1: "That comes after, in paragraph 2. As a result points back.", 2: "That is in paragraph 2, after this sentence. Look back, not forward." },
@@ -424,6 +445,7 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
       model: "Then [[pr]] went inside and got ready.",
       hint: "Start with then, but, so, suddenly, meanwhile, or another link word.",
       why: "Starting with a link word tells the reader how your sentence connects to the last one.",
+      ez: { q: "\"[[Hero]] reached [[place]].\" What next? Start with a link word, if you like.", hint: "Try then, but, so or suddenly.", why: "A link word joins it to the last one." },
       lv: { spicy: { q: "Write a topic sentence for a fifth paragraph of the article, starting with a link phrase. It could add another reason for, or against, visiting the past.",
         need: [["furthermore", "moreover", "in addition", "also", "however", "on the other hand", "nevertheless", "similarly", "finally", "another", "as well", "in contrast", "despite", "although"], ["past", "time", "visit", "travel", "histor", "risk", "learn", "trip"]],
         model: "Furthermore, a visit to the past could help us understand our own families.",
@@ -438,6 +460,11 @@ var ARTICLE = "<p class=\"a2task\"><b>Should we visit the past?</b><br><br>" +
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay by a time portal saying then, meanwhile, however">' + A.portal(80, 75, 56) + A.jay(240, 50, 0.85, "smile") +
       A.bubble(290, 6, 124, 52, "Then...\nmeanwhile...", 294) +
       A.egg(A.bonnie(380, 112, 0.5, "sit"), "Bonnie's favourite link word: because. Because snacks.") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>Instructions say <b>first, then, finally</b>.</p><p>A time travel story needs <b>then</b> and <b>meanwhile</b> too.</p>" },
+    make: { intro: "2 ideas, and a link word to join them." }
   },
 
   make: {

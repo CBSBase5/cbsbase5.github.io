@@ -190,6 +190,10 @@ function drawWidget(el, api){
     music: { name: "Music", w: { bld: "rehearsal room", room2: "dressing room", thing: "grand piano" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>Every house and school starts as a plan.</p><p>Castles were built from plans too, with no computers!</p>" },
+    make: { intro: "Pick a room, its size and a scale. The card draws it." }
+  },
   startFig: START,
   steps: [
 
@@ -200,6 +204,7 @@ function drawWidget(el, api){
         "<p>The <b>scale</b> tells you how much. <b>1 square = 1 m</b> means each square on the plan stands for 1 metre in real life.</p>" +
         "<p>So a wall 7 squares long is <b>7 m</b> long in real life.</p>" +
         "<p>Plans use symbols: a <b>door</b> is a gap in the wall with a curve showing how it swings; a <b>window</b> is thin lines in the wall.</p>",
+      ez: { title: "A plan is a view from above", html: "<p>A <b>plan</b> is a building seen from above, shrunk.</p><p><b>1 square = 1 m</b>. So 7 squares is <b>7 m</b>.</p>" },
       lv: { medium: { html: "<p>A <b>plan</b> shows a building from above, drawn <b>to scale</b>: every length shrunk by the same amount.</p>" +
           "<p>The scale tells you how much. <b>1 square = 2 m</b> means each square stands for 2 metres.</p>" +
           "<p><b>Plan to real: multiply.</b> A wall 5 squares long is 5 x 2 = <b>10 m</b>.</p>" +
@@ -217,6 +222,8 @@ function drawWidget(el, api){
       slips: [[6, "Count again, touching each square along the long wall. There is one more."], [8, "One too many. Count the squares inside the wall, one at a time."], [4, "That is the short side. The length is the long side."]],
       hint: "Count the squares along the long wall. Each one is 1 m.",
       why: "7 squares, and each square is 1 m, so the [[bld]] is <b>7 m</b> long.",
+      ez: { q: "How long is the [[bld]] in real life?", slips: [[null, "Count again. There is one more."], [null, "One too many. Count one at a time."], [null, "That is the short side."]],
+        hint: "Count along the long wall.", why: "7 squares. So <b>7 m</b>." },
       lv: { medium: { fig: plan({ cols: 14, rows: 7, x: 2, y: 1, w: 7, h: 4, door: true, win: true, label: "[[Bld]]", scale: "1 square = 2 m", aria: "A plan 7 squares long and 4 squares wide. 1 square is 2 metres." }),
           boxes: [{ label: "Length", a: 14, post: "m" }],
           slips: [[7, "That is the number of squares. Each square is 2 m, so multiply by 2."], [3.5, "That divides. Going from plan to real life makes it bigger: multiply."], [8, "That is the short side, doubled. Use the long side."]],
@@ -236,6 +243,7 @@ function drawWidget(el, api){
       slips: [[7, "That is the length. Width is the short side."], [3, "Count again along the short wall. There is one more."]],
       hint: "Count the squares along the short wall.",
       why: "4 squares, so the [[bld]] is <b>4 m</b> wide.",
+      ez: { q: "How <b>wide</b> is the [[bld]]?", slips: [[null, "That is the length. Width is the short side."], [null, "Count again. There is one more."]], hint: "Count along the short wall.", why: "4 squares. So <b>4 m</b>." },
       lv: { medium: { fig: plan({ cols: 14, rows: 7, x: 2, y: 1, w: 7, h: 4, door: true, win: true, label: "[[Bld]]", scale: "1 square = 2 m", aria: "A plan 7 squares long and 4 squares wide. 1 square is 2 metres." }),
           boxes: [{ label: "Width", a: 8, post: "m" }],
           slips: [[4, "That is the number of squares. Multiply by 2."], [2, "That divides. Plan to real life: multiply."], [14, "That is the length. Width is the short side."]],
@@ -256,6 +264,7 @@ function drawWidget(el, api){
       slips: { 1: "Windows are thin lines drawn in the wall, with no curve.", 2: "The curve is the clue: it shows something swinging open." },
       hint: "What swings open into a room?",
       why: "The gap is the doorway and the curve shows the door swinging open, so nobody puts a [[thing]] in its way.",
+      ez: { q: "What does the gap with a curve show?", slips: { 1: "Windows are thin lines. No curve.", 2: "The curve shows something swinging." }, hint: "What swings open?", why: "A <b>door</b>. The curve shows it swing." },
       lv: { spicy: { q: "A plan is labelled <b>1:100</b>. What does that mean?",
         fig: null,
         options: ["1 cm on the plan is 100 cm in real life", "The real building is 100 cm long", "The plan is 100 times bigger than the building", "Every room is 100 m long"],
@@ -270,6 +279,7 @@ function drawWidget(el, api){
         "<p><b>Worked example.</b> A real wall is 8 m long. The scale is 1 square = 2 m.</p>" +
         "<p>How many 2 m pieces fit in 8 m? 8 &divide; 2 = <b>4</b>. So draw the wall <b>4 squares</b> long.</p>" +
         "<p>Check: 4 squares x 2 m = 8 m. Yes.</p>",
+      ez: { html: "<p>Real life to plan: <b>divide</b>.</p><p>8 m wall. 1 square = 2 m. 8 &divide; 2 = <b>4 squares</b>.</p>" },
       lv: { medium: { fig: chop(9, 2, "m", "cm"),
           html: "<p>From <b>real life to the plan</b>, you <b>divide</b>: the plan is smaller.</p>" +
             "<p><b>Worked example.</b> A real wall is 9 m long. The scale is 1 cm to 2 m.</p>" +
@@ -288,6 +298,8 @@ function drawWidget(el, api){
       slips: [[20, "That multiplies. The plan is smaller, so divide."], [10, "That is the real length. Divide it by 2."], [8, "That takes away 2. Divide by 2 instead."]],
       hint: "How many 2s make 10?",
       why: "10 &divide; 2 = <b>5</b> squares. Check: 5 x 2 = 10 m.",
+      ez: { q: "A wall is 10 m. 1 square = 2 m.<br>10 &divide; 2 = ?", slips: [[null, "That multiplies. Divide."], [null, "That is the real length. Divide by 2."], [null, "That takes away 2. Divide by 2."]],
+        why: "10 &divide; 2 = <b>5</b> squares." },
       lv: { medium: { q: "Your turn, with the sum set up. A real wall is 7 m. Scale: 1 cm to 2 m.<br>7 &divide; 2 = ?",
           boxes: [{ label: "On the plan", a: 3.5, post: "cm" }],
           slips: [[14, "That multiplies. Real to plan: divide."], [3, "Close, but 3 x 2 is only 6. There is a half left over."], [4, "4 x 2 is 8, a bit too much. Try a half."]],
@@ -305,6 +317,7 @@ function drawWidget(el, api){
       slips: [[0, 12, "That multiplies. Divide by 2."], [0, 6, "That is the real length. Divide by 2."], [1, 8, "That multiplies. Divide by 2."], [1, 4, "That is the real width. Divide by 2."]],
       hint: "Divide each length by 2.",
       why: "6 &divide; 2 = <b>3</b> and 4 &divide; 2 = <b>2</b>. A 3 by 2 rectangle.",
+      ez: { q: "A room is 6 m by 4 m. 1 square = 2 m. How many squares?", hint: "Divide each by 2.", why: "<b>3</b> by <b>2</b> squares." },
       lv: { medium: { q: "Now on your own. A real room is 9 m long and 5 m wide. Scale: 1 cm to 2 m. How long is each side on the plan?",
           boxes: [{ label: "Length", a: 4.5, post: "cm" }, { label: "Width", a: 2.5, post: "cm" }],
           slips: [[0, 18, "That multiplies. Divide by 2."], [0, 4, "Close. 4 x 2 is 8. There is a half more."], [1, 10, "That multiplies. Divide by 2."], [1, 2, "Close. 2 x 2 is 4. There is a half more."]],
@@ -323,6 +336,8 @@ function drawWidget(el, api){
       slips: { 1: "16 squares would be 32 m in real life. That is far too big.", 2: "Doors do not change the length of a wall." },
       hint: "Should the plan be bigger or smaller than real life?",
       why: "8 x 2 = 16 makes it bigger. Real to plan, divide: 8 &divide; 2 = 4 squares.",
+      ez: { q: "A wall is 8 m. 1 square = 2 m. Someone draws 16 squares. What slip?", slips: { 1: "16 squares would be 32 m.", 2: "Doors do not change the length." },
+        hint: "Is a plan bigger or smaller?", why: "They <b>multiplied</b>. 8 &divide; 2 = 4 squares." },
       lv: { spicy: { q: "A real wall is 6 m at 1:50. Someone draws it 0.12 cm long. What slip did they make?",
         options: ["They divided the metres by 50 without changing to cm first", "They multiplied instead of dividing", "Nothing, 0.12 cm is right", "They used 1:100 instead"],
         slips: { 1: "Multiplying would give 300, not 0.12.", 2: "0.12 cm is about a millimetre. A 6 m wall would be invisible.", 3: "At 1:100 it would be 6 cm, not 0.12." },
@@ -337,6 +352,7 @@ function drawWidget(el, api){
       html: "<p>Four steps, every time:</p>" +
         "<ol><li><b>Work out</b> each length in squares (divide by the scale).</li><li><b>Draw</b> the outside walls.</li><li><b>Add</b> the door and windows.</li><li><b>Label</b> the room and write the scale.</li></ol>" +
         "<p>The blue box is the [[thing]], drawn to the same scale.</p>",
+      ez: { html: "<p><b>1.</b> Work out the squares. <b>2.</b> Draw the walls.</p><p><b>3.</b> Add a door. <b>4.</b> Label it.</p>" },
       lv: { spicy: { html: "<p>Four steps, every time:</p>" +
           "<ol><li><b>Convert</b> each real length to cm, then divide by the scale.</li><li><b>Draw</b> the outside walls with a ruler (or the grid).</li><li><b>Add</b> doors, windows and anything inside, to the same scale.</li><li><b>Label</b> rooms and write the scale ratio, so anyone can read it.</li></ol>" +
           "<p>Without the scale written on it, a plan is just a picture.</p>" } } },
@@ -344,6 +360,7 @@ function drawWidget(el, api){
     { type: "widget", topic: "Draw it on the grid", unscored: true,
       title: "Draw the [[bld]]",
       html: "<p>Have a go on the squared paper. Work out the squares first, then tap two corners. Add a door and a window if you like.</p>",
+      ez: { html: "<p>Work out the squares. Then tap two corners.</p>" },
       mount: drawWidget,
       report: function(d){ return d && d.r ? "Drew a plan " + d.r[2] + " by " + d.r[3] + " squares." : ""; } },
 
@@ -354,6 +371,7 @@ function drawWidget(el, api){
       slips: [[1, "Each square is 1 m, so 2 m needs 2 squares."], [4, "That doubles it. 1 square is 1 m, so the number stays the same."]],
       hint: "1 square for each metre.",
       why: "2 m at 1 square = 1 m is <b>2 squares</b>.",
+      ez: { q: "The [[thing]] is 2 m. 1 square = 1 m. How many squares?", slips: [[null, "2 m needs 2 squares."], [null, "That doubles it. Keep it the same."]], why: "<b>2 squares</b>." },
       lv: { medium: { q: "The [[thing]] is 3 m long. Scale: 1 square = 2 m. How many squares long should it be?",
           fig: plan({ cols: 12, rows: 6, x: 1, y: 1, w: 6, h: 4, label: "", thing: [2, 2, 1.5, 1], scale: "1 square = 2 m", aria: "A room with a blue box inside it" }),
           boxes: [{ label: "Squares", a: 1.5 }],
@@ -375,6 +393,7 @@ function drawWidget(el, api){
       slips: { 1: "Count the long side of Plan B. It is only 4 squares, so 4 m.", 2: "Plan C is a square: 6 by 6. The room is 3 m wide." },
       hint: "Count the squares along each side.",
       why: "Plan A is 6 by 3 squares, which is 6 m by 3 m.",
+      ez: { q: "The [[bld]] is 6 m by 3 m. 1 square = 1 m. Which plan?", slips: { 1: "Plan B is only 4 squares long.", 2: "Plan C is 6 by 6. Too wide." }, why: "<b>Plan A</b> is 6 by 3." },
       lv: { medium: { q: "The [[bld]] is 8 m long and 4 m wide. The scale is 1 square = 2 m. Which plan is right?",
           fig: choose([[8, 4], [4, 2], [6, 3]], 18, "1 square = 2 m"),
           answer: 1,
@@ -398,6 +417,7 @@ function drawWidget(el, api){
         T(20, 236, "1 square = 1 m", 14, { b: 1 }) + '</svg>',
       html: "<p>A building often has rooms side by side. Draw each room to the same scale, sharing a wall.</p>" +
         "<p>The [[bld]] is 6 squares and the [[room2]] is 4 squares. The whole building is 6 + 4 = <b>10 squares</b>, so <b>10 m</b> long.</p>",
+      ez: { html: "<p>Rooms can sit side by side.</p><p>6 squares + 4 squares = <b>10 m</b> long.</p>" },
       lv: { medium: { html: "<p>A building often has rooms side by side. Draw each room to the same scale, sharing a wall.</p>" +
           "<p>Work out each room, then add. If the scale were 1 square = 2 m, the 10 squares here would be 10 x 2 = <b>20 m</b>.</p>" },
         spicy: { html: "<p>Before you draw a whole building, <b>pick a scale that fits the paper</b>.</p>" +
@@ -412,6 +432,8 @@ function drawWidget(el, api){
       slips: [[5, "That is just the [[bld]]. Add the [[room2]] too."], [15, "That multiplies. The rooms sit side by side, so add."], [2, "That takes away. Side by side means add."]],
       hint: "5 + 3.",
       why: "5 + 3 = <b>8 squares</b>, which is 8 m.",
+      ez: { q: "1 square = 1 m. The [[bld]] is 5 m. The [[room2]] is 3 m. How many squares in all?",
+        slips: [[null, "That is just the [[bld]]. Add the [[room2]]."], [null, "That multiplies. Add them."], [null, "That takes away. Add them."]], why: "5 + 3 = <b>8 squares</b>." },
       lv: { medium: { q: "A real building has the [[bld]] (7 m) and the [[room2]] (5 m) side by side. Scale: 1 square = 2 m. How many squares long is the whole plan?",
           boxes: [{ label: "Squares", a: 6 }],
           slips: [[12, "That is the real length in metres. Divide by 2."], [24, "That multiplies by 2. Real to plan: divide."], [3.5, "That is just the [[bld]]. Add the [[room2]] too."]],
@@ -430,6 +452,7 @@ function drawWidget(el, api){
       slips: { 1: "Colour is nice, but it does not help a builder measure.", 2: "The building is full size. Only the drawing is shrunk." },
       hint: "What does a builder need to read off a plan?",
       why: "To scale means every length shrinks the same way, so a builder can measure any wall on the plan and know the real length.",
+      ez: { slips: { 1: "Colour does not help a builder measure.", 2: "Only the drawing is shrunk." }, hint: "What does a builder need?", why: "Every length shrinks the same. So builders can <b>measure</b> it." },
       lv: { spicy: { q: "A building is 18 m long. The paper is 30 cm wide. Which scale gives the <b>biggest</b> drawing that still fits?",
         options: ["1:100", "1:50", "1:200", "1:20"],
         slips: { 1: "At 1:50, 1800 &divide; 50 = 36 cm. Too wide.", 2: "At 1:200 it is 9 cm. It fits, but 1:100 is bigger and still fits.", 3: "At 1:20, 1800 &divide; 20 = 90 cm. Far too wide." },
@@ -442,6 +465,7 @@ function drawWidget(el, api){
       slips: [[4.5, "That divides. Plan to real life: multiply."], [11, "That adds 2. Each square is 2 m, so multiply."], [9, "That is the number of squares. Multiply by 2."]],
       hint: "9 squares, each 2 m.",
       why: "9 x 2 = <b>18 m</b>.",
+      ez: { q: "A plan is 9 squares. 1 square = 2 m. How long is the real building?", slips: [[null, "That divides. Plan to real: multiply."], [null, "That adds 2. Multiply."], [null, "That is the squares. Multiply by 2."]] },
       lv: { medium: { q: "The plan of a whole building is 8.5 cm long. Scale: 1 cm to 2 m. How long is the real building?",
           boxes: [{ label: "Real length", a: 17, post: "m" }],
           slips: [[4.25, "That divides. Plan to real life: multiply."], [16, "Close. Do not forget the half: 0.5 x 2 = 1 more metre."], [8.5, "That is the plan length. Multiply by 2."]],

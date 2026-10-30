@@ -181,6 +181,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>3.7 sits between 3 and 4. It is <b>nearer to 4</b>, so 3.7 rounds to <b>4</b>.</p>" +
         "<p>The shortcut: look at the digit just after the point. <b>5 or more, go up. 4 or less, stay put.</b></p>" +
         "<p>Exactly halfway, like 3.5? The rule says go up: 4.</p>",
+      ez: { title: "Which is nearer?", html: "<p>3.7 is <b>nearer to 4</b>. So it rounds to 4.</p><p><b>5 or more, go up.</b> 4 or less, stay put.</p>" },
       lv: {
         mild: { html: "<p>3.7 is between 3 and 4.</p><p>It is <b>nearer to 4</b>. So 3.7 rounds to <b>4</b>.</p><p>Look at the digit after the point. <b>5 or more, go up.</b> 4 or less, stay put.</p>" },
         spicy: { fig: nline(19, 20, 19.6),
@@ -190,6 +191,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
     { type: "widget", topic: "Nearest whole number", unscored: true,
       title: "Slide and see",
       html: "<p>Slide the dot along the line and watch where it rounds to. Try to find the exact spot where it flips, if you like.</p>",
+      ez: { html: "<p>Slide the dot. Where does it round to?</p>" },
       mount: slider,
       report: function(d){ return d && d.moves ? "Slide and see: moved the dot " + d.moves + " times." : ""; } },
 
@@ -201,6 +203,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "Look at the line: 6.3 is closer to 6. The 3 is 4 or less, so it stays put.", 2: "6.5 is not a whole number. Pick 6 or 7." },
       hint: "Is the dot nearer the 6 or the 7?",
       why: "The digit after the point is 3, which is 4 or less, so it stays at <b>6</b>.",
+      ez: { q: "Is 6.3 nearer 6 or 7?", hint: "Look at the dot.", why: "3 is 4 or less. It stays at <b>6</b>.", slips: { 1: "Look: the dot is nearer 6." } },
       lv: {
         mild: { options: ["6", "7"], slips: { 1: "Look at the line: the dot is closer to 6." } },
         spicy: { q: "Round 49.62 to the nearest whole number.", fig: nline(49, 50, 49.62, { arrow: false }),
@@ -215,6 +218,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       cards: [["4.2", 1], ["7.8", 0], ["1.5", 0], ["9.4", 1], ["3.6", 0], ["5.1", 1]],
       hint: "Look at the digit after the point. 5 or more goes up.",
       why: "7.8, 1.5 and 3.6 go up (8, 5 and 6 are 5 or more). 4.2, 9.4 and 5.1 stay put.",
+      ez: { q: "Round to a whole number. Up or stay put?", hint: "5 or more goes up.", why: "7.8 and 3.6 go up. 4.2 and 9.4 stay." },
       lv: {
         mild: { cards: [["4.2", 1], ["7.8", 0], ["9.4", 1], ["3.6", 0]] },
         spicy: { cards: [["12.49", 1], ["12.51", 0], ["8.5", 0], ["99.7", 0], ["0.45", 1], ["6.05", 1]],
@@ -226,6 +230,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[8, "The digit after the point is 6, which is 5 or more, so go up."], [8.6, "That is the exact weight. Rounded to the nearest kilogram it has nothing after the point."]],
       hint: "Is 8.6 nearer 8 or 9?",
       why: "6 is 5 or more, so it goes up: about <b>9 kg</b>.",
+      ez: { q: "[[Load]] weighs 5.8 kg. Round to the nearest kg.", hint: "Nearer 5 or 6?", why: "5.8 is nearer 6. About <b>6 kg</b>.", slips: [[null, "Look: 5.8 is much nearer 6."], [null, "That is exact. Rounded has nothing after the point."]] },
       lv: {
         mild: { q: "[[Load]] weighs 5.8 kg. Round it to the nearest kilogram.", fig: nline(5, 6, 5.8, { arrow: false, post: " kg" }),
           boxes: [{ label: "About", a: 6, post: "kg" }],
@@ -243,6 +248,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       fig: nline(4, 5, 4.68, { pre: P, loLab: "4.00", hiLab: "5.00", vLab: "4.68" }),
       html: "<p><b>Nearest pound:</b> look at the pence. 50p or more, go up. " + P + "4.68 rounds to <b>" + P + "5</b>.</p>" +
         "<p><b>Nearest penny</b> means two decimal places. Prices sometimes have more digits, like sharing " + P + "10 between 3 people: " + P + "3.3333... Keep two digits after the point, look at the next one: 3, so stay put. <b>" + P + "3.33</b>.</p>",
+      ez: { title: "Nearest pound", html: "<p>Look at the pence. <b>50p or more, go up.</b></p><p>" + P + "4.68 rounds up to <b>" + P + "5</b>.</p>" },
       lv: {
         mild: { html: "<p><b>Nearest pound:</b> look at the pence.</p><p><b>50p or more, go up.</b> 49p or less, stay put.</p><p>" + P + "4.68 has 68p, so it rounds up to <b>" + P + "5</b>.</p>" },
         spicy: { html: "<p><b>Nearest penny</b> means two decimal places. Keep two digits after the point and look at the third: 5 or more, go up.</p>" +
@@ -256,6 +262,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "49p is less than 50p, so it stays at " + P + "7.", 2: "That is the nearest 50p. Nearest pound means whole pounds." },
       hint: "Is 49p more or less than 50p?",
       why: "49p is less than 50p, so it stays at <b>" + P + "7</b>. Just.",
+      ez: { hint: "Is 80p more than 50p?", why: "80p is more than 50p. Up to <b>" + P + "4</b>.", slips: { 1: "80p is more than 50p, so go up.", 2: "That is exact. Round to whole pounds." } },
       lv: {
         mild: { q: "Round " + P + "3.80 to the nearest pound.", options: [P + "4", P + "3", P + "3.80"],
           slips: { 1: "80p is more than 50p, so go up.", 2: "That is the exact price. Nearest pound means whole pounds." },
@@ -272,6 +279,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[1, 3.34, "The next digit is 3, which is 4 or less, so stay put."], [1, 3.3, "That is one decimal place. Pennies need two."], [1, 3, "That is the nearest pound. Pennies need two decimal places."]],
       hint: "Keep 3.33, then look at the next digit.",
       why: "3.33 and the next digit is 3, so it stays put: <b>" + P + "3.33</b>.",
+      ez: { q: "[[Buy]] costs " + P + "6.72. Round to the nearest pound.", hint: "Is 72p 50p or more?", why: "72p goes up. <b>" + P + "7</b>.", slips: [[null, null, "72p is more than 50p, so go up."], [null, null, "That is exact. Round to whole pounds."]] },
       lv: {
         mild: { q: "[[Buy]] costs " + P + "6.72. Round to the nearest pound, one step at a time.",
           fig: nline(6, 7, 6.72, { pre: P, loLab: "6.00", hiLab: "7.00", vLab: "6.72", arrow: false }),
@@ -291,6 +299,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[4.23, "The next digit is 6, which is 5 or more, so go up."], [4.2, "That is one decimal place. Pennies need two."], [4, "That is the nearest pound. Pennies need two decimal places."]],
       hint: "Keep 4.23, then look at the next digit.",
       why: "4.23 and the next digit is 6, so it goes up: <b>" + P + "4.24</b>.",
+      ez: { q: "[[Buy]] costs " + P + "9.51. Round to the nearest pound.", hint: "Is 51p 50p or more?", why: "51p goes up. <b>" + P + "10</b>.", slips: [[null, "51p is more than 50p, so go up."], [null, "That is exact. Round to whole pounds."]] },
       lv: {
         mild: { q: "At [[shop]], [[buy]] costs " + P + "9.51. Round it to the nearest pound.",
           boxes: [{ label: P, a: 10 }],
@@ -312,6 +321,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       answers: [0, 1, 4],
       hint: "Anything from " + P + "4.50 up to " + P + "5.49 rounds to " + P + "5.",
       why: P + "4.50 and " + P + "4.95 go up to " + P + "5. " + P + "5.49 stays at " + P + "5. " + P + "4.49 stays at " + P + "4 and " + P + "5.50 goes up to " + P + "6. Bonnie's treats are about " + P + "5. Outrageous.",
+      ez: { q: "Which round to " + P + "5? Pick <b>all</b>.", hint: "Which are nearest " + P + "5?", why: "" + P + "4.80 and " + P + "5.20 round to " + P + "5." },
       lv: {
         mild: { options: [P + "4.80", P + "5.20", P + "3.90", P + "6.10"], answers: [0, 1],
           hint: "Which prices are nearest to " + P + "5?",
@@ -327,6 +337,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>Rounding a measurement to <b>1 decimal place</b> takes three steps.</p>" +
         "<p><b>1 Keep</b> one digit after the point: 1.4. <b>2 Look next door</b>: 6. <b>3 Decide</b>: 5 or more, so the 4 goes up. 1.46 m is <b>1.5 m</b>.</p>" +
         "<p>If it rounds to a zero, keep the zero: 2.03 kg to 1 decimal place is <b>2.0 kg</b>. The zero shows how exact you were.</p>",
+      ez: { title: "Nearest centimetre", html: "<p>The pencil is 8.4 cm. The 4 says <b>stay put</b>.</p><p>So it is about <b>8 cm</b>.</p>" },
       lv: {
         mild: { fig: ruler(8.4, A2ART.egg(A2ART.bird(470, 36, 0.6, "#3a8fd6"), "A bird measured in centimetres. About 14 cm, nearest whole bird.")),
           html: "<p>This pencil is 8.4 cm long.</p><p>Look at the digit after the point: 4. That is 4 or less, so <b>stay put</b>.</p><p>To the nearest centimetre, the pencil is <b>8 cm</b>.</p>" },
@@ -341,6 +352,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[2, 2.8, "The next door digit is 3, which is 4 or less, so stay put."], [2, 3, "That is the nearest whole metre. Keep one digit after the point."]],
       hint: "Keep 2.7. Next door is 3.",
       why: "Keep 2.7, next door 3, stay put: <b>2.7 m</b>.",
+      ez: { q: "The pencil is 8.4 cm. Round to the nearest cm.", hint: "Nearer 8 or 9?", why: "4 means stay put. <b>8 cm</b>.", slips: [[null, null, "The 4 means stay put."], [null, null, "That is exact. Rounded has nothing after the point."]] },
       lv: {
         mild: { q: "The pencil is 8.4 cm long. Round it to the nearest centimetre.", fig: ruler(8.4),
           boxes: [{ label: "Digit after the point:", a: 4 }, { label: "Answer:", a: 8, post: "cm" }],
@@ -359,6 +371,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[4.8, "Next door is 5. 5 or more goes up."], [5, "That is the nearest whole metre. Keep one digit after the point."], [4.85, "That is the exact length. 1 decimal place means one digit after the point."]],
       hint: "Keep 4.8, then look next door.",
       why: "Keep 4.8, next door 5, go up: <b>4.9 m</b>.",
+      ez: { q: "[[Long]] is 3.6 m. Round to the nearest metre.", hint: "Nearer 3 or 4?", why: "6 means go up. <b>4 m</b>.", slips: [[null, "The 6 means go up."], [null, "That is exact. Rounded has nothing after the point."]] },
       lv: {
         mild: { q: "[[Long]] measures 3.6 m. Round it to the nearest metre.", fig: nline(3, 4, 3.6, { post: " m", arrow: false }),
           boxes: [{ label: "Answer:", a: 4, post: "m" }],
@@ -378,6 +391,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "Same size, but 1 decimal place means one digit after the point, so write the zero: 2.0.", 2: "Next door is 3, which is 4 or less, so stay put.", 3: "That is the exact weight, with 2 decimal places." },
       hint: "Keep one digit after the point: 2.0. Next door is 3.",
       why: "Keep 2.0, next door 3, stay put: <b>2.0 kg</b>. The zero shows it is to 1 decimal place.",
+      ez: { q: "Round 6.2 cm to the nearest cm.", hint: "Nearer 6 or 7?", slips: { 1: "The 2 means stay put.", 2: "That is exact." } },
       lv: {
         mild: { q: "What is 6.2 cm rounded to the nearest centimetre?", options: ["6 cm", "7 cm", "6.2 cm"],
           slips: { 1: "The digit after the point is 2, so stay put.", 2: "That is the exact length." },
@@ -393,6 +407,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       pairs: [["3.14 m", "3.1 m"], ["3.18 m", "3.2 m"], ["2.96 m", "3.0 m"], ["3.25 m", "3.3 m"]],
       hint: "Keep one digit after the point, then look next door.",
       why: "3.14 stays at 3.1. 3.18 goes up to 3.2. 2.96 goes up to 3.0. 3.25 goes up to 3.3.",
+      ez: { q: "Match each one to the nearest cm.", hint: "5 or more goes up.", why: "3.8 and 4.5 go up. 3.2 and 6.1 stay." },
       lv: {
         mild: { q: "Match each measurement to the nearest whole centimetre.",
           pairs: [["3.2 cm", "3 cm"], ["3.8 cm", "4 cm"], ["4.5 cm", "5 cm"], ["6.1 cm", "6 cm"]],
@@ -407,6 +422,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>17 people, minibuses with 8 seats. 17 " + "&#247;" + " 8 = 2.125. The rule says 2, but 2 buses only fit 16. Someone gets left behind. You need <b>3</b>.</p>" +
         "<p>When you need enough of something (buses, boxes, tins of paint), <b>always round up</b>.</p>" +
         "<p>When you are counting how many you can afford, <b>always round down</b>: you cannot buy 3.3 tickets.</p>",
+      ez: { title: "Real life decides", html: "<p>17 people. 8 seats a bus. 2 buses fit 16.</p><p>Need enough? <b>Round up</b>. 3 buses.</p>" },
       lv: {
         mild: { html: "<p>17 people. Each minibus has 8 seats.</p><p>2 buses fit 16 people. One person is left over, so you need <b>3 buses</b>.</p><p>If you need enough of something, <b>round up</b>.</p>" } } },
 
@@ -416,6 +432,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[2, "2 minibuses only seat 16. Some [[group]] get left behind."], [2.6, "You cannot book 2.6 minibuses. Pick a whole number that fits everyone."], [2.625, "You cannot book part of a minibus."]],
       hint: "How many people fit in 2 minibuses? Is that enough?",
       why: "2 minibuses seat 16, not enough. <b>3</b> seat 24, so everyone gets on.",
+      ez: { q: "You have " + P + "10. [[Buy]] costs " + P + "3. How many can you buy?", hint: "3 cost " + P + "9. Could you get a 4th?", why: "<b>3</b>, with " + P + "1 left over.", slips: [[null, "4 would cost " + P + "12."], [null, "You cannot buy part of one."]] },
       lv: {
         mild: { q: "You have " + P + "10. [[Buy]] costs " + P + "3. 10 &#247; 3 = 3.33. How many can you buy?",
           boxes: [{ label: "How many", a: 3 }],
@@ -435,6 +452,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "With money, you can only buy whole ones you can afford, so that one rounds down.", 2: "Height follows the normal rule: 5 or more goes up, 4 or less stays." },
       hint: "Which one needs enough of something?",
       why: "50 &#247; 12 = 4.17, but 4 boxes only hold 48 cakes. You need 5 boxes.",
+      ez: { q: "Which one do you <b>always</b> round up?", hint: "Which needs enough of something?", why: "4 boxes hold 48. You need <b>5</b>.", slips: { 1: "Height uses the normal rule." } },
       lv: {
         mild: { options: ["Boxes needed to pack 50 cakes, 12 to a box", "Your height to the nearest centimetre"],
           slips: { 1: "Height follows the normal rule." } },
@@ -450,6 +468,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[1, 3.4, "Next door to the 4 is 6, so go up to 3.5."], [0, 4, "The digit after the point is 4, so stay put at 3."], [1, 3.47, "That is 2 decimal places."]],
       hint: "Nearest whole: look at the 4. One decimal place: keep 3.4, look at the 6.",
       why: "Nearest whole: <b>3 m</b>. 1 decimal place: <b>3.5 m</b>. Different questions, different answers.",
+      ez: { q: "" + P + "4.39 and " + P + "2.85. Round each to the nearest pound.", hint: "Look at the pence. 50p or more goes up.", why: "<b>" + P + "4</b> and <b>" + P + "3</b>. About " + P + "7 in all.", slips: [[null, null, "39p is under 50p, so stay put."], [null, null, "85p is over 50p, so go up."]] },
       lv: {
         mild: { q: "[[Who]] bought two things: " + P + "4.39 and " + P + "2.85. Round each to the nearest pound.",
           boxes: [{ label: P + "4.39 is about " + P, a: 4 }, { label: P + "2.85 is about " + P, a: 3 }],
@@ -462,6 +481,12 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
           hint: "Each time: keep, look next door, decide.",
           why: "<b>7 m</b>, <b>7.1 m</b> and <b>7.06 m</b>. Each one is a different level of exactness." } } }
   ],
+
+  ez: {
+    blurb: "Rounding numbers, money and lengths.",
+    realWorld: { title: "Rounding is everywhere", html: "<p>Prices, weather and recipes are all <b>rounded</b>.</p><p>Before 1971, a pound had 240 pennies!</p>" },
+    make: { intro: "Your rounding rule, with an example." }
+  },
 
   realWorld: {
     title: "Rounding is everywhere",

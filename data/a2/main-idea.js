@@ -140,6 +140,7 @@ var TX3 = {
       html: "<p>The <b>main idea</b> is what the whole text is <b>mostly about</b>.</p>" +
         "<p>The <b>details</b> are the smaller bits that tell you more. They all shelter under the main idea, like people under one big umbrella.</p>" +
         "<p>A handy question: <b>what do all the sentences have in common?</b></p>",
+      ez: { html: "<p>The <b>main idea</b> is what the text is <b>mostly about</b>.</p><p>The <b>details</b> shelter under it, like an umbrella.</p>" },
       lv: { spicy: { html: "<p>The <b>main idea</b> is what the whole text is <b>mostly about</b>. The <b>details</b> shelter underneath it.</p>" +
         "<p>Sometimes a writer says the main idea straight out. Often they do not: you work it out by asking <b>what all the details have in common</b>.</p>" +
         "<p>A main idea is usually a short sentence, not just a word. \"Nerves\" is a topic. \"Nova is too nervous to eat\" is an idea.</p>" } } },
@@ -151,6 +152,8 @@ var TX3 = {
       slips: { 1: "Breakfast is in one sentence. It is a detail, not the whole text.", 2: "They got up early, so the text never says they were late." },
       hint: "What do all four sentences have in common?",
       why: "Every sentence is part of getting ready: getting up, packing, breakfast, setting off. That is the main idea.",
+      ez: { q: "What is this <b>mostly</b> about?" + TX1.mild, slips: { 1: "Breakfast is just 1 sentence.", 2: "They got up early. Not late." },
+        hint: "What do all 4 sentences share?", why: "Every sentence is about getting ready." },
       lv: {
         medium: { q: "Have a read. What is this text mostly about?" + TX1.medium,
           options: ["[[Name]] getting ready for [[event]].", "Next door's cat.", "[[Name]] having breakfast.", "[[Name]] loving cats."],
@@ -169,6 +172,8 @@ var TX3 = {
       slips: { 1: "That one covers every sentence, so it is the main idea.", 2: "That is the main idea said another way. It covers the whole text." },
       hint: "A detail is only in one sentence.",
       why: "Breakfast is one small part of the text. It sits under the umbrella.",
+      ez: { q: "Which one is a <b>detail</b>?" + TX1.mild, slips: { 1: "That covers it all. It is the main idea.", 2: "That covers it all too." },
+        hint: "A detail is in 1 sentence.", why: "Breakfast is 1 small part." },
       lv: {
         medium: { q: "Same text. Which one is a <b>detail</b>, not the main idea?" + TX1.medium,
           options: ["Next door's cat was sitting on the wall.", "[[Name]] gets ready for [[event]].", "Getting ready for a big day."] },
@@ -184,6 +189,7 @@ var TX3 = {
       cards: [["[[Name]] gets ready for [[event]].", 0], ["They checked the [[kit]] twice.", 1], ["They got up early.", 1], ["They had breakfast.", 1]],
       hint: "Only one card covers every sentence.",
       why: "One card covers everything. The rest are details that tell you more about it.",
+      ez: { hint: "Only 1 card covers it all.", why: "1 card covers it all. The rest are details." },
       lv: {
         medium: { q: "Sort them. The whole text, or one small part?" + TX1.medium,
           cards: [["[[Name]] gets ready for [[event]].", 0], ["They checked the [[kit]] twice.", 1], ["Next door's cat sat on the wall.", 1], ["They left with time to spare.", 1], ["They got up at six.", 1]] },
@@ -197,7 +203,8 @@ var TX3 = {
       fig: GOLDI,
       html: "<p><b>Too small:</b> one detail. \"The car park\" is not what a whole text is about.</p>" +
         "<p><b>Too big:</b> so wide it could be about anything. \"People go places\" fits a million texts.</p>" +
-        "<p><b>Just right:</b> it covers every sentence in the text, and nothing more.</p>" },
+        "<p><b>Just right:</b> it covers every sentence in the text, and nothing more.</p>",
+      ez: { title: "Just right", html: "<p><b>Too small</b>: 1 detail. <b>Too big</b>: could be about anything.</p><p><b>Just right</b>: covers the whole text.</p>" } },
 
     { type: "mc", topic: "Not too small, not too big", explain: true,
       q: "Jay reads this text and says it is mostly about <b>the car park</b>. What do you reckon?" + TX2.mild,
@@ -207,6 +214,9 @@ var TX3 = {
       slips: { 1: "The car park is only in one sentence. What about the queue and the cafe?", 2: "Too big would be something like \"buildings\". The car park is the opposite: one tiny part." },
       hint: "How many sentences talk about the car park?",
       why: "The car park is in one sentence. The queue and the cafe are about something bigger: how busy it gets.",
+      ez: { q: "Jay says it is about <b>the car park</b>. What do you think?" + TX2.mild,
+        slips: { 1: "The car park is 1 sentence. What about the rest?", 2: "Too big would be something like buildings." },
+        why: "The car park is 1 sentence. The text is about busy Saturdays." },
       lv: { medium: { q: "Jay reads this text and says it is mostly about <b>the car park</b>. What do you reckon?" + TX2.medium },
             spicy: { q: "Jay reads this text and says it is mostly about <b>the car park</b>. What do you reckon?" + TX2.spicy,
               why: "The car park sharks are a fun detail, but they are one sentence. The text is about how busy Saturdays are compared with the rest of the week." } } },
@@ -218,6 +228,8 @@ var TX3 = {
       slips: { 1: "Too small: the cafe is one detail.", 2: "Too big: that could be about anywhere. This text is about one place.", 3: "The text says the opposite: people queue to get in." },
       hint: "Which one covers the queue, the car park and the cafe?",
       why: "The queue, the car park and the cafe all show the same thing: Saturdays are busy.",
+      ez: { slips: { 2: "Too big. This text is about 1 place.", 3: "No. People queue to get in." }, hint: "Which one covers it all?",
+        why: "The queue, car park and cafe all show <b>busy Saturdays</b>." },
       lv: {
         medium: { q: "Which is the main idea of the whole text? Not too small, not too big." + TX2.medium,
           options: ["[[Place]] is packed on Saturdays but quiet in the week.", "[[Place]] is very busy on Saturdays.", "The cafe is quiet on a Tuesday.", "Every place is quieter on a Tuesday."],
@@ -237,6 +249,9 @@ var TX3 = {
       slips: [[["car park", "cafe", "seats"], "That is one detail. Try to cover the whole text: what do the queue, the car park and the cafe show?"]],
       hint: "One word for lots of people everywhere would do it.",
       why: "Anything like \"it gets really busy on Saturdays\" is just right.",
+      ez: { q: "What is it mostly about? A few words is fine." + TX2.mild,
+        slips: [[["car park", "cafe", "seats"], "That is 1 detail. What does the whole text show?"]],
+        hint: "One word for lots of people?", why: "Like: it gets really busy on Saturdays." },
       lv: {
         medium: { q: "In your own words, what is the whole text mostly about? One sentence is plenty." + TX2.medium,
           need: [["busy", "crowded", "full", "packed", "queue", "rammed", "heaving", "popular"], ["quiet", "calm", "empty", "tuesday", "week", "weekday", "peaceful"]],
@@ -256,6 +271,7 @@ var TX3 = {
       fig: PAPER,
       html: "<p>A good <b>headline</b> or <b>title</b> is the main idea squeezed into a few words.</p>" +
         "<p>Readers often use it to decide whether to read on, so it has to fit the whole text: not too small, not too big.</p>",
+      ez: { title: "Headlines", html: "<p>A <b>headline</b> is the main idea in a few words.</p><p>It has to fit the whole text.</p>" },
       lv: { spicy: { html: "<p>A good <b>headline</b> or <b>title</b> is the main idea squeezed into a few words.</p>" +
         "<p>Clever headlines play with words, but they still have to fit the whole text. A headline that only fits one paragraph is too small, however catchy it sounds.</p>" } } },
 
@@ -266,6 +282,7 @@ var TX3 = {
       slips: { 1: "Too small: one detail.", 2: "Too big: the text is about one place, not the whole country.", 3: "The text says the opposite. It is busy." },
       hint: "Which one covers the queue, the car park and the cafe?",
       why: "\"Saturday crowds\" sums up the main idea in three words.",
+      ez: { slips: { 2: "Too big. It is about 1 place.", 3: "No. It is busy." }, why: "<b>Saturday crowds</b> sums it up." },
       lv: {
         medium: { q: "Which headline fits the whole text best?" + TX2.medium,
           options: ["Packed Saturdays, peaceful Tuesdays", "Saturday crowds", "The car park", "A day out"],
@@ -285,6 +302,7 @@ var TX3 = {
         ["Bonnie found a sock under the sofa. She carried it round all day like a prize.", "Bonnie's big find"]],
       hint: "Read each one and ask: what is it mostly about?",
       why: "Each title squeezes one whole little text into a few words.",
+      ez: { hint: "What is each one mostly about?", why: "Each title sums up 1 little text." },
       lv: {
         medium: { pairs: [["[[Name]] fell asleep on the bus and woke up at the end of the line. They had to walk two miles home in the rain.", "Missed my stop"],
           ["The cafe at [[place]] has a new lemon cake. It sells out by lunchtime every day.", "Gone by noon"],
@@ -304,6 +322,8 @@ var TX3 = {
       slips: { 1: "That one is just right: it covers the whole text.", 2: "\"Dogs\" is too big: it could be about any dog anywhere." },
       hint: "Which one is only one detail?",
       why: "The sofa is just where the sock was. The text is about Bonnie and her prize.",
+      ez: { q: "\"Bonnie found a sock under the sofa. She carried it round all day like a prize.\" Which title is <b>too small</b>?",
+        slips: { 1: "That one is just right.", 2: "Dogs is too big." }, hint: "Which one is just 1 detail?", why: "The sofa is just where the sock was." },
       lv: { spicy: { q: "The Bonnie text: \"Bonnie found a sock under the sofa. She carried it round all day like a prize.\" Which title is <b>too big</b>?",
         options: ["Pets and their habits", "Bonnie's big find", "The sofa"],
         slips: { 1: "That one is just right.", 2: "That one is too small: one detail." },
@@ -314,6 +334,7 @@ var TX3 = {
     { type: "learn", topic: "The whole text", title: "One last text: the big idea",
       fig: umbrella(false),
       html: "<p>Last one. Read it once, all the way through. Then ask: <b>what is it mostly about?</b></p>" + TX3.mild,
+      ez: { title: "The big idea", html: "<p>Read it all. What is it <b>mostly about</b>?</p>" + TX3.mild },
       lv: {
         medium: { fig: funnel(3),
           html: "<p>Longer texts have a <b>main point in each paragraph</b>. Put the points together and you get the big idea.</p>" +
@@ -329,6 +350,8 @@ var TX3 = {
       slips: { 1: "The tea is one detail right at the end.", 2: "Nobody gets lost in this text." },
       hint: "Most of the sentences are about a problem and what happened to it.",
       why: "A bad start, [[Name]] fixes it, it ends well. The main idea: [[Name]] fixes a problem.",
+      ez: { slips: { 1: "The tea is 1 detail at the end.", 2: "Nobody gets lost." }, hint: "Most of it is about a problem.",
+        why: "A bad start. [[Name]] fixes it. It ends well." },
       lv: {
         medium: { q: "What is the main point of <b>paragraph 2</b>?" + TX3.medium,
           options: ["[[Name]] stays calm and sorts the problem out.", "[[Name]] calls [[boss]].", "Things go badly at the start.", "[[Name]] wants a cup of tea."],
@@ -350,6 +373,8 @@ var TX3 = {
       answers: [0, 1],
       hint: "Which details show [[Name]] making things better?",
       why: "Fixing it and the good ending back up \"saved the day\". The tea is just a detail, and the bad start is the problem, not the saving.",
+      ez: { q: "Big idea: <b>[[Name]] saved the day</b>. Pick the <b>2</b> details that show it." + TX3.mild,
+        hint: "Which show [[Name]] making it better?", why: "Fixing it and the good ending show it." },
       lv: {
         medium: { q: "Paragraph 2's main point: <b>[[Name]] stays calm and sorts it out</b>. Pick the <b>two</b> details that back it up." + TX3.medium,
           options: ["They grabbed the [[kit]], called [[boss]] and made a plan.", "Bit by bit, things got back on track.", "A few [[crowd]] started to panic.", "[[Name]] just wanted a cup of tea."],
@@ -368,6 +393,7 @@ var TX3 = {
       slips: [[["tea"], "The tea is a tiny detail at the end. What did [[Name]] do about the problem?"]],
       hint: "What did [[Name]] do about the problem?",
       why: "\"[[Name]] stayed calm and fixed the problem\" covers the whole text.",
+      ez: { slips: [[["tea"], "The tea is a tiny detail. What did [[Name]] do?"]], why: "Like: [[Name]] stayed calm and fixed the problem." },
       lv: {
         medium: { q: "Write the big idea of the <b>whole</b> text in one sentence." + TX3.medium,
           need: [["fix", "fixed", "sorted", "saved", "calm", "solved", "helped", "rescued", "dealt"], ["bad", "problem", "trouble", "start", "mess", "disaster", "panic", "issue"]],
@@ -380,6 +406,11 @@ var TX3 = {
           hint: "Problem, fix, and the questions at the end. Leave the tea out.",
           why: "The strongest summaries cover the fix and the doubts at the end, without the small details." } } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Long messages, news, letters: look for the <b>big idea</b> first.</p><p>A newspaper from the future? Read the headline first!</p>" },
+    make: { intro: "Pick something that happened. Give it a headline and a big idea. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Getting the gist",

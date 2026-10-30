@@ -132,6 +132,9 @@ var HL = {
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Main point and details", title: "Details hold up the main point",
       fig: TABLE,
+      ez: { html: "<p>The <b>main point</b> is the big idea. <b>Details</b> back it up.</p>" +
+        "<p class=\"a2task\">[[Place]] is easy to get to. The number 12 bus stops right outside. There is a big car park. The train station is a five minute walk away.</p>" +
+        "<p>Bus, car park, station: they hold it up.</p>" },
       html: "<p>The <b>main point</b> is what a text is mostly saying. The <b>details</b> are the specific bits that back it up: names, numbers, times, places, examples.</p>" +
         "<p class=\"a2task\">[[Place]] is easy to get to. The number 12 bus stops right outside. There is a big car park. The train station is a five minute walk away.</p>" +
         "<p>Main point: <b>[[Place]] is easy to get to.</b> The bus, the car park and the station are the legs holding it up.</p>",
@@ -141,6 +144,7 @@ var HL = {
 
     { type: "mc", topic: "Main point and details",
       q: "The main point is: <b>[[Place]] is easy to get to.</b> Which detail backs it up?",
+      ez: { q: "Main point: <b>[[Place]] is easy to get to.</b> Which detail backs it up?", slips: { 1: "Paint does not help you get there.", 2: "A date does not help you get there." }, hint: "Which helps you get there?", why: "A bus outside makes it easy to get to." },
       options: ["The number 12 bus stops right outside.", "The walls are painted blue.", "It opened in 1950."],
       answer: 0,
       slips: { 1: "That is a detail, but paint colour does not help anyone get there.", 2: "A date is a detail, but it does not show it is easy to get to." },
@@ -153,6 +157,7 @@ var HL = {
 
     { type: "sort", topic: "Main point and details",
       q: "Sort them. Which is the main point, and which are the details?",
+      ez: { q: "Sort them. Main point or detail?", hint: "The main point is the big idea.", why: "\"Great for beginners\" is the big idea. The rest prove it." },
       buckets: ["Main point", "Detail"],
       cards: [["[[Event]] is great for beginners.", 0], ["Nobody needs to bring their own kit.", 1], ["[[Who]] explains everything step by step.", 1], ["The first session is free.", 1]],
       hint: "The main point is the big idea. Details are the specific bits that prove it.",
@@ -165,6 +170,7 @@ var HL = {
 
     { type: "mc", topic: "Main point and details", explain: true,
       q: "Which of these is a <b>detail</b>, not a main point?",
+      ez: { q: "Which one is a <b>detail</b>?", slips: { 1: "\"Good value\" is a big idea.", 2: "\"Worth a visit\" is a big idea." }, hint: "Which has a number?", why: "A price is a detail. It is specific." },
       options: ["Tickets cost 4 pounds.", "[[Event]] is good value.", "[[Place]] is worth a visit."],
       answer: 0,
       slips: { 1: "\"Good value\" is a big idea. A detail would prove it, like an actual price.", 2: "\"Worth a visit\" is the big idea. Details are the specific bits underneath it." },
@@ -176,6 +182,7 @@ var HL = {
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Key detail or padding?", title: "Key details and padding",
       fig: PAN,
+      ez: { title: "Key or padding?", html: "<p><b>Key</b> details: you need them. <b>Padding</b>: nice, but not needed.</p>" + MSG.mild },
       html: "<p>Some details are <b>key</b>: you need them. Others are <b>padding</b>: friendly and chatty, but you could take them out and nothing would break.</p>" +
         "<p>Here is a message. Read it and think: what do you actually need to know?</p>" + MSG.medium,
       lv: { mild: { html: "<p>Some details are <b>key</b>: you need them. Others are <b>padding</b>: nice, but you do not need them.</p><p>Here is a message. What do you need to know?</p>" + MSG.mild },
@@ -184,6 +191,7 @@ var HL = {
 
     { type: "mc", topic: "Key detail or padding?",
       q: "Which line from Jay's message is padding?",
+      ez: { q: "Which line is padding?", slips: { 1: "You need the time.", 2: "You need to know what to bring." }, hint: "Which could you take out?", why: "Bonnie saying hello is lovely. But you do not need it." },
       options: ["Bonnie says hello.", "It will start at 6pm, not 7pm.", "Please bring [[kit]]."],
       answer: 0,
       slips: { 1: "You need the time, or you would turn up late.", 2: "You need to know what to bring." },
@@ -196,6 +204,7 @@ var HL = {
 
     { type: "mc", topic: "Key detail or padding?",
       q: "What time should you be there by?",
+      ez: { why: "It starts at <b>6pm</b>." },
       options: ["5.45pm", "6pm", "7pm"],
       answer: 0, fixed: true,
       slips: { 1: "6pm is when it starts. Jay asks you to be there a bit before that.", 2: "7pm was the old time. It has moved." },
@@ -210,6 +219,7 @@ var HL = {
 
     { type: "sort", topic: "Key detail or padding?",
       q: "Sort the bits of Jay's message. Key detail or padding?",
+      ez: { q: "Key detail or padding? Sort them.", hint: "Do you need it to turn up?", why: "Day, time and kit are key. Bonnie is padding." },
       buckets: ["Key detail", "Padding"],
       cards: [["It is on Friday.", 0], ["Be there by 5.45pm.", 0], ["Bring [[kit]].", 0], ["It has been windy.", 1], ["Bonnie says hello.", 1]],
       hint: "Ask: would I need this to turn up at the right time with the right things?",
@@ -220,6 +230,7 @@ var HL = {
 
     { type: "text", topic: "Key detail or padding?",
       q: "What does Jay ask you to bring?",
+      ez: { slips: [[["bonnie", "hello", "regards"], "That is padding. Look for \"bring\"."]], hint: "Find the word \"bring\".", why: "<b>Bring [[kit]]</b>. You need it." },
       need: [[" [[kitkey]]"]],
       model: "Bring [[kit]].",
       slips: [[["bonnie", "hello", "regards"], "That is the padding. Look for the word \"bring\"."]],
@@ -229,11 +240,13 @@ var HL = {
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Scan for the detail", title: "Let the question tell you what to hunt for",
       fig: SCAN,
+      ez: { title: "Scan for it", html: "<p>Look at the <b>question word</b> first.</p><p>When: a time. How much: a price. Where: a place. Who: a person.</p>" },
       html: "<p>You do not need to read every word again to find a detail. Look at the <b>question word</b> first. It tells you what kind of detail to hunt for.</p>" +
         "<p>Then run your eyes over the text for just that kind of thing: a time, a price, a place or a person. That is called <b>scanning</b>.</p>" },
 
     { type: "num", topic: "Scan for the detail",
       q: "How much does it cost for someone under 16?",
+      ez: { q: "How much for under 16s?", slips: [[6, "That is the adult price."]], hint: "Find \"under 16s\".", why: "Under 16s pay <b>3 pounds</b>." },
       fig: poster(false),
       boxes: [{ label: "Under 16s", a: 3, pre: "&#163;" }],
       slips: [[6, "That is the adult price. Look for the words \"under 16s\"."]],
@@ -253,6 +266,7 @@ var HL = {
 
     { type: "mc", topic: "Scan for the detail",
       q: "What time do the doors close?",
+      ez: { slips: { 1: "10am is when doors open.", 2: "2pm is when you meet [[who]]." }, hint: "Find \"close\".", why: "Doors close at <b>4pm</b>." },
       fig: poster(false),
       options: ["4pm", "10am", "2pm"],
       answer: 0,
@@ -267,6 +281,7 @@ var HL = {
 
     { type: "mc", topic: "Scan for the detail",
       q: "Where is the cafe?",
+      ez: { slips: { 1: "That is the lift.", 2: "Look for the word \"cafe\"." }, hint: "Find the word \"cafe\"." },
       fig: poster(false),
       options: ["On the first floor", "By the main door", "Outside"],
       answer: 0,
@@ -276,6 +291,7 @@ var HL = {
 
     { type: "text", topic: "Scan for the detail",
       q: "Who do you meet at 2pm?",
+      ez: { slips: [[["4pm", "10am", "cafe", "lift"], "Who means a person. Look by 2pm."]], hint: "Find 2pm on the poster.", why: "Meet <b>[[who]]</b> at 2pm." },
       fig: poster(false),
       need: [[" [[whokey]]"]],
       model: "You meet [[who]].",
@@ -286,12 +302,14 @@ var HL = {
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Details in a review", title: "Longer texts: a main point for each part",
       fig: TREE,
+      ez: { title: "Details in a review", html: "<p>A short review. One main point, some details.</p>" + REVIEW.mild },
       html: "<p>Longer texts often have <b>more than one main point</b>, and each one has its own details. Here is a review. Read it once, then go hunting.</p>" + REVIEW.medium,
       lv: { mild: { fig: TABLE, html: "<p>Here is a short review. It has one main point and some details. Read it once, then go hunting.</p>" + REVIEW.mild },
             spicy: { html: "<p>Articles and reviews pack a lot in. Each paragraph has a main point, and the details that hold it up are mixed in with background and side facts. Read it once, then go hunting.</p>" + REVIEW.spicy } } },
 
     { type: "mc", topic: "Details in a review",
       q: "What is the main point of the second paragraph?",
+      ez: { slips: { 1: "That is padding.", 2: "That is a detail." }, hint: "What is it mostly saying?", why: "\"It was a great day out\". The rest backs it up." },
       options: ["The cafe let the visit down.", "The car park is big.", "The [[show]] was the highlight."],
       answer: 0,
       slips: { 1: "That is a small detail, and a bit of padding.", 2: "That is from the first paragraph." },
@@ -308,6 +326,7 @@ var HL = {
 
     { type: "mc", topic: "Details in a review",
       q: "Which detail backs up the point that the cafe let it down?",
+      ez: { slips: { 1: "That is about the writer.", 2: "That is when, not why." }, hint: "Which says something good?", why: "The [[show]] was amazing. That backs it up." },
       options: ["My sandwich was stale and cost 7 pounds.", "The staff were friendly.", "The car park is big, too.", "I visited with my cousin."],
       answer: 0,
       slips: { 1: "That backs up the first point, that it was worth it.", 2: "That does not tell us anything about the cafe.", 3: "Padding. It does not tell us about the cafe." },
@@ -325,6 +344,7 @@ var HL = {
     { type: "widget", topic: "Details in a review", unscored: true,
       title: "Highlighter",
       html: "<p>Tap the details that show the trip was <b>worth it</b>. Tap again to take the highlight off. When you are happy, check your highlights.</p>",
+      ez: { html: "<p>Tap the details that show the trip was <b>worth it</b>. Then check.</p>" },
       mount: function(el, api){
         var d = api.data, lv = api.level || "medium";
         var rows = HL[lv] || HL.medium;
@@ -369,6 +389,7 @@ var HL = {
 
     { type: "text", topic: "Details in a review", explain: true,
       q: "Write <b>one</b> detail from the review that shows the [[show]] was good.",
+      ez: { q: "Write <b>one</b> detail that shows the [[show]] was good.", slips: [[["sandwich", "stale", "queue", "till", "car park", "cousin", "hat"], "That is about something else."]], hint: "Find the [[show]] in the review.", why: "Like this: we stayed there for an hour." },
       need: [["hour", "amazing", "highlight", "hands on", "well lit", "step free", "quiet", "clear star", "wanted more"]],
       model: "We spent nearly an hour there and still wanted more.",
       slips: [[["sandwich", "stale", "queue", "till", "car park", "cousin", "hat"], "That detail is about something else. Find one about the [[show]]."]],
@@ -386,6 +407,11 @@ var HL = {
       "<p>It fits our big question too. <b>If we could time travel, should we?</b> A travel guide to the past would be packed with details. Which ones would decide whether the trip is worth it, and which ones would just be padding?</p>",
     fig: '<svg viewBox="0 0 420 140" role="img" aria-label="Jay next to a time portal, wondering which details matter">' + A.portal(80, 70, 56) + A.jay(250, 50, 0.85, "hmm") +
       A.bubble(296, 4, 120, 52, "Which details\nmatter?", 300) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Detail hunting is everywhere", html: "<p>Letters, bus times, reviews. Find the details that matter.</p><p>A guide to the past would be full of details too!</p>" },
+    make: { intro: "Pick a text. Write its main point and 2 details." }
   },
 
   make: {

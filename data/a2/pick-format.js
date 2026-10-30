@@ -111,7 +111,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
         "<p><b>Travelogue:</b> the story of a journey, told by I or we, stop by stop, in order.</p>",
       lv: { spicy: { fig: SIX, html: "<p>The same trip could be written up in lots of ways. Each way is called a <b>format</b>.</p>" +
         "<p><b>Letter</b> (Dear... Love from), <b>diary</b> (a date, my feelings), <b>instructions</b> (How to, numbered steps) and <b>travelogue</b> (a journey told in order) are the big four.</p>" +
-        "<p>Two more for you: a <b>review</b> judges something and often gives it a rating. A <b>report</b> gives facts, grouped in sections with headings, and keeps the writer's feelings out.</p>" } } },
+        "<p>Two more for you: a <b>review</b> judges something and often gives it a rating. A <b>report</b> gives facts, grouped in sections with headings, and keeps the writer's feelings out.</p>" } } ,
+      ez: { title: "Every format has a shape", html: "<p><b>Letter</b>: Dear. <b>Diary</b>: a date and I.</p><p><b>Instructions</b>: steps. <b>Travelogue</b>: a journey, stop by stop.</p>" } },
 
     { type: "mc", topic: "Spot the format",
       q: "Have a read. Which format is this?" + box("Dear Gran,<br>I am having a brilliant time on [[trip]]. Today I saw [[seen]]. See you soon.<br>Love from me"),
@@ -120,6 +121,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { 1: "A diary is written to yourself. This one starts Dear Gran, so it is going to someone else.", 2: "There are no numbered steps telling anyone what to do.", 3: "It does talk about the trip, but Dear Gran and Love from are the big clues." },
       hint: "Look at the very first and very last lines.",
       why: "Dear at the top and Love from at the bottom: a letter, written to one person.",
+      ez: { hint: "Look at the first and last lines.", why: "Dear at the top. Love from at the end. A letter.",
+        slips: { 1: "A diary is for you. This goes to Gran.", 2: "There are no steps.", 3: "Dear and Love from are the big clues." } },
       lv: { spicy: {
         q: "Have a read. Which format is this?" + box("[[Stop2]]: four stars out of five. The seats were comfy, but the queue was far too long. Worth a visit, but take a snack."),
         options: ["A review", "A report", "A letter", "A travelogue"],
@@ -134,6 +137,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { 0: "No Dear at the top, and it is not sharing news with anyone.", 1: "No date and no feelings. It tells you what to do.", 3: "A travelogue tells what happened. This tells you what to do next." },
       hint: "Look at the title and the numbers.",
       why: "A How to title and numbered steps that tell you what to do: instructions.",
+      ez: { hint: "Look at the title and the numbers.", why: "How to, and numbered steps. Instructions.",
+        slips: { 0: "No Dear at the top.", 1: "No date. No feelings.", 3: "It says what to do, not what happened." } },
       lv: { medium: {
           q: "Which format is this? There are no numbers this time." + box("Getting to [[stop2]]<br>First, pack [[gear]]. Next, get on [[ride]]. Get off at [[stop1]], then follow the signs. Do not stop for snacks."),
           hint: "Look at the first word of each sentence. Is it telling you to do something?",
@@ -152,6 +157,7 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { any: "Think about the one thing each format nearly always has." },
       hint: "Picture each little page from the start of this chunk.",
       why: "Dear for letters, a date and feelings for diaries, steps for instructions, stops in order for travelogues.",
+      ez: { hint: "Picture the little pages.", why: "Dear. A date. Steps. Stops in order.", slips: { any: "Each format has 1 big clue." } },
       lv: { spicy: { pairs: [["Letter", "Starts with Dear"], ["Diary", "A date, and how I felt"], ["Instructions", "Numbered steps"], ["Travelogue", "A journey, stop by stop"], ["Review", "A star rating"], ["Report", "Facts under headings"]],
         why: "Each format has a clue that gives it away. Reviews rate things; reports group facts under headings." } } },
 
@@ -163,7 +169,9 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       answer: 0,
       slips: { 1: "That is about one day and how someone feels. No journey from place to place.", 2: "That is telling you what to do. Climb, sit, wait: instructions." },
       hint: "Which one moves from place to place, in order?",
-      why: "It follows a journey in order (9am, first, then) and it is told by I. That is a travelogue." },
+      why: "It follows a journey in order (9am, first, then) and it is told by I. That is a travelogue." ,
+      ez: { q: "Which one starts a travelogue?", hint: "Which moves from place to place?", why: "It goes place to place, in order. Told by I.",
+        slips: { 1: "That is 1 day and feelings. No journey.", 2: "That says what to do. Instructions." } } },
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Clues on the page", title: "Clues before you read a word",
@@ -184,7 +192,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
         '</svg>',
       html: "<p>Every format leaves clues. For a travelogue, look for:</p>" +
         "<p><b>A title</b> that names the trip. <b>Time words</b> like first, later, at 9am. <b>Place names</b> for each stop. <b>I or we</b>, because the writer went on the journey.</p>" +
-        "<p>Spot the clues and you know the format before you have read it all.</p>" },
+        "<p>Spot the clues and you know the format before you have read it all.</p>" ,
+      ez: { title: "Clues on the page", html: "<p>Travelogue clues: a <b>title</b>, <b>time words</b>, <b>place names</b>, and <b>I or we</b>.</p>" } },
 
     { type: "multi", topic: "Clues on the page",
       q: "Pick the <b>three</b> clues that tell you something is a travelogue.",
@@ -192,7 +201,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       answers: [0, 1, 2],
       slips: { any: "Numbered steps belong to instructions, and Dear belongs to a letter." },
       hint: "Two of these belong to other formats.",
-      why: "I or we, place to place, and time words. Numbered steps are instructions; Dear is a letter." },
+      why: "I or we, place to place, and time words. Numbered steps are instructions; Dear is a letter." ,
+      ez: { q: "Pick the <b>3</b> travelogue clues.", hint: "2 belong to other formats.", why: "I or we. Place to place. Time words.", slips: { any: "Steps are instructions. Dear is a letter." } } },
 
     { type: "mc", topic: "Clues on the page",
       q: "Odd one out. Three of these would be in a diary. Which one would not?",
@@ -201,6 +211,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { 0: "A date at the top is a big diary clue.", 1: "Feelings are what diaries are for.", 2: "Lots of diaries start just like this." },
       hint: "Which one tells you to do something?",
       why: "A numbered step telling you to turn left belongs in instructions, not a diary.",
+      ez: { q: "Which one would <b>not</b> be in a diary?", why: "A numbered step is for instructions.",
+        slips: { 0: "A date is a diary clue.", 1: "Feelings go in a diary.", 2: "Lots of diaries start like this." } },
       lv: { spicy: { q: "Odd one out. Three of these would be in a report. Which one would not?",
         options: ["Opening times: 9am to 5pm", "Tickets cost 4 pounds.", "Getting there: take [[ride]].", "Honestly, it was the best day of my life!"],
         slips: { 0: "Opening times are a fact under a heading. Very report.", 1: "A price is a fact you could check.", 2: "A heading with a fact after it is exactly how reports work." },
@@ -214,6 +226,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { any: "Lines that talk to one person go in a letter. Lines that tell you what to do go in instructions." },
       hint: "Does the line talk to someone, or tell someone what to do?",
       why: "Dear, Love from and I hope you are well talk to one person. The numbered lines tell you what to do.",
+      ez: { q: "Letter or instructions? Sort the lines.", hint: "Talking to someone, or giving orders?", why: "Letters talk to 1 person. Steps say what to do.",
+        slips: { any: "Talking to 1 person: letter. Saying what to do: instructions." } },
       lv: { medium: { buckets: ["Letter", "Diary", "Instructions"],
           cards: [["Dear Grandad,", 0], ["Love from me", 0], ["Friday 7th November", 1], ["I felt so excited I could not sleep.", 1], ["1. Pack [[gear]].", 2], ["2. Get on [[ride]].", 2]],
           why: "Letters talk to one person, diaries keep a date and feelings, instructions give steps." },
@@ -228,6 +242,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: [[["hiya", "hello", "hey"], "That works for a text message. Letters usually start with a more old fashioned word."]],
       hint: "Look back at the letter at the start. It is the very first word.",
       why: "Letters start with <b>Dear</b>, then the person's name.",
+      ez: { q: "Which word starts most letters? Type it in.", hint: "It is the very first word.", why: "Letters start with <b>Dear</b>.",
+        slips: [[[], "That works in a text. Letters use an older word."]] },
       lv: { medium: {
           q: "Finish this travelogue line with a time word at the start: \"___ we reached [[stop2]].\" Type the whole sentence.",
           need: [["then", "next", "later", "after", "finally", "soon", "eventually", "by", "at", "an hour", "in the"]],
@@ -253,7 +269,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
           "<p>The audience changes the tone too. A letter to your best mate can say Hiya. A letter to [[boss]] says Dear, and stays polite.</p>" },
         spicy: { html: "<p>Editors ask: <b>purpose</b> (why), <b>audience</b> (who), then <b>format</b> (which shape) and <b>structure</b> (how it is laid out).</p>" +
           "<p>Help someone do it: instructions. News for one person: letter. Private feelings: diary. Take a reader on the journey: travelogue. Judge it: review. Inform with checkable facts: report.</p>" +
-          "<p>Audience also shapes tone and layout. [[Boss]] gets a formal letter. A reader on a phone needs short paragraphs with headings, not one long block.</p>" } } },
+          "<p>Audience also shapes tone and layout. [[Boss]] gets a formal letter. A reader on a phone needs short paragraphs with headings, not one long block.</p>" } } ,
+      ez: { title: "Why, and who?", html: "<p>Ask: <b>why am I writing?</b> And <b>who will read it?</b></p><p>Then pick the format.</p>" } },
 
     { type: "mc", topic: "Who is it for?",
       q: "A new [[newbie]] needs to get from [[stop1]] to [[stop2]] on their own. Which format would help most?",
@@ -261,7 +278,9 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       answer: 0, fixed: true,
       slips: { 1: "A diary is for you, about your feelings. It would not tell them where to go.", 2: "A letter could work, but steps in order are much easier to follow on the way.", 3: "A travelogue tells what happened to you. They need to know what to do." },
       hint: "They need to <b>do</b> something, one step at a time.",
-      why: "When someone needs to do something step by step, instructions are the format that fits." },
+      why: "When someone needs to do something step by step, instructions are the format that fits." ,
+      ez: { q: "A new [[newbie]] needs to get to [[stop2]] alone. Which format helps?", hint: "They need to <b>do</b> it, step by step.", why: "Doing something step by step? Instructions.",
+        slips: { 1: "A diary will not tell them where to go.", 2: "Steps are easier to follow on the way.", 3: "They need to know what to do." } } },
 
     { type: "mc", topic: "Who is it for?", explain: true,
       q: "You want readers to feel like they came along on [[trip]], stop by stop. Which format?",
@@ -270,6 +289,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { 0: "Instructions tell people what to do, not what happened to you.", 1: "A diary is private, mostly about feelings. These readers want the journey.", 2: "A letter is for one person. This is for lots of readers." },
       hint: "Lots of readers, a journey, stop by stop.",
       why: "A travelogue takes lots of readers along on a journey, in order. That is its whole job.",
+      ez: { q: "Take readers along on [[trip]], stop by stop. Which format?", hint: "Lots of readers. A journey.", why: "A travelogue takes readers on the journey.",
+        slips: { 0: "Instructions say what to do.", 1: "A diary is private.", 2: "A letter is for 1 person." } },
       lv: { spicy: { q: "A travel website wants something that makes readers feel they came along on [[trip]], and helps them decide if they would go. Which format fits best?",
         options: ["A report", "A diary", "A review", "A travelogue"],
         slips: { 0: "A report has the facts, but it keeps feelings out. Readers would not feel they came along.", 1: "A diary is private. A website needs something written for strangers.", 2: "A review judges, but it does not take readers along stop by stop." },
@@ -281,6 +302,7 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { any: "Ask: why am I writing, and who will read it?" },
       hint: "Ask why for each one: news, feelings, help or a journey?",
       why: "News for one person: letter. Feelings for me: diary. Help: instructions. A journey for readers: travelogue.",
+      ez: { hint: "News, feelings, help or a journey?", why: "News: letter. Feelings: diary. Help: instructions. Journey: travelogue.", slips: { any: "Ask: why am I writing?" } },
       lv: { spicy: { pairs: [["Tell Gran your news", "Letter"], ["Keep a private record of how you felt", "Diary"], ["Show someone how to do it", "Instructions"], ["Take readers along on the journey", "Travelogue"], ["Say if it was worth the money", "Review"], ["Give the opening times and prices", "Report"]],
         why: "Every job has a best fit. Judging is a review; checkable facts are a report." } } },
 
@@ -291,6 +313,8 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { 1: "A diary is usually private. You would not normally share it with the class.", 2: "Newspapers want reports and articles, not someone's private diary." },
       hint: "Think about who keeps a diary, and who reads it.",
       why: "A diary is usually just for the person writing it.",
+      ez: { q: "Who is a diary for, most of the time?", hint: "Who reads a diary?", why: "A diary is just for the writer.",
+        slips: { 1: "A diary is private. Not for the class.", 2: "Newspapers want reports, not diaries." } },
       lv: { medium: { q: "You are writing to [[boss]] to ask if you can go on [[trip]]. Which opening fits best?",
           options: ["Dear Sir or Madam, I am writing to ask if I could join the trip.", "Hiya mate! Can I come or what?", "Yo. Trip. Me. Yes?"],
           slips: { 1: "Fine for a friend, but [[boss]] is someone you need to be polite to.", 2: "Ha. Outrageous. Fun, but this reader needs a polite letter." },
@@ -308,14 +332,16 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       html: "<p>A travelogue follows a route. A <b>title</b> names the trip. Then <b>setting off</b>: where you started. Then each <b>stop</b>, in the order you got there. Then <b>heading home</b>, and what you thought of it all.</p>" +
         "<p>If the reader could draw your route on a map from your writing, you have nailed it.</p>",
       lv: { spicy: { html: "<p>A travelogue follows a route: a <b>title</b>, <b>setting off</b>, each <b>stop</b> in order, then <b>heading home</b> with a look back.</p>" +
-        "<p>As editor, you also choose the <b>structure</b> for your reader: one paragraph per stop, a heading for each stop on a website, a photo caption for a magazine. Same format, shaped for the audience.</p>" } } },
+        "<p>As editor, you also choose the <b>structure</b> for your reader: one paragraph per stop, a heading for each stop on a website, a photo caption for a magazine. Same format, shaped for the audience.</p>" } } ,
+      ez: { html: "<p>A travelogue follows a <b>route</b>.</p><p>Title. Set off. Each stop, in order. Home.</p>" } },
 
     { type: "order", topic: "Pick and plan",
       q: "Put the parts of a travelogue in order, first to last.",
       items: ["A title naming the trip", "Setting off: where I started", "The first stop", "The next stop", "Heading home, and what I thought"],
       slips: { any: "Follow the route: name it, set off, the stops, then home." },
       hint: "It goes the same way as the journey itself.",
-      why: "Title, set off, the stops in order, then home. Just like the route." },
+      why: "Title, set off, the stops in order, then home. Just like the route." ,
+      ez: { q: "Put the parts of a travelogue in order.", hint: "Same order as the journey.", why: "Title, set off, the stops, then home.", slips: { any: "Follow the route: title, off, stops, home." } } },
 
     { type: "mc", topic: "Pick and plan",
       q: "Which is the best title for a travelogue?",
@@ -324,6 +350,7 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       slips: { 1: "That is a title for instructions.", 2: "That is how a letter starts, not a title." },
       hint: "Which one names the trip?",
       why: "A travelogue title names the journey, so the reader knows where they are going.",
+      ez: { why: "It names the journey.", slips: { 1: "That is for instructions.", 2: "That starts a letter." } },
       lv: { spicy: { q: "Which title would hook a reader for a travelogue on a website?",
         options: ["[[Trip]]: three stops I will never forget", "A report on the facilities at [[stop2]]", "Instructions for visiting [[stop1]]"],
         slips: { 1: "Fine for a report, but it promises facts, not a journey.", 2: "That promises steps to follow, not a journey to come along on." },
@@ -338,14 +365,17 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       answer: 0,
       slips: { 1: "Instructions would tell the class what to do, not what Jay saw.", 2: "A private diary would not reach the class at all." },
       hint: "Readers, a journey, every stop.",
-      why: "Readers picturing every stop of a journey: a travelogue. Probably with far too many birds in it." },
+      why: "Readers picturing every stop of a journey: a travelogue. Probably with far too many birds in it." ,
+      ez: { q: "Jay wants the class to picture his bird watching trip. What should he write?", hint: "Readers. A journey. Every stop.", why: "A journey for readers: a travelogue. With lots of birds!",
+        slips: { 1: "That says what to do, not what Jay saw.", 2: "A private diary would not reach the class." } } },
 
     { type: "text", topic: "Pick and plan", stretch: true,
       q: "Have a go at the first sentence of a travelogue about [[trip]]. Use I or we.",
       need: [["i", "we", "my", "our"]],
       model: "At nine o'clock I climbed into [[ride]] and we set off.",
       hint: "Say when and how you set off. Start with At or First if you like.",
-      why: "A good opening says when you set off and how, told by I or we. The reader is already on the way with you." }
+      why: "A good opening says when you set off and how, told by I or we. The reader is already on the way with you." ,
+      ez: { q: "Write the first line of a travelogue about [[trip]]. Use I or we.", hint: "Say when you set off.", why: "Say when and how. Use I or we." } }
   ],
 
   realWorld: {
@@ -354,6 +384,11 @@ function box(h){ return '<p class="a2task">' + h + '</p>'; }
       "<p>And for our big question: if we could time travel, a traveller would need all of them. Instructions to work the machine, a diary for the scary bits, a letter home, and a travelogue so everyone else can come along.</p>",
     fig: '<svg viewBox="0 0 440 150" role="img" aria-label="A portal with four kinds of writing coming out">' + A2ART.portal(80, 75, 58) +
       page("letter", 168, 10).replace('translate(168 10)', 'translate(168 10) scale(.95)') + page("trav", 290, 10).replace('translate(290 10)', 'translate(290 10) scale(.95)') + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>Adults pick formats every day: texts, emails, reviews.</p><p>A time traveller would need them all!</p>" },
+    make: { intro: "A job, the format you would pick, and why." }
   },
 
   make: {

@@ -1449,7 +1449,8 @@ function needFor(item){
 function lockedSay(item){ say(item.name + ": " + (LD.next && LD.next.id === item.id ? LD.need + " more sparks." : "opens later this term."), 2400); }
 function eraBanner(){
   var e = era();
-  return '<div class="lcc-era">' + icon("era") + '<div><b>This week: ' + esc(e.name) + '</b><small>' + esc(e.line) + '</small><small>' + esc(RULE[e.id] || "") + '</small></div></div>';
+  /* LC has dyslexia: the week's name and its one rule, no extra line (30 Oct 2026) */
+  return '<div class="lcc-era">' + icon("era") + '<div><b>This week: ' + esc(e.name) + '</b><small>' + esc(RULE[e.id] || "") + '</small></div></div>';
 }
 function hub(show){
   var p = $(".lcc-hubp");

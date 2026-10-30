@@ -187,11 +187,13 @@ function gridWidget(el, api){
     /* ---------- chunk 1: warm up ---------- */
     { type: "learn", topic: "Rectangles first", title: "Area is the space inside",
       fig: AREA_IDEA,
+      ez: { title: "Area", html: "<p><b>Area</b> is the squares inside.</p><p>5 x 3 = <b>15 m&sup2;</b></p>" },
       html: "<p>A quick warm up first. <b>Area</b> is how much floor there is. Count the squares inside, or multiply: <b>length x width</b>.</p>" +
         "<p>5 squares along, 3 rows: 5 x 3 = <b>15 squares</b>. If each square is 1 metre by 1 metre, that is <b>15 square metres</b>, written <b>15 m&sup2;</b>.</p>" },
 
     { type: "num", topic: "Rectangles first",
       q: "Each square is 1 m by 1 m. What is the area of this floor?",
+      ez: { q: "What is the area of this floor?", slips: [[20, "That is round the edge. Area is inside."], [10, "That adds. Multiply instead."]], hint: "6 in each row. 4 rows.", why: "6 x 4 = <b>24 m&sup2;</b>." },
       fig: R(6, 4, true),
       boxes: [{ label: "Area", a: 24, post: "m&sup2;" }],
       slips: [[20, "That is the distance round the edge (the perimeter). Area is the squares inside."], [10, "That adds 6 and 4. Multiply them instead."]],
@@ -210,6 +212,7 @@ function gridWidget(el, api){
 
     { type: "mc", topic: "Rectangles first",
       q: "Which unit would you use for the area of a floor?",
+      ez: { q: "Which unit is for floor area?", slips: { 1: "Metres are for length.", 2: "Kilograms are for weight." }, why: "Area counts squares: m&sup2;." },
       options: ["m&sup2; (square metres)", "m (metres)", "kg (kilograms)"],
       answer: 0,
       slips: { 1: "Metres measure a length, like one wall. Area needs square metres.", 2: "Kilograms measure weight, not floor space." },
@@ -223,6 +226,7 @@ function gridWidget(el, api){
 
     { type: "mc", topic: "Rectangles first",
       q: "Which room has more floor?",
+      ez: { slips: { 1: "B is 6 x 3 = 18. A is 20.", 2: "Work out 5 x 4 and 6 x 3." }, hint: "Find each area.", why: "A is 20. B is 18. A has more." },
       fig: TWO([5, 4], [6, 3]),
       options: ["Room A", "Room B", "They are the same"],
       answer: 0, fixed: true,
@@ -243,6 +247,7 @@ function gridWidget(el, api){
 
     /* ---------- chunk 2: split it ---------- */
     { type: "learn", topic: "Split the L", title: "Split it into two rectangles",
+      ez: { routes: ["<p>An L is <b>2 rectangles</b>.</p><p>A: 4 x 5 = 20. B: 3 x 3 = 9. 20 + 9 = <b>29 m&sup2;</b>.</p>", "<p>Count the squares: 20 and 9.</p><p>That is <b>29 m&sup2;</b> too.</p>"] },
       routes: [
         { name: "Worked example", fig: L({ W: 7, H: 5, cw: 3, ch: 2, split: "v", areas: ["A: 4 x 5", "B: 3 x 3"], aria: "An L shape split into rectangle A, 4 by 5, and rectangle B, 3 by 3" }),
           html: "<p>An L is just two rectangles stuck together. Here is one worked all the way through.</p>" +
@@ -256,6 +261,7 @@ function gridWidget(el, api){
 
     { type: "num", topic: "Split the L",
       q: "Your turn, with the steps laid out. A is 3 m by 4 m. B is 2 m by 2 m. Fill in each area, then the total.",
+      ez: { q: "A is 3 m by 4 m. B is 2 m by 2 m. Find each area, then the total.", slips: [[2, 20, "That is the whole rectangle. Add A and B."], [0, 7, "That adds. Multiply 3 x 4."]] },
       fig: L({ W: 5, H: 4, cw: 2, ch: 2, split: "v", grid: true, areas: ["A", "B"] }),
       boxes: [{ label: "A", a: 12, post: "m&sup2;" }, { label: "B", a: 4, post: "m&sup2;" }, { label: "Total", a: 16, post: "m&sup2;" }],
       slips: [[2, 20, "20 is the whole 5 by 4 rectangle, including the missing corner. Add A and B instead."], [0, 7, "That adds 3 and 4. Multiply them."]],
@@ -276,6 +282,7 @@ function gridWidget(el, api){
 
     { type: "mc", topic: "Split the L",
       q: "Which line cuts this L into two rectangles?",
+      ez: { q: "Which line cuts the L into 2 rectangles?", slips: { 1: "A slanted cut does not make rectangles.", 2: "C leaves an L shape." }, hint: "Start at the inside corner.", why: "Line A goes down from the inside corner." },
       fig: CUTS(),
       options: ["Line A", "Line B", "Line C"],
       answer: 0, fixed: true,
@@ -285,6 +292,7 @@ function gridWidget(el, api){
 
     { type: "num", topic: "Split the L", explain: true,
       q: "Now the steps are up to you. Split it, find both areas, add. What is the total area?",
+      ez: { q: "Split it. Find both areas. Add. What is the total?", slips: [[24, "That is the whole rectangle, corner and all."], [20, "That is round the edge."]], hint: "Cut down from the inside corner.", why: "16 + 6 = <b>22 m&sup2;</b>." },
       fig: L({ W: 6, H: 4, cw: 2, ch: 1, grid: true }),
       boxes: [{ label: "Total area", a: 22, post: "m&sup2;" }],
       slips: [[24, "That is the whole 6 by 4 rectangle, including the missing corner."], [20, "That is the distance round the edge. Area is the squares inside."]],
@@ -304,11 +312,13 @@ function gridWidget(el, api){
     /* ---------- chunk 3: missing lengths ---------- */
     { type: "learn", topic: "Missing lengths", title: "Find the missing length",
       fig: MISSING,
+      ez: { title: "Missing lengths", html: "<p>The short sides <b>add up</b> to the long side.</p><p>10 - 6 = <b>4 m</b>. 7 - 4 = <b>3 m</b>.</p>" },
       html: "<p>Plans do not always label every side. No problem: the short sides along one edge <b>add up</b> to the long side opposite.</p>" +
         "<p>Top: 6 m. Bottom: 10 m. So the missing bit is <b>10 - 6 = 4 m</b>. Same up the side: 7 - 4 = <b>3 m</b>.</p>" },
 
     { type: "mc", topic: "Missing lengths",
       q: "The bottom is 8 m. The top is 5 m. Which sum finds the missing length?",
+      ez: { q: "Bottom 8 m. Top 5 m. Which sum finds the missing length?", slips: { 1: "Adding makes it too big.", 2: "Times is for area. This is a length." }, hint: "Top + missing = bottom.", why: "8 - 5 = 3 m." },
       fig: L({ W: 8, H: 5, cw: 3, ch: 2, hide: ["inh"], nolabels: false, lab: { inv: "", right: "", left: "" } }),
       options: ["Take away: 8 - 5", "Add: 8 + 5", "Times: 8 x 5"],
       answer: 0,
@@ -323,6 +333,7 @@ function gridWidget(el, api){
 
     { type: "num", topic: "Missing lengths",
       q: "Find the two missing lengths.",
+      ez: { q: "Find the 2 missing lengths.", slips: [[0, 13, "That adds. Find the difference."], [1, 8, "That adds. The right side is shorter."]] },
       fig: L({ W: 8, H: 6, cw: 3, ch: 2, hide: ["inh", "right"] }),
       boxes: [{ label: "Across the gap", a: 3, post: "m" }, { label: "Right side", a: 4, post: "m" }],
       slips: [[0, 13, "That adds 8 and 5. The missing bit is the difference."], [1, 8, "That adds 6 and 2. The right side is shorter than the left."]],
@@ -341,6 +352,7 @@ function gridWidget(el, api){
 
     { type: "num", topic: "Missing lengths",
       q: "All on your own now. Two lengths are missing. Find them in your head, then find the area of the [[room]].",
+      ez: { q: "Find the missing lengths. Then find the area.", slips: [[30, "That is the whole rectangle, corner and all."], [22, "That is round the edge."]], hint: "Split it: 4 by 5, and 2 by 2." },
       fig: L({ W: 6, H: 5, cw: 2, ch: 3, grid: true, hide: ["inh", "right"] }),
       boxes: [{ label: "Area", a: 24, post: "m&sup2;" }],
       slips: [[30, "That is the whole 6 by 5 rectangle, including the missing corner."], [22, "That is the distance round the edge, not the area."]],
@@ -359,6 +371,7 @@ function gridWidget(el, api){
 
     /* ---------- chunk 4: real plans ---------- */
     { type: "learn", topic: "Real floor plans", title: "Another way: take away the corner",
+      ez: { title: "Take away the corner", html: "<p>Find the <b>whole rectangle</b>. Then <b>take away</b> the corner.</p><p>35 - 6 = <b>29 m&sup2;</b></p>" },
       fig: L({ W: 7, H: 5, cw: 3, ch: 2, ghost: "take away", aria: "The L inside a whole rectangle, with the missing corner shaded to take away" }),
       html: "<p>Here is a second way, if you like. Pretend the corner is there, find the <b>whole rectangle</b>, then <b>take away</b> the missing corner.</p>" +
         "<p>Whole: 7 x 5 = 35. Corner: 3 x 2 = 6. Floor: 35 - 6 = <b>29 m&sup2;</b>. The same answer as splitting it, which is a handy way to check.</p>",
@@ -368,6 +381,7 @@ function gridWidget(el, api){
 
     { type: "num", topic: "Real floor plans",
       q: "Try the take away way. The whole rectangle is 5 by 4. The missing corner is 2 by 2. What is the floor area?",
+      ez: { q: "Whole: 5 by 4. Corner: 2 by 2. What is the area?", slips: [[24, "That adds the corner. Take it away."], [20, "That is the whole. Now take away the corner."]] },
       fig: L({ W: 5, H: 4, cw: 2, ch: 2, grid: true, ghost: "take away" }),
       boxes: [{ label: "Area", a: 16, post: "m&sup2;" }],
       slips: [[24, "That adds the corner on. Take it away instead."], [20, "That is the whole rectangle. Now take away the corner."]],
@@ -388,6 +402,7 @@ function gridWidget(el, api){
 
     { type: "mc", topic: "Real floor plans",
       q: "Jay worked out his L shaped kitchen. He did 5 x 4 = 20, then 2 x 2 = 4, then 20 + 4 = 24 m&sup2;. What went astray?",
+      ez: { q: "Jay did 5 x 4 = 20. Then he added 2 x 2 = 4. What went astray?", slips: { 1: "Multiplying was fine.", 2: "The corner is missing. Take it off." }, hint: "Is the corner there, or missing?", why: "Take the corner away: 20 - 4 = 16 m&sup2;. \"Outrageous.\"" },
       fig: KITCHEN,
       options: ["He added the missing corner instead of taking it away", "He should have done 5 + 4", "Nothing, 24 m&sup2; is right"],
       answer: 0,
@@ -397,6 +412,7 @@ function gridWidget(el, api){
 
     { type: "num", topic: "Real floor plans", stretch: true,
       q: "The [[room]] floor is 16 m&sup2;. Each m&sup2; of [[floor]] costs &pound;3. How much for the whole floor?",
+      ez: { q: "16 m&sup2; of [[floor]]. Each m&sup2; costs &pound;3. How much?", slips: [[19, "That adds. Multiply instead."], [45, "Check 16 x 3."]] },
       boxes: [{ label: "Cost", a: 48, pre: "&pound;" }],
       slips: [[19, "That adds 16 and 3. Each square metre costs &pound;3, so multiply."], [45, "Check 16 x 3: 10 x 3 = 30, 6 x 3 = 18."]],
       hint: "16 lots of &pound;3.",
@@ -415,6 +431,7 @@ function gridWidget(el, api){
     { type: "widget", topic: "Real floor plans", unscored: true,
       title: "Design a floor",
       html: "<p>Build your own floor on the grid, if you like. It counts the area for you, so you can check your sums.</p>",
+      ez: { html: "<p>Build a floor, if you like. It counts the area for you.</p>" },
       mount: gridWidget,
       report: function(d){ return d && d.on && d.on.length ? "Designed a floor of " + d.on.length + " m2 on the grid." : ""; } }
   ],
@@ -426,6 +443,11 @@ function gridWidget(el, api){
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="A time portal next to an L shaped floor plan, with Jay">' + A2ART.portal(70, 75, 54) +
       '<path d="M150 30H250V70H310V130H150Z" fill="#fde7b0" stroke="#141a33" stroke-width="3"/><path d="M250 70V130" stroke="#e04848" stroke-width="3" stroke-dasharray="7 5"/>' +
       A2ART.jay(370, 50, 0.75, "wink") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Floor plans are everywhere", html: "<p>Flooring is sold by the square metre.</p><p>Old castles had odd rooms too!</p>" },
+    make: { intro: "Design an L room. It draws the plan for you." }
   },
 
   make: {

@@ -90,6 +90,7 @@ function qA(d){
     options: ["Title", "Caption", "Bullet points"], answer: 0,
     slips: { 1: "A caption goes under a picture.", 2: "Bullet points are a list with dots." },
     hint: "It is the name of the whole page.", why: "The <b>title</b> is the biggest words, at the very top. \"" + d.title + "\".",
+    ez: { q: "What is marker <b>A</b> called?", hint: "The name of the page.", why: "<b>A</b> is the <b>title</b>.", slips: { 2: "Bullet points have dots." } },
     lv: { medium: { options: ["Title", "Subheading", "Caption", "Bold"], slips: { 1: "A subheading is smaller, for one section.", 2: "A caption goes under a picture.", 3: "It is bold, but it is bigger than that: it names the whole page." } },
       spicy: { q: "Marker <b>A</b> and marker <b>B</b> are both bigger than the rest. What is the difference?",
         options: ["A is the title for the whole page; B is a subheading for one section", "A is a caption; B is a title", "A is bold; B is a bullet point", "There is no difference"],
@@ -101,6 +102,7 @@ function qE(d){
     options: ["Caption", "Title", "Numbered steps"], answer: 0,
     slips: { 1: "The title is at the top of the page.", 2: "Numbered steps have 1, 2, 3." },
     hint: "It goes with a picture.", why: "A <b>caption</b> is the small writing under a picture: \"" + d.cap + "\".",
+    ez: { q: "What is marker <b>E</b> called?", why: "<b>E</b> is a <b>caption</b>. It is about the picture.", slips: { 2: "Steps have 1, 2, 3." } },
     lv: { medium: { options: ["Caption", "Title", "Subheading", "Bullet points"], slips: { 1: "The title is at the top.", 2: "A subheading starts a section.", 3: "Bullet points are a list with dots." } },
       spicy: { q: "Marker <b>E</b> is a caption. What is it for?", options: ["It tells you what the picture shows", "It is the name of the whole page", "It gives the steps in order", "It is a warning"],
         slips: { 1: "That is the title's job.", 2: "That is what numbered steps do.", 3: "That is more like the bold line." },
@@ -111,6 +113,7 @@ function qMatch(d){
     pairs: [["A", "Title"], ["B", "Subheading"], ["C", "Bullet points"], ["E", "Caption"]],
     slips: { any: "Find each purple letter on the page and look at what is next to it." },
     hint: "C has dots. E is under the picture.", why: "A title, B subheading, C bullet points, E caption.",
+    ez: { q: "Match each letter to its name.", slips: { any: "Find each purple letter on the page." } },
     lv: { medium: { pairs: [["A", "Title"], ["B", "Subheading"], ["C", "Bullet points"], ["D", "Numbered steps"], ["E", "Caption"]], why: "A title, B subheading, C bullet points, D numbered steps, E caption." },
       spicy: { pairs: [["A", "Title"], ["B", "Subheading"], ["C", "Bullet points"], ["D", "Numbered steps"], ["E", "Caption"], ["F", "Bold"]], why: "All six: title, subheading, bullet points, numbered steps, caption and bold." } } };
 }
@@ -119,6 +122,7 @@ function qAll(d){
     options: ["A title", "Bullet points", "Numbered steps", "A caption", "Speech bubbles", "A table"], answers: [0, 1, 2, 3],
     slips: { any: "Four of them are on the page. Look for speech bubbles and a table with rows and columns: are they there?" },
     hint: "Check each one against the page.", why: "Title, bullet points, numbered steps and a caption are all there. No speech bubbles, no table.",
+    ez: { q: "Which can you see? Pick <b>all</b> of them.", hint: "Check each one.", why: "A title, bullet points and a caption. No speech bubbles.", slips: { any: "Three are there. Any speech bubbles?" } },
     lv: { mild: { options: ["A title", "Bullet points", "A caption", "Speech bubbles"], answers: [0, 1, 2], slips: { any: "Three are on the page. Are there any speech bubbles?" }, why: "A title, bullet points and a caption. No speech bubbles." },
       spicy: { options: ["A title", "Subheadings", "Bullet points", "Numbered steps", "A caption", "Bold text", "A table", "A glossary"], answers: [0, 1, 2, 3, 4, 5],
         slips: { any: "Six are on the page. A table has rows and columns; a glossary explains hard words. Are they there?" }, why: "Six markers. No table and no glossary." } } };
@@ -130,6 +134,7 @@ function qWhyNum(d){
     options: ["You need to do them in that order", "There are lots of them", "They are the most important part"], answer: 0,
     slips: { 1: "Bullet points can be long lists too. Numbers mean something more.", 2: "Bold shows important. Numbers show order." },
     hint: "Could you do step 4 before step 1?", why: "Numbers tell you the <b>order matters</b>. You cannot " + d.steps[3].toLowerCase().replace(/\.$/, "") + " before step 1.",
+    ez: { q: "Why are the steps numbered?", hint: "Could you do step 4 first?", why: "Numbers mean: do them <b>in order</b>.", slips: { 1: "Numbers are about order.", 2: "Bold is for important. Numbers are for order." } },
     lv: { spicy: { q: "What would go wrong if the steps under <b>" + d.h2 + "</b> were bullet points instead of numbers?",
       options: ["A reader might do them in the wrong order", "Nothing at all", "The page would be harder to print", "The title would not make sense"],
       slips: { 1: "Bullets say any order is fine. Here it is not.", 2: "It is about the reader, not the printer.", 3: "The title is fine either way." },
@@ -140,6 +145,7 @@ function qWhyBullets(d){
     options: ["They are separate things, and the order does not matter", "You must get them in that order", "They are not important"], answer: 0,
     slips: { 1: "Does it matter which you get first? Bullets say no.", 2: "You need all of them. Bullets just mean any order." },
     hint: "Does it matter which one you find first?", why: "Bullet points list <b>separate things in any order</b>. You could get them ready in any order.",
+    ez: { q: "Why does this list have dots, not numbers?", hint: "Does the order matter?", why: "Dots mean: <b>any order</b>.", slips: { 1: "Dots mean any order.", 2: "You need them all. Dots just mean any order." } },
     lv: { spicy: { options: ["They are separate things and the order does not matter", "They are in order of importance", "Bullets are quicker to type", "They are optional extras"],
       slips: { 1: "Nothing on the page says the first one matters most.", 2: "Maybe, but that is about the writer. What do they tell the reader?", 3: "You need them all. The heading says so." } } } };
 }
@@ -148,6 +154,7 @@ function qWhyBold(d){
     options: ["It is important, so the writer wants you to notice it", "It is the title", "It is a step"], answer: 0,
     slips: { 1: "The title is at the top.", 2: "It is not numbered." },
     hint: "What does bold make your eyes do?", why: "Bold makes your eyes stop. Writers use it for the bit you really must not miss.",
+    ez: { q: "Why is this line in bold?<br><b>\"" + d.bold + "\"</b>", why: "Bold means: <b>do not miss this</b>." },
     lv: { spicy: { q: "The writer could have hidden <b>\"" + d.bold + "\"</b> inside a step. Why put it on its own line, in bold?",
       options: ["So nobody misses it, because it is about safety or care", "To fill up space at the bottom", "Because it is the first step", "Because it is a caption"],
       slips: { 1: "Writers rarely add lines just to fill space.", 2: "It is not numbered, and it is at the bottom.", 3: "Captions go with pictures." },
@@ -158,19 +165,22 @@ function qWhere(d){
   return { q: "You want to know what to get ready before you start. Which marker takes you straight there?", fig: page(d),
     options: ["The subheading <b>" + d.h1 + "</b>", "The subheading <b>" + d.h2 + "</b>", "The caption", "The title"], answer: 0,
     slips: { 1: "That section is about what to do.", 2: "The caption is about the picture.", 3: "The title tells you the whole page, not where the list is." },
-    hint: "Subheadings tell you what each section is about.", why: "<b>" + d.h1 + "</b> is the section that lists what you need." };
+    hint: "Subheadings tell you what each section is about.", why: "<b>" + d.h1 + "</b> is the section that lists what you need.",
+    ez: { q: "Where is the list of things you need?", hint: "Look at the subheadings.", why: "Under <b>" + d.h1 + "</b>.", slips: { 1: "That part is what to do.", 2: "The caption is about the picture.", 3: "The title is the whole page." } } };
 }
 function qStepNo(d){
   return { q: "Which step number tells you to " + d.target + "?", fig: page(d),
     boxes: [{ label: "Step", a: d.t }],
     slips: [[d.t - 1, "One too early. Read the step after."], [d.t + 1, "One too far. Read the step before."]],
-    hint: "Find the numbered steps, then read down.", why: "Step <b>" + d.t + "</b>: \"" + d.steps[d.t - 1] + "\"" };
+    hint: "Find the numbered steps, then read down.", why: "Step <b>" + d.t + "</b>: \"" + d.steps[d.t - 1] + "\"",
+    ez: { q: "Which step says to " + d.target + "?", hint: "Find the numbers. Read down.", why: "Step <b>" + d.t + "</b>.", slips: [[d.t - 1, "One too early."], [d.t + 1, "One too far."]] } };
 }
 function qNext(d){
   return { q: "You have just done: <b>\"" + d.steps[1] + "\"</b> What do you do next?", fig: page(d),
     options: [d.steps[2], d.steps[0], d.steps[3]], answer: 0,
     slips: { 1: "That was step 1, already done.", 2: "That is step 4. Something comes before it." },
     hint: "That was step 2. What is step 3?", why: "Step 3: <b>" + d.steps[2] + "</b> The numbers keep you on track.",
+    ez: { q: "You did step 2. What is next?", hint: "Find step 3.", why: "Step 3: <b>" + d.steps[2] + "</b>", slips: { 1: "That was step 1.", 2: "That is step 4." } },
     lv: { spicy: { q: "Someone did step 4 straight after step 2. What did they miss?", options: [d.steps[2], d.steps[0], d.title],
       slips: { 1: "Step 1 came before step 2, so they did that.", 2: "That is the title, not a step." },
       why: "They skipped step 3: <b>" + d.steps[2] + "</b> That is exactly the mistake numbers help you avoid." } } };
@@ -207,6 +217,7 @@ function qPickWords(k){
   return { q: P(d.text) + "Pick <b>all</b> the order words.", options: d.words.concat(d.not), answers: [0, 1, 2, 3],
     slips: { any: "Order words tell you when, or in what order. Nouns like \"" + d.not[0] + "\" do not." },
     hint: "Look at the start of each sentence.", why: "<b>" + d.words.join(", ") + "</b>. They sit at the start of each sentence and move you through in order.",
+    ez: { q: P(d.text) + "Pick <b>all</b> the order words.", hint: "Look at the start of each sentence.", why: "<b>" + d.words.join(", ") + "</b>.", slips: { any: "Order words tell you when." } },
     lv: { spicy: { q: P(s.text) + "Pick <b>all</b> the time markers.", options: s.words.concat(s.not), answers: [0, 1, 2, 3],
       slips: { any: "Time markers are often whole phrases, like \"" + s.words[0] + "\"." },
       why: "<b>" + s.words.join(", ") + "</b>. In stories, time markers can be whole phrases." } } };
@@ -215,6 +226,7 @@ function qOrd(k){
   var d = ORD[k], s = ORDS[k];
   return { q: "These sentences got jumbled. Use the order words to put them back.", items: d.items.slice(),
     hint: "Which word means it comes first?", why: "The order words do the work: " + d.words.join(", then ") + ".",
+    ez: { q: "Put the sentences in order.", hint: "Which word means first?", why: d.words.join(", then ") + "." },
     lv: { spicy: { items: s.items.slice(), hint: "Which marker is earliest in time?", why: "The time markers do the work: " + s.words.join(", then ") + "." } } };
 }
 function qLast(k){
@@ -222,6 +234,7 @@ function qLast(k){
   return { q: P(d.text) + "Which word tells you this is the last thing that happened?", options: [d.last, d.words[0], d.words[1]], answer: 0,
     slips: { 1: "That one starts things off.", 2: "That is near the start." },
     hint: "Look at the last sentence.", why: "<b>" + d.last + "</b> tells you this is the end.",
+    ez: { q: P(d.text) + "Which word means the end?", why: "<b>" + d.last + "</b> means the end.", slips: { 1: "That one starts it.", 2: "That is near the start." } },
     lv: { spicy: { q: P(s.text) + s.q, options: s.o, answer: s.o.indexOf(s.a),
       slips: (function(){ var sl = {}; s.o.forEach(function(w, i){ if(w !== s.a) sl[i] = "\"" + w + "\" is a time marker, but have another look at what the question asks."; }); return sl; })(),
       why: "<b>" + s.a + "</b>. Time markers can jump forward, slow down or split the story in two." } } };
@@ -238,6 +251,10 @@ function qLast(k){
   blurb: "Every page has markers that tell you how to read it. Four short chunks: spot them, work out what each one tells you, follow time and order words, then use them to find things fast. A marker key to make at the end. A new page each time you come back.",
   note: "Marker hunt: the titles, bullets, numbers, captions and order words that tell you how to read a page. Four five minute chunks and a key to make. A new page every time you come back, so have a go whenever you fancy it.",
   sure: true,
+  ez: {
+    realWorld: { title: "Markers are everywhere", html: "<p>Game menus. Building instructions. Medicine boxes.</p><p>A time machine would need very clear steps!</p>" },
+    make: { intro: "Pick three markers. Say what each one does." }
+  },
   levels: [
     { id: "mild", name: "Spotter", line: "Spotter: find the markers and name them." },
     { id: "medium", name: "Reader", line: "Reader: more markers, and what each one tells you." },
@@ -259,10 +276,12 @@ function qLast(k){
       fig: page(D[0], true),
       html: "<p>Before you read a single sentence, a page is already telling you things. The <b>markers</b> do it.</p>" +
         "<p>On this page: <b>A</b> is the <b>title</b>. <b>B</b> is a <b>subheading</b>. <b>C</b> is <b>bullet points</b>. <b>D</b> is <b>numbered steps</b>. <b>E</b> is a <b>caption</b>. <b>F</b> is <b>bold</b>.</p>",
+      ez: { title: "Markers", html: "<p><b>Markers</b> help you read a page.</p><p><b>A</b> title. <b>B</b> subheading. <b>C</b> bullet points. <b>E</b> caption.</p>" },
       lv: { mild: { html: "<p>A page has <b>markers</b> that help you read it.</p><p><b>A</b> is the <b>title</b>, at the top. <b>B</b> is a <b>subheading</b>, a small heading for one part. <b>C</b> is <b>bullet points</b>, a list with dots. <b>E</b> is a <b>caption</b>, under the picture.</p>" },
         spicy: { html: "<p>Before you read a word, the <b>markers</b> have told you what this is, how it is split up and how to use it.</p>" +
           "<p><b>A</b> title, <b>B</b> subheading, <b>C</b> bullet points, <b>D</b> numbered steps, <b>E</b> caption, <b>F</b> bold. Every one is a choice the writer made for the reader.</p>" } },
       vary: [1, 2].map(function(k){ return { fig: page(D[k], true), html: "<p>A new page this time. The <b>markers</b> are tagged with purple letters.</p><p><b>A</b> title, <b>B</b> subheading, <b>C</b> bullet points, <b>D</b> numbered steps, <b>E</b> caption, <b>F</b> bold.</p>",
+        ez: { title: "Markers", html: "<p>A new page. Same <b>markers</b>.</p><p><b>A</b> title. <b>B</b> subheading. <b>C</b> bullet points. <b>E</b> caption.</p>" },
         lv: { mild: { html: "<p>A new page this time. The <b>markers</b> are tagged with purple letters.</p><p><b>A</b> is the <b>title</b>. <b>B</b> is a <b>subheading</b>. <b>C</b> is <b>bullet points</b>. <b>E</b> is a <b>caption</b>.</p>" } } }; }) },
 
     S("mc", "Spot them", qA, D),
@@ -272,12 +291,12 @@ function qLast(k){
 
     /* ---------- chunk 2: what each marker tells you ---------- */
     { type: "learn", topic: "What it tells you", title: "Each marker has a job",
-      fig: KEY,
+      fig: KEY, ez: { html: "<p>Each marker tells you something. The key shows what.</p>" },
       html: "<p>Each marker tells the reader something.</p>" +
         "<p><b>Title:</b> what the whole page is about. <b>Subheading:</b> what this section is about. <b>Bullet points:</b> separate things, any order. <b>Numbered steps:</b> do these in order. <b>Caption:</b> what the picture shows. <b>Bold:</b> this bit matters.</p>" },
 
     { type: "match", topic: "What it tells you",
-      q: "Match each marker to what it tells the reader.",
+      q: "Match each marker to what it tells the reader.", ez: { q: "Match each marker to its job.", slips: { any: "Look at the key on the last card." } },
       pairs: [["Title", JOBS[0]], ["Bullet points", JOBS[2]], ["Numbered steps", JOBS[3]], ["Caption", JOBS[4]]],
       slips: { any: "Have a look at the marker key in the last card." },
       hint: "Numbers are about order.", why: "Title: the whole page. Bullets: any order. Numbers: this order. Caption: the picture.",
@@ -297,6 +316,7 @@ function qLast(k){
         T(260, 40, "Step across in order", 16, { a: "middle", b: 1 }) + '</svg>',
       html: "<p>Some markers are <b>words</b>. Order words tell you what comes first and what comes next: <b>first, next, then, after that, finally</b>.</p>" +
         "<p>Time words tell you when: <b>before, later, at 6pm, by morning</b>. They are like stepping stones through a text.</p>",
+      ez: { html: "<p><b>Order words</b> tell you what comes next.</p><p><b>First. Next. Then. Finally.</b></p>" },
       lv: { spicy: { html: "<p>Some markers are <b>words and phrases</b>. In instructions, order words (<b>first, next, finally</b>) keep you on track.</p>" +
         "<p>In stories, time markers do more: they can <b>jump forward</b> (\"later that evening\"), <b>slow down</b> (\"moments later\") or <b>split the story</b> (\"meanwhile\"). They are often at the start of a paragraph, telling the reader time has moved.</p>" } } },
 
@@ -306,6 +326,7 @@ function qLast(k){
 
     /* ---------- chunk 4: use the markers ---------- */
     { type: "learn", topic: "Use them", title: "Markers help you find things fast",
+      ez: { title: "Find things fast", html: "<p>Markers help you <b>jump</b> to what you need.</p>" },
       html: "<p>Last bit. Markers are not just for spotting: they let you <b>jump</b> to what you need without reading everything.</p>" +
         "<p>Need a list? Find the right <b>subheading</b>. Need the next step? Follow the <b>numbers</b>. Wondering about the picture? Read the <b>caption</b>.</p>",
       fig: '<svg viewBox="0 0 420 140" role="img" aria-label="Jay with a page, looking pleased">' + A.jay(90, 56, 0.8, "smile") + A.bubble(150, 10, 250, 70, "When I was in China, I\nread the subheadings first.\nWorks every time.", 168) + '</svg>' },

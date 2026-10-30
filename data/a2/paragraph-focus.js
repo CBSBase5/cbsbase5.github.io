@@ -119,7 +119,8 @@ var BUILD = {
       lv: { spicy: { html: "<p>A paragraph is a group of sentences that are all about <b>one thing</b>. That one thing is the <b>focus</b>.</p>" +
         "<p>In a lot of real writing the focus is an <b>idea</b>, not just a word. Ask: what is this paragraph really saying about it?</p>" +
         "<p class=\"a2task\">The [[thing]] was very old. It had a long scratch down one side. [[Who]] had kept it for twenty years. It still worked perfectly.</p>" +
-        "<p>The word that keeps coming back is the [[thing]]. The idea is sharper: <b>the [[thing]] is old, but still good</b>.</p>" } } },
+        "<p>The word that keeps coming back is the [[thing]]. The idea is sharper: <b>the [[thing]] is old, but still good</b>.</p>" } } ,
+      ez: { title: "One focus", html: "<p>A paragraph is about <b>one thing</b>.</p><p>That one thing is its <b>focus</b>.</p>" } },
 
     { type: "mc", topic: "One paragraph, one focus",
       q: "<p class=\"a2task\">The [[thing]] was very old. It had a long scratch down one side. [[Who]] had kept it for twenty years. It still worked perfectly.</p>What is this paragraph mostly about?",
@@ -128,6 +129,8 @@ var BUILD = {
       slips: { 1: "[[Who]] is in one sentence. Which thing is in every sentence?", 2: "Twenty years is a detail in one sentence, not the focus." },
       hint: "Which thing does every sentence talk about?",
       why: "Every sentence is about the [[thing]]: how old it is, the scratch, how long it was kept, and that it works.",
+      ez: { q: "<p class=\"a2task\">The [[thing]] was very old. It had a long scratch down one side. [[Who]] had kept it for twenty years. It still worked perfectly.</p>What is it mostly about?",
+        hint: "What is in every sentence?", why: "Every sentence is about the [[thing]].", slips: { 1: "[[Who]] is in 1 sentence. What is in all of them?", 2: "That is a small detail." } },
       lv: {
         medium: { q: "<p class=\"a2task\">[[Who]] had kept the same [[thing]] for twenty years. It had a long scratch down one side, and one corner was chipped. Everyone told her to get a new one. She never listened, because it still worked perfectly.</p>What is this paragraph mostly about?",
           options: ["[[Who]] and her old [[thing]]", "Everyone [[who]] knows", "How to fix a scratch"],
@@ -145,6 +148,9 @@ var BUILD = {
       slips: { 0: "This one is about where [[place]] is. It belongs.", 1: "\"It\" means [[place]] here, so it belongs.", 3: "The rooms are inside [[place]], so it belongs." },
       hint: "Three sentences are about [[place]]. Find the one that is not.",
       why: "Bonnie does like sausages, but this paragraph is about [[place]]. She has wandered in from somewhere else.",
+      ez: { q: "<p class=\"a2task\">[[Place]] is at the end of a long road. It has a big red door. Bonnie likes sausages. Inside, there are lots of rooms.</p>Which one does <b>not</b> belong?",
+        hint: "Find the one not about [[place]].", why: "It is about Bonnie, not [[place]]. Sausages, though!",
+        slips: { 0: "That is about [[place]]. It fits.", 1: "It means [[place]]. It fits.", 3: "The rooms are in [[place]]. It fits." } },
       lv: {
         medium: { q: "<p class=\"a2task\">[[Place]] is at the end of a long road. It has a big red door with a brass handle. The road was built in 1900 by a team of twenty workers. Inside, there are more rooms than anyone has counted.</p>Which sentence does <b>not</b> belong?",
           options: ["[[Place]] is at the end of a long road.", "It has a big red door with a brass handle.", "The road was built in 1900 by a team of twenty workers.", "Inside, there are more rooms than anyone has counted."],
@@ -163,6 +169,7 @@ var BUILD = {
       cards: [["[[Who]] has short dark hair.", 0], ["She always wears a green coat.", 0], ["[[Place]] has a big red door.", 1], ["It has lots of rooms.", 1]],
       hint: "\"She\" is a person. \"It\" is a thing or a place.",
       why: "Hair and a coat go with [[who]]. A door and rooms go with [[place]].",
+      ez: { q: "Sort them into 2 paragraphs.", hint: "She is a person. It is a place.", why: "Hair and coat: [[who]]. Door and rooms: [[place]]." },
       lv: {
         medium: { cards: [["[[Who]] has short dark hair.", 0], ["She is always the first one there.", 0], ["Her boots are always muddy.", 0], ["[[Place]] has a big red door.", 1], ["Its windows are tall and dusty.", 1], ["Nobody has painted its walls for years.", 1]],
           hint: "She and her point to a person. It and its point to a place.",
@@ -181,6 +188,11 @@ var BUILD = {
       slips: { 1: "B jumps from [[event]] to a puppy, then rain, then toast. Four sentences, four focuses.", 2: "Only one of them sticks to [[event]] all the way through." },
       hint: "Which one is still talking about [[event]] in its last sentence?",
       why: "Every sentence in A is about how [[event]] went. B wanders off after the first sentence.",
+      ez: { q: "Which one sticks to one focus?" +
+          "<p class=\"a2task\"><b>A:</b> [[Event]] started badly. First the rain came. Then the lights went out. By the end, though, everyone was smiling.</p>" +
+          "<p class=\"a2task\"><b>B:</b> [[Event]] started badly. My cousin has a new puppy. Rain is made of water. I like toast.</p>",
+        hint: "Which still talks about [[event]] at the end?", why: "A stays on [[event]]. B wanders off.",
+        slips: { 1: "B jumps to a puppy, then rain, then toast.", 2: "Only 1 of them sticks to [[event]]." } },
       lv: { spicy: { q: "Two people wrote about [[event]]. Which paragraph keeps one focus?" +
         "<p class=\"a2task\"><b>A:</b> [[Event]] started badly. First the rain came, then the lights went out. By the end, though, everyone was smiling.</p>" +
         "<p class=\"a2task\"><b>B:</b> [[Event]] started badly. My cousin, who has a new puppy, was there too. Puppies need lots of walks. Ours goes out three times a day.</p>",
@@ -193,7 +205,8 @@ var BUILD = {
       html: "<p>Sentences in a paragraph link together to keep the focus. There are three easy ways to spot the links.</p>" +
         "<p><b>Same word:</b> the word comes back. <b>Pointing word:</b> it, she, he, they or this points back to something. <b>Another name:</b> the same thing gets a new name.</p>" +
         "<p class=\"a2task\">[[Who]] picked up the [[thing]]. <b>She</b> looked at <b>it</b> carefully. The [[thing]] was cold.</p>" +
-        "<p><b>She</b> points back to [[who]]. <b>It</b> points back to the [[thing]]. The [[thing]] comes back as the same word.</p>" },
+        "<p><b>She</b> points back to [[who]]. <b>It</b> points back to the [[thing]]. The [[thing]] comes back as the same word.</p>" ,
+      ez: { html: "<p>Sentences <b>link</b> to keep the focus.</p><p><b>She</b> and <b>it</b> point back. Or the same word comes back.</p>" } },
 
     { type: "mc", topic: "How the sentences link",
       q: "<p class=\"a2task\">[[Who]] picked up the [[thing]]. She looked at it carefully.</p>What does <b>it</b> point back to?",
@@ -202,6 +215,7 @@ var BUILD = {
       slips: { 1: "[[Who]] is a person, so she gets \"she\", not \"it\".", 2: "\"Carefully\" says how she looked. \"It\" points back to a thing." },
       hint: "What did she pick up?",
       why: "\"It\" points back to the [[thing]]. That link keeps both sentences on the same focus.",
+      ez: { why: "<b>It</b> means the [[thing]].", slips: { 1: "[[Who]] is a person. That is she.", 2: "Carefully says how. It is a thing." } },
       lv: {
         medium: { q: "<p class=\"a2task\">[[Who]] left the [[thing]] by the door of [[place]]. When she came back, it had gone.</p>What does <b>it</b> point back to?",
           options: ["The [[thing]]", "The door", "[[Place]]"],
@@ -220,6 +234,8 @@ var BUILD = {
       answers: [0, 1],
       hint: "Look for the small words that stand in for a person.",
       why: "\"She\" and \"Her\" both point back to [[who]]. They keep every sentence on her.",
+      ez: { q: "<p class=\"a2task\">[[Who]] arrived at [[place]] early. She was nervous. Her hands were shaking. She took a deep breath.</p>Pick the words that mean [[who]].",
+        hint: "Small words that stand for a person.", why: "<b>She</b> and <b>Her</b> mean [[who]]." },
       lv: {
         medium: { q: "<p class=\"a2task\">[[Who]] and her friend arrived at [[place]] early. They were nervous. Their hands were shaking. Nobody else was there yet.</p>Pick the words that point back to <b>both</b> of them.",
           options: ["They", "Their", "her", "Nobody", "early"],
@@ -237,6 +253,7 @@ var BUILD = {
       items: ["[[Who]] found a box at [[place]].", "Inside it was a note.", "The note said: see you at midnight."],
       hint: "\"It\" needs the box to come first. \"The note\" needs the note to come first.",
       why: "Each sentence holds on to the one before: the box, then inside it, then the note.",
+      ez: { q: "Put these in order. The links help.", hint: "The box comes first.", why: "The box, then inside it, then the note." },
       lv: {
         medium: { items: ["[[Who]] found a box at [[place]].", "It was covered in thick dust.", "Inside it was a folded note.", "The note said: see you at midnight."] },
         spicy: { items: ["[[Who]] found a box at [[place]].", "It was covered in thick dust.", "Inside it was a folded note.", "The note said: see you at midnight.", "She has not slept since."],
@@ -249,6 +266,9 @@ var BUILD = {
       slips: { 1: "Lots of sentences are short. That does not make them belong together.", 2: "Every sentence starts with a capital letter.", 3: "Every sentence ends with a full stop or a mark like it." },
       hint: "What are both sentences talking about?",
       why: "They share a focus, the [[thing]], and the word \"it\" links the second one back to the first.",
+      ez: { q: "<p class=\"a2task\">The [[thing]] was very old. It still worked perfectly.</p>Why do they belong together?",
+        hint: "What are both about?", why: "Both are about the [[thing]]. <b>It</b> links them.",
+        slips: { 1: "Lots of sentences are short.", 2: "Every sentence has a capital.", 3: "Every sentence has a full stop." } },
       lv: { spicy: { q: "<p class=\"a2task\">[[Place]] has stood empty for years. The old building creaks in the wind.</p>Why do these two sentences belong together?",
         options: ["\"The old building\" is another name for [[place]], so the focus stays the same.", "They are both about the wind.", "They both use the word \"the\".", "They are both about being empty."],
         slips: { 1: "Only the second one mentions wind.", 2: "Lots of sentences use \"the\". That is not a link.", 3: "Only the first one says it is empty." },
@@ -262,7 +282,8 @@ var BUILD = {
         "<p>Every sentence is about her getting ready. So you can say: <b>This paragraph is about [[who]] getting ready.</b></p>",
       lv: { spicy: { html: "<p>To find the focus, ask: <b>what does every sentence talk about?</b> The focus is the umbrella they all fit under.</p>" +
         "<p class=\"a2task\">[[Who]] gets up at six. She has toast. Then she checks her bag twice, and once more by the door.</p>" +
-        "<p>\"This paragraph is about [[who]]\" is true, but blurry. Sharper: <b>This paragraph is about [[who]] being nervous and careful as she gets ready.</b> Checking three times tells you that.</p>" } } },
+        "<p>\"This paragraph is about [[who]]\" is true, but blurry. Sharper: <b>This paragraph is about [[who]] being nervous and careful as she gets ready.</b> Checking three times tells you that.</p>" } } ,
+      ez: { html: "<p>Ask: <b>what is every sentence about?</b></p><p>Then say it in 1 line.</p>" } },
 
     { type: "text", topic: "Say what it is about",
       q: "<p class=\"a2task\">Bonnie is a small brown poodle. She has curly fur and no tail. She loves walks in the park. Her favourite treat is a crunchy biscuit.</p>Finish this: <b>This paragraph is about ...</b>",
@@ -272,6 +293,8 @@ var BUILD = {
       slips: [[["walk", "park"], "Walks are in one sentence. Who is every sentence about?"], [["biscuit", "treat"], "The treat is in one sentence. Who is every sentence about?"]],
       hint: "Who is in every single sentence?",
       why: "Every sentence is about Bonnie: what she is, what she looks like, what she loves.",
+      ez: { hint: "Who is in every sentence?", why: "Every sentence is about Bonnie.",
+        slips: [[[], "Walks are in 1 sentence. Who is in all of them?"], [[], "The treat is in 1 sentence. Who is in all of them?"]] },
       lv: { spicy: { q: "<p class=\"a2task\">Bonnie is a small brown poodle with no tail. She will sit for a biscuit, but not for anything else. When Jay says \"walk\", she spins in circles. If he says \"bath\", she hides under the sofa.</p>Finish this, as sharply as you can: <b>This paragraph is about ...</b>",
         model: "This paragraph is about Bonnie and how she only does what she wants.",
         why: "Bonnie is the focus. A sharper answer says what the paragraph shows about her: she has a mind of her own, and words like walk and bath change everything." } } },
@@ -283,6 +306,9 @@ var BUILD = {
       slips: { 1: "Coats are in one sentence. What do all four sentences have in common?", 2: "Umbrellas are in the last sentence only.", 3: "Corners are a tiny detail." },
       hint: "What is the same in every sentence?",
       why: "Rain, puddles, soaked coats, broken umbrellas: it is all about how wet it was.",
+      ez: { q: "<p class=\"a2task\">During [[event]], the rain did not stop. Puddles filled every corner. Everyone's coats were soaked. Even the umbrellas gave up.</p>Which heading fits best?",
+        hint: "What is in every sentence?", why: "Rain, puddles, wet coats. A very wet day!",
+        slips: { 1: "Coats are in 1 sentence.", 2: "Umbrellas are only at the end.", 3: "Corners are a tiny detail." } },
       lv: { spicy: { options: ["Nothing could stand up to the rain", "Coats and umbrellas", "What to wear in bad weather", "A day out"],
         slips: { 1: "Those are two details. The heading needs the idea they show.", 2: "The paragraph does not give advice. It tells you what happened.", 3: "True, but blurry. It does not say anything about the rain." },
         why: "Every sentence shows the rain winning: puddles everywhere, coats soaked, even the umbrellas giving up. The best heading says that idea." } } },
@@ -294,6 +320,9 @@ var BUILD = {
       slips: [[["short", "capital", "full stop"], "That is true of lots of sentences. What are both of them talking about?"]],
       hint: "Who are both sentences about? Which word points back?",
       why: "Both sentences are about [[who]], and \"She\" points back to her. Same focus, linked by a pointing word.",
+      ez: { q: "<p class=\"a2task\">[[Who]] loves [[event]]. She gets there an hour early every time.</p>How do they belong together? Use your own words.",
+        hint: "Start with: Both sentences are about ...", why: "Both are about [[who]]. <b>She</b> points back to her.",
+        slips: [[[], "True of lots of sentences. Who are both about?"]] },
       lv: { mild: { hint: "Try starting with: Both sentences are about ..." } } },
 
     { type: "mc", topic: "Say what it is about",
@@ -303,6 +332,7 @@ var BUILD = {
       slips: { 1: "That sentence is about building a car park, not the rain.", 2: "That is about you, not the rain." },
       hint: "Which one keeps talking about the rain?",
       why: "Umbrellas blowing inside out keeps the focus on the wet, wild weather.",
+      ez: { hint: "Which one is about the rain?", why: "Umbrellas keep it on the wet weather.", slips: { 1: "That is about a car park.", 2: "That is about you, not the rain." } },
       lv: { spicy: { options: ["Even the umbrellas blew inside out.", "Some people say rain is good for gardens.", "The car park was built in 1990.", "Rain can be measured in millimetres."],
         slips: { 1: "It is about rain, but it changes the focus to gardens and what people think. The paragraph is about this one wet day.", 2: "A car park being built is a different focus.", 3: "That is a fact about rain in general, not about this day." },
         why: "The paragraph is about rain spoiling this one day. Only the umbrellas sentence keeps that exact focus." } } },
@@ -321,7 +351,10 @@ var BUILD = {
         spicy: { fig: page(3), html: "<p>Longer pieces have more than one paragraph. Each paragraph has its own focus. Have a read.</p>" +
           "<p class=\"a2task\">We reached [[place]] just after ten, only to find a queue snaking round the corner. An hour later, still shuffling forward, we had learned every crack in the pavement.</p>" +
           "<p class=\"a2task\">Inside, though, the wait was soon forgotten. The soup was hot, the chips were salty, and my friend declared it the best lunch of her life.</p>" +
-          "<p class=\"a2task\">Then it was time for [[event]], and the whole room went quiet.</p>" } } },
+          "<p class=\"a2task\">Then it was time for [[event]], and the whole room went quiet.</p>" } } ,
+      ez: { html: "<p>Each paragraph has its own focus. Have a read.</p>" +
+        "<p class=\"a2task\">We got to [[place]] at ten. The queue was very long. It took an hour to get in.</p>" +
+        "<p class=\"a2task\">Inside, the food was great. I had hot soup. My friend had a big bowl of chips.</p>" } },
 
     { type: "mc", topic: "Focus finder",
       q: "What is the <b>first</b> paragraph about?" +
@@ -331,6 +364,7 @@ var BUILD = {
       slips: { 1: "The food is the next paragraph.", 2: "Ten is a detail. What is the whole paragraph about?" },
       hint: "What do the queue and the hour have in common?",
       why: "Arriving, the queue and the hour all tell you about getting in.",
+      ez: { hint: "The queue, the hour ... what is it about?", why: "The queue and the wait. It is about getting in.", slips: { 1: "The food is next.", 2: "Ten is a small detail." } },
       lv: { medium: { q: "What is the <b>first</b> paragraph about?" +
           "<p class=\"a2task\">We got to [[place]] at ten. The queue went right round the corner, and it took an hour to get in.</p>" },
         spicy: { q: "Which is the best way to say what the <b>first</b> paragraph is about?" +
@@ -347,6 +381,7 @@ var BUILD = {
       slips: { 1: "The queue was the first paragraph.", 2: "My friend is in one sentence. What is in all of them?" },
       hint: "Soup, chips ... what are they?",
       why: "Every sentence is about the food: it was great, the soup, the chips.",
+      ez: { why: "Soup and chips. It is about the food.", slips: { 1: "The queue was paragraph 1.", 2: "My friend is in 1 sentence." } },
       lv: { medium: { q: "What is the <b>second</b> paragraph about?" +
           "<p class=\"a2task\">Inside, the food was great. I had hot tomato soup. My friend had a big bowl of chips and said it was the best thing all week.</p>" },
         spicy: { q: "Which is the best way to say what the <b>second</b> paragraph is about?" +
@@ -358,6 +393,7 @@ var BUILD = {
     { type: "widget", topic: "Focus finder", unscored: true,
       title: "Build a paragraph",
       html: "Here is a focus. Tap the sentences that belong to it to build a paragraph. Tap again to take one out. When you are happy, tap <b>Check my paragraph</b>.",
+      ez: { html: "Tap the sentences that fit the focus. Then tap <b>Check my paragraph</b>." },
       mount: function(el, api){
         var lv = BUILD[api.level] ? api.level : "medium";
         var set = BUILD[lv], list = set.s.map(function(s){ return [api.tok(s[0]), s[1]]; });
@@ -427,6 +463,11 @@ var BUILD = {
       "<p>Picture a time traveller's guide to Victorian London. If we could time travel, the paragraph about staying safe might be the one worth finding fast.</p>",
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay next to a time portal, wondering which paragraph to read">' + A.portal(76, 76, 54) + A.jay(240, 56, 0.85, "hmm") +
       A.bubble(292, 8, 120, 52, "Which bit do\nI need?", 296) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>People skim for the paragraph they need.</p><p>A time traveller would look for <b>staying safe</b> first!</p>" },
+    make: { intro: "Pick a focus. Write 3 short sentences about it." }
   },
 
   make: {

@@ -115,6 +115,7 @@ var DEV = {
 
     /* ---------- chunk 1: what is it mostly about? ---------- */
     { type: "learn", topic: "Mostly about", title: "The gist is the one breath version",
+      ez: { title: "The gist", html: "<p>The <b>gist</b> is the main thing.</p><p>What would you tell a mate?</p>" },
       fig: GIST,
       html: "<p>The <b>gist</b> is what a text is <b>mostly</b> about.</p>" +
         "<p>Imagine a mate asks, \"What did it say?\" You would not read the whole thing out. You would tell them the main thing, in one breath. That is the gist.</p>" +
@@ -132,6 +133,7 @@ var DEV = {
       slips: { 1: "That is the reason it moved, not the main thing. What would a mate need to know?", 2: "A small detail near the end.", 3: "Have another look: it has moved, not been cancelled." },
       hint: "What has happened to [[event]]?",
       why: "The gist: [[event]] has moved to next Saturday. The storm, the tickets and the time are details.",
+      ez: { hint: "What happened to [[event]]?", why: "It is on next Saturday now.", slips: { 1: "The storm is why. What is the main thing?", 2: "Look again. Not this Saturday." } },
       lv: {
         mild: { q: P("[[Event]] is not on this Saturday now. A storm is coming. It is on next Saturday.") + "What is it mostly about?",
           options: ["[[Event]] is on next Saturday now.", "A storm is coming.", "[[Event]] is on this Saturday."],
@@ -148,6 +150,7 @@ var DEV = {
           slips: { 1: "A small detail about the bed.", 2: "That is why she needed a new one. The main thing is the new bed.", 3: "Have another look: whose bed is it?" },
           hint: "Who is it about, and what is new?",
           why: "Mostly about Bonnie's new bed. Falling asleep on it hints that she likes it.",
+          ez: { hint: "Who is it about?", why: "Bonnie's new bed.", slips: { 1: "Blue is a small detail.", 2: "Look again. Whose bed?" } },
           lv: {
             mild: { q: P("Bonnie has a new bed. It is blue. She likes it.") + "What is it mostly about?",
               options: ["Bonnie's new bed", "The colour blue", "Jay's new bed"],
@@ -163,6 +166,7 @@ var DEV = {
           slips: { 1: "That is why it is shut. The main thing is what is happening.", 2: "A detail: where the van is.", 3: "It says two weeks, not forever." },
           hint: "What has changed, and for how long?",
           why: "Cafe shut for two weeks, snack van instead. The kitchen and the gate are details.",
+          ez: { hint: "What has changed?", why: "The cafe is shut. Use the van.", slips: { 1: "It does not say the van is new.", 2: "Look again. It is shut." } },
           lv: {
             mild: { q: P("The cafe at [[place]] is shut this week. Go to the snack van.") + "What is it mostly about?",
               options: ["The cafe is shut, so use the snack van.", "The snack van is new.", "The cafe is open."],
@@ -181,6 +185,7 @@ var DEV = {
       slips: { 1: "True, but small. Would your mate know when and where to go?", 2: "Have another look: you do not need to know anything.", 3: "A detail. Your mate still would not know when or where." },
       hint: "What, when and where.",
       why: "What, when and where: bird club, Wednesday lunch, Base 5. That is the gist.",
+      ez: { q: P("Bird club is on Wednesday at lunch. Come to Base 5! Jay") + "What would you tell a mate?", hint: "What, when and where.", why: "Bird club, Wednesday lunch, Base 5.", slips: { 1: "It does not say that.", 2: "Look again at the day." } },
       lv: {
         mild: { q: P("Bird club is on Wednesday at lunch. Come to Base 5! Jay") + "A mate missed this. What would you tell them?",
           options: ["Bird club is on Wednesday lunch, in Base 5.", "Jay likes Base 5.", "Bird club is on Friday."],
@@ -198,6 +203,7 @@ var DEV = {
       slips: { any: "Only one card is the gist. The rest are times, lengths and extras." },
       hint: "Which one could you say in one breath and your mate would get it?",
       why: "The gist is the charity walk. Sunday, ten miles and Bonnie are details.",
+      ez: { q: P("[[Crew]] are raising money for a guide dog charity. They are doing a sponsored walk on Sunday. It is ten miles long. Bonnie is coming too, on a short lead.") + "Sort them. The gist or a detail?", hint: "Which one is the main thing?", why: "The charity walk is the gist. The rest are details.", slips: { any: "Only 1 card is the gist." } },
       lv: {
         mild: { cards: [["[[Crew]] are raising money for a guide dog charity.", 0], ["The walk is on Sunday.", 1], ["Bonnie is coming too.", 1]] },
         spicy: { q: P("[[Crew]] are raising money for a guide dog charity. They are doing a sponsored walk on Sunday. It is ten miles long. Bonnie is coming too, on a short lead.") + "Sort them: the gist, a detail, or something the text never says?",
@@ -213,10 +219,12 @@ var DEV = {
       slips: [[["lost", "looked"], "That is how it starts. What happened in the end?"]],
       hint: "How does it end?",
       why: "Something like \"Bonnie found the lost [[thing]]\" sums it up. Monday, the sofa and the chewing are details.",
+      ez: { q: P("On Monday, [[who]] lost the [[thing]]. Everyone looked for it all week. On Friday, Bonnie found it under the sofa, a bit chewed.") + "What is the gist? A few words is fine.", model: "Bonnie found the [[thing]].", slips: [[null, "That is the start. How does it end?"]], hint: "How does it end?", why: "Bonnie found the [[thing]]. The rest are details." },
       lv: { spicy: { q: P("On Monday, [[who]] lost the [[thing]]. Everyone searched for days. Posters went up. Someone even blamed a ghost. On Friday, Bonnie trotted out from under the sofa with it in her mouth, looking very pleased with herself.") + "In your own words, what is the gist? One sentence is plenty." } } },
 
     /* ---------- chunk 2: main points ---------- */
     { type: "learn", topic: "Main points", title: "Some texts have two main points",
+      ez: { title: "Two main points", html: "<p>Some texts tell you <b>two</b> big things.</p><p>Find both.</p>" },
       fig: POINTS,
       html: "<p>A longer text can have <b>two or three main points</b>. Often each paragraph gives one.</p>" +
         "<p>Find the main point of each paragraph, put them together, and you have the gist of the whole thing.</p>",
@@ -232,6 +240,7 @@ var DEV = {
       slips: { any: "One main point in each paragraph. The others are a detail, and something the text never says." },
       hint: "One from each paragraph.",
       why: "Paragraph one: they won an award. Paragraph two: the minibus broke down. Tuesday is a detail.",
+      ez: { hint: "Good news and bad news.", why: "A prize, and a broken minibus.", slips: { any: "Find the good news and the bad news." } },
       lv: {
         mild: { q: P("[[Crew]] won a prize! But their minibus is broken. They will walk for now.") + "Pick the <b>two</b> big things it tells you.",
           options: ["[[Crew]] won a prize.", "Their minibus is broken.", "Minibuses are blue."], answers: [0, 1],
@@ -250,6 +259,7 @@ var DEV = {
           slips: { any: "One main point in each paragraph. Soggy sandwiches are a detail." },
           hint: "One from each paragraph.",
           why: "The good bit (the kingfisher) and the bad bit (the rain). The sandwiches are a detail.",
+          ez: { hint: "A good thing and a bad thing.", why: "A kingfisher, then rain.", slips: { any: "Find a good thing and a bad thing." } },
           lv: {
             mild: { q: P("Jay saw a kingfisher! But then it rained. He went home.") + "Pick the <b>two</b> big things it tells you.",
               options: ["Jay saw a kingfisher.", "It rained.", "Jay has a car."], answers: [0, 1],
@@ -267,6 +277,7 @@ var DEV = {
           slips: { any: "One main point in each paragraph. Friday is a detail, and nothing says it will close." },
           hint: "One from each paragraph.",
           why: "It opened and was popular, and some neighbours are unhappy about the noise.",
+          ez: { hint: "Good news and not so good news.", why: "It is open. Some say it is loud.", slips: { any: "A good thing and a not so good thing." } },
           lv: {
             mild: { q: P("The skate park is open! Lots of people came. But some people say it is too loud.") + "Pick the <b>two</b> big things it tells you.",
               options: ["The skate park is open.", "Some people say it is too loud.", "Skate parks are free."], answers: [0, 1],
@@ -286,6 +297,7 @@ var DEV = {
       slips: { any: "Look for the big clue in each one: a bus, a time, or things to carry." },
       hint: "Buses and car parks are about getting there.",
       why: "Each paragraph has one job. Put the three jobs together and you have the gist of the leaflet.",
+      ez: { q: "A leaflet about [[place]]. Match each part to its job.", hint: "A bus is about getting there.", why: "Each part has its own job.", slips: { any: "Look for a bus, a time, or things to bring." } },
       lv: {
         spicy: { pairs: [["The number 9 stops right outside, and the car park next door is free after 4.", "How to get there"], ["Doors open at 10 and close at 5, but last entry is 4.", "When it is open"], ["It gets chilly inside, so layers are a good idea. Packed lunches are welcome.", "What to bring"], ["Adults pay 6 pounds, and under 16s go free with an adult.", "How much it costs"]] } },
       vary: [
@@ -294,12 +306,14 @@ var DEV = {
           slips: { any: "Look for the big clue in each one: a hutch, food, or teeth and claws." },
           hint: "Hay and greens are food.",
           why: "Home, food, health: one job for each paragraph.",
+          ez: { q: "A rabbit guide. Match each part to its job.", hint: "Hay is food.", why: "Home, food, health.", slips: { any: "Look for a hutch, food, or teeth." } },
           lv: { spicy: { pairs: [["A hutch alone is not enough: they need a run, ideally with something to hide in.", "Where it lives"], ["Most of their diet should be hay, with a handful of greens and fresh water.", "What it eats"], ["Their teeth never stop growing, so check them, along with claws, every week.", "Keeping it healthy"], ["Rabbits get lonely, so most do better living with another rabbit.", "Company"]] } } },
         { q: "Three short paragraphs from a page about [[event]]. Match each to its main point.",
           pairs: [["Tickets are 5 pounds, or 3 pounds if you book early.", "Cost"], ["It starts at 7pm, so please arrive by quarter to.", "Time"], ["There is a lift and a quiet room if anyone needs one.", "Help on the night"]],
           slips: { any: "Look for the big clue: money, a time, or something to help people." },
           hint: "Pounds are about cost.",
           why: "Cost, time, help: one job for each paragraph.",
+          ez: { q: "A page about [[event]]. Match each part to its job.", hint: "Pounds are about cost.", why: "Cost, time, help.", slips: { any: "Look for money, a time, or help." } },
           lv: { spicy: { pairs: [["Book before Friday and you save 2 pounds on each ticket.", "Cost"], ["Doors at 6.45, curtain up at 7, and it all wraps up by 9.", "Time"], ["Step free access, plus a quiet room for anyone who needs a break.", "Help on the night"], ["The car park fills fast, so the bus or a lift is your best bet.", "Getting there"]] } } }
       ] },
 
@@ -310,6 +324,7 @@ var DEV = {
       slips: { 1: "Only half. What about the food?", 2: "Only half. What about the times?", 3: "That is an opinion, and it misses both points." },
       hint: "Look for the one with both bits in.",
       why: "A gist of the whole text covers every main point, squeezed together.",
+      ez: { q: "The cafe has <b>new times</b> and <b>hot food</b>. Which says <b>both</b>?", hint: "Find the one with both.", why: "The first one has both points.", slips: { 1: "Only half. What about the food?", 2: "Only half. What about the times?", 3: "That is an opinion." } },
       lv: { spicy: { q: "A text makes three points: <b>the [[place]] cafe has new opening times</b>, <b>it now sells hot food</b>, and <b>prices have gone up a little</b>. Which is the best gist?",
         options: ["The cafe at [[place]] has new times, hot food and slightly higher prices.", "The cafe at [[place]] now sells hot food.", "The cafe at [[place]] has new times and hot food.", "The cafe at [[place]] is getting too expensive."],
         slips: { 1: "Only one of the three points.", 2: "Close, but it misses the prices.", 3: "That is a judgement. The text says prices went up \"a little\"." },
@@ -317,6 +332,7 @@ var DEV = {
 
     /* ---------- chunk 3: what it hints ---------- */
     { type: "learn", topic: "Under the surface", title: "Texts hint more than they say",
+      ez: { title: "Clues", html: "<p>A text can give you a <b>clue</b>.</p><p>\"Their coat was on.\" They want to go!</p>" },
       fig: ICE,
       html: "<p>Writers do not always say things straight out. Like an iceberg, there is often more <b>under the surface</b>.</p>" +
         "<p>\"[[Who]] checked the clock again. Their coat was already on.\" It never says they want to leave. But the clues, plus what you know, tell you they do.</p>" +
@@ -334,6 +350,7 @@ var DEV = {
       slips: { 1: "Possible, but the clock and the question point somewhere else.", 2: "Checking the clock five times usually means the opposite.", 3: "They can see a clock. The text does not mention a watch." },
       hint: "Why would you keep looking at a clock?",
       why: "Checking the clock, coat on, asking if it is nearly finished: all clues that they want to go.",
+      ez: { hint: "Why look at the door?", why: "Coat on, eyes on the door. They want to go.", slips: { 1: "The coat is a clue. Are they staying?", 2: "Looking at the door means awake." } },
       lv: {
         mild: { q: P("[[Who]] has their coat on. They keep looking at the door.") + "What does this hint?",
           options: ["[[Who]] wants to go.", "[[Who]] wants to stay all day.", "[[Who]] is asleep."],
@@ -350,6 +367,7 @@ var DEV = {
           slips: { 1: "A bowl would be the clue for hungry. What is in her mouth?", 2: "Tired dogs lie down. She is sitting up, watching.", 3: "She is sitting right next to it." },
           hint: "What is in her mouth?",
           why: "Her lead, by the door, watching Jay: she is asking for a walk without saying a word.",
+          ez: { hint: "What is in her mouth?", why: "A lead by the door. She wants a walk.", slips: { 1: "What is a lead for?", 2: "She is by the door, ready." } },
           lv: {
             mild: { q: P("Bonnie has her lead in her mouth. She sits by the door.") + "What does this hint?",
               options: ["Bonnie wants a walk.", "Bonnie wants a bath.", "Bonnie wants to sleep."],
@@ -365,6 +383,7 @@ var DEV = {
           slips: { 1: "They smiled, but what did they do with it?", 2: "Possible, but \"Oh\" and putting it straight back are clues.", 3: "The text never says that." },
           hint: "Look at what they do, not just what they say.",
           why: "A short \"Oh. Thanks\" and straight back in the box: they are being polite, but they do not love it.",
+          ez: { hint: "Look at what they do.", why: "\"Oh\" and away fast. They do not like it.", slips: { 1: "Would you put away a present you love?", 2: "They did open it." } },
           lv: {
             mild: { q: P("[[Who]] opens a present. They say \"Oh.\" They put it away fast.") + "What does this hint?",
               options: ["[[Who]] does not like it much.", "[[Who]] loves it.", "[[Who]] cannot open it."],
@@ -383,6 +402,7 @@ var DEV = {
       slips: { 1: "That shows they worked hard, not how they feel.", 2: "That is when it happens, not a feeling.", 3: "That does not tell you how anyone feels." },
       hint: "Which clue is about a feeling in the body?",
       why: "Not being able to eat is a common sign of nerves. Nobody speaking backs it up.",
+      ez: { hint: "Look at their body.", why: "Shaking hands show nerves.", slips: { 1: "That is when, not a feeling.", 2: "The text does not say that." } },
       lv: {
         mild: { q: P("It is the day of [[event]]. [[Who]] cannot eat. Their hands shake.") + "Which clue shows [[who]] is nervous?",
           options: ["Their hands shake.", "It is the day of [[event]].", "It is breakfast time."],
@@ -399,6 +419,7 @@ var DEV = {
       slips: { any: "Picture someone doing it. How would they feel?" },
       hint: "Yawning is a body clue.",
       why: "Each action is a clue. Clue + what you know = the hint.",
+      ez: { hint: "Yawning is a body clue.", why: "Each action is a clue to a feeling.", slips: { any: "Picture someone doing it." } },
       lv: {
         mild: { pairs: [["She yawned.", "She is tired."], ["He slammed the door.", "He is angry."], ["They cheered.", "They are happy."]] },
         spicy: { pairs: [["He gave a one word answer and stared at his phone.", "He does not want to talk."], ["She read the letter, smiled, and read it again.", "It is good news."], ["They kept glancing at the back door.", "They are planning to slip out."], ["He laughed a little too loudly at the joke.", "He is pretending to find it funny."]] } } },
@@ -410,6 +431,7 @@ var DEV = {
       slips: { 1: "\"Not rushing back\" says the opposite.", 2: "Cold chips are a complaint.", 3: "They waited for food, so they were there." },
       hint: "What does \"we will not be rushing back\" really mean?",
       why: "It never says \"bad\", but the wait, the cold chips and \"not rushing back\" all hint it. Only the view gets a nice word.",
+      ez: { hint: "Would you go back?", why: "No. Cold food and a long wait.", slips: { 1: "Cold food and a long wait. Fun?", 2: "They waited for food, so they were there." } },
       lv: {
         mild: { q: P("The food was cold. We waited a long time. We will not go back.") + "Did they like the cafe?",
           options: ["No, they did not like it.", "Yes, they loved it.", "They did not go."],
@@ -426,6 +448,7 @@ var DEV = {
           slips: { 1: "Would you check your phone a lot during the best film ever?", 2: "Nobody falls asleep in a scary film.", 3: "Two hours is not short." },
           hint: "What do people do when something is boring?",
           why: "Checking the phone and falling asleep hint it was boring. Only the popcorn gets praise.",
+          ez: { hint: "Do people sleep in good films?", why: "No. It was boring.", slips: { 1: "Do people sleep in exciting films?", 2: "They were there, on a phone." } },
           lv: {
             mild: { q: P("The film was long. My friend fell asleep. I looked at my phone.") + "Did they like the film?",
               options: ["No, it was boring.", "Yes, it was exciting.", "They did not watch it."],
@@ -441,6 +464,7 @@ var DEV = {
           slips: { 1: "Look after the word \"But\".", 2: "A tiny room and a cold shower are not perfect.", 3: "They talk about their room, so they stayed." },
           hint: "What changes after \"But\"?",
           why: "Two complaints, then \"But\", then two big compliments. A mixed review.",
+          ez: { hint: "Look after \"But\".", why: "A bad bit and a good bit.", slips: { 1: "Look after \"But\".", 2: "It says great." } },
           lv: {
             mild: { q: P("The room was small. But the breakfast was great!") + "What does the writer think?",
               options: ["The room was small, but breakfast was good.", "Everything was bad.", "Breakfast was awful."],
@@ -454,15 +478,18 @@ var DEV = {
 
     /* ---------- chunk 4: postcards, all together ---------- */
     { type: "learn", topic: "Postcard", title: "Last one: a postcard",
+      ez: { title: "A postcard", html: "<p>Read Nan's postcard.</p><p>What is it <b>mostly</b> about?</p>" },
       fig: pc(NAN.medium, true),
       html: "<p>Last bit. Postcards are short, so they are perfect for getting the gist. Have a read of this one whenever you are ready.</p>" +
         "<p>Ask yourself: what is it <b>mostly</b> about, and what does it <b>hint</b>?</p>",
       lv: { mild: { fig: pc(NAN.mild, true) }, spicy: { fig: pc(NAN.spicy, true) } },
       vary: [
         { html: "<p>Last bit. Postcards are short, so they are perfect for getting the gist. Have a read of this one from Rory whenever you are ready.</p><p>Ask yourself: what is it <b>mostly</b> about, and what does it <b>hint</b>?</p>",
-          fig: pc(RORY.medium, true), lv: { mild: { fig: pc(RORY.mild, true) }, spicy: { fig: pc(RORY.spicy, true) } } },
+          fig: pc(RORY.medium, true), ez: { title: "A postcard", html: "<p>Read Rory's postcard.</p><p>What is it <b>mostly</b> about?</p>" },
+           lv: { mild: { fig: pc(RORY.mild, true) }, spicy: { fig: pc(RORY.spicy, true) } } },
         { html: "<p>Last bit. Postcards are short, so they are perfect for getting the gist. Have a read of this one from Uncle Dev whenever you are ready.</p><p>Ask yourself: what is it <b>mostly</b> about, and what does it <b>hint</b>?</p>",
-          fig: pc(DEV.medium, true), lv: { mild: { fig: pc(DEV.mild, true) }, spicy: { fig: pc(DEV.spicy, true) } } }
+          fig: pc(DEV.medium, true), ez: { title: "A postcard", html: "<p>Read Uncle Dev's postcard.</p><p>What is it <b>mostly</b> about?</p>" },
+           lv: { mild: { fig: pc(DEV.mild, true) }, spicy: { fig: pc(DEV.spicy, true) } } }
       ] },
 
     { type: "mc", topic: "Postcard",
@@ -473,6 +500,7 @@ var DEV = {
       slips: { 1: "True, but only part of it. Is she having a bad time?", 2: "A detail about Grandad.", 3: "Nothing says that. She says the hotel is lovely." },
       hint: "Where is she, and is she having a good time?",
       why: "Holiday, by the sea, nice despite the rain. The chips and books are details.",
+      ez: { hint: "Where is she?", why: "Nan is on holiday at the seaside.", slips: { 1: "It says it rains, not that she likes it.", 2: "Look again. Where is she?" } },
       lv: {
         mild: { fig: pc(NAN.mild), options: ["Nan is on holiday at the seaside.", "Nan likes the rain.", "Nan is at home."],
           slips: { 1: "It says it rains, not that she likes it.", 2: "Have another look: where is she?" }, why: "Nan is on holiday at the seaside." },
@@ -485,6 +513,7 @@ var DEV = {
           slips: { 1: "A detail: the time.", 2: "True, but only part of it.", 3: "Only three rides. Have another look." },
           hint: "Where was he, and how did it go?",
           why: "Theme park, lots of queues, but the coaster made it worth it.",
+          ez: { hint: "Where did he go?", why: "Rory went to a theme park.", slips: { 1: "Look again. Where did he go?", 2: "It says the queues were long." } },
           lv: {
             mild: { fig: pc(RORY.mild), options: ["Rory went to a theme park.", "Rory went to the seaside.", "The queues were short."],
               slips: { 1: "Have another look: where did he go?", 2: "It says the queues were long." }, why: "Rory went to a theme park." },
@@ -496,6 +525,7 @@ var DEV = {
           slips: { 1: "A funny detail.", 2: "A detail.", 3: "Have another look at the last line." },
           hint: "Is he coming home, or staying?",
           why: "Some problems, but he loves it and is staying another night.",
+          ez: { hint: "Where is he?", why: "Dev is camping. He likes it.", slips: { 1: "A goat turns up. But where is he?", 2: "He says the stars are great." } },
           lv: {
             mild: { fig: pc(DEV.mild), options: ["Dev is camping and having a good time.", "Dev is at a goat farm.", "Dev hates camping."],
               slips: { 1: "A goat turns up, but where is he?", 2: "\"The stars are great\" says otherwise." }, why: "Dev is camping, and he likes it." },
@@ -511,6 +541,7 @@ var DEV = {
       slips: { 1: "Nothing points to her job.", 2: "Nothing says that. Why might she be indoors?", 3: "The text does not say where the books came from." },
       hint: "What was the weather doing?",
       why: "Rain every day + four books = lots of time inside. It never says so, but the clues add up.",
+      ez: { hint: "Is nice a happy word?", why: "The hotel is nice, so she is OK.", slips: { 1: "\"Nice\" is a happy word.", 2: "She is staying in it." } },
       lv: {
         mild: { q: "Nan says \"But the hotel is nice.\" What does that hint?", fig: pc(NAN.mild),
           options: ["She is still having an OK time.", "She wants to go home now.", "The hotel is shut."],
@@ -525,6 +556,7 @@ var DEV = {
           slips: { 1: "\"Never again\" means the opposite.", 2: "Nothing points to that.", 3: "Nothing points to that." },
           hint: "When do people say \"never again\"?",
           why: "People say \"never again\" after something they did not enjoy. The queues are the clue.",
+          ez: { hint: "Is best a happy word?", why: "\"The best!\" means he loved it.", slips: { 1: "\"The best\" is a happy word.", 2: "He says it was the best, so he went on it." } },
           lv: {
             mild: { q: "\"The big ride was the best!\" How did Rory feel about it?", fig: pc(RORY.mild),
               options: ["He loved it.", "He hated it.", "He did not go on it."],
@@ -539,6 +571,7 @@ var DEV = {
           slips: { 1: "Nothing says he is lost.", 2: "A funny idea, but the goat only took a sandwich.", 3: "Would you stay longer somewhere you hate?" },
           hint: "Would you stay longer somewhere you did not like?",
           why: "Choosing to stay longer, after all that, hints he is loving it.",
+          ez: { hint: "Is great a happy word?", why: "The stars are great. He is happy.", slips: { 1: "\"Great\" is a happy word.", 2: "\"Great\" is not a scared word." } },
           lv: {
             mild: { q: "\"But the stars are great.\" How does Dev feel?", fig: pc(DEV.mild),
               options: ["Happy, even after the goat.", "Cross, and wants to go home.", "Scared of the stars."],
@@ -556,6 +589,7 @@ var DEV = {
       model: "Nan is on a rainy holiday by the sea.",
       hint: "Where is she?",
       why: "Something like \"Nan is having a nice, rainy holiday by the sea\" gets the gist.",
+      ez: { q: "What is Nan's postcard about? A few words is fine.", model: "Nan is on holiday by the sea.", why: "Nan is on holiday by the sea." },
       lv: { mild: { fig: pc(NAN.mild) }, spicy: { fig: pc(NAN.spicy), q: "In one sentence, what is Nan's postcard mostly about, including what it hints?" } },
       vary: [
         { q: "In your own words, what is Rory's postcard mostly about? A few words is plenty.", fig: pc(RORY.medium),
@@ -563,15 +597,22 @@ var DEV = {
           model: "A day at a theme park with long queues.",
           hint: "Where did he go?",
           why: "Something like \"A long day at a theme park, but the coaster was great\" gets the gist.",
+          ez: { q: "What is Rory's postcard about? A few words is fine.", model: "A day at a theme park.", why: "Rory had a day at a theme park." },
           lv: { mild: { fig: pc(RORY.mild) }, spicy: { fig: pc(RORY.spicy), q: "In one sentence, what is Rory's postcard mostly about, including what it hints?" } } },
         { q: "In your own words, what is Uncle Dev's postcard mostly about? A few words is plenty.", fig: pc(DEV.medium),
           need: [["camp", "camping", "tent", "lake", "stars", "goat", "trip"]],
           model: "Dev is camping and loving it.",
           hint: "Where is he?",
           why: "Something like \"Dev's camping trip went wrong, but he loves it\" gets the gist.",
+          ez: { q: "What is Uncle Dev's postcard about? A few words is fine.", model: "Dev is camping.", why: "Dev is camping, and he likes it." },
           lv: { mild: { fig: pc(DEV.mild) }, spicy: { fig: pc(DEV.spicy), q: "In one sentence, what is Uncle Dev's postcard mostly about, including what it hints?" } } }
       ] }
   ],
+
+  ez: {
+    realWorld: { title: "Gist every day", html: "<p>Group chats. Letters. Game boxes.</p><p>A time traveller would need the gist fast!</p>" },
+    make: { intro: "Pick something you read or watched. Give its gist, plus a hint." }
+  },
 
   realWorld: {
     title: "Getting the gist, every day",

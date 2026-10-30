@@ -106,6 +106,7 @@ function reviewHtml(lv){
 
     /* ---------- chunk 1: sort it ---------- */
     { type: "learn", topic: "Sort it", title: "Two questions sort almost anything",
+      ez: { title: "Fact or opinion", html: "<p><b>Fact</b>: you can check it.</p><p><b>Opinion</b>: someone could disagree.</p>" },
       fig: TESTS,
       html: "<p>Ask two questions about any statement.</p>" +
         "<p><b>Could I check it?</b> Count it, measure it, look it up, see it. If yes, it is a <b>fact</b>.</p>" +
@@ -121,6 +122,7 @@ function reviewHtml(lv){
       cards: [["The [[thing]] is 2 metres long.", 0], ["The [[thing]] is far too big.", 1], ["[[Event]] starts at 7pm.", 0], ["[[Event]] is the best night of the year.", 1], ["Tickets cost 10 pounds.", 0], ["Everybody should go.", 1]],
       hint: "For each card ask: could I check it, or could someone disagree?",
       why: "Lengths, times and prices can be checked. Far too big, the best and should are opinions someone could disagree with.",
+      ez: { hint: "Can I check it?", why: "Lengths and times can be checked. Best and too big are opinions." },
       lv: {
         mild: { cards: [["The [[thing]] is 2 metres long.", 0], ["The [[thing]] is far too big.", 1], ["[[Event]] starts at 7pm.", 0], ["[[Event]] is the best night of the year.", 1]] },
         spicy: { cards: [["The [[thing]] is 2 metres long.", 0], ["At 2 metres, the [[thing]] is ridiculously long.", 1], ["[[Event]] starts at 7pm.", 0], ["Most people agree [[event]] is the best night of the year.", 1], ["The moon is made of cheese.", 0], ["It is a fact that tickets are too pricey.", 1]],
@@ -134,6 +136,7 @@ function reviewHtml(lv){
       slips: { 1: "Have a look for a clue word. There is no best, should or I think. You could go and see the cafe." },
       hint: "Could you go and see it?",
       why: "You could go and see the cafe. Nobody could reasonably disagree that it is there.",
+      ez: { hint: "Could you go and see it?", why: "You can go and see it. A fact.", slips: { 1: "No clue word. You could go and see it." } },
       lv: {
         medium: { q: "<b>The cafe at [[place]] is a bit pricey.</b><br>Fact or opinion?", answer: 1,
           slips: { 0: "Prices are facts, but a bit pricey is a judgement. One person's pricey is another person's bargain." },
@@ -153,10 +156,11 @@ function reviewHtml(lv){
       answer: 0,
       slips: { 1: "Comfiest is a judgement. Another dog might prefer the sofa." },
       hint: "Look for the clue word.",
-      why: "Comfiest is what Bonnie thinks. Another dog might disagree, and nobody could measure comfy." },
+      why: "Comfiest is what Bonnie thinks. Another dog might disagree, and nobody could measure comfy.", ez: { hint: "Find the clue word.", why: "Comfiest is what Bonnie thinks.", slips: { 1: "Comfiest is a judgement. Another dog may disagree." } } },
 
     /* ---------- chunk 2: say why ---------- */
     { type: "learn", topic: "Say why", title: "Say why with because",
+      ez: { title: "Say why", html: "<p><b>Fact</b>: I could check it by...</p><p><b>Opinion</b>: a word like <b>best</b> shows what someone thinks.</p>" },
       fig: BECAUSE,
       html: "<p>Sorting is half the job. The other half is saying <b>why</b>.</p>" +
         "<p>For a fact: <b>It is a fact because I could check it by</b> counting, measuring, looking it up or seeing it.</p>" +
@@ -172,6 +176,7 @@ function reviewHtml(lv){
       slips: { 1: "Being about [[place]] does not make it an opinion. Point at the clue word.", 2: "Naming a thing does not make the sentence a fact. Look at what it says about it." },
       hint: "A good explanation points at the clue word.",
       why: "Pointing at best explains it. Someone else might think a different part is best.",
+      ez: { q: "<b>The [[highlight]] is the best part of [[place]].</b><br>Which reason is best?", hint: "Point at the clue word.", why: "The word <b>best</b> is the clue.", slips: { 1: "Point at the clue word.", 2: "Naming a thing does not make a fact." } },
       lv: { spicy: { q: "<b>Tickets cost 8 pounds, which is shockingly expensive.</b><br>Which is the strongest explanation?",
         options: ["The price can be checked, but shockingly expensive judges it, and someone else might think 8 pounds is fair.", "It is a fact because it has a number in it.", "It is an opinion because it is about money."],
         slips: { 1: "The number is the checkable part. The rest of the sentence adds a judgement.", 2: "Money can be a fact. Point at the words doing the judging." } } } },
@@ -183,6 +188,7 @@ function reviewHtml(lv){
       slips: [[["good", "nice", "fun", "late", "early"], "That is a judgement about the time. Say how you could check it."]],
       hint: "Where could you check what time something starts?",
       why: "You could check the time on a poster, a ticket or a website, so it is a fact.",
+      ez: { q: "Why is this a fact?<br><b>[[Event]] starts at 7pm.</b>", model: "I could check a poster.", hint: "Where could you check the time?", why: "You could check a poster or a ticket.", slips: [[null, "That is a judgement. How could you check it?"]] },
       lv: { spicy: { q: "Explain why this is an opinion, pointing at the exact word or words.<br><b>Any family looking for a day out would be mad to miss [[place]].</b>",
         need: [["mad", "miss", "family", "judge", "judgement", "opinion", "disagree", "think", "view", "check"]],
         model: "Mad to miss is a judgement. Some families might not enjoy it, so people could disagree.",
@@ -195,6 +201,7 @@ function reviewHtml(lv){
       model: "It is an opinion because the word amazing shows what someone thinks.",
       hint: "Which word shows what someone thinks?",
       why: "Amazing is the clue word. Someone else might think the [[thing]] is boring.",
+      ez: { q: "Why is this an opinion?<br><b>The [[thing]] is amazing.</b>", model: "Amazing shows what someone thinks.", hint: "Which word shows a feeling?", why: "<b>Amazing</b> is the clue word." },
       lv: { spicy: { q: "Now a fact in disguise. Explain why this is a fact type statement, even though it sounds persuasive.<br><b>Last year, the cafe won a local award for its soup.</b>",
         need: [["check", "look", "record", "award", "news", "list", "find", "prove", "website", "paper"]],
         model: "You could check the award list or the local news to see if it won.",
@@ -206,10 +213,12 @@ function reviewHtml(lv){
       pairs: [["There are 40 seats.", "Fact: I could count them."], ["The seats are uncomfortable.", "Opinion: someone could find them comfy."], ["It opened in 2001.", "Fact: I could look it up."], ["You should sit at the front.", "Opinion: should shows what someone thinks."]],
       hint: "Find the two facts first, then match each opinion to its clue.",
       why: "Each fact has a way to check it. Each opinion has a clue that someone could disagree with.",
+      ez: { q: "Match each one to its reason.", hint: "Find the fact first.", why: "Facts can be checked. Opinions can be argued with." },
       lv: { mild: { pairs: [["There are 40 seats.", "Fact: I could count them."], ["The seats are uncomfortable.", "Opinion: someone could find them comfy."], ["You should sit at the front.", "Opinion: should shows what someone thinks."]] } } },
 
     /* ---------- chunk 3: find both in a review ---------- */
     { type: "learn", topic: "Find both", title: "A real review",
+      ez: { title: "A review", html: "<p>Read this short review.</p>" + reviewHtml("mild") },
       fig: REVIEW,
       html: "<p>Reviews mix facts and opinions together. Have a read of this one. Next, you get a highlighter.</p>" + reviewHtml("medium"),
       lv: { mild: { html: "<p>Reviews mix facts and opinions together. Have a read of this short one. Next, you get a highlighter.</p>" + reviewHtml("mild") },
@@ -217,6 +226,7 @@ function reviewHtml(lv){
 
     { type: "widget", topic: "Find both", unscored: true,
       title: "Highlight the opinions",
+      ez: { html: "<p>Tap each <b>opinion</b>. It turns pink. Then tap <b>Check my highlights</b>.</p>" },
       html: "Tap any sentence that has an opinion in it. It turns pink. Tap again to take it back. When you are happy, tap <b>Check my highlights</b>.",
       mount: function(el, api){
         var lv = SENT[api.level] ? api.level : "medium";
@@ -281,6 +291,7 @@ function reviewHtml(lv){
       answers: [0, 1, 2],
       hint: "Look for times and prices.",
       why: "Opening times, prices and when hot food stops can all be checked. Best part and a disgrace are opinions.",
+      ez: { q: "Pick the <b>2</b> facts.", why: "A time and a price. Both can be checked." },
       lv: {
         mild: { q: "Pick the <b>two</b> facts from the review.",
           options: ["[[Place]] opens at 9am.", "It costs 5 pounds to get in.", "The [[highlight]] is brilliant.", "You should go on a sunny day."], answers: [0, 1],
@@ -299,6 +310,7 @@ function reviewHtml(lv){
       slips: { 1: "Toilets can be in a fact too: \"There are 4 toilets.\" Look at what it says about them.", 2: "Facts can be about the past too, like a date. Look for the judging words." },
       hint: "Which words judge the toilets?",
       why: "Disgrace (and sadly) judge them. That could be argued with, so it is an opinion.",
+      ez: { why: "<b>Should</b> shows what the writer thinks.", slips: { 1: "Weather can be a fact. Find the clue word.", 2: "Day is not a clue word. Find should." } },
       lv: {
         mild: { q: "<b>You should go on a sunny day.</b><br>Why is this an opinion?",
           options: ["Should shows what the writer thinks you ought to do.", "It is about the weather.", "It has the word day in it."],
@@ -317,6 +329,7 @@ function reviewHtml(lv){
       slips: [[3, "Close. Did you count the sentence about going last Sunday? That could be checked."], [7, "That is every sentence. Three of them have opinions."], [5, "One too many. Should get there early is advice: an opinion."]],
       hint: "Go sentence by sentence: could I check all of it?",
       why: "There are <b>4</b>: the opening times, the prices, last Sunday, and the hot food until 3pm.",
+      ez: { q: "How many sentences are facts?", hint: "Can I check all of it?", why: "<b>3</b>: 9am, 5 pounds, and the cafe by the gate.", slips: [[null, "1 more: the cafe by the gate."], [null, "That is all of them. Some are opinions."], [null, "1 too many. Should is a clue word."]] },
       lv: {
         mild: { boxes: [{ label: "Fact sentences", a: 3 }],
           slips: [[2, "Close. There is one more: the cafe next to the gate could be seen."], [5, "That is every sentence. Brilliant and should are opinions."], [4, "One too many. Should is a clue word."]],
@@ -327,6 +340,7 @@ function reviewHtml(lv){
 
     /* ---------- chunk 4: points of view ---------- */
     { type: "learn", topic: "Points of view", title: "Same fact, different points of view",
+      ez: { title: "Points of view", html: "<p>Same fact. Different <b>points of view</b>.</p><p class=\"a2task\">[[Event]] lasted [[dur]].<br><b>[[Pa]]:</b> \"[[Dur]] flew by. Every minute was worth it.\"<br><b>[[Pb]]:</b> \"[[Dur]]? Far too long. I nearly fell asleep.\"</p>" },
       fig: POV,
       html: "<p>Two people can agree on a fact and still have different opinions about it.</p>" +
         "<p class=\"a2task\">[[Event]] lasted [[dur]].<br><b>[[Pa]]:</b> \"[[Dur]] flew by. Every minute was worth it.\"<br><b>[[Pb]]:</b> \"[[Dur]]? Far too long. I nearly fell asleep.\"</p>" +
@@ -341,14 +355,14 @@ function reviewHtml(lv){
       answer: 0,
       slips: { 1: "That is [[pa]]'s opinion. [[Pb]] does not agree.", 2: "That is [[pb]]'s opinion. [[Pa]] would not agree." },
       hint: "Find the part they both say.",
-      why: "They both agree it lasted [[dur]]. That is the fact. Everything else is their own point of view." },
+      why: "They both agree it lasted [[dur]]. That is the fact. Everything else is their own point of view.", ez: { hint: "What do they both say?", why: "It lasted [[dur]]. That is the fact.", slips: { 1: "That is what [[pa]] thinks.", 2: "That is what [[pb]] thinks." } } },
 
     { type: "sort", topic: "Points of view",
       q: "Who said it? Sort each line to the person.",
       buckets: ["[[Pa]]", "[[Pb]]"],
       cards: [["Every minute was worth it.", 0], ["I nearly fell asleep.", 1], ["[[Dur]] flew by.", 0], ["Far too long.", 1]],
       hint: "One person loved it, one did not.",
-      why: "[[Pa]] enjoyed it. [[Pb]] did not. Same [[dur]], two points of view." },
+      why: "[[Pa]] enjoyed it. [[Pb]] did not. Same [[dur]], two points of view.", ez: { q: "Who said it?", hint: "Who loved it? Who did not?", why: "[[Pa]] liked it. [[Pb]] did not." } },
 
     { type: "mc", topic: "Points of view", explain: true,
       q: "Is one of them right and one of them wrong?",
@@ -357,6 +371,7 @@ function reviewHtml(lv){
       slips: { 1: "Being in charge does not make an opinion a fact.", 2: "The order people speak in does not decide anything." },
       hint: "Can an opinion be checked?",
       why: "Opinions cannot be checked, so neither is right or wrong. Only the fact, [[dur]], could be checked.",
+      ez: { hint: "Can you check an opinion?", why: "Both are opinions. Both can be fair.", slips: { 1: "Being in charge does not make it a fact.", 2: "Who speaks first does not matter." } },
       lv: { spicy: { q: "<b>Only 40 people came to [[event]].</b><br>Which word turns the fact into a point of view?",
         options: ["Only", "40", "people", "came"],
         slips: { 1: "40 is the fact. You could count it.", 2: "People is just who came.", 3: "Came is just the action." },
@@ -369,12 +384,18 @@ function reviewHtml(lv){
       model: "I loved it. The rain was perfect for staying in and reading.",
       hint: "Who might be glad of rain? A gardener, a duck, someone who wanted a day indoors.",
       why: "Same fact, happy point of view. A gardener and a picnicker would feel very differently about it.",
+      ez: { q: "<b>It rained all day.</b> Write what someone glad might say, if you like.", model: "I loved it. Perfect for staying in.", hint: "A duck would be glad!", why: "Same fact. A happy point of view." },
       lv: { spicy: { q: "Your turn, if you like. Write <b>two</b> sentences about [[event]], both using the fact that 40 people came: one making it sound good, one making it sound bad.",
         need: [["40", "forty"], ["only", "just", "full", "whole", "packed", "empty", "great", "poor", "sad", "disappointing", "brilliant", "amazing", "good", "bad", "few", "whopping", "massive", "busy", "quiet"]],
         model: "A whopping 40 people packed in to watch. Sadly, only 40 people bothered to turn up.",
         hint: "Use a word like a whopping or a full for good, and only or just for bad.",
         why: "Little words like only and a whopping spin the same fact into opposite points of view." } } }
   ],
+
+  ez: {
+    realWorld: { title: "Reviews", html: "<p>People read reviews before a trip.</p><p>Facts help you decide for yourself.</p>" },
+    make: { intro: "Pick anything. Give a fact and an opinion." }
+  },
 
   realWorld: {
     title: "Reviews before you go anywhere",

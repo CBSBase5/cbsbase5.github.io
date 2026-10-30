@@ -103,6 +103,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Asking something", title: "Asking? Use a question mark",
+      ez: { title: "Asking? Use ?", html: "<p>A <b>question</b> asks something. It ends with <b>?</b></p><p class=\"a2task\">Where is [[thing]]?</p>" },
       fig: QFIG,
       html: "<p>A <b>question</b> asks something. It wants an answer. It ends with a <b>question mark</b> (?).</p>" +
         "<p>Lots of questions start with <b>who, what, where, when, why</b> or <b>how</b>. Others start with <b>can, do, is, are</b> or <b>will</b>.</p>" +
@@ -121,6 +122,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       slips: { 1: "That tells you where it is. It does not ask anything.", 2: "That asks for help, but it is worded as telling someone. Can you... is the question." },
       hint: "Which one could you answer with yes or no?",
       why: "\"Can you help me...?\" asks something, so it is a question and ends with a question mark.",
+      ez: { why: "\"Where is...?\" is asking. It is a question.", slips: { 1: "That tells. It does not ask.", 2: "That tells. It does not ask." } },
       lv: {
         mild: { options: ["Where is [[thing]]?", "[[Thing]] is here.", "I can see [[thing]]."],
           slips: { 1: "That tells you something. It does not ask.", 2: "That tells you something. It does not ask." },
@@ -137,6 +139,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       cards: [["Where is the toilet", 0], ["What time is it", 0], ["[[Who]] is at [[place]]", 1], ["I am hungry", 1]],
       hint: "Read each one aloud. Does your voice go up, like you want an answer?",
       why: "Where and What are asking. The other two tell you something.",
+      ez: { q: "Sort them. Asking or telling?", hint: "Say it. Does your voice go up?", why: "Where and What are asking. The others tell." },
       lv: {
         medium: { cards: [["Where is the toilet", 0], ["What time is it", 0], ["[[Who]] is at [[place]]", 1], ["I am hungry", 1], ["Do you like it", 0], ["The door is open", 1]] },
         spicy: { cards: [["Where is the toilet", 0], ["Is it raining", 0], ["[[Who]] is at [[place]]", 1], ["I asked what time it was", 1], ["Do you like it", 0], ["I wonder if the door is open", 1]],
@@ -148,6 +151,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       slips: { 1: "Nobody is shouting. It starts with How many: it is asking.", 2: "It is not telling. How many... wants an answer." },
       hint: "Does it want an answer?",
       why: "\"How many...\" asks something, so it needs a question mark.",
+      ez: { hint: "Does it want an answer?", why: "\"How many...\" asks. It needs <b>?</b>", slips: { 1: "Nobody is shouting. It is asking.", 2: "It is not telling. It wants an answer." } },
       lv: { spicy: { q: "What end mark does this need?<p class=\"a2task\">I asked how many people were at [[place]]</p>",
         answer: 2,
         slips: { 0: "It has a question inside it, but it is telling you what I asked. Reported questions take a full stop.", 1: "No strong feeling here: just calm telling." },
@@ -161,6 +165,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       model: "What is the best part of your day?",
       hint: "Think of something you would like to know about them.",
       why: "Any question that asks them something works, as long as it ends with a question mark.",
+      ez: { q: "Write a question for [[who]]. End it with <b>?</b>", hint: "What would you like to know?", why: "Any question works. End it with <b>?</b>", slips: [[null, "That sounds like telling. Try What or Where."]] },
       lv: {
         mild: { q: "Write a question you could ask [[who]]. You could start with what, where, can or do. End it with a question mark.",
           need: [["who", "what", "where", "when", "why", "how", "can", "do", "does", "is", "are", "will", "did"]],
@@ -172,6 +177,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Strong feelings", title: "Strong feeling? Use an exclamation mark",
+      ez: { title: "Big feeling? Use !", html: "<p><b>!</b> shows a <b>big feeling</b> or a <b>shout</b>.</p><p class=\"a2task\">Wow, [[big]]!<br>Help!</p>" },
       fig: EXFIG,
       html: "<p>An <b>exclamation mark</b> (!) shows a <b>strong feeling</b>: surprise, excitement, fear, anger or pain. It is also used when something is said loudly or urgently.</p>" +
         "<p class=\"a2task\">Wow, [[big]]!<br>Watch out!<br>Ouch, my toe!</p>",
@@ -187,13 +193,14 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       options: MARKS, answer: 1, fixed: true,
       slips: { 0: "Jay is not asking the goblin anything. He is shouting.", 2: "A full stop is calm. Jay is not calm. He wants his bird book back." },
       hint: "Is Jay calm, or shouting?",
-      why: "Jay is shouting with a strong feeling, so it is an exclamation mark: \"Unhand me, goblin!\"" },
+      why: "Jay is shouting with a strong feeling, so it is an exclamation mark: \"Unhand me, goblin!\"", ez: { q: "A goblin has Jay's bird book! Jay shouts. Which end mark?", why: "Jay is shouting. So <b>!</b> \"Unhand me, goblin!\"", slips: { 0: "Jay is not asking. He is shouting.", 2: "A full stop is calm. Jay is not!" } } },
 
     { type: "match", topic: "Strong feelings",
       q: "Match each exclamation to the feeling behind it.",
       pairs: [["Wow, [[big]]!", "Surprise"], ["Watch out, it is falling!", "Danger"], ["Yes, we did it!", "Excitement"], ["Get out of my room!", "Anger"]],
       hint: "Watch out is a warning. Yes, we did it is a celebration.",
       why: "Every one is a strong feeling. That is why they all end with an exclamation mark.",
+      ez: { q: "Match each one to its feeling.", hint: "Watch out is a warning.", why: "Each one is a big feeling. So <b>!</b>" },
       lv: {
         mild: { pairs: [["Wow, [[big]]!", "Surprise"], ["Watch out, it is falling!", "Danger"], ["Yes, we did it!", "Happy"]] },
         spicy: { pairs: [["Wow, [[big]]!", "Surprise"], ["Watch out, it is falling!", "Danger"], ["Yes, we did it!", "Excitement"], ["Get out of my room!", "Anger"], ["Ouch, my toe!", "Pain"]] } } },
@@ -205,6 +212,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       slips: { 1: "It starts with What, but this one really asks: question mark.", 2: "That is calm telling: full stop." },
       hint: "Two start with What. Only one is really asking.",
       why: "\"What a night that was\" is not asking anything. It is a strong feeling, so it takes an exclamation mark.",
+      ez: { why: "You would shout \"Help!\" So <b>!</b>", slips: { 1: "That is calm telling.", 2: "That is asking." } },
       lv: {
         mild: { options: ["Help, the boat is sinking", "The boat is blue", "Where is the boat"],
           slips: { 1: "That is calm telling: a full stop.", 2: "That is asking: a question mark." },
@@ -220,6 +228,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       cards: [["Stop, that is hot", 1], ["The kettle is hot", 0], ["Wow, look at that", 1], ["I had toast for breakfast", 0]],
       hint: "Which ones would you say loudly?",
       why: "Stop and Wow are said with feeling. The other two are calm facts.",
+      ez: { q: "Sort them. Calm, or a big feeling?", hint: "Which would you say loudly?", why: "Stop and Wow are big feelings. The others are calm." },
       lv: {
         medium: { cards: [["Stop, that is hot", 1], ["The kettle is hot", 0], ["Wow, look at that", 1], ["I had toast for breakfast", 0], ["Get down now", 1], ["We got down at six", 0]] },
         spicy: { cards: [["Stop, that is hot", 1], ["The kettle is hot", 0], ["What a mess", 1], ["She said it was a mess", 0], ["How rude", 1], ["He told me how it went", 0]],
@@ -227,6 +236,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Choose the mark", title: "Three marks, one choice",
+      ez: { title: "3 marks", html: "<p>Asking? <b>?</b><br>Big feeling or a shout? <b>!</b><br>Calm telling? <b>.</b></p>" },
       fig: FLOW,
       html: "<p>Every sentence needs an end mark. To choose, ask two questions:</p>" +
         "<p>1. Is it <b>asking</b> something? Use a <b>question mark</b>.<br>2. Is it a <b>strong feeling</b> or a <b>shout</b>? Use an <b>exclamation mark</b>.<br>If neither, it is calm telling: use a <b>full stop</b>.</p>" +
@@ -235,6 +245,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
 
     { type: "widget", topic: "Choose the mark", unscored: true,
       title: "Tap the end mark",
+      ez: { html: "<p>Tap the end mark that fits. Change it any time.</p>" },
       html: "<p>Each sentence is missing its end mark. Tap the one you think fits. Change your mind as often as you like.</p>",
       mount: function(el, api){
         var d = api.data;
@@ -308,6 +319,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       slips: { 1: "A calm fact would end with a full stop.", 2: "A shout would end with an exclamation mark." },
       hint: "Say it out loud with the voice going up at the end.",
       why: "The question mark turns a statement into checking: \"You are coming? Really?\"",
+      ez: { q: "<b>\"Is it time to go?\"</b> What does the <b>?</b> tell you?", hint: "What does <b>?</b> always mean?", why: "<b>?</b> means someone is asking.", slips: { 1: "Shouting would be <b>!</b>", 2: "Calm telling would be a full stop." } },
       lv: {
         mild: { q: "Read this: <b>\"Is it time to go?\"</b> What does the question mark tell you?",
           options: ["Someone is asking", "Someone is shouting", "Someone is calmly telling"],
@@ -326,6 +338,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       slips: { 1: "Texts still need the right mark. Can you... is asking.", 2: "Important is not the same as a strong feeling. It is asking." },
       hint: "Look at the first two words.",
       why: "\"Can you...\" asks something, so it ends with a question mark, even in a text.",
+      ez: { q: "A text: <b>Can you come to [[place]] tomorrow</b>. Which end mark?", hint: "Look at the first 2 words.", why: "\"Can you...\" is asking. So <b>?</b>", slips: { 1: "Texts need the right mark too. It is asking.", 2: "Important is not a big feeling. It is asking." } },
       lv: { spicy: { q: "<b>Could you close the door</b> is said as a polite request. Which end mark?",
         options: ["A question mark: it is worded as a question, even though it is really a request", "A full stop: it is really an order", "No mark: requests do not need one"],
         slips: { 1: "Some writers do use a full stop for very formal requests, but the standard choice is a question mark, because it is worded as a question.", 2: "Every sentence needs an end mark." },
@@ -334,6 +347,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Marks with a purpose", title: "Marks with a purpose",
+      ez: { title: "Read it out loud", html: "<p>Voice goes <b>up</b>? Use <b>?</b></p><p>Would you say it <b>loudly</b>? Use <b>!</b></p>" },
       fig: PHONE,
       html: "<p>Writers choose end marks on purpose.</p>" +
         "<p><b>One ! is plenty.</b> If every sentence shouts, nothing stands out. Save it for the moment that really matters.</p>" +
@@ -351,6 +365,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       answers: [1, 3],
       hint: "Two of them really ask. Two start like questions but do not ask.",
       why: "\"How do I get to...\" and \"Is it far\" ask. \"How amazing it was\" is a feeling (!). \"I asked how...\" reports a question (.).",
+      ez: { q: "Pick the ones that need <b>?</b>", hint: "Which ones would you answer?", why: "\"Where are you\" and \"Are you coming\" ask." },
       lv: {
         mild: { options: ["Where are you", "I am at [[place]]", "Are you coming", "It is cold"], answers: [0, 2],
           hint: "Which ones would you answer?", why: "\"Where are you\" and \"Are you coming\" ask something, so they need question marks." },
@@ -365,6 +380,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       slips: { 1: "It works the other way: if everything shouts, nothing stands out.", 2: "That would be question marks, not exclamation marks." },
       hint: "Imagine someone who shouts every word.",
       why: "If every sentence shouts, the reader stops noticing. One exclamation mark in the right place does more.",
+      ez: { q: "Your friend won the cup! You are excited. How do you end <b>That is brilliant</b>?", hint: "How do you feel?", why: "You are excited. So <b>!</b>", slips: { 0: "You are not asking. You are excited.", 2: "A full stop is calm. You are excited!" } },
       lv: {
         mild: { q: "Your friend texts: \"We won the cup.\" You are really excited. How should you end your reply: <b>That is brilliant</b>",
           options: MARKS, answer: 1, fixed: true,
@@ -380,11 +396,17 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       q: "Imagine you have just arrived at [[place]]. Write a short postcard home. Have a go at using at least one question mark and one exclamation mark. It only goes to Jay if you choose.",
       starters: ["Guess where I am", "You will never believe", "Wow", "Can you", "I wonder"],
       checklist: ["I asked a question and ended it with ?", "I used ! for a strong feeling", "I used full stops for the calm bits"],
+      ez: { q: "Write a postcard from [[place]], if you like. Use a <b>?</b> and a <b>!</b>" },
       minWords: 30,
       lv: {
         mild: { minWords: 12, starters: ["Guess where I am", "Wow", "Can you", "It is"] },
         spicy: { minWords: 50, checklist: ["I used a direct question with ?", "I used ! once, where it matters most", "I used a rhetorical question or an indirect question", "I used full stops for the calm bits"] } } }
   ],
+
+  ez: {
+    realWorld: { title: "End marks change meaning", html: "<p>\"See you later.\" and \"See you later?\" mean different things.</p><p>Our big question asks, so it ends with <b>?</b></p>" },
+    make: { intro: "Make 2 speech bubbles: a question and a shout.", fields: [{ label: "A question for someone from the past" }] }
+  },
 
   realWorld: {
     title: "End marks change what people hear",

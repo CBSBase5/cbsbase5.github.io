@@ -99,6 +99,10 @@ var LEGS =
     music: { name: "Music", w: { mover: "the tour bus", who: "the dancer", from: "the theatre", to: "the next venue" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>Sat navs and bus apps use speed, distance and time.</p><p>A time machine would break the sums!</p>" },
+    make: { intro: "Where to, how far, how fast? The card finds the time." }
+  },
   startFig: ROAD,
   steps: [
 
@@ -108,6 +112,7 @@ var LEGS =
       html: "<p><b>Speed</b> tells you how far something goes in each hour (or each second, or each minute).</p>" +
         "<p><b>Speed = distance &#247; time</b></p>" +
         work(["<b>Worked example.</b> [[Mover]] goes 120 km in 2 hours.", "Speed = distance &#247; time", "Speed = 120 &#247; 2 = <b>60 km/h</b>", "km/h means kilometres per hour: 60 km in every hour."]),
+      ez: { html: "<p><b>Speed</b> is how far you go in each hour.</p>" + work(["[[Mover]] goes 120 km in 2 hours.", "120 &#247; 2 = <b>60 km/h</b>"]) },
       lv: { spicy: { html: "<p><b>Speed</b> is the distance covered in each unit of time.</p>" +
         "<p><b>Speed = distance &#247; time</b>, and the units come along for the ride: km &#247; hours gives km/h, metres &#247; seconds gives m/s.</p>" +
         work(["<b>Worked example.</b> [[Mover]] goes 195 km in 3 hours.", "Speed = 195 &#247; 3 = <b>65 km/h</b>", "<b>Another.</b> [[Who]] sprints 100 m in 12.5 seconds.", "Speed = 100 &#247; 12.5 = <b>8 m/s</b>"]) } } },
@@ -118,6 +123,8 @@ var LEGS =
       slips: [[450, "That is distance times time. Speed is distance <b>divided by</b> time."], [153, "That adds the numbers. Speed is distance divided by time."], [147, "That takes away. Speed is distance divided by time."]],
       hint: "Speed = distance &#247; time = 150 &#247; 3",
       why: "150 &#247; 3 = <b>50 km/h</b>. It covers 50 km in every hour.",
+      ez: { q: "[[Mover]] goes 80 km in 2 hours. What is its speed?", slips: [[null, "That times them. Divide instead."], [null, "That adds. Divide instead."], [null, "That takes away. Divide instead."]],
+        why: "80 &#247; 2 = <b>40 km/h</b>." },
       lv: { mild: { q: "[[Mover]] travels 80 km in 2 hours. What is its average speed?",
           boxes: [{ label: "Speed", a: 40, post: "km/h" }],
           slips: [[160, "That is distance times time. Speed is distance <b>divided by</b> time."], [82, "That adds the numbers. Speed is distance divided by time."], [78, "That takes away. Divide instead."]],
@@ -135,6 +142,7 @@ var LEGS =
       slips: [[48, "That is distance times time. Divide instead."], [0.33, "That is time divided by distance, upside down. Distance goes first."], [0.333, "That is time divided by distance, upside down. Distance goes first."], [8, "That takes away. Divide instead."]],
       hint: "12 &#247; 4",
       why: "12 &#247; 4 = <b>3 km/h</b>. A gentle stroll, maybe with a stop for some birdwatching.",
+      ez: { q: "[[Who]] walks 10 km in 2 hours. What is the speed?" },
       lv: { mild: { q: "[[Who]] walks 10 km in 2 hours. What is the average walking speed?",
           boxes: [{ label: "Speed", a: 5, post: "km/h" }],
           slips: [[20, "That is distance times time. Divide instead."], [8, "That takes away. Divide instead."], [12, "That adds. Divide instead."]],
@@ -153,6 +161,7 @@ var LEGS =
       slips: { 1: "60 km is a distance. A speed says how far <b>per</b> hour.", 2: "60 minutes is a time.", 3: "60 kg is a weight." },
       hint: "Look for \"per\" hiding in the unit.",
       why: "km/h means kilometres <b>per</b> hour. That per is the giveaway: distance per time is a speed.",
+      ez: { slips: { 1: "60 km is a distance.", 2: "60 minutes is a time.", 3: "60 kg is a weight." }, hint: "Look for per in the unit.", why: "km/h means km <b>per</b> hour. That is a speed." },
       lv: { spicy: { q: "Which of these is the <b>fastest</b>?",
         options: ["20 metres per second", "60 km/h", "1 km per minute", "1000 metres per hour"],
         slips: { 1: "60 km/h is the same as 1 km per minute. Try turning 20 m/s into km/h: times 3600, then divide by 1000.", 2: "1 km per minute is 60 km/h. Turn 20 m/s into km/h and compare.", 3: "1000 metres per hour is only 1 km/h: walking pace for a snail with ambition." },
@@ -166,6 +175,7 @@ var LEGS =
         work(["<b>Worked example: distance.</b> [[Mover]] goes at 50 km/h for 3 hours.", "Cover D: S x T", "D = 50 x 3 = <b>150 km</b>"]) +
         work(["<b>Worked example: time.</b> [[Mover]] goes 240 km at 60 km/h.", "Cover T: D &#247; S", "T = 240 &#247; 60 = <b>4 hours</b>"]) +
         "<p>Next, the steps get filled in less and less, until you are doing it on your own.</p>",
+      ez: { html: "<p>Cover the one you want on the triangle.</p>" + work(["<b>Distance.</b> 20 km/h for 2 hours.", "20 x 2 = <b>40 km</b>"]) + work(["<b>Time.</b> 60 km at 30 km/h.", "60 &#247; 30 = <b>2 hours</b>"]) },
       lv: { mild: { html: "<p>The triangle holds all three. Cover the one you want and the other two show you the sum.</p>" +
           work(["<b>Worked example: distance.</b> [[Mover]] goes at 20 km/h for 2 hours.", "Cover D: S x T", "D = 20 x 2 = <b>40 km</b>"]) +
           work(["<b>Worked example: time.</b> [[Mover]] goes 60 km at 30 km/h.", "Cover T: D &#247; S", "T = 60 &#247; 30 = <b>2 hours</b>"]) +
@@ -181,6 +191,7 @@ var LEGS =
       slips: [[13.3, "That divides. Covering D leaves S and T side by side, which means multiply."], [13.33, "That divides. Covering D leaves S and T side by side, which means multiply."], [43, "That adds. S and T side by side means multiply."]],
       hint: "The working is set up for you: 40 x 3.",
       why: "D = 40 x 3 = <b>120 km</b>.",
+      ez: { q: "[[Mover]] goes at 30 km/h for 2 hours. How far?" + work(["D = 30 x 2 = ?"]) },
       lv: { mild: { q: "[[Mover]] travels at 30 km/h for 2 hours. How far does it go?" + work(["Cover D: S x T", "D = 30 x 2 = ?"]),
           boxes: [{ label: "Distance", a: 60, post: "km" }],
           slips: [[15, "That divides. Covering D leaves S x T: multiply."], [32, "That adds. Multiply instead."]],
@@ -198,6 +209,7 @@ var LEGS =
       slips: [[2, 10800, "That multiplies. Covering T leaves D over S: divide."], [2, 0.333, "That is speed &#247; distance. Distance goes on top."]],
       hint: "Cover T: D over S. 180 &#247; 60.",
       why: "T = 180 &#247; 60 = <b>3 hours</b>.",
+      ez: { q: "[[Mover]] goes 80 km at 40 km/h. How long does it take?", slips: [[null, null, "That multiplies. Divide."], [null, null, "Distance goes on top."]], hint: "80 &#247; 40." },
       lv: { mild: { q: "[[Mover]] travels 80 km at 40 km/h. How long does the journey take? Fill in the working.",
           boxes: [{ label: "Distance", a: 80, pre: "T =" }, { label: "Speed", a: 40, pre: "&#247;" }, { label: "Time", a: 2, pre: "=", post: "hours" }],
           slips: [[2, 3200, "That multiplies. Covering T means divide."], [2, 0.5, "That is speed &#247; distance. Distance goes on top."]],
@@ -215,6 +227,7 @@ var LEGS =
       slips: [[11.25, "That divides. Distance means S x T: multiply."], [49, "That adds. Multiply instead."]],
       hint: "Which letter are you finding? Cover it.",
       why: "D = S x T = 45 x 4 = <b>180 km</b>.",
+      ez: { q: "[[Mover]] goes at 25 km/h for 4 hours. How far?", slips: [[null, "That divides. Multiply."], [null, "That adds. Multiply."]], hint: "Cover D on the triangle." },
       lv: { mild: { q: "[[Mover]] travels at 25 km/h for 4 hours. How far does it go? This time, no working given.",
           boxes: [{ label: "Distance", a: 100, post: "km" }],
           slips: [[6.25, "That divides. Distance means S x T: multiply."], [29, "That adds. Multiply instead."]],
@@ -231,7 +244,8 @@ var LEGS =
       answer: 0,
       slips: { 1: "That is upside down. On the triangle, D sits on top of S.", 2: "Multiplying makes the number bigger. Cover T: D sits over S, so divide.", 3: "Adding mixes up kilometres and kilometres per hour. Cover T on the triangle." },
       hint: "Cover T on the triangle. What is left?",
-      why: "Cover T and you see D over S: <b>distance &#247; speed</b>." },
+      why: "Cover T and you see D over S: <b>distance &#247; speed</b>.",
+      ez: { q: "Which sum finds the <b>time</b>?", slips: { 1: "Upside down. D sits on top.", 2: "Times makes it bigger. Divide.", 3: "Cover T on the triangle." }, why: "<b>distance &#247; speed</b>." } },
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Minutes and hours", title: "Minutes are parts of an hour",
@@ -239,6 +253,7 @@ var LEGS =
       html: "<p>Speeds in km/h need the time in <b>hours</b>. So minutes need turning into parts of an hour first.</p>" +
         "<p>An hour has <b>60</b> minutes, not 100. So 30 minutes is half an hour: <b>0.5</b> hours, not 0.3.</p>" +
         work(["<b>Worked example.</b> [[Mover]] goes 90 km in 1 hour 30 minutes.", "1 hour 30 minutes = 1.5 hours", "Speed = 90 &#247; 1.5 = <b>60 km/h</b>"]),
+      ez: { html: "<p>Half an hour is 30 minutes.</p>" + work(["[[Mover]] goes 30 km in half an hour.", "30 + 30 = <b>60 km/h</b>"]) },
       lv: { mild: { html: "<p>Speeds in km/h need the time in <b>hours</b>.</p>" +
           "<p>Half an hour is 30 minutes. In half an hour you go <b>half</b> as far as in a whole hour.</p>" +
           work(["<b>Worked example.</b> [[Mover]] goes 30 km in half an hour.", "In a whole hour it would go 30 + 30 = 60 km.", "Speed = <b>60 km/h</b>"]) },
@@ -253,6 +268,7 @@ var LEGS =
       slips: [[0.45, "45 minutes is not 0.45 hours: an hour has 60 minutes, not 100. Divide 45 by 60."], [45, "That is still in minutes. Divide by 60 to get hours."], [4.5, "Divide 45 by 60, not by 10."]],
       hint: "45 &#247; 60. Or: 45 minutes is three quarters of an hour.",
       why: "45 &#247; 60 = <b>0.75 hours</b>: three quarters of an hour.",
+      ez: { slips: [[null, "30 minutes is half an hour: 0.5."], [null, "That is minutes. Half an hour is 0.5."]], hint: "A half is 0.5.", why: "<b>0.5 hours</b>." },
       lv: { mild: { q: "Write <b>30 minutes</b> as a decimal of an hour.",
           boxes: [{ label: "Hours", a: 0.5, post: "h" }],
           slips: [[0.3, "30 minutes is not 0.3 hours. It is half an hour, and a half is 0.5."], [30, "That is still in minutes. 30 minutes is half an hour."]],
@@ -270,6 +286,7 @@ var LEGS =
       slips: [[[69.2, 69.23, 69.231], "That used 1.3 hours. 1 hour 30 minutes is 1.5 hours."], [1, "That divided by 90 minutes. Change the time into hours first: 1.5 hours."], [135, "That multiplies. Speed is distance &#247; time."]],
       hint: "Change the time to hours first: 1.5 hours. Then 90 &#247; 1.5.",
       why: "1 hour 30 minutes = 1.5 hours. 90 &#247; 1.5 = <b>60 km/h</b>.",
+      ez: { q: "[[Mover]] goes 25 km in half an hour. What is its speed?", slips: [[null, "That is half an hour. Double it."], [null, "That halves it. Double it."]], hint: "25 + 25.", why: "25 + 25 = <b>50 km/h</b>." },
       lv: { mild: { q: "[[Mover]] travels 25 km in half an hour. How far would it go in a whole hour? So what is its speed?",
           boxes: [{ label: "Speed", a: 50, post: "km/h" }],
           slips: [[25, "That is how far it goes in <b>half</b> an hour. A whole hour is two halves."], [12.5, "That halves it. A whole hour is twice as long, so double it."]],
@@ -287,6 +304,7 @@ var LEGS =
       slips: [[1, 50, "2.5 hours is not 2 hours 50 minutes. The 0.5 is half an hour: 30 minutes."], [1, 5, "The 0.5 is half an hour, which is 30 minutes."]],
       hint: "T = 100 &#247; 40 = 2.5 hours. Now turn the 0.5 into minutes.",
       why: "100 &#247; 40 = 2.5 hours = <b>2 hours 30 minutes</b>.",
+      ez: { q: "[[Mover]] goes 120 km at 40 km/h. How many hours?", slips: [[null, "That multiplies. Divide."], [null, "That takes away. Divide."]] },
       lv: { mild: { q: "[[Mover]] travels 120 km at 40 km/h. How many hours does it take?",
           boxes: [{ label: "Hours", a: 3, post: "h" }],
           slips: [[4800, "That multiplies. Time is distance &#247; speed."], [80, "That takes away. Divide instead."]],
@@ -304,6 +322,7 @@ var LEGS =
       html: "<p>Real journeys are rarely one simple sum. A good plan:</p>" +
         "<p><b>1.</b> Write down what you know (with units). <b>2.</b> Pick the formula: cover the letter you want. <b>3.</b> Make the units match (minutes into hours). <b>4.</b> Ask: does the answer make sense?</p>" +
         "<p>For a journey with stops, work out each leg, then add up the distances and add up the times.</p>",
+      ez: { html: "<p>Write what you know. Cover the letter you want.</p><p>Then check: does it make sense?</p>" },
       lv: { spicy: { html: "<p>A good plan for any speed question:</p>" +
         "<p><b>1.</b> Write what you know, with units. <b>2.</b> Cover the letter you want. <b>3.</b> Make the units match. <b>4.</b> Sense check.</p>" +
         "<p>For a journey in legs, the <b>average speed for the whole journey</b> is total distance &#247; total time. It is <b>not</b> the average of the two speeds, because the legs can take different amounts of time.</p>" } } },
@@ -311,6 +330,7 @@ var LEGS =
     { type: "widget", topic: "Plan the journey", unscored: true,
       title: "Speed machine",
       html: "<p>Set a speed and a time, then press Go. Can you land exactly on the flag? There is more than one way to do it. Have a play.</p>",
+      ez: { html: "<p>Pick a speed and a time. Can you hit the flag?</p>" },
       mount: function(el, api){
         var d = api.data, tk = api.tok || function(t){ return t; };
         var goal = { mild: 100, medium: 150, spicy: 135 }[api.level] || 150;
@@ -373,6 +393,8 @@ var LEGS =
       slips: [[1, 1.3, "Careful: 60 &#247; 40 is 1.5, which is 1 hour 30 minutes."], [0, 7200, "That multiplies. Time is distance &#247; speed."], [1, 2400, "That multiplies. Time is distance &#247; speed."]],
       hint: "Time = distance &#247; speed for each route.",
       why: "Route A: 120 &#247; 60 = <b>2 hours</b>. Route B: 60 &#247; 40 = <b>1.5 hours</b>. The slower road wins, because it is so much shorter.",
+      ez: { q: "<b>A:</b> 120 km at 60 km/h. <b>B:</b> 40 km at 40 km/h. How many hours each?", slips: [[null, null, "That multiplies. Divide."], [null, null, "That multiplies. Divide."]],
+        hint: "Distance &#247; speed.", why: "A: <b>2 hours</b>. B: <b>1 hour</b>." },
       lv: { mild: { q: "Two ways to get to [[to]]. <b>Route A:</b> 120 km at 60 km/h. <b>Route B:</b> 40 km at 40 km/h. How many hours does each route take?",
           boxes: [{ label: "Route A", a: 2, post: "hours" }, { label: "Route B", a: 1, post: "hours" }],
           slips: [[0, 7200, "That multiplies. Time is distance &#247; speed."], [1, 1600, "That multiplies. Time is distance &#247; speed."]],
@@ -389,6 +411,8 @@ var LEGS =
       slips: [[2, "That is just leg 1. Add on the time for leg 2."], [1, "That is just leg 2. Add on the time for leg 1."], [1.6, "That divides the total distance by the sum of the speeds. Work out each leg's time, then add."]],
       hint: "Leg 1: 90 &#247; 45. Leg 2: 30 &#247; 30. Then add.",
       why: "Leg 1 takes 90 &#247; 45 = 2 hours. Leg 2 takes 30 &#247; 30 = 1 hour. Total: <b>3 hours</b>.",
+      ez: { q: "150 km in all. 2 hours, then 1 hour. What is the speed?", slips: [[null, "The whole trip is 3 hours."], [null, "That is the distance. Divide by the time."], [null, "That multiplies. Divide."]],
+        hint: "2 + 1 hours. Then 150 &#247; that.", why: "150 &#247; 3 = <b>50 km/h</b>." },
       lv: { mild: { q: "A journey has two legs. Leg 1 takes 2 hours. Leg 2 takes 1 hour. The whole journey is 150 km. What is the average speed?",
           boxes: [{ label: "Speed", a: 50, post: "km/h" }],
           slips: [[75, "That divides by 2 hours only. The whole journey takes 2 + 1 = 3 hours."], [150, "That is the distance. Divide it by the total time."], [450, "That multiplies. Speed is distance &#247; time."]],
@@ -409,6 +433,7 @@ var LEGS =
       slips: { 1: "A normal bike ride is more like 15 to 25 km/h. 300 km/h is faster than most trains.", 2: "Speed does not depend on how far it is. 300 km/h would be faster than a racing car on a straight." },
       hint: "How fast does a car go on the motorway? Is a bike faster than that?",
       why: "300 km/h is faster than a racing car. Outrageous. A sense check like this catches slips, like a decimal point that has wandered: 30.0 km/h would be a very speedy cyclist, but possible.",
+      ez: { q: "Jay says he cycled at 300 km/h. Does that make sense?", slips: { 1: "Bikes go about 20 km/h.", 2: "300 km/h is faster than a racing car." }, hint: "Is a bike faster than a car?", why: "<b>No</b>. That is faster than a racing car!" },
       lv: { spicy: { q: "Jay says he cycled 6 km to school in 12 minutes, so his average speed was 0.5 km/h. Which is true?",
         options: ["He forgot to turn minutes into hours: it is 30 km/h.", "0.5 km/h is right.", "It should be 72 km/h."],
         slips: { 1: "6 &#247; 12 = 0.5 km per <b>minute</b>, not per hour. Times by 60.", 2: "That multiplies 6 by 12. 12 minutes is 0.2 hours, and 6 &#247; 0.2 = 30." },

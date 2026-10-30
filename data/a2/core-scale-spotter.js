@@ -17,11 +17,13 @@ function fmt(n){ return String(r6(n)); }
 function ups(n){ return fmt(n) + (n === Math.round(n) ? "s" : ""); }
 var DEG = "&deg;C", RED = "#e04848";
 
+/* easy read (LC): builders add ez at every level; it is kept on mild only */
+function noEz(v){ if(!v || !v.ez) return v; var c = {}; Object.keys(v).forEach(function(k){ if(k !== "ez") c[k] = v[k]; }); return c; }
 function lvl(v){
   if(!v.mild) return v;
   var o = {};
   Object.keys(v.mild).forEach(function(k){ o[k] = v.mild[k]; });
-  o.lv = { medium: v.medium || v.mild, spicy: v.spicy || v.mild };
+  o.lv = { medium: noEz(v.medium || v.mild), spicy: noEz(v.spicy || v.mild) };
   return o;
 }
 function S(type, topic, vs, extra){
@@ -194,28 +196,31 @@ var START = '<svg viewBox="0 0 520 220" role="img" aria-label="A dial, a ruler a
 
 /* ---------- question builders ---------- */
 /* a reading: mode "near" (nearest labelled mark), "exact" (on a mark), "est" (between marks) */
-function RQ(q, draw, o, mode, hint, label){
-  var fig = draw(o), I = info(o), u = o.unit ? " " + o.unit : "", ans, slips = [], why, tol;
-  function add(v, msg){ v = r6(v); if(v !== ans && !slips.some(function(s){ return s[0] === v; })) slips.push([v, msg]); }
+function RQ(q, draw, o, mode, hint, label, ezq){
+  var fig = draw(o), I = info(o), u = o.unit ? " " + o.unit : "", ans, slips = [], why, tol, ezs = [], ezw, q0 = q, auto = !hint;
+  function add(v, msg, sh){ v = r6(v); if(v !== ans && !slips.some(function(s){ return s[0] === v; })){ slips.push([v, msg]); ezs.push([v, sh || msg]); } }
   if(mode === "near"){
     ans = I.near;
-    add(ans === I.lb ? I.la : I.lb, "That label is further away. Which label is the pointer closer to?");
-    if(o.v !== ans) add(I.mid, "That is halfway, and it has no label here. Pick the nearest label.");
+    add(ans === I.lb ? I.la : I.lb, "That label is further away. Which label is the pointer closer to?", "That label is further away.");
+    if(o.v !== ans) add(I.mid, "That is halfway, and it has no label here. Pick the nearest label.", "That is halfway. Pick the nearest label.");
+    ezw = o.v === ans ? "It is right on <b>" + fmt(ans) + u + "</b>." : "Halfway is " + fmt(I.mid) + ". It is " + (ans === I.lb ? "before" : "past") + " that, so <b>" + fmt(ans) + u + "</b>.";
     why = o.v === ans ? "The pointer is right on the " + fmt(ans) + " label: <b>" + fmt(ans) + u + "</b>." :
       "It is between " + fmt(I.lb) + " and " + fmt(I.la) + ". Halfway is " + fmt(I.mid) + ", and the pointer is " + (ans === I.lb ? "before" : "past") + " halfway, so the nearest labelled mark is <b>" + fmt(ans) + u + "</b>.";
   } else if(mode === "exact"){
     ans = o.v;
-    if(I.sub > 1 && I.per !== 1) add(I.lb + I.k, "That counts each small gap as 1. Each gap is worth " + fmt(I.per) + ".");
-    if(o.v < 0) add(-o.v, "It is below zero, so it needs a minus sign.");
-    if(o.unit === "cm" && I.sub === 10) add(o.v * 10, "That is in millimetres. The box wants centimetres: " + fmt(o.v * 10) + " mm is " + fmt(o.v) + " cm.");
-    add(I.lb, "That is the label just below. Count on the small gaps too.");
-    add(I.la, "That is the label just above. The pointer has not reached it.");
+    if(I.sub > 1 && I.per !== 1) add(I.lb + I.k, "That counts each small gap as 1. Each gap is worth " + fmt(I.per) + ".", "Each gap is worth " + fmt(I.per) + ", not 1.");
+    if(o.v < 0) add(-o.v, "It is below zero, so it needs a minus sign.", "Below zero needs a minus sign.");
+    if(o.unit === "cm" && I.sub === 10) add(o.v * 10, "That is in millimetres. The box wants centimetres: " + fmt(o.v * 10) + " mm is " + fmt(o.v) + " cm.", "That is in mm. The box wants cm.");
+    add(I.lb, "That is the label just below. Count on the small gaps too.", "That is the label below. Count the small gaps too.");
+    add(I.la, "That is the label just above. The pointer has not reached it.", "That is the label above. The pointer is not there yet.");
+    ezw = I.sub > 1 ? "Each gap is " + fmt(I.per) + ". So it reads <b>" + fmt(ans) + u + "</b>." : "It is on the " + fmt(ans) + " label: <b>" + fmt(ans) + u + "</b>.";
     why = I.sub > 1 ? "The labels go up in " + ups(o.lab) + " with " + I.sub + " gaps between, so each gap is " + fmt(I.per) + ". From " + fmt(I.lb) + ", " + I.k + " gap" + (I.k === 1 ? "" : "s") + " up: <b>" + fmt(ans) + u + "</b>." :
       "It is right on the " + fmt(ans) + " label: <b>" + fmt(ans) + u + "</b>.";
   } else {
     ans = o.v; tol = r6(I.per / 4);
-    add(I.m1, "That is the mark just below. The pointer is past it, about halfway to the next one.");
-    add(I.m2, "That is the mark just above. The pointer has not reached it.");
+    add(I.m1, "That is the mark just below. The pointer is past it, about halfway to the next one.", "That is the mark below. The pointer is past it.");
+    add(I.m2, "That is the mark just above. The pointer has not reached it.", "That is the mark above. It is not there yet.");
+    ezw = "About halfway between " + fmt(I.m1) + " and " + fmt(I.m2) + ": about <b>" + fmt(ans) + u + "</b>.";
     why = "Each small gap is " + fmt(I.per) + ". The pointer is about halfway between " + fmt(I.m1) + " and " + fmt(I.m2) + ", so about <b>" + fmt(ans) + u + "</b>. Anything close is fine.";
   }
   if(mode === "near") q += " Read it to the nearest labelled mark.";
@@ -226,29 +231,40 @@ function RQ(q, draw, o, mode, hint, label){
   var box = { label: label || "Reading", a: ans };
   if(o.unit) box.post = o.unit;
   if(tol) box.tol = tol;
-  return { q: q, fig: fig, boxes: [box], slips: slips, hint: hint, why: why };
+  var ez = { slips: ezs, why: ezw };
+  if(ezq || mode === "near") ez.q = (ezq || q0) + (mode === "near" ? " Read to the nearest label." : "");
+  if(auto) ez.hint = mode === "near" ? "Halfway is " + fmt(I.mid) + ". Before or past it?" : mode === "est" ? "Which 2 marks is it between?" :
+    I.sub > 1 ? "Each gap is " + fmt(o.lab) + " &divide; " + I.sub + "." :
+    (draw === therm ? "Read the top of the red line." : draw === jug ? "Read the top of the liquid." : o.bar ? "Start at 0. Read the other end." : "Find the label it is on.");
+  return { q: q, fig: fig, boxes: [box], slips: slips, hint: hint, why: why, ez: ez };
 }
 /* steps laid out in boxes, for the faded examples */
-function FADE(q, draw, o, mode){
-  var fig = draw(o), I = info(o), u = o.unit ? " " + o.unit : "";
-  if(mode === "near") return { q: q, fig: fig, hint: "Halfway between the two labels is " + fmt(I.mid) + ". Is the pointer before or past it?",
+function FADE(q, draw, o, mode, ezq){
+  var fig = draw(o), I = info(o), u = o.unit ? " " + o.unit : "", r;
+  function ez(e){ if(ezq) e.q = ezq; r.ez = e; return r; }
+  if(mode === "near"){ r = { q: q, fig: fig, hint: "Halfway between the two labels is " + fmt(I.mid) + ". Is the pointer before or past it?",
     boxes: [{ label: "Label just below", a: I.lb }, { label: "Label just above", a: I.la }, { label: "Nearest label", a: I.near }],
     slips: [[0, I.la, "That is the label above. Box 1 wants the one below."], [2, I.near === I.lb ? I.la : I.lb, "That label is further away. Check halfway."]],
     why: "Between " + fmt(I.lb) + " and " + fmt(I.la) + ", " + (I.near === I.lb ? "before" : "past") + " halfway, so <b>" + fmt(I.near) + u + "</b>." };
-  if(mode === "exact") return { q: q, fig: fig, hint: "Labels go up in " + ups(o.lab) + ". Count the gaps between two labels.",
+    return ez({ hint: "Halfway is " + fmt(I.mid) + ". Before or past it?", slips: [[0, I.la, "That is the label above."], [2, I.near === I.lb ? I.la : I.lb, "That one is further away."]] }); }
+  if(mode === "exact"){
+    var fl = [[1, 1, "That counts each gap as 1. Share " + fmt(o.lab) + " between " + I.sub + " gaps.", "Share " + fmt(o.lab) + " between " + I.sub + " gaps."], [1, I.sub, "That is how many gaps there are. What is each one worth?", "That is the number of gaps."], [2, I.lb + I.k, "That counts each small gap as 1.", "Each small gap is not 1."]].filter(function(s){ return s[1] !== (s[0] === 1 ? I.per : o.v); });
+    r = { q: q, fig: fig, hint: "Labels go up in " + ups(o.lab) + ". Count the gaps between two labels.",
     boxes: [{ label: "Label just below", a: I.lb }, { label: "Each small gap is worth", a: I.per }, { label: "Reading", a: o.v, post: o.unit }],
-    slips: [[1, 1, "That counts each gap as 1. Share " + fmt(o.lab) + " between " + I.sub + " gaps."], [1, I.sub, "That is how many gaps there are. What is each one worth?"], [2, I.lb + I.k, "That counts each small gap as 1."]].filter(function(s){ return s[1] !== (s[0] === 1 ? I.per : o.v); }),
+    slips: fl.map(function(s){ return [s[0], s[1], s[2]]; }),
     why: fmt(o.lab) + " shared between " + I.sub + " gaps is " + fmt(I.per) + ". From " + fmt(I.lb) + ", " + I.k + (I.k === 1 ? " gap" : " gaps") + " up: <b>" + fmt(o.v) + u + "</b>." };
-  return { q: q, fig: fig, hint: "Find the small marks on each side of the pointer first.",
+    return ez({ hint: "Labels go up in " + ups(o.lab) + ". Count the gaps.", slips: fl.map(function(s){ return [s[0], s[1], s[3]]; }) }); }
+  r = { q: q, fig: fig, hint: "Find the small marks on each side of the pointer first.",
     boxes: [{ label: "Mark just below", a: I.m1 }, { label: "Mark just above", a: I.m2 }, { label: "Your reading", a: o.v, tol: r6(I.per / 4), post: o.unit }],
     slips: [[2, I.m1, "That is the mark below. The pointer is part way to the next one."], [2, I.m2, "That is the mark above. The pointer has not reached it."], [1, I.m1, "That is the mark below. Box 2 wants the one above."]],
     why: "It is between " + fmt(I.m1) + " and " + fmt(I.m2) + ", about halfway: about <b>" + fmt(o.v) + u + "</b>." };
+  return ez({ hint: "Find the small marks each side first.", slips: [[2, I.m1, "That is the mark below."], [2, I.m2, "That is the mark above."], [1, I.m1, "Box 2 wants the mark above."]] });
 }
 function O(lo, hi, lab, sub, v, unit, extra){ var o = { lo: lo, hi: hi, lab: lab, sub: sub, v: v, unit: unit }; Object.keys(extra || {}).forEach(function(k){ o[k] = extra[k]; }); return o; }
 
 /* one reading step: q (or [q, q, q] per level, or a function of the scale), a drawing, modes per level,
    and rows of versions: each row is [[o, hint], [o, hint], [o, hint]] for mild, medium, spicy */
-function RS(q, draw, modes, rows, label){
+function RS(q, draw, modes, rows, label, ezq){
   var L = ["mild", "medium", "spicy"];
   return rows.map(function(r){
     var v = {};
@@ -256,7 +272,8 @@ function RS(q, draw, modes, rows, label){
       var qq = Array.isArray(q) ? q[i] : q, o = r[i][0], I = info(o);
       if(typeof qq === "function") qq = qq(o, I);
       var hint = typeof r[i][1] === "function" ? r[i][1](o, I) : r[i][1];
-      v[l] = modes[i].charAt(0) === "f" ? FADE(qq, draw, o, modes[i].slice(1)) : RQ(qq, draw, o, modes[i], hint, label);
+      var eq = i === 0 ? (typeof ezq === "function" ? ezq(o, I) : ezq) : undefined;
+      v[l] = modes[i].charAt(0) === "f" ? FADE(qq, draw, o, modes[i].slice(1), eq) : RQ(qq, draw, o, modes[i], hint, label, eq);
     });
     return v;
   });
@@ -298,7 +315,8 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
       mild: { title: "Worked example: what do the labels say?",
         html: "<p>Every scale works the same way. Here is one done for you.</p>" +
           "<p class=\"a2task\"><b>Step 1:</b> find two labels next to each other: 10 and 20.<br><b>Step 2:</b> the gap between them is 10, so the labels go up in <b>10s</b>.<br><b>Step 3:</b> look where the pointer is. It is right on <b>30</b>.<br>So this luggage scale reads <b>30 kg</b>.</p>",
-        fig: hs(O(0, 50, 10, 1, 30, "kg")) },
+        fig: hs(O(0, 50, 10, 1, 30, "kg")),
+        ez: { title: "What do the labels say?", html: "<p>The labels go up in <b>10s</b>.</p><p>The pointer is on 30. So it reads <b>30 kg</b>.</p>" } },
       medium: { title: "Worked example: the marks between labels",
         html: "<p>Lots of marks have no number. Work out what each one is worth.</p>" +
           "<p class=\"a2task\"><b>Step 1:</b> labels go up in 10s.<br><b>Step 2:</b> between 20 and 30 there are <b>5 gaps</b>, so each gap is 10 &divide; 5 = <b>2</b>.<br><b>Step 3:</b> the pointer is 3 gaps past 20: 20, 22, 24, <b>26</b>.<br>So it reads <b>26 kg</b>.</p>",
@@ -316,16 +334,18 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
         var c = {}; Object.keys(o).forEach(function(k){ c[k] = o[k]; }); c.v = o.lo; c.hide = 1;
         return { q: o.sub > 1 ? "What is each small gap on this scale worth?" : "What do the labels on this scale go up in?",
           fig: hs(c), options: [right].concat(w.map(function(x){ return x[0]; })), answer: 0, slips: sl,
-          hint: o.sub > 1 ? "Find what the labels go up in, then share it between the gaps." : "Look at two labels next to each other.", why: why };
+          hint: o.sub > 1 ? "Find what the labels go up in, then share it between the gaps." : "Look at two labels next to each other.", why: why,
+          ez: { q: o.sub > 1 ? "What is each small gap worth?" : "What do the labels go up in?", hint: o.sub > 1 ? "Share the label jump between the gaps." : "Look at 2 labels side by side.",
+            slips: (function(){ var e = {}; w.forEach(function(x, k){ e[k + 1] = x[2] || x[1]; }); return e; })() } };
       }
       return [
-        { mild: L(O(0, 30, 5, 1, 0, "cm"), [["1", "The labels jump from 0 to 5, not 0 to 1."], ["10", "Look at two labels next to each other: 0 and 5."], ["7", "That is how many labels there are. What is the jump between two of them?"]], "0, 5, 10, 15: they go up in <b>5s</b>."),
+        { mild: L(O(0, 30, 5, 1, 0, "cm"), [["1", "The labels jump from 0 to 5, not 0 to 1."], ["10", "Look at two labels next to each other: 0 and 5.", "Look at 2 labels side by side: 0 and 5."], ["7", "That is how many labels there are. What is the jump between two of them?", "That is how many labels. What is the jump?"]], "0, 5, 10, 15: they go up in <b>5s</b>."),
           medium: L(O(0, 100, 20, 4, 0, "kg"), [["1", "That counts each gap as 1. The labels go up in 20s."], ["4", "That is how many gaps there are between labels."], ["20", "That is what the labels go up in. Share it between the gaps."]], "20 shared between 4 gaps is <b>5</b>."),
           spicy: L(O(0, 5, 1, 5, 0, "kg"), [["0.1", "There are 5 gaps, not 10. Share 1 between 5."], ["5", "That is how many gaps there are between labels."], ["1", "That is what the labels go up in. Share it between the gaps."]], "1 shared between 5 gaps is <b>0.2</b>.") },
-        { mild: L(O(0, 12, 2, 1, 0, "cm"), [["1", "The labels jump from 0 to 2, not 0 to 1."], ["4", "Look at two labels next to each other: 2 and 4."], ["12", "That is the last label. What is the jump between two labels?"]], "0, 2, 4, 6: they go up in <b>2s</b>."),
+        { mild: L(O(0, 12, 2, 1, 0, "cm"), [["1", "The labels jump from 0 to 2, not 0 to 1."], ["4", "Look at two labels next to each other: 2 and 4.", "Look at 2 labels side by side: 2 and 4."], ["12", "That is the last label. What is the jump between two labels?", "That is the last label. What is the jump?"]], "0, 2, 4, 6: they go up in <b>2s</b>."),
           medium: L(O(0, 250, 50, 5, 0, "g"), [["1", "That counts each gap as 1. The labels go up in 50s."], ["5", "That is how many gaps there are between labels."], ["50", "That is what the labels go up in. Share it between the gaps."]], "50 shared between 5 gaps is <b>10</b>."),
           spicy: L(O(0, 2.5, 0.5, 5, 0, "litres"), [["0.5", "That is what the labels go up in. Share it between the gaps."], ["5", "That is how many gaps there are between labels."], ["0.2", "Share 0.5 between 5 gaps, not 1."]], "0.5 shared between 5 gaps is <b>0.1</b>.") },
-        { mild: L(O(0, 100, 20, 1, 0, "kg"), [["10", "Look at two labels next to each other: 0 and 20."], ["1", "The labels jump from 0 to 20, not 0 to 1."], ["6", "That is how many labels there are. What is the jump between two of them?"]], "0, 20, 40, 60: they go up in <b>20s</b>."),
+        { mild: L(O(0, 100, 20, 1, 0, "kg"), [["10", "Look at two labels next to each other: 0 and 20.", "Look at 2 labels side by side: 0 and 20."], ["1", "The labels jump from 0 to 20, not 0 to 1."], ["6", "That is how many labels there are. What is the jump between two of them?", "That is how many labels. What is the jump?"]], "0, 20, 40, 60: they go up in <b>20s</b>."),
           medium: L(O(0, 400, 100, 4, 0, "ml"), [["1", "That counts each gap as 1. The labels go up in 100s."], ["4", "That is how many gaps there are between labels."], ["20", "That would need 5 gaps. Count the gaps between two labels again."]], "100 shared between 4 gaps is <b>25</b>."),
           spicy: L(O(0, 4, 1, 4, 0, "kg"), [["0.4", "That is not 1 shared between 4. Count the gaps between two labels again."], ["4", "That is how many gaps there are between labels."], ["0.2", "That would need 5 gaps. Count the gaps between two labels again."]], "1 shared between 4 gaps is <b>0.25</b>.") }
       ];
@@ -335,13 +355,13 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
       [[O(0, 50, 10, 1, 40, "kg")], [O(0, 50, 10, 5, 34, "kg")], [O(0, 5, 1, 5, 3.4, "kg")]],
       [[O(0, 25, 5, 1, 15, "kg")], [O(0, 40, 10, 4, 27.5, "kg")], [O(0, 2.5, 0.5, 5, 1.3, "kg")]],
       [[O(0, 100, 20, 1, 60, "kg")], [O(0, 60, 20, 4, 45, "kg")], [O(0, 10, 2, 4, 6.5, "kg")]]
-    ])),
+    ], undefined, "How heavy is the [[bag]]?")),
 
     S("num", "What the labels say", RS("What temperature does the thermometer show at [[place]]?", therm, EX3, [
       [[O(0, 40, 10, 1, 20, DEG)], [O(0, 40, 10, 5, 26, DEG)], [O(-20, 20, 10, 5, -6, DEG)]],
       [[O(0, 30, 5, 1, 15, DEG)], [O(-10, 30, 10, 5, 14, DEG)], [O(-10, 30, 10, 4, -2.5, DEG)]],
       [[O(0, 40, 10, 1, 10, DEG)], [O(0, 50, 10, 2, 35, DEG)], [O(35, 42, 1, 5, 37.4, DEG)]]
-    ])),
+    ], undefined, "What does the thermometer show?")),
 
     S("num", "What the labels say", RS(["How long is the [[thing]]?", "How long is the [[thing]]?", "How long is the [[thing]], in centimetres?"], hs, EX3, [
       [[O(0, 10, 1, 1, 7, "cm", { bar: 1 })], [O(0, 12, 1, 2, 8.5, "cm", { bar: 1 })], [O(0, 10, 1, 10, 7.4, "cm", { bar: 1 })]],
@@ -354,7 +374,8 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
       mild: { title: "Worked example: the nearest labelled mark",
         html: "<p>Sometimes the pointer stops <b>between</b> two labels. Then you read it to the <b>nearest</b> label.</p>" +
           "<p class=\"a2task\"><b>Step 1:</b> the pointer is between 20 and 30.<br><b>Step 2:</b> halfway between them is 25.<br><b>Step 3:</b> the pointer is past halfway, so it is nearer 30.<br>To the nearest labelled mark: <b>30</b>.</p>",
-        fig: hs(O(0, 40, 10, 1, 28, "m", { half: 1 })) },
+        fig: hs(O(0, 40, 10, 1, 28, "m", { half: 1 })),
+        ez: { title: "The nearest label", html: "<p>Halfway between 20 and 30 is 25.</p><p>The pointer is past 25. So the nearest label is <b>30</b>.</p>" } },
       medium: { title: "Worked example: counting the gaps",
         html: "<p>When the pointer is on a small mark, count the gaps from the label below.</p>" +
           "<p class=\"a2task\"><b>Step 1:</b> the label below the pointer is 60.<br><b>Step 2:</b> labels go up in 20s with 4 gaps, so each gap is <b>5</b>.<br><b>Step 3:</b> one gap past 60 is <b>65</b>.</p>",
@@ -369,7 +390,7 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
       [[O(0, 50, 10, 1, 37, "m")], [O(0, 100, 20, 4, 85, "m")], [O(0, 2, 0.5, 5, 1.35, "m")]],
       [[O(0, 100, 20, 1, 46, "m")], [O(0, 50, 10, 5, 36, "m")], [O(0, 5, 1, 5, 2.5, "m")]],
       [[O(0, 25, 5, 1, 11, "m")], [O(0, 200, 50, 5, 120, "m")], [O(0, 10, 2, 4, 3.75, "m")]]
-    ])),
+    ], undefined, "How far along the tape is the pointer?")),
 
     S("num", "In between", RS([
         function(o, I){ return "Fewer steps now. Step 1 is done: the pointer is between " + fmt(I.lb) + " and " + fmt(I.la) + "."; },
@@ -379,13 +400,13 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
       return [[O(0, 100, 10, 1, 62, "m"), O(0, 60, 20, 4, 35, "m"), O(0, 1, 0.2, 2, 0.65, "m")],
         [O(0, 50, 10, 1, 18, "m"), O(0, 100, 25, 5, 70, "m"), O(0, 30, 10, 5, 17, "m")],
         [O(0, 60, 10, 1, 43, "m"), O(0, 400, 100, 4, 275, "m"), O(0, 4, 1, 2, 2.25, "m")]].map(function(r){ return r.map(function(o, i){ return [o, h[i]]; }); });
-    })())),
+    })(), undefined, function(o, I){ return "It is between " + fmt(I.lb) + " and " + fmt(I.la) + "."; })),
 
     S("num", "In between", RS(["On your own now. How much [[liquid]] is in the jug?", "On your own now. How much [[liquid]] is in the jug?", "On your own now. How much [[liquid]] is in the jug, in litres?"], jug, NEE, [
       [[O(0, 500, 100, 1, 290, "ml")], [O(0, 1000, 200, 4, 750, "ml")], [O(0, 2, 0.5, 5, 1.3, "litres")]],
       [[O(0, 1000, 200, 1, 620, "ml")], [O(0, 500, 100, 5, 340, "ml")], [O(0, 1, 0.25, 5, 0.85, "litres")]],
       [[O(0, 500, 100, 1, 410, "ml")], [O(0, 2000, 500, 5, 1300, "ml")], [O(0, 1, 0.2, 4, 0.55, "litres")]]
-    ])),
+    ], undefined, "How much [[liquid]] is in the jug?")),
 
     /* ---------- chunk 3: dials and gauges ---------- */
     S("learn", "Dials and gauges", [{
@@ -394,7 +415,8 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
           "<p class=\"a2task\">Same steps as before: what do the labels go up in? Which labels is the needle between? Which one is it nearest?</p>",
         fig: '<svg viewBox="0 0 520 250" role="img" aria-label="A kitchen scale dial and a fuel gauge">' + '<rect width="520" height="250" rx="14" fill="#f4f1ea"/>' +
           dialG(130, 135, 100, O(0, 1000, 100, 1, 600, "g")) + '<rect x="270" y="60" width="236" height="170" rx="14" fill="#2b3150"/>' + gaugeG(388, 210, 104, 0.75, GL.mild) +
-          A.egg(A.bird(486, 46, 0.6, "#ff5d5d"), "A bird checking the fuel. Birds do not need fuel. They run on seeds and good vibes.") + '</svg>' },
+          A.egg(A.bird(486, 46, 0.6, "#ff5d5d"), "A bird checking the fuel. Birds do not need fuel. They run on seeds and good vibes.") + '</svg>',
+        ez: { title: "A dial is a bent scale", html: "<p>A <b>dial</b> is a scale bent round.</p><p>Read it like a clock. Same steps as before.</p>" } },
       medium: { title: "A dial is a scale bent round",
         html: "<p>Kitchen scales, speedometers and fuel gauges are scales bent into a curve. Follow the numbers round the same way as a clock.</p>" +
           "<p class=\"a2task\">Same steps: labels go up in 200s here, with 4 gaps between, so each gap is 50. The needle is one gap past 600: <b>650 g</b>.</p>",
@@ -409,12 +431,14 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
       [[O(0, 1000, 100, 1, 400, "g")], [O(0, 1000, 200, 4, 850, "g")], [O(0, 5, 1, 10, 3.6, "kg")]],
       [[O(0, 1000, 100, 1, 680, "g")], [O(0, 2000, 500, 5, 1300, "g")], [O(0, 3, 0.5, 5, 1.7, "kg")]],
       [[O(0, 500, 50, 1, 260, "g")], [O(0, 500, 100, 5, 260, "g")], [O(0, 4, 1, 4, 2.75, "kg")]]
-    ])),
+    ], undefined, "How heavy is the [[bag]]?")),
 
     S("mc", "Dials and gauges", (function(){
       var M = ["Nearly empty", "About half", "Nearly full"], Q = ["A quarter", "Half", "Three quarters", "Full"];
       function mild(f, ans){ var sl = {}; M.forEach(function(m, k){ if(k !== ans) sl[k] = "Look at which label the needle is nearest: E, 1/2 or F."; });
-        return FIX("About how much fuel is in the [[vehicle]]?", gauge(f, GL.mild), M, ans, sl, "E means empty and F means full.", "The needle is nearest " + ["E", "1/2", "F"][ans] + ": <b>" + M[ans].toLowerCase() + "</b>."); }
+        var r = FIX("About how much fuel is in the [[vehicle]]?", gauge(f, GL.mild), M, ans, sl, "E means empty and F means full.", "The needle is nearest " + ["E", "1/2", "F"][ans] + ": <b>" + M[ans].toLowerCase() + "</b>.");
+        var es = {}; M.forEach(function(m, k){ if(k !== ans) es[k] = "Which is the needle nearest: E, 1/2 or F?"; });
+        r.ez = { slips: es }; return r; }
       function med(f, ans){ var sl = {}; Q.forEach(function(m, k){ if(k !== ans) sl[k] = "Count the big marks from E. There are 4 equal gaps from E to F."; });
         return FIX("About how much fuel is in the [[vehicle]]?", gauge(f, GL.other), Q, ans, sl, "The big marks split E to F into quarters.", "The needle is on the " + ["first", "middle", "third"][ans] + " big mark: <b>" + Q[ans].toLowerCase() + "</b>."); }
       function spicy(f, tank, opts, why){
@@ -444,7 +468,10 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
           boxes: [{ label: "Before", a: b, post: unit }, { label: "After", a: a, post: unit }, { label: "Seed", a: d, post: unit }],
           slips: [[2, r6(a + b), "That adds them. The seed is the difference: after take away before."], [2, a, "That is the feeder and the seed together. Take away the feeder."]],
           hint: "Read both dials, then work out after take away before.",
-          why: "Before " + fmt(b) + ", after " + fmt(a) + ". " + fmt(a) + " take away " + fmt(b) + " is <b>" + fmt(d) + " " + unit + "</b> of seed. The birds approve." };
+          why: "Before " + fmt(b) + ", after " + fmt(a) + ". " + fmt(a) + " take away " + fmt(b) + " is <b>" + fmt(d) + " " + unit + "</b> of seed. The birds approve.",
+          ez: { q: "Jay weighs the feeder before and after. How much seed went in?", hint: "Read both. After take away before.",
+            slips: [[2, r6(a + b), "That adds them. Take away instead."], [2, a, "That is feeder and seed. Take away the feeder."]],
+            why: fmt(a) + " take away " + fmt(b) + " is <b>" + fmt(d) + " " + unit + "</b>. The birds approve." } };
       }
       return [
         { mild: BA(0, 1000, 100, 1, 200, 700, "g"), medium: BA(0, 1000, 200, 4, 250, 800, "g"), spicy: BA(0, 2, 0.5, 5, 0.4, 1.3, "kg") },
@@ -461,8 +488,10 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
         if(ans !== 0) sl[0] = "Jug A might look fuller, but read the numbers, not the height.";
         if(ans !== 1) sl[1] = "Jug B might look fuller, but read the numbers, not the height.";
         if(ans !== 2) sl[2] = "Read each jug carefully. One has more.";
+        var es = {}; Object.keys(sl).forEach(function(k){ es[k] = k === "2" ? "Read each jug. One has more." : "Read the numbers, not the height."; });
         return { q: "Which jug has more [[liquid]] in it?", fig: jug2(o1, o2), options: OPT, answer: ans, slips: sl,
-          hint: "The jugs have different scales. Read each one, then compare the numbers.", why: why };
+          hint: "The jugs have different scales. Read each one, then compare the numbers.", why: why,
+          ez: { hint: "Read each jug. Then compare.", slips: es, why: "A has " + fmt(a) + " ml. B has " + fmt(b) + " ml. " + (ans === 2 ? "<b>They have the same</b>." : "<b>Jug " + "AB".charAt(ans) + "</b> has more.") } };
       }
       return [
         { mild: J(O(0, 500, 100, 1, 300, "ml"), O(0, 1000, 200, 1, 400, "ml"), "A has 300 ml. B has 400 ml, even though it looks lower. <b>Jug B</b> has more."),
@@ -492,7 +521,8 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
           why += " From " + fmt(o2.v) + " up to 0 is " + fmt(-o2.v) + ", then up to " + fmt(o1.v) + " is " + fmt(o1.v) + " more: <b>" + fmt(d) + " degrees</b> warmer inside.";
         }
         return { q: diff ? "Bonnie is inside by the fire. Jay is outside watching birds. Read both thermometers, then find how much warmer it is inside." : "Bonnie is inside by the fire. Jay is outside watching birds. Read both thermometers.",
-          fig: therm2(o1, o2, "Inside", "Outside"), boxes: b, slips: sl, hint: diff ? "For the difference, count up from the outside temperature to the inside one." : "Read the top of each red line.", why: why };
+          fig: therm2(o1, o2, "Inside", "Outside"), boxes: b, slips: sl, hint: diff ? "For the difference, count up from the outside temperature to the inside one." : "Read the top of each red line.", why: why,
+          ez: { q: diff ? "Bonnie is inside. Jay is outside. Read both. How much warmer is inside?" : "Bonnie is inside. Jay is outside. Read both thermometers." } };
       }
       return [
         { mild: TT(O(0, 40, 10, 1, 20), O(0, 40, 10, 1, 10)), medium: TT(O(-10, 30, 10, 5, 18), O(-10, 30, 10, 5, 6)), spicy: TT(O(-20, 20, 10, 5, 4), O(-20, 20, 10, 5, -6), 1) },
@@ -507,9 +537,11 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
         var sl = [[ml ? r6(have * 1000) : have, "That is how much is in the jug now. How much more is needed?"]];
         if(ml) sl.push([need, "That is in litres. The box wants millilitres: " + fmt(need) + " litres is " + fmt(ansml) + " ml."]);
         else sl.push([r6(target + have), "That adds them. Work out the gap from " + fmt(have) + " up to " + fmt(target) + "."]);
+        var es = [[sl[0][0], "That is what is in the jug now."], ml ? [need, "That is in litres. The box wants ml."] : [sl[1][0], "That adds them. Count up from " + fmt(have) + " to " + fmt(target) + "."]];
         return { q: "A recipe needs " + fmt(target) + " " + (target === 1 ? "litre" : o.unit) + " of [[liquid]]. How much more do you need to pour in?", fig: jug(o),
           boxes: [{ label: "More needed", a: ansml, post: u }], slips: sl, hint: "Read the jug first. Then count up to " + fmt(target) + ".",
-          why: "The jug has " + fmt(have) + " " + o.unit + ". From " + fmt(have) + " up to " + fmt(target) + " is " + (ml ? fmt(need) + " litres, which is " : "") + "<b>" + fmt(ansml) + " " + u + "</b>." };
+          why: "The jug has " + fmt(have) + " " + o.unit + ". From " + fmt(have) + " up to " + fmt(target) + " is " + (ml ? fmt(need) + " litres, which is " : "") + "<b>" + fmt(ansml) + " " + u + "</b>.",
+          ez: { q: "You need " + fmt(target) + " " + (target === 1 ? "litre" : o.unit) + " of [[liquid]]. How much more do you pour in?", slips: es } };
       }
       return [
         { mild: MORE(O(0, 500, 100, 1, 300, "ml"), 500), medium: MORE(O(0, 1000, 200, 4, 350, "ml"), 1000), spicy: MORE(O(0, 1, 0.2, 4, 0.65, "litres"), 1, true) },
@@ -528,6 +560,11 @@ function FIX(q, fig, options, answer, slips, hint, why){ return { q: q, fig: fig
       '<rect x="189" y="24" width="22" height="216" rx="11" fill="#ffffff" stroke="#141a33" stroke-width="2.5"/><rect x="195" y="130" width="10" height="114" fill="' + RED + '"/><circle cx="200" cy="250" r="20" fill="' + RED + '" stroke="#141a33" stroke-width="2.5"/>' +
       [0, 10, 20, 30, 40].map(function(c){ var y = 220 - c * 4.5, f = c * 9 / 5 + 32; return '<path d="M212 ' + y + 'h14M174 ' + y + 'h14" stroke="#141a33" stroke-width="2"/>' + T(232, y + 5, c + " C", 13, { b: 1 }) + T(168, y + 5, f + " F", 13, { b: 1, a: "end" }); }).join("") +
       A.jay(380, 140, 0.9, "hmm") + A.bubble(300, 20, 180, 52, "50 degrees?\nSuncream or coat?", 360) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Always check the labels", html: "<p>Speedometers, kitchen scales, thermometers.</p><p>Old forecasts used <b>Fahrenheit</b>. There, 50 is mild, not hot!</p>" },
+    make: { intro: "Design a gauge for anything. Pick the numbers and the needle.", fields: [{}, { label: "Lowest number" }, { label: "Highest number" }, { label: "Needle points to" }] }
   },
 
   make: {

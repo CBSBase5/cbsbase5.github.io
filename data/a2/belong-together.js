@@ -124,6 +124,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Same idea", title: "Sentences can be a matching pair",
+      ez: { title: "Matching pairs", html: "<p>Sentences <b>belong together</b> when they share the <b>same idea</b>.</p><p>Bonnie is a poodle. She has curly fur. A pair!</p>" },
       fig: SOCKS,
       html: "<p>Some sentences <b>belong together</b>, like a pair of socks. They belong together when they are about the <b>same idea</b>.</p>" +
         "<p><b>Bonnie is a toy poodle. She has brown curly fur.</b> Both sentences are about Bonnie. They match.</p>" +
@@ -139,6 +140,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: { 1: "Bonnie is lovely, but this sentence is about Bonnie, not about packing.", 2: "Owls are a whole different idea. Which one is about the bag?" },
       hint: "Which one is still about the bag?",
       why: "Both sentences are about packing the bag. Same idea, so they belong together.",
+      ez: { hint: "Which one is about the bag?", why: "Both are about packing the bag.", slips: { 1: "That one is about Bonnie, not the bag.", 2: "Owls are a different idea." } },
       lv: {
         medium: { options: ["In the bag went [[kit]].", "Bags can be made of paper or cloth.", "Owls hunt at night."],
           slips: { 1: "It says \"bag\", but it is about what bags are made of, not about packing for [[event]].", 2: "Owls are a whole different idea." } },
@@ -152,6 +154,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       answers: [0, 1, 2],
       hint: "\"She\" can mean Bonnie too.",
       why: "The first three are all about Bonnie. \"She\" points back to Bonnie. The bus and the owls are different ideas.",
+      ez: { hint: "\"She\" can mean Bonnie.", why: "The first 3 are about Bonnie." },
       lv: { spicy: { q: "Pick the <b>three</b> sentences about the same idea: Bonnie's walk.",
         options: ["Bonnie pulled on her lead at the gate.", "She sniffed every lamp post on the way.", "By the park, she was ready to go home.", "Bonnie has her fur cut every six weeks.", "The park opens at 8am."],
         why: "The first three follow one walk from the gate to the park. The haircut is about Bonnie, but not about her walk. The park opening time is about the park." } } },
@@ -162,6 +165,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       cards: [["[[Place]] was busy.", 0], ["[[Sound]] filled the air.", 0], ["We had cheese sandwiches.", 1], ["The apples were crunchy.", 1]],
       hint: "Ask: is this about the place, or about the food?",
       why: "Busy and the noise are about [[place]]. Sandwiches and apples are about lunch.",
+      ez: { hint: "The place, or the food?", why: "Busy and noise: [[place]]. Sandwiches and apples: lunch." },
       lv: {
         medium: { cards: [["[[Place]] was busy.", 0], ["[[Sound]] filled the air.", 0], ["There was a long queue at [[spot]].", 0], ["We had cheese sandwiches.", 1], ["The apples were crunchy.", 1], ["Lunch came in a paper bag.", 1]] },
         spicy: { cards: [["[[Place]] was packed.", 0], ["It was hard to find a seat.", 0], ["[[Sound]] filled the air.", 0], ["We had cheese sandwiches.", 1], ["They were a bit squashed.", 1], ["The apples were crunchy, too.", 1]],
@@ -176,6 +180,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: { 1: "Look again: the second one does not say \"is\". And sharing a word is not what makes sentences match.", 2: "Lots of short sentences are about different things. What are these two about?" },
       hint: "Who is each sentence about?",
       why: "Both sentences are about Bonnie. \"She\" in the second one points back to Bonnie.",
+      ez: { q: "Why do they belong together?<p class=\"a2task\">Bonnie is a toy poodle. She has no tail.</p>", hint: "Who is each one about?", why: "Both are about Bonnie.", slips: { 1: "Sharing a word does not make a match.", 2: "What are they both about?" } },
       lv: { spicy: { q: "Why do these two sentences belong together?<p class=\"a2task\">[[Place]] was packed. It was hard to find a seat.</p>",
         options: ["They are about the same idea: how busy it was.", "They both start with a capital letter.", "They sit next to each other.", "They are both about seats."],
         slips: { 1: "Every sentence starts with a capital. That cannot be what makes these two match.", 2: "Sentences can sit side by side and still be odd socks. What idea do they share?", 3: "Only the second one mentions a seat. What are both of them about?" },
@@ -184,6 +189,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "What is a paragraph?", title: "A paragraph is a group of sentences about one idea",
+      ez: { title: "Paragraphs", html: "<p>A <b>paragraph</b> is sentences about the <b>same idea</b>.</p><p>New idea? New paragraph.</p>" },
       fig: page([3, 2, 3], false, true),
       html: "<p>A <b>paragraph</b> is a group of sentences about <b>one idea</b>.</p>" +
         "<p>When the idea changes, a new paragraph starts on a <b>new line</b>. Lots of writers leave a <b>gap</b> between paragraphs, so you can see where each one starts.</p>",
@@ -199,6 +205,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: [[7, "That is the number of lines. Count the blocks instead."], [2, "Have another look: count each block with a gap after it, and the last one too."]],
       hint: "Count the blocks, not the lines.",
       why: "There are <b>3</b> blocks of lines, with gaps between them. Each block is a paragraph.",
+      ez: { hint: "Count the blocks, not lines.", why: "<b>3</b> blocks. So 3 paragraphs.", slips: [[null, "That is the lines. Count the blocks."], [null, "Count again. Do not miss the last block."]] },
       lv: {
         medium: { fig: page([2, 3, 2, 3], false, false), boxes: [{ label: "Paragraphs", a: 4 }],
           slips: [[10, "That is the number of lines. Count the blocks instead."], [3, "Nearly. Count again, including the very last block."]],
@@ -215,7 +222,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       answer: 0,
       slips: { 1: "A paragraph is usually a few sentences, not one long one.", 2: "It is not about how many. It is about sharing one idea.", 3: "A heading is a title. A paragraph is the sentences underneath." },
       hint: "Think about the socks: what makes them a set?",
-      why: "A paragraph is a group of sentences that share one idea." },
+      why: "A paragraph is a group of sentences that share one idea.", ez: { hint: "What makes socks a set?", why: "Sentences about the same idea.", slips: { 1: "It is a few sentences, not 1.", 2: "It is about the idea, not how many.", 3: "A heading is a title." } } },
 
     { type: "mc", topic: "What is a paragraph?",
       q: "When should a new paragraph start?",
@@ -224,6 +231,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: { 1: "Then every sentence would be on its own. A paragraph holds a few sentences about one idea.", 2: "A full line just carries on onto the next line. Paragraphs are about ideas, not space." },
       hint: "What does a paragraph hold together?",
       why: "A new idea gets a new paragraph.",
+      ez: { hint: "What does a paragraph hold?", why: "A new idea gets a new paragraph.", slips: { 1: "Then every sentence is alone.", 2: "Paragraphs are about ideas, not space." } },
       lv: {
         medium: { q: "Where should the new paragraph start?<p class=\"a2task\">1. Bonnie is a toy poodle. 2. She has brown curly fur. 3. Our school has a big field. 4. It has two football goals.</p>",
           options: ["Before sentence 2", "Before sentence 3", "Before sentence 4"], answer: 1, fixed: true,
@@ -243,6 +251,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: { 1: "Box B jumps from the beach to a phone to owls. Three ideas, so it is not one paragraph." },
       hint: "Which box sticks to one idea all the way through?",
       why: "Box A stays on one idea: the trip to the beach. That makes it a paragraph.",
+      ez: { hint: "Which box keeps to the same idea?", why: "Box A is all about the beach.", slips: { 1: "Box B jumps about. Beach, phone, owls." } },
       lv: { spicy: { fig: boxes(["Owls hunt at night.", "Night buses run every hour.", "The night sky was clear."], ["Owls hunt at night.", "They fly almost silently.", "Their big eyes see in the dark."]),
         answer: 1,
         slips: { 0: "Box A says \"night\" every time, but it is about owls, then buses, then the sky. Same word, three ideas." },
@@ -251,6 +260,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Odd sock", title: "Spot the odd sock",
+      ez: { title: "Odd sock", html: "<p>The <b>odd sock</b> is the sentence that does not fit.</p><p>Ask: is it about the same idea?</p>" },
       fig: LINE,
       html: "<p>Sometimes a sentence sneaks into a paragraph where it does not belong. It is the <b>odd sock</b>.</p>" +
         "<p>Read each sentence and ask: <b>is this about the same idea as the others?</b></p>" +
@@ -268,6 +278,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: { 0: "This one starts the paragraph off: arriving at [[place]].", 1: "The noise is part of being at [[place]]. It fits.", 3: "Finding a spot is still about being at [[place]]." },
       hint: "Three sentences are about arriving at [[place]]. Which one is not?",
       why: "Soup has nothing to do with arriving at [[place]]. In the wise words of Jay's late, great grandfather: stop. That sentence does not belong.",
+      ez: { hint: "3 are about [[place]]. Which is not?", why: "Soup is not about [[place]]. It does not belong.", slips: { 0: "This one starts it: arriving.", 1: "The noise is part of [[place]].", 3: "Finding a spot fits." } },
       lv: {
         medium: { q: "Which sentence is the odd sock?<p class=\"a2task\">[[Who]] got to [[place]] at 9am. It was already busy. [[Sound]] filled the air. My nan makes great soup on Sundays. [[Who]] found a spot near [[spot]] and waited.</p>",
           options: ["It was already busy.", "[[Sound]] filled the air.", "My nan makes great soup on Sundays.", "[[Who]] found a spot near [[spot]] and waited."],
@@ -287,6 +298,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: { 0: "This one tells you who the paragraph is about.", 1: "\"She\" means Bonnie, so this is about her.", 2: "\"She\" means Bonnie. No tail is very much about her." },
       hint: "Jay likes birds, but is this paragraph about birds?",
       why: "The birds are a different idea. The other three are all about Bonnie.",
+      ez: { hint: "Jay likes birds. Is this about birds?", why: "Birds are a different idea.", slips: { 0: "This says who it is about.", 1: "\"She\" means Bonnie.", 2: "\"She\" means Bonnie." } },
       lv: {
         medium: { q: "Which sentence is the odd sock?<p class=\"a2task\">Bonnie loves her walks. She pulls on her lead at the gate. She sniffs every lamp post. Many birds fly south in winter. When she gets home, she sleeps for an hour.</p>",
           options: ["She pulls on her lead at the gate.", "She sniffs every lamp post.", "Many birds fly south in winter.", "When she gets home, she sleeps for an hour."],
@@ -306,6 +318,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       answers: [0, 1],
       hint: "Which ones are still about getting ready?",
       why: "Checking the bag and setting the alarm are both part of getting ready.",
+      ez: { q: "This paragraph is about getting ready.<p class=\"a2task\">[[Who]] packed a bag for [[event]]. In the bag went [[kit]].</p>Pick <b>2</b> that could join it.", hint: "Which are about getting ready?", why: "The bag check and the alarm. Both are getting ready." },
       lv: {
         medium: { options: ["[[Who]] checked the bag twice.", "The alarm was set for 6am.", "[[Place]] has a big car park.", "Owls hunt at night.", "My nan makes great soup."],
           why: "Checking the bag and setting the alarm are part of getting ready. The car park is about [[place]], a different idea." },
@@ -320,6 +333,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: [[["red"], "Red is a colour, but the colour is not the problem. What is the sentence about?"]],
       hint: "What is the bike sentence about? What are the others about?",
       why: "The others are all about getting ready. The bike sentence is about a different idea, so it does not belong.",
+      ez: { q: "Why is <b>My cousin has a red bike</b> the odd sock?<p class=\"a2task\">[[Who]] packed a bag for [[event]]. In the bag went [[kit]]. My cousin has a red bike. The alarm was set for 6am.</p>", model: "It is about a bike, not packing.", hint: "What is the bike sentence about?", why: "The others are about getting ready. The bike is not.", slips: [[null, "Red is not the problem. What is it about?"]] },
       lv: { spicy: { q: "<b>Busy people should drink plenty of water</b> shares the word \"busy\" with the paragraph. Why is it still the odd sock?<p class=\"a2task\">By 9am, [[place]] was packed. People queued all the way to [[spot]]. There was nowhere left to sit. Busy people should drink plenty of water.</p>",
         need: [["advice", "different", "not about", "does not", "doesn't", "doesnt", "general", "everyone", "people", "drink", "water", "nothing to do", "not the same", "only shares", "just shares", "same word"]],
         model: "It only shares the word busy. It is advice about drinking water, not about how full [[place]] was.",
@@ -329,6 +343,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Sort the drawer", title: "Muddled sentences, sorted into paragraphs",
+      ez: { title: "Sort the drawer", html: "<p>Sort muddled sentences by <b>idea</b>.</p><p>Each pile is a <b>paragraph</b>.</p>" },
       fig: DRAWERS,
       html: "<p>When sentences are muddled up, sort them by <b>idea</b>, like sorting socks into drawers.</p>" +
         "<p>Each pile becomes a <b>paragraph</b>. One idea, one paragraph.</p>",
@@ -341,6 +356,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       cards: [["[[Who]] packed a bag the night before.", 0], ["In the bag went [[kit]].", 0], ["[[Place]] was packed.", 1], ["[[Sound]] filled the air.", 1]],
       hint: "Is it before you leave, or once you are there?",
       why: "Packing happens before. The crowd and the noise are what you find when you get there.",
+      ez: { hint: "Before you leave, or once there?", why: "Packing is before. The crowd and noise are there." },
       lv: {
         medium: { cards: [["[[Who]] packed a bag the night before.", 0], ["In the bag went [[kit]].", 0], ["The alarm was set for 6am.", 0], ["[[Place]] was packed.", 1], ["[[Sound]] filled the air.", 1], ["There was a long queue at [[spot]].", 1]] },
         spicy: { q: "Sort the sentences into three paragraphs.",
@@ -355,6 +371,7 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: { 1: "Setting an alarm happens before you leave, not once you are there." },
       hint: "Does this happen before you leave, or after you arrive?",
       why: "Setting the alarm is part of getting ready.",
+      ez: { q: "A new sentence:<p class=\"a2task\">The alarm was set for 6am.</p>Where does it go?", hint: "Before you leave, or after?", why: "The alarm is part of getting ready.", slips: { 1: "An alarm is set before you leave." } },
       lv: {
         medium: { q: "One more sentence turns up:<p class=\"a2task\">[[Who]] found a spot near [[spot]].</p>Which paragraph does it belong in?",
           answer: 1,
@@ -374,12 +391,18 @@ var BONNIE = '<svg viewBox="0 0 420 170" role="img" aria-label="Bonnie the poodl
       slips: [[["bird", "birds", "owl", "bus", "soup"], "That would be an odd sock. Keep it about Bonnie."]],
       hint: "Write anything about Bonnie. Starting with \"She\" works well.",
       why: "Any sentence about Bonnie belongs. \"She likes to sleep on the sofa\" matches the rest.",
+      ez: { q: "Write 1 more sentence that fits.<p class=\"a2task\">Bonnie is a brown toy poodle. She has curly fur and no tail. She loves her walks.</p>", hint: "Start with \"She\".", why: "Any sentence about Bonnie fits.", slips: [[null, "That is an odd sock. Keep it about Bonnie."]] },
       lv: { spicy: { q: "Here is a paragraph about Bonnie. Write a <b>topic sentence</b> that could start a new paragraph about her walks.<p class=\"a2task\">Bonnie is a brown toy poodle. She has curly fur and no tail.</p>",
         need: [["walk", "park", "lead", "outside", "stroll", "run", "lamp post"]],
         model: "Bonnie's walks are the best part of her day.",
         hint: "Tell the reader the new idea: her walks.",
         why: "A topic sentence says what the new paragraph will be about, like \"Bonnie's walks are the best part of her day.\"" } } }
   ],
+
+  ez: {
+    realWorld: { title: "Paragraphs everywhere", html: "<p>Books and blogs use paragraphs so you do not get lost.</p><p>A time travel blog: a paragraph for each stop!</p>" },
+    make: { intro: "Pick an idea. Write 3 sentences that belong together." }
+  },
 
   realWorld: {
     title: "Every book, article and travel blog uses paragraphs",

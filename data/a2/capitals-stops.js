@@ -183,6 +183,8 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       fig: TRAIN,
       html: "<p>Every sentence starts with a <b>capital letter</b>, like the engine at the front of a train. It ends with a <b>full stop</b>, like the buffer at the back.</p>" +
         "<p class=\"a2task\">we got on the bus &#8594; <b><span style=\"color:#c0392b\">W</span>e got on the bus<span style=\"color:#1f6fd1\">.</span></b></p>",
+      ez: { title: "A sentence is a train", html: "<p><b>Capital letter</b> at the front. <b>Full stop</b> at the back.</p>" +
+        "<p class=\"a2task\">we got on the bus &#8594; <b><span style=\"color:#c0392b\">W</span>e got on the bus<span style=\"color:#1f6fd1\">.</span></b></p>" },
       lv: { medium: { html: "<p>Every sentence starts with a <b>capital letter</b>, like the engine at the front of a train, and ends with a <b>full stop</b>, like the buffer at the back.</p>" +
               "<p>A question ends with a question mark, and a shout ends with an exclamation mark, but they still start with a capital.</p>" +
               "<p class=\"a2task\">we got on the bus &#8594; <b><span style=\"color:#c0392b\">W</span>e got on the bus<span style=\"color:#1f6fd1\">.</span></b></p>" },
@@ -196,6 +198,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: { 0: "Yes, it needs a capital. Look at the very end too: is there a full stop?", 1: "Yes, it needs a full stop. Look at the very first letter too.", 3: "Check the first letter, then check the very end." },
       hint: "Check the front of the train, then the back.",
       why: "It needs both: <b>The [[thing]] is ready.</b>",
+      ez: { slips: { 0: "Yes, a capital. Now check the end.", 1: "Yes, a full stop. Now check the start.", 3: "Check the first letter. Then the end." }, hint: "Check the front, then the back." },
       lv: { spicy: { q: "What is missing from the <b>second</b> sentence?<p class=\"a2task\">We set off at dawn. the [[thing]] was humming</p>",
         why: "The second sentence needs both: <b>The [[thing]] was humming.</b> Being consistent means every sentence gets the same care." } } },
 
@@ -205,6 +208,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: { 1: "Bag is an ordinary word in the middle of the sentence.", 2: "Door is an ordinary word at the end." },
       hint: "Which word is at the front of the train?",
       why: "<b>My</b> starts the sentence, so it gets the capital.",
+      ez: { slips: { 1: "Bag is in the middle.", 2: "Door is at the end." }, hint: "Which word is at the front?" },
       lv: { spicy: { q: "Which word needs a capital letter?<p class=\"a2task\">The [[thing]] was ready. we set off before dawn.</p>",
         options: ["we", "dawn", "ready", "set"],
         slips: { 1: "Dawn is a time of day, not a name, so it stays small.", 2: "Ready ends the first sentence. It is the word after the full stop that needs the capital.", 3: "Set is in the middle of the sentence." },
@@ -217,6 +221,8 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: [[1, "There are two ideas: the bus being late, and the waiting. Each one needs its own full stop."], [3, "Count the ideas: the bus was late, then we waited. That is two."]],
       hint: "Count the ideas. Each complete idea gets its own full stop.",
       why: "Two ideas, two full stops: <b>The bus was late. We waited in the rain.</b>",
+      ez: { slips: [[1, "There are 2 ideas. Each needs a full stop."], [3, "Count the ideas. There are 2."]], hint: "Count the ideas.",
+        why: "2 ideas, 2 full stops: <b>The bus was late. We waited in the rain.</b>" },
       lv: { medium: { q: "How many full stops does this need?<p class=\"a2task\">the bus was late we waited in the rain [[name]] brought snacks</p>",
               boxes: [{ label: "Full stops", a: 3 }],
               slips: [[2, "Three ideas: the bus, the waiting and the snacks."], [4, "Count the ideas again: who did what? There are three."]],
@@ -232,6 +238,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: { 0: "[[Name]] already has its capital. Look at the end.", 2: "The front is fine: [[Name]] has a capital. Just one thing is missing.", 3: "Look at the very end of the train." },
       hint: "The front looks fine. What about the back?",
       why: "It needs a full stop: <b>[[Name]] packed the [[thing]].</b>",
+      ez: { slips: { 0: "[[Name]] has a capital. Look at the end.", 2: "The front is fine. Just 1 thing is missing.", 3: "Look at the very end." }, hint: "The front is fine. The back?" },
       lv: { spicy: { q: "What is missing from this sentence?<p class=\"a2task\">on monday, [[Name]] met us at [[spot]].</p>",
         options: ["Capitals on \"on\" and \"monday\"", "Just a full stop", "A capital on [[spot]]", "Nothing, it is all there"], answer: 0,
         slips: { 1: "There is already a full stop at the end. Look at the start.", 2: "[[Spot]] is a general place, not a name, so it stays small.", 3: "Look at the first word, and at the day." },
@@ -243,6 +250,8 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       fig: TWO,
       html: "<p>A sentence is one complete idea. When a <b>new idea</b> starts, finish the old one with a full stop, then start the new one with a capital.</p>" +
         "<p class=\"a2task\">we got on the bus it was full<br>&#8594; <b>We got on the bus. It was full.</b></p>",
+      ez: { html: "<p><b>New idea</b>? Full stop, then a capital.</p>" +
+        "<p class=\"a2task\">we got on the bus it was full<br>&#8594; <b>We got on the bus. It was full.</b></p>" },
       lv: { spicy: { html: "<p>A sentence is one complete idea. When a <b>new idea</b> starts, end the old one and start the new one with a capital.</p>" +
         "<p>Watch out for the <b>comma pretending to be a full stop</b>: \"We got on the bus, it was full.\" A comma is not strong enough to hold two sentences apart.</p>" +
         "<p>Fix it with a full stop, or glue the ideas with a joining word like <b>and, so, because, but</b>: \"We got on the bus, but it was full.\"</p>" } } },
@@ -253,6 +262,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: { 1: "\"We got\" is not a complete idea yet. Got where?", 2: "\"It\" belongs to the second idea: it was raining." },
       hint: "Read it out loud in your head. Where does the first idea finish?",
       why: "<b>We got to [[Place]]. It was raining.</b> Two ideas, so two sentences.",
+      ez: { slips: { 1: "We got where? It is not finished yet.", 2: "It goes with the second idea." }, hint: "Where does the first idea end?" },
       lv: { spicy: { q: "Where should a full stop go?<p class=\"a2task\">we got to [[place]] late, the hotel was shut so we slept in the car</p>",
         options: ["After \"late\", in place of the comma", "After \"shut\"", "After \"hotel\"", "Nowhere, the comma does the job"],
         slips: { 1: "\"So\" already joins the hotel being shut to sleeping in the car.", 2: "\"The hotel\" on its own is not a complete idea.", 3: "This is the comma pretending to be a full stop. It cannot hold two sentences apart." },
@@ -265,6 +275,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: [[1, "There are two ideas: it was dark, and we went home."], [3, "Count the ideas again: who or what, and what happened."]],
       hint: "Count the complete ideas.",
       why: "<b>It was dark. We went home.</b> Two sentences.",
+      ez: { slips: [[1, "2 ideas: it was dark, and we went home."], [3, "Count the ideas again."]] },
       lv: { medium: { q: "How many sentences are hiding in here?<p class=\"a2task\">it was dark [[name]] switched on the [[thing]] we heard a noise nobody moved</p>",
               boxes: [{ label: "Sentences", a: 4 }],
               slips: [[3, "Look near the end: \"we heard a noise\" and \"nobody moved\" are two ideas."], [5, "Check each idea has someone or something doing something. There are four."]],
@@ -277,6 +288,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
     { type: "widget", topic: "Where does it stop?", unscored: true,
       title: "Fix it: where does it stop?",
       html: "<p>Pick a mode, then tap words. Add the full stops where each idea ends, and the capitals where each new one starts. Check whenever you like.</p>",
+      ez: { html: "<p>Pick a mode. Tap words to add full stops and capitals.</p>" },
       mount: fixer({
         mild: "We got on the bus. It was full.",
         medium: "We got to the station at noon. It was raining. We ran to the cafe and waited.",
@@ -289,6 +301,8 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       html: "<p>Some words get a capital letter <b>wherever they are</b> in a sentence:</p>" +
         "<p>names of <b>people and pets</b> (Bonnie, [[Name]]), <b>places</b> ([[Place]]), <b>days and months</b> (Monday, May), and the word <b>I</b> on its own.</p>" +
         "<p class=\"a2task\">On Friday, Bonnie and I went to [[Place]].</p>",
+      ez: { title: "Names get a capital", html: "<p><b>Names</b> always get a capital. People, pets, places, days, months and <b>I</b>.</p>" +
+        "<p class=\"a2task\">On Friday, Bonnie and I went to [[Place]].</p>" },
       lv: { spicy: { html: "<p>Names get a capital letter <b>wherever they are</b>: people and pets (Bonnie, [[Name]]), places ([[Place]]), days and months, and the word I.</p>" +
         "<p>The tricky part is spotting when a word is a <b>name</b> and when it is just an ordinary word:</p>" +
         "<p class=\"a2task\">the River Thames, but a river<br>North Wales, but north of here<br>July, but summer<br>Mum, but my mum</p>" +
@@ -299,6 +313,8 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       options: ["bonnie", "park", "monday", "took"], answers: [0, 2],
       hint: "Look for a name and a day.",
       why: "<b>Bonnie</b> is a name and <b>Monday</b> is a day. Park and took are ordinary words.",
+      ez: { q: "Which words need a capital? Pick them all.<p class=\"a2task\">We took bonnie to the park on monday.</p>",
+        why: "<b>Bonnie</b> is a name. <b>Monday</b> is a day." },
       lv: { medium: { q: "Pick every word that needs a capital letter. (The first word is done for you.)<p class=\"a2task\">Last friday, bonnie and i went to [[place]] with [[name]].</p>",
               options: ["friday", "bonnie", "i", " [[place]]", " [[name]]", "went"], answers: [0, 1, 2, 3, 4],
               why: "<b>Last Friday, Bonnie and I went to [[Place]] with [[Name]].</b> A day, two names, I and a place." },
@@ -313,6 +329,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       cards: [["bonnie", 0], ["poodle", 1], [" [[place]]", 0], ["town", 1], ["tuesday", 0], ["dog", 1]],
       hint: "Is it the name of one particular dog, place or day?",
       why: "Bonnie, [[Place]] and Tuesday are names. Poodle, town and dog are ordinary words.",
+      ez: { hint: "Is it the name of 1 dog, place or day?", why: "Bonnie, [[Place]] and Tuesday are names." },
       lv: { medium: { cards: [["bonnie", 0], ["poodle", 1], [" [[place]]", 0], ["town", 1], ["december", 0], ["winter", 1], ["i", 0], ["me", 1]],
               why: "Bonnie, [[Place]], December and I always get capitals. Seasons like winter do not." },
             spicy: { cards: [["the river thames", 0], ["a wide river", 1], ["north wales", 0], ["north of here", 1], ["july", 0], ["the summer", 1], ["the great wall", 0], ["a tall wall", 1]],
@@ -324,6 +341,8 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: { 1: "Saw is an ordinary doing word.", 2: "In is a small ordinary word." },
       hint: "Look for a name still in small letters.",
       why: "<b>[[Name]]</b> is a person's name, so it always gets a capital.",
+      ez: { q: "Which word still needs a capital?<p class=\"a2task\">Bonnie and I saw [[name]] in [[Place]] on Saturday.</p>",
+        slips: { 1: "Saw is an ordinary word.", 2: "In is an ordinary word." }, why: "<b>[[Name]]</b> is a name. Names get a capital." },
       lv: { spicy: { q: "Jay says: \"When I was in China, I visited the great wall on a sunny tuesday in may.\" Which words still need capitals?",
         options: ["great, wall, tuesday and may", "great, wall and sunny", "tuesday and may only", "China only"],
         slips: { 1: "Sunny is just a describing word, not a name.", 2: "The Great Wall is the name of one particular place, so both words get capitals.", 3: "China already has its capital. Look further along." },
@@ -335,11 +354,13 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       fig: PROOF,
       html: "<p>When you check your own writing, do it in <b>three sweeps</b>:</p>" +
         "<p>1. Find where each idea ends: full stop.<br>2. Check the start of every sentence: capital.<br>3. Hunt for names, days, places and I: capitals.</p>" +
-        "<p>Here comes a travel log with every capital and full stop missing. Have a go at fixing it.</p>" },
+        "<p>Here comes a travel log with every capital and full stop missing. Have a go at fixing it.</p>",
+      ez: { title: "3 checks", html: "<p>1. Full stops. 2. Sentence starts. 3. Names and I.</p><p>Now fix a travel log!</p>" } },
 
     { type: "widget", topic: "Proofread the travel log", unscored: true,
       title: "Fix the travel log",
       html: "<p>Every capital and full stop has fallen out. Tap to put them back, then check it.</p>",
+      ez: { html: "<p>Tap to put the capitals and full stops back.</p>" },
       mount: fixer({
         mild: "We went to [[Place]] on Friday. I saw Bonnie.",
         medium: "On Monday, [[Name]] and I went to [[Place]]. The [[thing]] broke. We fixed it by lunch.",
@@ -352,6 +373,8 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: { 1: "Look again: it is in the middle of the sentence.", 2: "Important words do not get capitals just for being important. Names do." },
       hint: "Where is it in the sentence, and what kind of word is it?",
       why: "[[Place]] is the name of one particular place, so it always gets a capital.",
+      ez: { q: "Why does <b>[[Place]]</b> need a capital?", slips: { 1: "It is in the middle of the sentence.", 2: "Names get capitals. Not important words." },
+        hint: "What kind of word is it?", why: "[[Place]] is the name of a place." },
       lv: { spicy: { q: "Why does <b>Leeds</b> get a capital in the travel log, but <b>the station</b> would not?",
         options: ["Leeds names one particular place; a station could be any station.", "Leeds is a bigger word.", "Leeds comes later in the sentence.", "Places never get capitals."],
         slips: { 1: "Length has nothing to do with it.", 2: "Where it sits in the sentence does not matter for names.", 3: "Named places always do." },
@@ -364,6 +387,7 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       slips: [[3, "Did you count the word I? On its own it is always a capital."], [2, "Count the first word, the day, I, and Bonnie."]],
       hint: "First word, then names, days and I.",
       why: "<b>On Monday I saw Bonnie.</b> Four capitals.",
+      ez: { slips: [[3, "Did you count I?"], [2, "Count the first word, the day, I and Bonnie."]] },
       lv: { medium: { q: "How many capital letters does this need?<p class=\"a2task\">on monday, [[name]] and i met bonnie at the station.</p>",
               boxes: [{ label: "Capitals", a: 5 }],
               slips: [[4, "Did you count the word I? On its own it is always a capital."], [6, "The station is any station here, so it stays small."]],
@@ -374,6 +398,11 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
               hint: "Two sentence starts, a month, a person, I, a pet and a river.",
               why: "<b>In March, [[Name]] and I took Bonnie to the River Thames. She was not impressed.</b> Eight." } } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Forms, messages and signs all need <b>capitals and full stops</b>.</p><p>A postcard from the past? Full stops show where each adventure ends.</p>" },
+    make: { intro: "A postcard from anywhere, any time. 2 sentences. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Where capitals and full stops matter",

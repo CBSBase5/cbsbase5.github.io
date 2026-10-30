@@ -200,6 +200,10 @@ function huntWidget(el, api){
     music: { name: "Music", w: { item: "harmonica", liquid: "water", load: "speaker", event: "the rehearsal", trip: "the trip to the theatre" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>Cooks weigh in grams. Nurses measure in ml.</p><p>Long ago, people used inches and pints. A time traveller needs a chart!</p>" },
+    make: { intro: "One thing you measured. The number and the unit." }
+  },
   startFig: FOUR,
   steps: [
 
@@ -209,6 +213,7 @@ function huntWidget(el, api){
       html: "<p>We measure four main things.</p>" +
         "<p><b>Length:</b> how long. Use <b>cm</b> or <b>m</b>. <b>Mass:</b> how heavy. Use <b>g</b> or <b>kg</b>. <b>Capacity:</b> how much it holds. Use <b>ml</b> or <b>l</b> (litres). <b>Time:</b> how long it takes. Use <b>minutes</b> or <b>hours</b>.</p>" +
         "<p>A number on its own is not enough. \"The [[item]] is 7\" could mean anything. \"The [[item]] is 7 cm\" tells the whole story.</p>",
+      ez: { html: "<p><b>Length</b>: cm. <b>Mass</b>: kg. <b>Capacity</b>: ml. <b>Time</b>: minutes.</p><p>Always write the <b>unit</b>: 7 cm, not 7.</p>" },
       lv: {
         medium: { html: "<p>We measure four main things, each with its own units.</p>" +
           "<p><b>Length:</b> mm for tiny things, cm for small things, m for rooms, km for journeys. <b>Mass:</b> g for light things, kg for heavy things. <b>Capacity:</b> ml for cups, l for buckets and baths. <b>Time:</b> seconds, minutes, hours.</p>" +
@@ -223,6 +228,7 @@ function huntWidget(el, api){
       slips: { any: "Think about what each tool shows: lines along an edge, a needle, lines up the side, or hands going round." },
       hint: "A jug has lines up the side. Scales have a needle or a screen.",
       why: "Ruler for length, scales for mass, jug for capacity, clock for time.",
+      ez: { q: "Match each question to its tool.", slips: { any: "What does each tool show?" }, hint: "A jug has lines up the side.", why: "Ruler: length. Scales: mass. Jug: holds. Clock: time." },
       lv: { spicy: { pairs: [["How long is it?", "Ruler or tape measure"], ["How heavy is it?", "Scales"], ["How much does it hold?", "Measuring jug"], ["How long does it take?", "Clock or timer"], ["How far is the journey?", "A map or a car trip meter"]] } } },
 
     { type: "sort", topic: "Pick the unit",
@@ -232,6 +238,7 @@ function huntWidget(el, api){
       slips: { any: "Lengths are m words, masses are g words, capacities are l words. Time has its own." },
       hint: "Grams go with heavy. Litres go with holding.",
       why: "cm and m are lengths. g and kg are masses. ml and litres are capacities. Minutes and hours are times.",
+      ez: { q: "What does each unit measure?", slips: { any: "m is length. g is mass. l is how much it holds." }, hint: "Grams go with heavy.", why: "cm, m: length. g, kg: mass. ml, litres: holds." },
       lv: {
         medium: { cards: [["mm", 0], ["km", 0], ["g", 1], ["kg", 1], ["ml", 2], ["litres", 2], ["seconds", 3], ["hours", 3]],
           why: "mm and km are lengths. g and kg are masses. ml and litres are capacities. Seconds and hours are times." },
@@ -249,6 +256,8 @@ function huntWidget(el, api){
       slips: { 1: "A km is a long way, about a 12 minute walk. Far too big for this.", 2: "kg tells you how heavy, not how long.", 3: "Litres tell you how much a container holds." },
       hint: "It is small enough to hold in your hand.",
       why: "Small things are measured in <b>cm</b>.",
+      ez: { q: "Which unit is best for a [[item]]'s length?", slips: { 1: "A km is a long walk. Too big.", 2: "kg is how heavy.", 3: "Litres is how much it holds." },
+        hint: "You can hold it in your hand.", why: "Small things use <b>cm</b>." },
       lv: {
         medium: { q: "Which unit would you use for [[trip]]?",
           options: ["km", "cm", "mm", "ml"],
@@ -271,6 +280,7 @@ function huntWidget(el, api){
       slips: { 1: "500 litres would fill about three baths. Outrageous, for a water bottle.", 2: "km is for distance, not how much a bottle holds." },
       hint: "How many bottles would it take to fill a bath?",
       why: "A water bottle holds about <b>500 ml</b>, which is half a litre. Jay needs a smaller bottle, or very strong arms.",
+      ez: { slips: { 1: "500 litres would fill 3 baths!", 2: "km is for distance." }, hint: "Could it fill a bath?", why: "About <b>500 ml</b>. Jay needs strong arms!" },
       lv: {
         medium: { q: "Jay writes: \"[[Trip]] was 6 cm.\" What is the slip?",
           fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay looking puzzled">' + A2ART.jay(90, 46, 0.85, "hmm") + A2ART.bubble(170, 24, 220, 52, "[[Trip]]\nwas 6 cm.", 182) + '</svg>',
@@ -291,6 +301,7 @@ function huntWidget(el, api){
       html: "<p>Here is how to measure with a ruler, step by step.</p>" +
         "<p><b>1.</b> Line one end up with the <b>0</b>, not the edge of the ruler.<br><b>2.</b> Look at the other end.<br><b>3.</b> Read the number it lands on, and write the unit.</p>" +
         "<p>This [[item]] starts at 0 and ends at 7. So it is <b>7 cm</b> long.</p>",
+      ez: { html: "<p>Start at <b>0</b>. Read where it ends.</p><p>This [[item]] ends at 7. It is <b>7 cm</b>.</p>" },
       lv: {
         medium: { fig: ruler(0, 6.4),
           html: "<p>Each centimetre is split into 10 small steps called <b>millimetres</b> (mm). 10 mm = 1 cm.</p>" +
@@ -307,6 +318,8 @@ function huntWidget(el, api){
       slips: [[0, 10, "That is one line past the end. Follow the red dashed line down."], [0, 8, "One line short. Follow the red dashed line down from the end."]],
       hint: "Follow the red dashed line down from the end of the [[item]].",
       why: "It starts at 0 and ends at 9, so it is <b>9 cm</b> long.",
+      ez: { q: "It starts at 0. Where does it end? How long is it?",
+        slips: [[null, null, "One line too far. Follow the red line down."], [null, null, "One line short. Follow the red line down."]], hint: "Follow the red line down.", why: "It ends at 9. It is <b>9 cm</b>." },
       lv: {
         medium: { q: "Your turn, with the steps laid out. Count the whole cm, then the small steps, then give the length in mm.",
           fig: ruler(0, 8.3),
@@ -328,6 +341,7 @@ function huntWidget(el, api){
       slips: [[6, "It looks like the 0 line was counted as 1. Start counting at 0."], [4, "One short. Look at the line the end of the [[item]] lands on."]],
       hint: "Look at the number under the red dashed line at the end.",
       why: "It ends at 5, so it is <b>5 cm</b> long.",
+      ez: { q: "How long is the [[item]]?", slips: [[null, "Start counting at 0."], [null, "One short. Look at the end."]], hint: "Read the number at the red line.", why: "It ends at 5. <b>5 cm</b>." },
       lv: {
         medium: { fig: ruler(0, 5.7),
           q: "Now on your own. How long is the [[item]], in cm?",
@@ -350,6 +364,8 @@ function huntWidget(el, api){
       slips: { 1: "10 is where it ends. It started at 4, not 0.", 2: "4 is where it starts.", 3: "That adds them. Count the steps from 4 to 10 instead." },
       hint: "Count the cm steps from 4 to 10.",
       why: "From 4 to 10 is 6 steps: <b>6 cm</b>.",
+      ez: { q: "The [[item]] goes from 4 to 10. How long is it?", slips: { 1: "10 is the end. It starts at 4.", 2: "4 is the start.", 3: "Count the steps from 4 to 10." },
+        hint: "Count from 4 to 10.", why: "4 to 10 is <b>6 cm</b>." },
       lv: {
         medium: { q: "Which of these is the same as 45 mm?", fig: "",
           options: ["4.5 cm", "45 cm", "0.45 cm", "450 cm"],
@@ -368,6 +384,7 @@ function huntWidget(el, api){
       html: "<p>Jugs and scales have lines with numbers.</p>" +
         "<p><b>1.</b> Get your eyes level with the top of the [[liquid]].<br><b>2.</b> Find the line it is level with.<br><b>3.</b> Read the number, and write the unit.</p>" +
         "<p>Here the [[liquid]] is level with <b>300</b>. So there is <b>300 ml</b>.</p>",
+      ez: { html: "<p>Look at the top of the [[liquid]]. Read the line.</p><p>It is level with 300. So <b>300 ml</b>.</p>" },
       lv: {
         medium: { fig: jug(1000, 200, 50, 650, "ml"),
           html: "<p>Not every line has a number. Work out what each small step is worth.</p>" +
@@ -383,6 +400,7 @@ function huntWidget(el, api){
       slips: [[700, "That is the line above. Find the line the top of the [[liquid]] is level with."], [500, "That is the line below. Look where the top of the [[liquid]] is."], [6, "Nearly: the label says 600, not 6."]],
       hint: "Find the line the top of the [[liquid]] touches.",
       why: "The top of the [[liquid]] is level with 600: <b>600 ml</b>.",
+      ez: { slips: [[null, "That is the line above."], [null, "That is the line below."], [null, "The label says 600, not 6."]], hint: "Find the line at the top.", why: "Level with 600: <b>600 ml</b>." },
       lv: {
         medium: { fig: jug(1000, 200, 50, 350, "ml"),
           slips: [[300, "Each small step is worth 50 here, not 100. Count again from 200."], [400, "400 is the labelled line just above. The [[liquid]] is one step below it."], [250, "Count the steps up from 200 again: each one is 50."]],
@@ -401,6 +419,7 @@ function huntWidget(el, api){
       slips: [[5, "That is the number just past the needle. Look exactly where the red needle points."], [3, "That is the number just before the needle. Look exactly where it points."]],
       hint: "Follow the red needle to the number it points at.",
       why: "The needle points at 4: <b>4 kg</b>.",
+      ez: { slips: [[null, "Just past the needle. Look where it points."], [null, "Just before the needle. Look where it points."]], hint: "Follow the red needle." },
       lv: {
         medium: { q: "How heavy is the [[load]]? Give it in kg, then in g.",
           fig: dial(5, 1, 0.5, 2.5, "kg"),
@@ -421,6 +440,7 @@ function huntWidget(el, api){
       slips: { any: "1 litre is the same as 1 000 ml. That helps with the ones in litres." },
       hint: "1 litre is 1 000 ml.",
       why: "100 ml, 500 ml, then 1 litre (1 000 ml), then 2 litres (2 000 ml).",
+      ez: { q: "Put them in order. Smallest first.", slips: { any: "1 litre is 1 000 ml." }, why: "100 ml, 500 ml, 1 litre, 2 litres." },
       lv: {
         medium: { items: ["250 ml", "0.5 litres", "750 ml", "1.2 litres"],
           hint: "Turn the litres into ml: 0.5 l is 500 ml.",
@@ -435,6 +455,7 @@ function huntWidget(el, api){
       html: "<p>To find how long something took, count on from the start time to the end time.</p>" +
         "<p>[[Event]] starts at 3:00 and ends at 3:30. Count on in fives as the red hand goes round: 5, 10, 15, 20, 25, 30. It took <b>30 minutes</b>.</p>" +
         "<p>Half an hour is 30 minutes. A whole hour is 60 minutes.</p>",
+      ez: { html: "<p>Count on from start to end.</p><p>3:00 to 3:30. Count in fives: <b>30 minutes</b>.</p>" },
       lv: {
         medium: { fig: hops(["2:45", "3:00", "3:20"], ["+15", "+20"]),
           html: "<p>Across an o'clock, jump in two steps.</p>" +
@@ -452,6 +473,8 @@ function huntWidget(el, api){
       slips: [[1, 4, "4 is the number of fives. Each five is 5 minutes: 5, 10, 15, 20."], [1, 25, "One five too many. The red hand stops on the 4."], [0, 20, "20 is the minutes. How many fives make 20?"]],
       hint: "The red hand moves from 12 to 4. Count 5, 10, 15, 20.",
       why: "4 fives: 5, 10, 15, 20. So it lasts <b>20 minutes</b>.",
+      ez: { q: "[[Event]] is 3:00 to 3:20. How many fives? How many minutes?",
+        slips: [[null, null, "4 is the fives. Each five is 5 minutes."], [null, null, "One five too many."], [null, null, "20 is the minutes. How many fives?"]], hint: "Count 5, 10, 15, 20.", why: "4 fives. <b>20 minutes</b>." },
       lv: {
         medium: { q: "[[Event]] starts at 4:40 and ends at 5:25. Fill in the jumps, then the total.",
           fig: hops(["4:40", "5:00", "5:25"], ["?", "?"]),
@@ -473,6 +496,8 @@ function huntWidget(el, api){
       slips: [[9, "9 is the number of fives. Each five is 5 minutes."], [15, "15 is what is left of the hour. Count from 7:00 to 7:45 instead."], [40, "Count on in fives again, all the way to the 9."]],
       hint: "The red hand goes from 12 to 9. Count in fives.",
       why: "9 fives: <b>45 minutes</b>. That is three quarters of an hour.",
+      ez: { q: "[[Event]] is 7:00 to 7:45. How long is it?",
+        slips: [[null, "9 is the fives. Each one is 5 minutes."], [null, "15 is what is left. Count from 7:00."], [null, "Count in fives again, up to the 9."]], hint: "Count in fives to the 9.", why: "9 fives: <b>45 minutes</b>." },
       lv: {
         medium: { q: "Now on your own. [[Event]] starts at 11:50 and ends at 12:25. How long is it?",
           fig: hops(["11:50", "12:00", "12:25"], ["?", "?"]),
@@ -494,6 +519,7 @@ function huntWidget(el, api){
       slips: { 1: "That treats an hour as 100 minutes. An hour is 60, so half is 30.", 2: "12 is the number at the top of the clock, not half an hour." },
       hint: "An hour is 60 minutes. What is half of 60?",
       why: "Half of 60 minutes is <b>30 minutes</b>.",
+      ez: { slips: { 1: "An hour is 60, not 100.", 2: "12 is the top of the clock." }, hint: "What is half of 60?" },
       lv: {
         medium: { q: "Which is the same as 1 hour 15 minutes?",
           options: ["75 minutes", "115 minutes", "65 minutes"],
@@ -512,6 +538,7 @@ function huntWidget(el, api){
       html: "<p>Good measurers do three things.</p>" +
         "<p><b>1. Guess first.</b> It trains your eye.<br><b>2. Measure</b> with the right tool.<br><b>3. Write it down</b> with the number <b>and</b> the unit.</p>" +
         "<p>Guesses do not need to be close. Seeing how far off they were is half the fun.</p>",
+      ez: { html: "<p><b>1.</b> Guess. <b>2.</b> Measure. <b>3.</b> Write the number <b>and</b> the unit.</p>" },
       lv: { spicy: { html: "<p>Good measurers do four things.</p>" +
         "<p><b>1. Guess first.</b> It trains your eye.<br><b>2. Pick the tool and the unit</b> that suit the size.<br><b>3. Measure twice</b> if it matters.<br><b>4. Write it down</b> with the number, the unit, and how exact it is, like \"to the nearest cm\".</p>" +
         "<p>Builders say: measure twice, cut once.</p>" } } },
@@ -523,6 +550,7 @@ function huntWidget(el, api){
       slips: { 1: "120 what? It needs a unit.", 2: "Quite long is a describing word. Nobody could check it.", 3: "kg is for mass, not length." },
       hint: "Number and unit.",
       why: "<b>120 cm</b> has a number and a length unit. Anyone could check it.",
+      ez: { q: "What is the best way to write a table's length?", slips: { 1: "120 what? Add a unit.", 2: "Nobody could check quite long.", 3: "kg is for mass." }, why: "<b>120 cm</b>. A number and a unit." },
       lv: {
         medium: { q: "Which is the best way to write down the length of [[trip]]?",
           options: ["4.5 km", "4 500 000 mm", "4.5", "4.5 kg"],
@@ -538,6 +566,7 @@ function huntWidget(el, api){
     { type: "widget", topic: "Record it", unscored: true,
       title: "Measure hunt",
       html: "<p>A real world bit, only if you fancy it. Your list can go to Jay with the rest if you send it.</p>",
+      ez: { html: "<p>Only if you like. Measure real things.</p>" },
       mount: huntWidget,
       report: function(d){
         var r = (d && d.rows || []).filter(function(x){ return x && x.what && (x.got || x.guess); });
@@ -551,6 +580,7 @@ function huntWidget(el, api){
       model: "The table is 120 cm long.",
       slips: [[["long", "big", "heavy", "small", "short"], "Swap the describing word for a number and a unit, like 120 cm."]],
       hint: "Something like: The mug holds 350 ml.",
+      ez: { q: "Write one measurement. Say what it is, the number and the unit.", slips: [[null, "Use a number and a unit, like 120 cm."]], hint: "Like: The mug holds 350 ml.", why: "A number and a unit. Like: The mug holds 350 ml." },
       why: "A number and a unit, so anyone could check it. Like: The mug holds 350 ml." }
   ],
 

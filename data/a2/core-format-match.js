@@ -21,7 +21,7 @@ function task(h){ return '<div class="a2task">' + h + '</div>'; }
    slips. Version 1 is the base; the rest become vary, each with every level written out. */
 function res(v, L, vi){
   var o = {};
-  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0) o[k] = v[k]; });
+  Object.keys(v).forEach(function(k){ if(LVS.indexOf(k) < 0 && k !== "ez") o[k] = v[k]; });
   if(v[L]) ext(o, v[L]);
   if(o.o){
     var right = o.o[0], rest = o.o.slice(1), t = vi % o.o.length, opts = rest.slice(), sl = {};
@@ -39,6 +39,14 @@ function Q(type, topic, flags, vers){
   var step = ext(ext({ type: type, topic: topic }, flags || {}), R[0][START]);
   step.lv = others(R[0]);
   if(R.length > 1) step.vary = R.slice(1).map(function(r){ return ext(ext({}, r[START]), { lv: others(r) }); });
+  /* easy read for LC: a version's ez is for the first level only. s:[...] is the slips for the other
+     options in o order, turned into slips the same way, against the first level's options. */
+  vers.forEach(function(v, vi){
+    if(!v.ez) return;
+    var e = ext({}, v.ez), m = R[vi][LVS[0]];
+    if(e.s){ var sl = {}; e.s.forEach(function(x, j){ if(x) sl[j < m.answer ? j : j + 1] = x; }); e.slips = sl; delete e.s; }
+    if(vi === 0) step.ez = e; else step.vary[vi - 1].ez = e;
+  });
   return step;
 }
 
@@ -145,7 +153,8 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           "<p>The shape is not random. Each one fits its job.</p>" },
         spicy: { html: "<p>Format follows purpose. Each layout exists because of who reads it and why.</p>" +
           "<p>A <b>letter</b> talks to one reader, so it greets them by name and signs off. A <b>diary</b> is written for yourself, so it is first person, dated and honest about feelings. <b>Instructions</b> are for someone doing a task, so they are numbered, in order, and start with commands. A <b>poster</b> is read from across a room in seconds, so it is short and big.</p>" +
-          "<p>Formal or informal changes the details too: <b>Dear Sir or Madam</b> is a different letter from <b>Hiya!</b></p>" } } },
+          "<p>Formal or informal changes the details too: <b>Dear Sir or Madam</b> is a different letter from <b>Hiya!</b></p>" } } ,
+      ez: { title: "Every format has a shape", html: "<p><b>Letter</b>: starts with Dear. <b>Diary</b>: I and a day.</p><p><b>Instructions</b>: steps. <b>Poster</b>: big title.</p>" } },
 
     Q("mc", "Spot the format", null, [
       { q: "Have a read. Which format is this?" + task("Dear Alex,<br>Thank you for the card. I loved the robin on the front.<br>Love from Jay"),
@@ -153,6 +162,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["A diary is written to yourself. This one is written to Alex.", "There are no steps to follow."],
         hint: "Look at the very first word.",
         why: "<b>Dear Alex</b> at the top and <b>Love from</b> at the end: that is a letter.",
+        ez: { hint: "Look at the first word.", why: "<b>Dear</b> at the top. <b>Love from</b> at the end. A letter.", s: ["A diary is for yourself. This is to Alex.", "There are no steps."] },
         medium: { o: ["A letter", "A diary", "Instructions", "A poster"], s: ["A diary is written to yourself, not to Alex.", "There are no steps to follow.", "A poster would be a big title and a few words."] },
         spicy: { q: "Which format is this, exactly?" + task("Dear Sir or Madam,<br>I am writing to ask whether your shop has any weekend jobs.<br>Yours faithfully,<br>A. Morgan"),
           o: ["A formal letter", "An informal letter", "A diary"],
@@ -163,6 +173,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["There is no Dear at the top and no sign off.", "Nobody is being told what to do."],
         hint: "Look for a day, and the word I.",
         why: "A day at the top, <b>I</b>, and how the writer felt: that is a diary.",
+        ez: { hint: "Look for a day and I.", why: "A day, <b>I</b>, and feelings. A diary.", s: ["There is no Dear.", "Nobody is told what to do."] },
         medium: { o: ["A diary", "A letter", "Instructions", "A poster"], s: ["There is no Dear and no sign off.", "Nobody is being told what to do.", "Far too many words for a poster."] },
         spicy: { q: "Which format is this, exactly?" + task("I still cannot believe it. After all that worrying, [[day]] went fine. Better than fine. I think I am actually proud of myself."),
           o: ["A diary", "A formal letter", "A set of instructions"],
@@ -173,6 +184,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["A diary says what I did. This tells you what to do.", "There is no Dear and no sign off."],
         hint: "Look at the numbers.",
         why: "A <b>How to</b> title and numbered steps: instructions.",
+        ez: { why: "<b>How to</b> and numbered steps. Instructions.", s: ["A diary says what I did.", "There is no Dear."] },
         medium: { o: ["Instructions", "A diary", "A letter", "A poster"], s: ["A diary says what I did. This tells you what to do.", "There is no Dear and no sign off.", "A poster would have a big title and hardly any words."] },
         spicy: { q: "Which format is this, exactly?" + task("Before you start, check the glue is dry. Next, thread the string through the hole. Finally, tie a double knot."),
           o: ["Instructions", "A diary", "A formal letter"],
@@ -185,18 +197,21 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         pairs: [["Letter", "Starts with Dear..."], ["Diary", "I, me and a day at the top"], ["Instructions", "Numbered steps"]],
         hint: "Which one starts with Dear?",
         why: "Dear for letters, I and a day for diaries, numbers for instructions.",
+        ez: { q: "Match each format to its clue.", hint: "Which starts with Dear?", why: "Dear for letters. I for diaries. Numbers for steps." },
         medium: { pairs: [["Letter", "Starts with Dear..."], ["Diary", "I, me and a day at the top"], ["Instructions", "Numbered steps"], ["Poster", "A big title and few words"]] },
         spicy: { pairs: [["Formal letter", "Dear Sir or Madam"], ["Informal letter", "Hiya! Guess what..."], ["Diary", "First person, dated, private"], ["Instructions", "Commands in order"], ["Poster", "Readable from across a room"]] } },
       { q: "Match each format to the way it ends or signs off.",
         pairs: [["Letter", "Love from Jay"], ["Instructions", "Step 4: enjoy!"], ["Diary", "I am so tired. Night night!"]],
         hint: "Which one has a name after Love from?",
         why: "Letters sign off with a name. Instructions end on the last step. A diary ends with the writer's own thoughts.",
+        ez: { q: "Match each format to its ending.", hint: "Which has Love from?", why: "Letters end with a name." },
         medium: { pairs: [["Letter", "Love from Jay"], ["Instructions", "Step 4: enjoy!"], ["Diary", "I am so tired. Night night!"], ["Poster", "Free entry! Everyone welcome!"]] },
         spicy: { pairs: [["Formal letter", "Yours faithfully"], ["Informal letter", "See you soon! Love, Jay"], ["Diary", "I wonder if tomorrow will be better."], ["Instructions", "Finally, switch it off at the wall."], ["Poster", "Book now! Limited places!"]] } },
       { q: "Match each job to the format that fits it.",
         pairs: [["Saying thank you to a friend for a present", "Letter"], ["Remembering your own day", "Diary"], ["Showing someone how to [[task]]", "Instructions"]],
         hint: "Which one is written for yourself?",
         why: "A thank you goes to someone else, a diary is for you, and steps show someone how.",
+        ez: { q: "Match each job to its format.", hint: "Which one is just for you?", why: "Thank you is a letter. Your day is a diary." },
         medium: { pairs: [["Saying thank you to a friend for a present", "Letter"], ["Remembering your own day", "Diary"], ["Showing someone how to [[task]]", "Instructions"], ["Telling the whole school about a cake sale", "Poster"]] },
         spicy: { pairs: [["Asking a company about a job", "Formal letter"], ["Thanking your aunt for a present", "Informal letter"], ["Working out how you feel about a tricky week", "Diary"], ["Helping someone [[task]]", "Instructions"], ["Getting people to a cake sale", "Poster"]] } }
     ]),
@@ -207,6 +222,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["That is a greeting. Every letter starts with one.", "That is a sign off. It goes at the end of a letter.", "Letters often say thank you."],
         hint: "Which one is telling you to do something, step by step?",
         why: "A numbered step belongs in instructions, not a letter.",
+        ez: { q: "Which one would <b>not</b> be in a letter?", hint: "Which one is a step?", why: "A numbered step is for instructions.", s: ["That is a greeting. Letters have one.", "A sign off. Letters end with one.", "Letters often say thank you."] },
         spicy: { o: ["Step 2: remove the lid.", "Dear Ms Patel,", "Yours sincerely,", "I am writing to ask about the job."],
           s: ["A formal greeting. Right at home in a letter.", "A formal sign off. Right at home in a letter.", "A formal first line. Right at home in a letter."] } },
       { q: "Odd one out. Three of these would be in a diary. Which one would <b>not</b>?",
@@ -214,6 +230,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["A date at the top is a diary clue.", "I and today: very diary.", "Feelings belong in a diary."],
         hint: "Which one tells someone else what to do?",
         why: "A numbered step is from instructions.",
+        ez: { q: "Which one would <b>not</b> be in a diary?", hint: "Which tells someone what to do?", why: "A numbered step is for instructions.", s: ["A date is a diary clue.", "I and today: a diary.", "Feelings go in a diary."] },
         spicy: { o: ["Yours faithfully,", "Tuesday 4 March", "I am still thinking about what happened at [[place]].", "Maybe tomorrow I will feel braver."],
           s: ["A date is a diary clue.", "First person thoughts: diary.", "Private hopes and worries are diary writing."] } },
       { q: "Odd one out. Three of these would be in instructions. Which one would <b>not</b>?",
@@ -221,6 +238,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["A kit list is part of instructions.", "A numbered step: instructions.", "Another numbered step."],
         hint: "Which one is a greeting?",
         why: "<b>Dear Sir or Madam</b> starts a letter.",
+        ez: { q: "Which one would <b>not</b> be in instructions?", hint: "Which one is a greeting?", why: "<b>Dear Sir or Madam</b> starts a letter.", s: ["A kit list is part of instructions.", "Steps belong in instructions.", "Steps belong there too."] },
         spicy: { o: ["I felt a bit silly at first.", "You will need:", "Next, tighten the screw.", "Warning: the edges are sharp."],
           s: ["A kit list is part of instructions.", "A command with an order word: instructions.", "Warnings are common in instructions."] } }
     ]),
@@ -235,11 +253,13 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           "<p><b>1. Greeting:</b> <b>Dear</b> + name + comma. <b>Dear Alex,</b> or <b>Dear Mr Khan,</b><br><b>2. Message:</b> say why you are writing, then the details.<br><b>3. Sign off:</b> it matches the reader. A friend gets <b>Love from</b> or <b>See you soon</b>. Someone you do not know well gets <b>Best wishes</b> or <b>Kind regards</b>.</p>" },
         spicy: { html: "<p>Formal letters have fixed rules, and readers notice when you break them.</p>" +
           "<p><b>Your address</b> top right, then the <b>date</b>. <b>Greeting:</b> if you know the name, <b>Dear Ms Patel,</b> and sign off <b>Yours sincerely,</b>. If you do not, <b>Dear Sir or Madam,</b> and sign off <b>Yours faithfully,</b>.</p>" +
-          "<p>The first line says why you are writing: <b>I am writing to...</b>. No slang, no exclamation marks, full sentences.</p>" } } },
+          "<p>The first line says why you are writing: <b>I am writing to...</b>. No slang, no exclamation marks, full sentences.</p>" } } ,
+      ez: { title: "Inside a letter", html: "<p>A letter has 3 parts.</p><p><b>Dear</b> name. Your message. <b>Love from</b> you.</p>" } },
 
     Q("mc", "Letters", null, [
       { q: "<b>Step 1, the greeting.</b> Jay is writing to his friend Alex. Which goes at the top?",
         o: ["Dear Alex,", "Love from Alex", "Step 1: Alex"],
+        ez: { q: "Jay writes to Alex. What goes at the top?", why: "<b>Dear</b>, the name, a comma.", s: ["That is a sign off. It goes at the end.", "That is from instructions."] },
         s: ["That is a sign off. It goes at the end.", "That is from instructions, not a letter."],
         hint: "Greetings start with Dear.",
         why: "<b>Dear</b>, then the name, then a comma.",
@@ -252,6 +272,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           why: "When you do not know the name, the formal greeting is <b>Dear Sir or Madam,</b>." } },
       { q: "<b>Step 1, the greeting.</b> You are writing a thank you letter to Bonnie. Which goes at the top?",
         o: ["Dear Bonnie,", "From Bonnie", "1. Bonnie"],
+        ez: { q: "A thank you letter to Bonnie. What goes at the top?", why: "<b>Dear Bonnie,</b> Can she read it? Who knows!", s: ["From goes at the end.", "Numbers are for steps."] },
         s: ["From goes at the end, before the writer's name.", "Numbers are for steps in instructions."],
         hint: "Greetings start with Dear.",
         why: "<b>Dear Bonnie,</b> Whether she can read it is another question.",
@@ -264,6 +285,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           why: "You know the name, so <b>Dear Ms Patel,</b>." } },
       { q: "<b>Step 1, the greeting.</b> You are writing to [[pal]] about [[place]]. Which goes at the top?",
         o: ["Dear [[pal]],", "Love from [[pal]]", "Step 1: [[pal]]"],
+        ez: { q: "A letter to [[pal]]. What goes at the top?", why: "<b>Dear</b>, the name, a comma.", s: ["That is a sign off, for the end.", "Steps are for instructions."] },
         s: ["That is a sign off, for the end.", "Steps are for instructions."],
         hint: "Greetings start with Dear.",
         why: "<b>Dear</b>, then the name, then a comma.",
@@ -280,6 +302,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
     Q("mc", "Letters", null, [
       { q: "<b>Step 3, the sign off.</b> Which goes at the end of a letter to a friend?",
         o: ["Love from Jay", "Dear Jay,", "Step 4: Jay"],
+        ez: { q: "A letter to a friend. What goes at the end?", hint: "Who is it from?", why: "<b>Love from</b>, then your name.", s: ["That is a greeting. It goes at the top.", "That is from instructions."] },
         s: ["That is a greeting. It goes at the top.", "That is from instructions."],
         hint: "It says who the letter is from.",
         why: "<b>Love from</b>, then your name. It tells the reader who wrote it.",
@@ -292,6 +315,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           why: "Sir or Madam goes with <b>Yours faithfully</b>. A trick to remember: no name, so you have to have faith it reaches the right person." } },
       { q: "<b>Step 3, the sign off.</b> You wrote to Bonnie. Which goes at the end?",
         o: ["From your friend in Base 5", "Dear Bonnie,", "1. Bonnie"],
+        ez: { q: "A letter to Bonnie. What goes at the end?", hint: "Who is it from?", why: "It says who it is from.", s: ["That is a greeting. It goes at the top.", "Numbers are for steps."] },
         s: ["That is a greeting. It goes at the top.", "Numbers are for steps."],
         hint: "It says who the letter is from.",
         why: "A sign off says who it is from. Bonnie will want to know.",
@@ -304,6 +328,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           why: "A name in the greeting goes with <b>Yours sincerely</b>." } },
       { q: "<b>Step 3, the sign off.</b> You wrote to [[pal]]. Which goes at the end?",
         o: ["From Jay", "Dear [[pal]],", "Step 1: [[pal]]"],
+        ez: { q: "A letter to [[pal]]. What goes at the end?", hint: "Who is it from?", why: "<b>From</b>, then your name.", s: ["That is a greeting, for the top.", "That is from instructions."] },
         s: ["That is a greeting, for the top.", "That is from instructions."],
         hint: "It says who the letter is from.",
         why: "<b>From</b>, then your name.",
@@ -319,18 +344,21 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
     Q("order", "Letters", null, [
       { q: "<b>All three steps, on your own.</b> Put this letter in order, top to bottom.",
         items: ["Dear Alex,", "Thank you for the bird book.", "I have read it twice already.", "Love from Jay"],
+        ez: { q: "Put the letter in order, top to bottom.", hint: "Dear first. Sign off last.", why: "Greeting, message, sign off." },
         hint: "Greeting first, sign off last.",
         why: "Greeting, message, sign off. The shape of every letter.",
         medium: { items: ["Dear Mr Khan,", "I am writing to ask about joining the club.", "I have played for two years.", "Best wishes,", "Jay"] },
         spicy: { items: ["14 Elm Road, Chilton", "3 November 2026", "Dear Ms Patel,", "I am writing to apply for the weekend job.", "Yours sincerely,", "A. Morgan"] } },
       { q: "<b>All three steps, on your own.</b> Put this letter in order, top to bottom.",
         items: ["Dear Bonnie,", "Thank you for being such a good dog.", "Sorry I ate your biscuit.", "From your friend in Base 5"],
+        ez: { q: "Put the letter in order, top to bottom.", hint: "Dear first. Sign off last.", why: "Greeting, message, sign off." },
         hint: "Greeting first, sign off last.",
         why: "Greeting, message, sign off.",
         medium: { items: ["Dear [[pal]],", "I am writing to say thank you.", "Your help with [[place]] was brilliant.", "Best wishes,", "Jay"] },
         spicy: { items: ["2 Mill Lane, Chilton", "10 March 2027", "Dear Sir or Madam,", "I am writing to complain about a broken toaster.", "Yours faithfully,", "A. Morgan"] } },
       { q: "<b>All three steps, on your own.</b> Put this letter in order, top to bottom.",
         items: ["Dear [[pal]],", "I had a great time at [[place]].", "Can we go again soon?", "From Jay"],
+        ez: { q: "Put the letter in order, top to bottom.", hint: "Dear first. Sign off last.", why: "Greeting, message, sign off." },
         hint: "Greeting first, sign off last.",
         why: "Greeting, message, sign off.",
         medium: { items: ["Hi Sam,", "Guess what happened at [[place]]!", "I will tell you all about it on Saturday.", "See you soon,", "Jay"] },
@@ -344,6 +372,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         slips: [[["love from", "from", "yours"], "That is a sign off. A greeting is how you start: Dear..."]],
         hint: "Dear, then the name.",
         why: "<b>Dear Jay,</b> or <b>Hi Jay,</b> both work. Jay would be very happy to get a letter.",
+        ez: { why: "<b>Dear Jay,</b> or <b>Hi Jay,</b> both work.", slips: [[[], "That is a sign off. Start with Dear."]] },
         medium: { q: "Type a greeting for a letter to Mr Khan, who runs the football club. You have never met him.",
           need: [["dear"]], model: "Dear Mr Khan,",
           slips: [[["hi", "hiya", "hey", "yo"], "Friendly, but for someone you have never met, Dear is safer."]],
@@ -358,6 +387,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         slips: [[["love from", "from", "yours"], "That is a sign off. A greeting is how you start: Dear..."]],
         hint: "Dear, then the name.",
         why: "<b>Dear Bonnie,</b> She would probably prefer a biscuit, but it is a lovely start.",
+        ez: { why: "<b>Dear Bonnie,</b> She would like a biscuit too.", slips: [[[], "That is a sign off. Start with Dear."]] },
         medium: { q: "Type a greeting for a letter to [[pal]], who you have only met once.",
           need: [["dear"]], model: "Dear [[pal]],",
           slips: [[["hi", "hiya", "hey", "yo"], "Friendly, but for someone you have met once, Dear is safer."]],
@@ -372,6 +402,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         slips: [[["love from", "from", "yours"], "That is a sign off. A greeting is how you start: Dear..."]],
         hint: "Dear, then the name.",
         why: "<b>Dear Max,</b> or <b>Hi Max,</b> both work for a pen pal.",
+        ez: { q: "Type a greeting to a pen pal called Max.", why: "<b>Dear Max,</b> or <b>Hi Max,</b> both work.", slips: [[[], "That is a sign off. Start with Dear."]] },
         medium: { q: "Type a greeting for an email to Mrs Lee, who runs the bird sanctuary. You have never met her.",
           need: [["dear"]], model: "Dear Mrs Lee,",
           slips: [[["hi", "hiya", "hey", "yo"], "Friendly, but for someone you have never met, Dear is safer."]],
@@ -393,7 +424,8 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           "<p>No greeting is needed, though some people write <b>Dear Diary</b> for fun.</p>" },
         spicy: { html: "<p>A diary is private, so its voice is honest and informal: <b>first person</b>, <b>past tense</b> for what happened, <b>present tense</b> for how you feel now.</p>" +
           "<p>Good diary writing does more than list events. It <b>reflects</b>: why something mattered, what you wonder, what you might do next time.</p>" +
-          "<p>Some diaries are written to be read later by other people. Then the writer explains more, because the reader was not there.</p>" } } },
+          "<p>Some diaries are written to be read later by other people. Then the writer explains more, because the reader was not there.</p>" } } ,
+      ez: { title: "Inside a diary", html: "<p>A <b>diary</b> is for you.</p><p>A day at the top. <b>I</b> and <b>my</b>. How you felt.</p>" } },
 
     Q("mc", "Diaries", null, [
       { q: "Which sentence comes from a diary?",
@@ -401,6 +433,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["That is a step from instructions.", "That is the start of a letter."],
         hint: "Look for I and today.",
         why: "<b>Today I...</b> is a big diary clue.",
+        ez: { s: ["That is a step.", "That starts a letter."] },
         medium: { q: "Which sentence is written like a diary, in the first person?",
           o: ["I was so tired after [[day]].", "He was so tired after [[day]].", "Be sure to rest after [[day]]."],
           s: ["He is third person: it is about someone else.", "That is an instruction, telling the reader what to do."] },
@@ -413,6 +446,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["That is an instruction.", "That is from a poster."],
         hint: "Look for I and a feeling.",
         why: "<b>I felt...</b>: a diary.",
+        ez: { hint: "Look for I and a feeling." },
         medium: { q: "Which sentence is written like a diary, in the first person?",
           o: ["We got lost twice on the way to [[place]].", "They got lost twice on the way to [[place]].", "Follow the signs to [[place]]."],
           s: ["They is third person: about other people.", "That is an instruction."] },
@@ -425,6 +459,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["That is a step from instructions.", "That is the end of a letter."],
         hint: "Look for my and today.",
         why: "<b>My best bit of today</b>: a diary. Jay would approve of the robin.",
+        ez: { why: "<b>My best bit of today</b>: a diary.", s: ["That is a step.", "That ends a letter."] },
         medium: { q: "Which sentence is written like a diary, in the first person?",
           o: ["My hands were freezing at [[place]].", "Her hands were freezing at [[place]].", "Wear gloves at [[place]]."],
           s: ["Her is third person: about someone else.", "That is an instruction."] },
@@ -441,6 +476,8 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         slips: { any: "Three clues are there. There are no numbered steps and no Dear Sir." },
         hint: "Look at the top line, the little words, and the feelings.",
         why: "A day, I and my, and feelings: three diary clues.",
+        ez: { q: "Pick <b>all</b> the diary clues." + task("Saturday<br>Today I went to [[place]] with my cousin. I was nervous at first, but I loved it."),
+          hint: "Top line, little words, feelings.", why: "A day, I and my, and feelings.", slips: { any: "3 clues are there. No steps. No Dear." } },
         spicy: { options: ["A day at the top", "First person", "Past tense for what happened", "Feelings", "A formal sign off", "Commands in order"], answers: [0, 1, 2, 3],
           slips: { any: "Four clues. No sign off and no commands." } } },
       { q: "Pick <b>all</b> the clues that this is a diary." + task("Monday 2 March<br>I scored my first ever goal today. My legs were shaking and I could not stop grinning."),
@@ -449,6 +486,8 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         slips: { any: "Three clues. It does not sign off and it does not tell anyone what to do." },
         hint: "Date, little words, feelings.",
         why: "A date, I and my, and feelings.",
+        ez: { q: "Pick <b>all</b> the diary clues." + task("Monday 2 March<br>I scored my first ever goal today. My legs were shaking and I could not stop grinning."),
+          why: "A date, I and my, and feelings.", slips: { any: "3 clues. No sign off. No orders." } },
         spicy: { options: ["A date at the top", "First person", "Past tense for what happened", "Feelings", "A greeting", "Numbered steps"], answers: [0, 1, 2, 3],
           slips: { any: "Four clues. No greeting and no steps." } } },
       { q: "Pick <b>all</b> the clues that this is a diary." + task("Wednesday<br>I took Bonnie for a walk in the rain. My socks got soaked. I was grumpy, but she was so happy."),
@@ -457,6 +496,8 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         slips: { any: "Three clues. No poster title and no letter greeting." },
         hint: "Day, little words, feelings.",
         why: "A day, I and my, and feelings. And Bonnie, who loves rain more than socks do.",
+        ez: { q: "Pick <b>all</b> the diary clues." + task("Wednesday<br>I took Bonnie for a walk in the rain. My socks got soaked. I was grumpy, but she was so happy."),
+          why: "A day, I and my, and feelings.", slips: { any: "3 clues. No big title. No Dear." } },
         spicy: { options: ["A day at the top", "First person", "Past tense for what happened", "Feelings", "A formal greeting", "Bossy verbs"], answers: [0, 1, 2, 3],
           slips: { any: "Four clues. No greeting and no commands." } } }
     ]),
@@ -467,6 +508,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         cards: [["I went swimming today.", 0], ["My dinner was lovely.", 0], ["Turn left at the gate.", 1], ["Dear Alex,", 1]],
         hint: "Diary sentences are about the writer: I, me, my.",
         why: "I and my go in the diary. A step and a greeting belong to other formats.",
+        ez: { q: "Diary or not? Sort them.", hint: "A diary uses I and my.", why: "I and my go in the diary." },
         medium: { cards: [["I went swimming today.", 0], ["My dinner was lovely.", 0], ["We got home late.", 0], ["She went swimming today.", 1], ["Turn left at the gate.", 1], ["Dear Alex,", 1]],
           why: "First person (I, my, we) is diary. She is about someone else." },
         spicy: { cards: [["I went swimming today.", 0], ["We got home late.", 0], ["I keep thinking about what she said.", 0], ["She went swimming today.", 1], ["Turn left at the gate.", 1], ["Yours sincerely,", 1], ["The swimming pool opens at 7am.", 1]],
@@ -476,6 +518,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         cards: [["I felt brave today.", 0], ["My friend made me laugh.", 0], ["2. Stir the mix.", 1], ["Love from Jay", 1]],
         hint: "Diary sentences are about the writer.",
         why: "I and my go in the diary. A step and a sign off belong to other formats.",
+        ez: { q: "Diary or not? Sort them.", hint: "A diary uses I and my.", why: "I and my go in the diary." },
         medium: { cards: [["I felt brave today.", 0], ["My friend made me laugh.", 0], ["We watched a film.", 0], ["He felt brave today.", 1], ["2. Stir the mix.", 1], ["Love from Jay", 1]],
           why: "First person is diary. He is about someone else." },
         spicy: { cards: [["I felt brave today.", 0], ["We watched a film.", 0], ["I am not sure I did the right thing.", 0], ["He felt brave today.", 1], ["2. Stir the mix.", 1], ["Dear Sir or Madam,", 1], ["The film is 90 minutes long.", 1]],
@@ -485,6 +528,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         cards: [["I saw a heron at [[place]].", 0], ["My feet hurt.", 0], ["You will need a pen.", 1], ["SALE NOW ON!", 1]],
         hint: "Diary sentences are about the writer.",
         why: "I and my go in the diary. A kit list and a poster line do not.",
+        ez: { q: "Diary or not? Sort them.", hint: "A diary uses I and my.", why: "I and my go in the diary." },
         medium: { cards: [["I saw a heron at [[place]].", 0], ["My feet hurt.", 0], ["We laughed all the way home.", 0], ["They saw a heron at [[place]].", 1], ["You will need a pen.", 1], ["SALE NOW ON!", 1]],
           why: "First person is diary. They is about other people." },
         spicy: { cards: [["I saw a heron at [[place]].", 0], ["We laughed all the way home.", 0], ["I wish I had said something.", 0], ["They saw a heron at [[place]].", 1], ["You will need a pen.", 1], ["SALE NOW ON!", 1], ["Herons can live for 15 years.", 1]],
@@ -503,7 +547,8 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
           "<p>One action per step, and the detail that matters: <b>Stir for one minute</b>, not <b>Stir it for a bit</b>.</p>" },
         spicy: { html: "<p>Instructions use the <b>imperative</b>: commands with no I, he or she (<b>Thread the needle</b>). They are in strict <b>chronological order</b>, either numbered or with order words (<b>First, Next, Finally</b>).</p>" +
           "<p>Good ones are <b>precise</b> (how long, how much, which one), add <b>warnings</b> or <b>tips</b> where needed, and may use <b>subheadings</b> for longer tasks.</p>" +
-          "<p>Everything serves one reader: someone in the middle of the task, glancing back for the next step.</p>" } } },
+          "<p>Everything serves one reader: someone in the middle of the task, glancing back for the next step.</p>" } } ,
+      ez: { title: "Inside instructions", html: "<p><b>Instructions</b> tell you how.</p><p>Numbered steps. Each starts with a <b>bossy verb</b>: Fill, Hang.</p>" } },
 
     Q("mc", "Instructions", null, [
       { q: "Which line is written as an instruction?",
@@ -511,6 +556,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["That says what I did, like a diary.", "That says what Jay did. It does not tell you to do anything."],
         hint: "An instruction starts with a bossy verb.",
         why: "<b>Put</b> is a bossy verb. It tells the reader what to do.",
+        ez: { q: "Which line is an instruction?", hint: "Look for a bossy verb first.", why: "<b>Put</b> tells you what to do.", s: ["That says what I did.", "That says what Jay did."] },
         spicy: { q: "Which instruction is the most precise?",
           o: ["Put two scoops of seed in the feeder.", "Put some seed in.", "You could maybe add seed if you like."],
           s: ["Some is vague. How much?", "Not a clear command, and still no amount."],
@@ -520,6 +566,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["That says what I did.", "That describes the button but does not tell you to do anything."],
         hint: "An instruction starts with a bossy verb.",
         why: "<b>Press</b> is a bossy verb.",
+        ez: { q: "Which line is an instruction?", hint: "Look for a bossy verb first.", why: "<b>Press</b> tells you what to do.", s: ["That says what I did.", "That just describes it."] },
         spicy: { q: "Which instruction is the most precise?",
           o: ["Hold the green button for five seconds.", "Press a button for a while.", "Try pressing something."],
           s: ["Which button, and how long is a while?", "Not precise at all."],
@@ -529,6 +576,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         s: ["That says what I did.", "That describes the paint."],
         hint: "An instruction starts with a bossy verb.",
         why: "<b>Stir</b> is a bossy verb.",
+        ez: { q: "Which line is an instruction?", hint: "Look for a bossy verb first.", why: "<b>Stir</b> tells you what to do.", s: ["That says what I did.", "That just describes it."] },
         spicy: { q: "Which instruction is the most precise?",
           o: ["Stir the paint for one minute.", "Stir it for a bit.", "Give it a stir or something."],
           s: ["A bit could mean anything.", "Vague, and no time."],
@@ -540,18 +588,21 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         items: ["Fill a pot with soil", "Make a small hole", "Drop the seed in", "Cover it and water it"],
         hint: "What do you need before you can make a hole?",
         why: "Soil, hole, seed, water. Instructions only work in the right order.",
+        ez: { q: "Put the seed steps in order.", hint: "Soil comes first.", why: "Soil, hole, seed, water." },
         medium: { items: ["Fill a pot with soil", "Make a hole with your finger", "Drop the seed in", "Cover it with soil", "Water it gently"] },
         spicy: { items: ["First, fill a pot with soil", "Next, make a hole 2 cm deep", "Then drop the seed in", "Cover it with soil", "Finally, water it gently"] } },
       { q: "Put the steps for making a paper plane in order.",
         items: ["Fold the paper in half", "Fold the top corners in", "Fold down the wings", "Throw it gently"],
         hint: "Throwing comes last!",
         why: "Fold, fold, fold, throw.",
+        ez: { q: "Put the paper plane steps in order." },
         medium: { items: ["Fold the paper in half", "Open it up again", "Fold the top corners in", "Fold down the wings", "Throw it gently"] },
         spicy: { items: ["First, fold the paper in half lengthways", "Open it up again", "Next, fold the top corners to the middle", "Then fold down each wing", "Finally, throw it gently"] } },
       { q: "Put the steps for brushing Bonnie in order.",
         items: ["Get the soft brush", "Ask Bonnie to sit", "Brush gently from head to back", "Give her a treat"],
         hint: "The treat comes at the end. Bonnie would like it at the start.",
         why: "Brush, sit, brush, treat. No tail to brush, so it is quick.",
+        ez: { q: "Put the Bonnie brushing steps in order.", hint: "The treat comes last. Sorry, Bonnie.", why: "Brush, sit, brush, treat." },
         medium: { items: ["Get the soft brush", "Ask Bonnie to sit", "Brush her ears gently", "Brush from head to back", "Give her a treat"] },
         spicy: { items: ["First, get the soft brush", "Ask Bonnie to sit", "Next, brush her ears gently", "Then brush from head to back", "Finally, give her a treat"] } }
     ]),
@@ -562,6 +613,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         cards: [["A pot", 0], ["Some soil", 0], ["1. Fill the pot.", 1], ["2. Plant the seed.", 1]],
         hint: "Things go in the list. Actions go in the steps.",
         why: "Things you need go in the list. Things you do go in the steps.",
+        ez: { q: "A thing you need, or a step?", hint: "Things in the list. Actions in steps.", why: "Things in the list. Actions in the steps." },
         medium: { cards: [["A pot", 0], ["Some soil", 0], ["A seed", 0], ["1. Fill the pot.", 1], ["2. Plant the seed.", 1], ["3. Water it.", 1]] },
         spicy: { buckets: ["You will need", "Steps", "Warning or tip"],
           cards: [["A pot", 0], ["Some soil", 0], ["1. Fill the pot.", 1], ["2. Plant the seed.", 1], ["Tip: a sunny window works best.", 2], ["Careful: do not overwater it.", 2]] } },
@@ -570,6 +622,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         cards: [["Bread", 0], ["Butter", 0], ["1. Toast the bread.", 1], ["2. Spread the butter.", 1]],
         hint: "Things go in the list. Actions go in the steps.",
         why: "Bread and butter are things. Toasting and spreading are actions.",
+        ez: { q: "A thing you need, or a step?", hint: "Things in the list. Actions in steps.", why: "Bread and butter are things. The rest are steps." },
         medium: { cards: [["Bread", 0], ["Butter", 0], ["A knife", 0], ["1. Toast the bread.", 1], ["2. Spread the butter.", 1], ["3. Cut it in half.", 1]] },
         spicy: { buckets: ["You will need", "Steps", "Warning or tip"],
           cards: [["Bread", 0], ["Butter", 0], ["1. Toast the bread.", 1], ["2. Spread the butter.", 1], ["Careful: the toaster gets hot.", 2], ["Tip: soft butter spreads more easily.", 2]] } },
@@ -578,6 +631,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
         cards: [["Paint", 0], ["A brush", 0], ["1. Dip the brush.", 1], ["2. Paint the shape.", 1]],
         hint: "Things go in the list. Actions go in the steps.",
         why: "Paint and a brush are things. Dipping and painting are actions.",
+        ez: { q: "A thing you need, or a step?", hint: "Things in the list. Actions in steps.", why: "Paint and a brush are things. The rest are steps." },
         medium: { cards: [["Paint", 0], ["A brush", 0], ["Water", 0], ["1. Dip the brush.", 1], ["2. Paint the shape.", 1], ["3. Wash the brush.", 1]] },
         spicy: { buckets: ["You will need", "Steps", "Warning or tip"],
           cards: [["Paint", 0], ["A brush", 0], ["1. Dip the brush.", 1], ["2. Paint the shape.", 1], ["Tip: let each layer dry first.", 2], ["Careful: some paint stains clothes.", 2]] } }
@@ -590,6 +644,8 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
       slips: { 1: "Diaries can be any length. The problem is that it tells you what Jay did, not what you should do.", 2: "True, but the birds are not the ones following it." },
       hint: "Who is the reader, and what are they trying to do?",
       why: "The reader wants to do it. Numbered steps and bossy verbs tell them exactly what to do next.",
+      ez: { q: "Jay wrote <b>Today I filled the feeder.</b> Why would steps help a reader more?", hint: "What is the reader trying to do?", why: "Steps with bossy verbs say what to do next.",
+        slips: { 1: "It tells you what Jay did, not what to do.", 2: "True! But birds are not the readers." } },
       lv: { spicy: { q: "Jay wrote how to feed the birds like a diary: <b>Today I filled the feeder, then I hung it up.</b> What is the best reason to turn it into instructions?",
         options: ["The reader is doing the task, so they need commands in order they can glance back at", "Instructions are more formal than diaries", "Diaries cannot have more than one step"],
         slips: { 1: "Instructions can be friendly. The reason is about what the reader is doing.", 2: "A diary can describe lots of steps. It just does not tell the reader what to do." },
@@ -598,6 +654,7 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
     { type: "write", topic: "Instructions",
       q: "Only if you fancy it: write instructions for something you are good at. A game, a snack, a trick, how to [[task]]. Give it a <b>How to</b> title and at least three numbered steps.",
       starters: ["How to", "You will need:", "1.", "2.", "3."],
+      ez: { q: "Only if you like: write how to do something. A How to title and 3 steps." },
       checklist: ["I wrote a How to title", "My steps are numbered and in order", "Each step starts with a bossy verb"],
       minWords: 15,
       lv: { medium: { minWords: 25, checklist: ["I wrote a How to title", "I wrote a You will need list", "My steps are numbered and in order", "Each step starts with a bossy verb"] },
@@ -612,6 +669,11 @@ var HOWTO = '<svg viewBox="0 0 520 250" role="img" aria-label="Instructions with
       '<g transform="translate(220 22) rotate(-4)"><rect width="150" height="110" rx="6" fill="#d8b27a" stroke="#141a33" stroke-width="2.5"/><rect x="8" y="8" width="134" height="94" rx="4" fill="#fdf3dc"/>' +
       T(20, 34, "2 September 1666", 12, { b: 1 }) + rule(20, 52, 110) + rule(20, 68, 96) + rule(20, 84, 104) + '</g>' +
       A.bird(392, 30, 0.6, "#3a8fd6") + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>In 1666 Samuel Pepys wrote a <b>diary</b>. We can still read it.</p><p>A diary is a safe time machine!</p>" },
+    make: { intro: "A tiny letter. Dear, a message, and a sign off." }
   },
 
   make: {

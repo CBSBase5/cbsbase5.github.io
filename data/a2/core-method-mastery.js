@@ -26,8 +26,49 @@ function wrap(t, n, max){ var w = String(t || "").split(/\s+/), out = [], cur = 
 function esc(t){ return String(t == null ? "" : t).replace(/[&<>]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
 
 /* one step built from up to three versions, each [medium, mild, spicy] */
+/* easy read (LC): shorter wrong answer messages, matched from the full ones */
+var ZS = [
+  [/^It looks like the (\S+) was added on rather than multiplied\..*/, "Multiply the $1 too."],
+  [/^That is just the first part\. Add on (.+) as well\.$/, "That is part 1. Add on $1."],
+  [/^Nearly\. You took away (\S+) once, but there are (\S+) lots of it\. Take away (\S+)\.$/, "Take away $1, $2 times. That is $3."],
+  [/^That is .+?\. Now take away the extra bit: (.+)\.$/, "Now take away $1."],
+  [/^\S+ is bigger than \S+, so take the extra away instead of adding it\.$/, "Take the extra away. Do not add."],
+  [/^It looks like both numbers were (halved|doubled)\..*/, "Halve one. Double the other."],
+  [/^That doubled (\S+)\. This one gets halved\.$/, "Halve $1. Do not double it."],
+  [/^It looks like the (\S+) was added on\. It needs multiplying by (\S+) too\.$/, "Multiply the $1 by $2 too."],
+  [/^That is only the first box\. Add on (.+)\.$/, "That is box 1. Add on $1."],
+  [/^One box is missing from the total\..*/, "A box is missing. Add all 4."],
+  [/^That is only the top row\..*/, "Add the bottom row too."],
+  [/^Looks like a carry went missing\..*/, "A carry went missing. Carry the tens."],
+  [/^Check the tens row.*/, "The tens row needs a 0 on the end."],
+  [/^The digits are right\. Count the decimal places.*/, "Right digits. Count the decimal places."],
+  [/^That is the remainder\..*/, "That is the remainder. How many fit?"],
+  [/^Looks like a remainder did not get carried\..*/, "Carry the remainder to the next digit."],
+  [/^Keep the decimal point on top lined up.*/, "Line up the point."],
+  [/^A zero went missing\..*/, "A 0 went missing. Write 0 on top."],
+  [/^Keep the point lined up: .+ is about (\S+)\.$/, "Line up the point. It is about $1."],
+  [/^Too small\. Estimate: .+ is about (\S+)\.$/, "Too small. It is about $1."],
+  [/^That is in pence\. Write it in pounds: (.+)\.$/, "Write it in pounds: $1."],
+  [/^That looks like pence\. Write it in pounds: (.+)\.$/, "Write it in pounds: $1."],
+  [/^Ten times too big\. Estimate: about (.+)\.$/, "10 times too big. About $1."],
+  [/^Ten times too small\. Estimate: about (.+)\.$/, "10 times too small. About $1."],
+  [/^(Same digits, but ten|Ten) times too big\..*/, "10 times too big."],
+  [/^(Same digits, but ten|Ten) times too small\..*/, "10 times too small."],
+  [/^That is the cost\. Now take it away from (.+)\.$/, "That is the cost. Take it from $1."],
+  [/^That is only one of them\. There are (\S+)\.$/, "That is just 1. There are $1."],
+  [/^Buying things leaves less money, so take away\.$/, "Take away. Buying leaves less."]
+];
+function zmsg(m){ if(typeof m !== "string") return m; for(var i = 0; i < ZS.length; i++) if(ZS[i][0].test(m)) return m.replace(ZS[i][0], ZS[i][1]); return m; }
+function ezSlips(o){
+  if(!o.ez || !Array.isArray(o.slips) || o.ez.slips) return;
+  var any = false, z = o.slips.map(function(r){ var m = zmsg(r[r.length - 1]); if(m === r[r.length - 1]) return null; any = true; return r.map(function(x, j){ return j === r.length - 1 ? m : null; }); });
+  if(any) o.ez.slips = z;
+}
+function noez(x){ var o = {}; Object.keys(x).forEach(function(k){ if(k !== "ez") o[k] = x[k]; }); return o; }
 function G(type, topic, sets, extra){
-  function one(v){ var o = {}; Object.keys(v[0]).forEach(function(k){ o[k] = v[0][k]; }); o.lv = { mild: v[1], spicy: v[2] }; return o; }
+  sets.forEach(function(v){ v.forEach(ezSlips); });
+  /* ez comes from the first level's version only (v[1]); medium and spicy carry none */
+  function one(v){ var o = noez(v[0]); o.lv = { mild: noez(v[1]), spicy: noez(v[2]) }; if(v[1].ez) o.ez = v[1].ez; return o; }
   var s = { type: type, topic: topic }, b = one(sets[0]);
   Object.keys(b).forEach(function(k){ s[k] = b[k]; });
   if(sets.length > 1) s.vary = sets.slice(1).map(one);
@@ -140,6 +181,7 @@ function partFade(t, o, b){
   if(o < 1){ sl.push([0, r6(P2 * 10), fm(o) + " is a tenth of " + fm(o * 10) + ", so " + fm(o) + X + b + " is a tenth of " + fm(o * 10 * b) + "."]);
     sl.push([1, r6(P1 + P2 * 10), "Check the decimal part: " + fm(o) + X + b + " is " + fm(P2) + ", not " + fm(P2 * 10) + "."]); }
   return { q: "Split <b>" + fm(t + o) + X + b + "</b> into " + fm(t) + " and " + fm(o) + ". The first part is done for you: " + fm(t) + X + b + " = " + fm(P1) + ". Have a go at the rest.",
+    ez: { q: "<b>" + fm(t + o) + X + b + "</b>. Split it: " + fm(t) + " and " + fm(o) + ".<br>Done: " + fm(t) + X + b + " = " + fm(P1) + ". Now the rest.", hint: fm(o) + X + b + ". Then add both parts." },
     fig: partFig(t, o, b, true),
     boxes: [{ label: fm(o) + X + b + " =", a: P2 }, { label: "Total", a: tot }],
     slips: sl, hint: "Multiply " + fm(o) + " by " + b + ", then add the two parts together.",
@@ -148,6 +190,7 @@ function partFade(t, o, b){
 function mcNear(n, b, R){
   var Dd = r6(R - n), opt = [fm(R) + X + b + ", then take away " + fm(Dd * b), fm(R) + X + b + ", then take away " + fm(Dd), fm(R) + X + b + ", then add " + fm(Dd * b)];
   return { q: "Nudge it to a friendly number. Which of these gives <b>" + fm(n) + X + b + "</b>?",
+    ez: { q: "Which gives <b>" + fm(n) + X + b + "</b>?", hint: "You made " + fm(n) + " bigger, " + b + " times.", why: fm(R) + X + b + " = " + fm(R * b) + ". Take away " + fm(Dd * b) + ": <b>" + fm(n * b) + "</b>.", slips: { 1: "Take away " + b + " lots of " + fm(Dd) + ". That is " + fm(Dd * b) + ".", 2: fm(R) + X + b + " is too big. Take away." } },
     options: opt, answer: 0,
     slips: { 1: "You nudged " + fm(n) + " up by " + fm(Dd) + ", but you did that " + b + " times (once for each lot). So take away " + b + " lots of " + fm(Dd) + ", which is " + fm(Dd * b) + ".",
              2: fm(R) + " is bigger than " + fm(n) + ", so " + fm(R) + X + b + " is too big. Take away, do not add." },
@@ -157,6 +200,7 @@ function mcNear(n, b, R){
 function numNear(n, b, R){
   var Dd = r6(R - n), ans = r6(n * b);
   return { q: "Work out <b>" + fm(n) + X + b + "</b> in your head. Nudging " + fm(n) + " to " + fm(R) + " might help.",
+    ez: { q: "Work out <b>" + fm(n) + X + b + "</b>. Try " + fm(R) + X + b + " first." },
     boxes: [{ label: fm(n) + X + b + " =", a: ans }],
     slips: [[r6(R * b - Dd), "Nearly. You took away " + fm(Dd) + " once, but there are " + b + " lots of it. Take away " + fm(Dd * b) + "."],
             [r6(R * b), "That is " + fm(R) + X + b + ". Now take away the extra bit: " + fm(Dd) + X + b + "."],
@@ -167,6 +211,7 @@ function numNear(n, b, R){
 function halveDouble(a, b){
   var ans = r6(a * b);
   return { q: "Make <b>" + fm(a) + X + b + "</b> friendlier: halve " + fm(a) + " and double " + b + ". The answer stays the same.",
+    ez: { q: "<b>" + fm(a) + X + b + "</b>. Halve " + fm(a) + ". Double " + b + ". Same answer!", hint: "Halve one. Double the other." },
     boxes: [{ label: "Half of " + fm(a), a: r6(a / 2) }, { label: "Double " + b, a: 2 * b }, { label: "So " + fm(a) + X + b + " =", a: ans }],
     slips: [[2, r6(ans / 4), "It looks like both numbers were halved. Halve one and double the other, so it balances."],
             [2, r6(ans * 4), "It looks like both numbers were doubled. Halve one and double the other."],
@@ -189,6 +234,7 @@ function gridFade(A_, B_, dp){
     sl.push([boxes.length - 1, r6(P / 100), "Count the decimal places in the question: just one, so one in the answer."]); }
   return { q: (dp ? "Find <b>" + fm(Av) + X + B_ + "</b>. Do " + A_ + X + B_ + " on the grid first" : "Grid method for <b>" + A_ + X + B_ + "</b>. The top row is done for you") +
       (dp ? " (the top row is done), then put the point back." : ". Have a go at the rest."),
+    ez: { q: dp ? "Find <b>" + fm(Av) + X + B_ + "</b>. Grid first. Then put the point back." : "Grid for <b>" + A_ + X + B_ + "</b>. " + (bt ? "The top row is done." : "Box 1 is done.") + " Now the rest.", hint: "Times each box. Then add them." },
     fig: gridFig(A_, B_, true, bt ? "Top row: " + (at * bt) + " and " + (ao * bt) + ". Bottom row: your turn." : "First box: " + (at * bo) + ". Second box: your turn."),
     boxes: boxes, slips: sl,
     hint: "Each box is the number on top times the number at the side. Then add every box.",
@@ -204,6 +250,7 @@ function mulInd(a, b){
           sl.push([r6(ans / 10), "The digits are right. Count the decimal places: " + dp + " in the question, so " + dp + " in the answer."]);
           if(ai * bi !== ans * 10 && ai * bi !== ans / 10) sl.push([ai * bi, "That is " + ai + X + bi + ". Now put the decimal point back in: " + dp + " decimal place" + (dp > 1 ? "s" : "") + "."]); }
   return { q: "Work out <b>" + fm(a) + X + fm(b) + "</b>. Grid or column, whichever suits you." + (dp ? " Ignore the points first, then put them back." : ""),
+    ez: { q: "Work out <b>" + fm(a) + X + fm(b) + "</b>. Any way you like.", hint: dp ? "Do " + ai + X + bi + ". Then count the decimal places." : "Split " + (bi < 10 ? ai : bi) + " into tens and ones." },
     boxes: [{ label: "Answer", a: ans }], slips: sl,
     hint: dp ? "Do " + ai + X + bi + ", then count the decimal places in the question." : "Split " + bi + " into parts, multiply each part, then add.",
     why: (dp ? ai + X + bi + " = " + (ai * bi) + ". There " + (dp > 1 ? "are " + dp + " decimal places" : "is 1 decimal place") + " in the question, so the answer is <b>" + fm(ans) + "</b>." :
@@ -215,6 +262,7 @@ function mcDp(a, b, a2, b2){
   var say = {}; say[1] = "That is ten times too big."; say[2] = "That is ten times too small."; say[3] = "That is a hundred times too big.";
   var how = " Compare " + fm(a2) + X + fm(b2) + " with " + fm(a) + X + fm(b) + ": count the decimal places (or the zeros) and move the digits that many places.";
   return { q: fm(a) + X + fm(b) + " = " + fm(P) + ". Use that to find <b>" + fm(a2) + X + fm(b2) + "</b>.",
+    ez: { q: fm(a) + X + fm(b) + " = " + fm(P) + ".<br>So what is <b>" + fm(a2) + X + fm(b2) + "</b>?", hint: "Same digits. How big should it be?", slips: { 1: "10 times too big.", 2: "10 times too small.", 3: "100 times too big." } },
     options: opts.map(fm), answer: 0,
     slips: { 1: say[1] + how, 2: say[2] + how, 3: say[3] + how },
     hint: "Same digits. The only question is where the point goes. A rough estimate helps.",
@@ -227,6 +275,7 @@ function divFade(ds, d){
   var nc = +ds.replace(".", "").split("").map(function(c){ return Math.floor(+c / d); }).join(""); if(ds.indexOf(".") < 0 && nc !== ans) sl.push([1, nc, "Looks like a remainder did not get carried. Carry what is left over to the next digit."]);
   if(ds.indexOf(".") >= 0) sl.push([1, r6(ans * 10), "Keep the decimal point on top lined up with the point underneath."]);
   return { q: "Bus stop for <b>" + ds + D + d + "</b>. Done for you: " + said + " Have a go at the next digit, then the whole answer.",
+    ez: { q: "Bus stop for <b>" + ds + D + d + "</b>.<br>Done: " + said + "<br>Now the next digit. Then the answer.", hint: "How many " + d + "s fit into " + nx.cur + "?" },
     fig: busFig(ds, d, give, "The small red numbers are the carries."),
     boxes: [{ label: nx.cur + D + d + " =", a: nx.qd }, { label: "So " + ds + D + d + " =", a: ans }], slips: sl,
     hint: "How many " + d + "s fit into " + nx.cur + "? Any remainder is carried to the next digit.",
@@ -242,12 +291,14 @@ function divInd(ds, d){
   if(ds.indexOf(".") >= 0){ sl.push([r6(ans * 10), "Keep the decimal point on top lined up with the point underneath."]); sl.push([r6(ans / 10), "Keep the decimal point on top lined up with the point underneath."]); }
   return { q: "Work out <b>" + fm(parseFloat(ds)) + D + d + "</b>." + (ds !== fm(parseFloat(ds)) ? " If it does not finish, put a zero on the end and keep going." : ""),
     boxes: [{ label: "Answer", a: ans }], slips: sl,
+    ez: { hint: "Bus stop. Carry the remainder." },
     hint: "Bus stop: one digit at a time, carrying the remainder.",
     why: st.filter(function(s){ return !s.point; }).map(function(s){ return s.cur + D + d + " = " + s.qd + (s.r ? " r " + s.r : ""); }).join(", ") + ". Answer <b>" + fm(ans) + "</b>." };
 }
 function divMoney(a, n){
   var ans = r6(a / n);
   return { q: "&pound;" + mo(a) + " is shared equally between " + n + " of [[who]]. How much each?",
+    ez: { q: "&pound;" + mo(a) + " shared between " + n + " of [[who]]. How much each?", hint: "Bus stop. Line up the point." },
     boxes: [{ label: "Each", a: ans, pre: "&pound;", show: mo(ans) }],
     slips: [[r6(ans * 10), "Keep the point lined up: " + mo(a) + D + n + " is about " + fm(Math.round(a / n)) + "."], [r6(ans / 10), "Too small. Estimate: " + mo(a) + D + n + " is about " + fm(Math.round(a / n)) + "."], [r6(ans * 100), "That is in pence. Write it in pounds: &pound;" + mo(ans) + "."]],
     hint: "Bus stop, with the point on top lined up with the point underneath.",
@@ -266,6 +317,7 @@ function divDec(a, d){
 function mcCheck(a, d){
   var q = r6(a / d);
   return { q: "Bonnie (somehow) worked out <b>" + fm(a) + D + fm(d) + " = " + fm(q) + "</b>. Which check would show it is right?",
+    ez: { q: "Bonnie says <b>" + fm(a) + D + fm(d) + " = " + fm(q) + "</b>. Which check shows it is right?", why: "Times undoes divide. " + fm(q) + X + fm(d) + " = " + fm(a) + ". Good dog!", slips: { 1: "That makes a bigger number.", 2: "Adding does not undo dividing." } },
     options: [fm(q) + X + fm(d) + " = " + fm(a), fm(a) + X + fm(d) + " = " + fm(a * d), fm(q) + " + " + fm(d) + " = " + fm(q + d)], answer: 0,
     slips: { 1: "That makes an even bigger number. It does not undo the divide.", 2: "Adding does not undo dividing. Multiplying does." },
     hint: "What undoes a divide?",
@@ -274,6 +326,7 @@ function mcCheck(a, d){
 function moneyMul(n, p, per){
   var ans = r6(n * p);
   return { q: per ? "[[Who]] buys " + fm(n) + " metres of [[line]] at &pound;" + mo(p) + " per metre. What is the cost?" : "[[Who]] buys " + n + " [[items]] at &pound;" + mo(p) + " each. What is the total?",
+    ez: { hint: "Estimate first. Then work it out." },
     boxes: [{ label: "Total", a: ans, pre: "&pound;", show: mo(ans) }],
     slips: [[r6(ans * 100), "That looks like pence. Write it in pounds: &pound;" + mo(ans) + "."], [r6(ans * 10), "Ten times too big. Estimate: about " + fm(Math.round(n)) + X + fm(Math.round(p)) + " = " + fm(Math.round(n) * Math.round(p)) + "."], [r6(ans / 10), "Ten times too small. Estimate: about " + fm(Math.round(n)) + X + fm(Math.round(p)) + " = " + fm(Math.round(n) * Math.round(p)) + "."]],
     hint: "Estimate first, then work it out. Your answer should be near the estimate.",
@@ -282,6 +335,7 @@ function moneyMul(n, p, per){
 function known(a, b, m1, m2, d1, d2){
   var P = a * b, x = r6(m1 * m2), y = r6(d1 / d2);
   return { q: "You know <b>" + a + X + b + " = " + P + "</b>. Use it to find these, no starting from scratch.",
+    ez: { q: "You know <b>" + a + X + b + " = " + P + "</b>. Use it for these.", hint: "Same digits. Bigger or smaller?" },
     boxes: [{ label: fm(m1) + X + fm(m2) + " =", a: x }, { label: fm(d1) + D + fm(d2) + " =", a: y }],
     slips: [[0, r6(x * 10), "Same digits, but ten times too big. Count the decimal places (or the zeros)."], [0, r6(x / 10), "Same digits, but ten times too small. Count the decimal places (or the zeros)."],
             [1, r6(y * 10), "Ten times too big. Check: does your answer " + X.trim() + " " + fm(d2) + " make " + fm(d1) + "?"], [1, r6(y / 10), "Ten times too small. Check: does your answer " + X.trim() + " " + fm(d2) + " make " + fm(d1) + "?"]],
@@ -291,6 +345,7 @@ function known(a, b, m1, m2, d1, d2){
 function change(have, n, p){
   var cost = r6(n * p), ans = r6(have - cost);
   return { q: "[[Who]] has &pound;" + mo(have) + " and buys " + n + " [[items]] at &pound;" + mo(p) + " each. How much is left?",
+    ez: { q: "[[Who]] has &pound;" + mo(have) + ". " + n + " [[items]] at &pound;" + mo(p) + " each. How much is left?", hint: "Find the cost. Then take it away." },
     boxes: [{ label: "Left", a: ans, pre: "&pound;", show: mo(ans) }],
     slips: [[cost, "That is the cost. Now take it away from &pound;" + mo(have) + "."], [r6(have - p), "That is only one of them. There are " + n + "."], [r6(have + cost), "Buying things leaves less money, so take away."]],
     hint: "Two steps: the cost first, then what is left.",
@@ -335,6 +390,7 @@ function packs(per, pp, single, need){
     /* ---------- chunk 1: in your head ---------- */
     { type: "learn", topic: "In your head", title: "Split it, double and halve, nudge it",
       fig: stratFig([["46 x 7", "40 x 7 = 280", "6 x 7 = 42", "= 322"], ["16 x 25", "= 8 x 50", "= 4 x 100", "= 400"], ["99 x 8", "100 x 8 = 800", "take away 8", "= 792"]]),
+      ez: { title: "Three tricks", html: "<p>3 tricks: <b>split it</b>, <b>double and halve</b>, <b>nudge it</b>.</p><p>Pick the easiest one.</p>" },
       html: "<p>Three tricks for doing it in your head. Pick whichever feels easiest for the numbers in front of you.</p>" +
         "<p><b>Split it:</b> break one number into friendly parts, multiply each part, add them up.</p>" +
         "<p><b>Double and halve:</b> halve one number and double the other. The answer stays the same, and the sum often gets much easier.</p>" +
@@ -374,6 +430,7 @@ function packs(per, pp, single, need){
     /* ---------- chunk 2: grid and column ---------- */
     { type: "learn", topic: "Grid and column", title: "Split both numbers into a grid",
       fig: gridFig(34, 26, false, "600 + 80 + 180 + 24 = 884"),
+      ez: { title: "Grid it", html: "<p>Split 36 into 30 and 6.</p><p>30 &times; 4 = 120. 6 &times; 4 = 24. Add: <b>144</b>.</p>" },
       html: "<p>For bigger numbers, split <b>both</b> numbers into tens and ones. Each box is one small times.</p>" +
         "<p>34 &times; 26: 30 &times; 20 = 600, 4 &times; 20 = 80, 30 &times; 6 = 180, 4 &times; 6 = 24. Add every box: <b>884</b>.</p>" +
         "<p>The column method does exactly the same sums, just stacked up. Use whichever you trust.</p>",
@@ -410,6 +467,7 @@ function packs(per, pp, single, need){
       answer: 0,
       slips: { 1: "58 &times; 4 = 232 is right. Look at the second row: what is the 3 really worth?", 2: "The rows always get added. Each row is one part of the sum." },
       hint: "The 3 in 34 is in the tens column. What is it really worth?",
+      ez: { q: "Jay got <b>26 &times; 3</b> = 68. Where did it slip?", hint: "What is 6 &times; 3?", why: "6 &times; 3 = 18. Carry the 1. So <b>78</b>.", slips: { 1: "2 &times; 3 = 6 is right. Try 6 &times; 3.", 2: "It is a times, so adding will not help." } },
       why: "The 3 means 30, so the second row is 58 &times; 30 = 1740. Then 232 + 1740 = <b>1972</b>. An estimate (60 &times; 30 = 1800) would have caught it.",
       lv: {
         mild: { q: "Jay did <b>26 &times; 3</b> in columns and got 68. He thinks something is up. Where did it slip?",
@@ -428,6 +486,7 @@ function packs(per, pp, single, need){
     /* ---------- chunk 3: bus stop division ---------- */
     { type: "learn", topic: "Bus stop division", title: "One digit at a time, carry the rest",
       fig: busFig("852", 6, 9, "8 / 6 = 1 r 2, 25 / 6 = 4 r 1, 12 / 6 = 2. Answer 142.", true),
+      ez: { title: "Bus stop", html: "<p>4 into 7 goes <b>1</b>. Carry the 3.</p><p>4 into 32 goes <b>8</b>. Answer: <b>18</b>.</p>" },
       html: "<p>Short division works left to right, one digit at a time.</p>" +
         "<p>852 &divide; 6: 6 into 8 goes <b>1</b>, remainder 2. Carry the 2 to make 25. 6 into 25 goes <b>4</b>, remainder 1. Carry the 1 to make 12. 6 into 12 goes <b>2</b>. Answer: <b>142</b>.</p>" +
         "<p>If it does not go, write <b>0</b> on top and carry the whole digit. Check by multiplying back: 142 &times; 6 = 852.</p>",
@@ -466,6 +525,7 @@ function packs(per, pp, single, need){
     /* ---------- chunk 4: use it for real ---------- */
     { type: "learn", topic: "Use it for real", title: "Estimate, work it out, check",
       fig: FLOW,
+      ez: { title: "Estimate, work, check", html: "<p><b>Estimate</b>. <b>Work it out</b>. <b>Check</b>.</p><p>Money has 2 decimal places: &pound;51.10.</p>" },
       html: "<p>Real problems come in words. Three moves keep you safe:</p>" +
         "<p><b>Estimate</b> with rounded numbers, <b>work it out</b> with the method you trust, then <b>check</b> your answer is near the estimate.</p>" +
         "<p>Money has two decimal places, so &pound;51.1 is written &pound;51.10.</p>" },
@@ -495,6 +555,10 @@ function packs(per, pp, single, need){
     ])
   ],
 
+  ez: {
+    realWorld: { title: "The day the pennies changed", html: "<p>Before 1971, a pound was <b>240 pennies</b>!</p><p>Then it became 100 pence.</p>" },
+    make: { intro: "Your best trick and an example." }
+  },
   realWorld: {
     title: "The day the pennies changed",
     html: "<p>Until 15 February 1971, there were <b>240 pennies</b> in a pound in the UK. Then the country switched to decimal money: 100 pence in a pound. Overnight, everyone's money sums turned into the decimal methods you have just used.</p>" +

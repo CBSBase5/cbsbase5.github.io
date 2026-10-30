@@ -126,6 +126,7 @@ function planWidget(el, api){
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "What is a travelogue?", title: "A travelogue tells a journey",
+      ez: { html: "<p>A <b>travelogue</b> tells the story of a journey.</p><p class=\"a2task\"><b>[[Title]]</b><br>[[T1]] [[T2]] [[T3]] [[T4]] [[T5]]</p><p>It uses <b>I</b> or <b>we</b>, in order.</p>" },
       fig: ROUTE,
       html: "<p>A <b>travelogue</b> tells the story of a journey. Here is a short one.</p>" +
         "<p class=\"a2task\"><b>[[Title]]</b><br>[[T1]] [[T2]] [[T3]] [[T4]] [[T5]]</p>" +
@@ -144,7 +145,8 @@ function planWidget(el, api){
       answer: 0,
       slips: { 1: "That tells you what to do. It is an instruction.", 2: "That is trying to sell you something. It is an advert.", 3: "That is a recipe step. It tells you what to do." },
       hint: "Which one tells what happened to the writer?",
-      why: "It tells what happened on a journey, and it uses I or we." },
+      why: "It tells what happened on a journey, and it uses I or we.",
+      ez: { why: "It tells a journey, with I or we.", slips: { 1: "That is an instruction.", 2: "That is an advert.", 3: "That is a recipe." } } },
 
     { type: "multi", topic: "What is a travelogue?",
       q: "Pick <b>all</b> the things a travelogue has.",
@@ -153,6 +155,7 @@ function planWidget(el, api){
       slips: { any: "Three are right. Ingredients and instructions belong to recipes and how to guides." },
       hint: "Ingredients and instructions belong somewhere else.",
       why: "I or we, the right order, and what the writer saw and felt.",
+      ez: { slips: { any: "2 are right. Ingredients are for recipes." } },
       lv: { mild: { options: ["Written as I or we", "Things in the order they happened", "A list of ingredients"], answers: [0, 1],
         slips: { any: "Two are right. Ingredients belong in a recipe." },
         why: "I or we, and the right order. Ingredients belong in a recipe." } } },
@@ -164,6 +167,7 @@ function planWidget(el, api){
       slips: { 1: "The reader was not there. That is why they are reading about it.", 2: "A travelogue is about the writer's own journey." },
       hint: "Who went on the trip?",
       why: "I is the writer. A travelogue is their own journey, told by them.",
+      ez: { why: "<b>I</b> is the writer.", slips: { 1: "The reader was not there." } },
       lv: { spicy: { q: "Why is a travelogue told in the order things happened?",
         options: ["So the reader can follow the journey", "Because it makes it shorter", "So that it rhymes", "Because the best part must come first"],
         slips: { 1: "The order does not change the length.", 2: "Travelogues do not need to rhyme.", 3: "The best part can come anywhere. The order is about following the route." },
@@ -173,6 +177,7 @@ function planWidget(el, api){
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Writing as me", title: "First person: I, me, my, we",
       fig: PEOPLE,
+      ez: { title: "First person", html: "<p><b>First person</b> words: I, me, my, we.</p><p>Jay's favourite: <b>\"When I was in China...\"</b></p>" },
       html: "<p>Travelogues are written in the <b>first person</b>: the writer talks about themselves.</p>" +
         "<p>First person words: <b>I, me, my, we, us, our</b>.</p>" +
         "<p>Jay's favourite first person sentence starts: <b>\"When I was in China...\"</b> You may have heard it once or twice.</p>" +
@@ -205,6 +210,7 @@ function planWidget(el, api){
       model: "I walked into [[place]].",
       hint: "Swap one word.",
       why: "\"I walked into [[place]].\" Swap he for I and you are in the first person.",
+      ez: { q: "Rewrite with I: \"He walked into [[place]].\"", why: "\"I walked into [[place]].\" He becomes I.", slips: [[["he walked", "she walked", "they walked"], "Swap he for I."]] },
       lv: {
         medium: { q: "Rewrite this in the first person: \"She bought a ticket. Her seat was near the front.\"",
           need: [["i bought", "we bought"], ["my seat", "our seat"]],
@@ -226,6 +232,7 @@ function planWidget(el, api){
       slips: { 1: "That one has I, so it is first person.", 2: "That one has we, so it is first person.", 3: "That one has my, so it is first person." },
       hint: "Look for the one without I, we or my.",
       why: "\"He bought a drink\" is about someone else. In a travelogue it would be \"I bought a drink\".",
+      ez: { q: "Which one is not first person?", why: "He is someone else. It should be \"I bought a drink\".", slips: { 1: "That has I.", 2: "That has we.", 3: "That has my." } },
       lv: { spicy: { q: "One sentence slips out of the past tense. Which one?",
         options: ["We walk to [[place]].", "I got off the bus.", "We had lunch by the river.", "My feet ached."],
         slips: { 1: "Got is past.", 2: "Had is past.", 3: "Ached is past." },
@@ -235,6 +242,7 @@ function planWidget(el, api){
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "In the right order", title: "Time words keep the reader on the route",
       fig: TIMEROUTE,
+      ez: { title: "Time words", html: "<p>Tell it <b>in order</b>.</p><p><b>First. Next. Then. Finally.</b></p>" },
       html: "<p>Tell the stops in the order they happened. <b>Time words</b> show the reader where they are on the journey.</p>" +
         "<p><b>First,</b> for the start. <b>Next,</b> <b>Then,</b> and <b>After that,</b> for the middle. <b>Finally,</b> for the end.</p>" +
         "<p>You can use times too: <b>At nine o'clock</b>, <b>At lunchtime</b>, <b>That evening</b>.</p>",
@@ -252,6 +260,7 @@ function planWidget(el, api){
       slips: { any: "Where does every journey start, and where does it end?" },
       hint: "Setting off comes first. Home comes last.",
       why: "Setting off comes first, then the stops in the order they happened, then home at the end.",
+      ez: { why: "Set off first. Home last." },
       lv: {
         medium: { q: "Put the sentences in order.", items: ["[[T1]]", "[[T2]]", "[[T3]]", "[[T4]]", "[[T5]]"],
           hint: "Look at the time words and the clock times.",
@@ -268,6 +277,7 @@ function planWidget(el, api){
       slips: { 1: "First is for the very start of the journey.", 2: "Next is for the middle. Getting home is the end." },
       hint: "Getting home is the end of the journey.",
       why: "<b>Finally</b> tells the reader it is the end.",
+      ez: { slips: { 1: "First is for the start.", 2: "Next is for the middle." } },
       lv: {
         medium: { q: "Which word fits the gap? \"I bought my ticket. ____, I found my seat.\"",
           options: ["Then", "Before that", "First of all"],
@@ -301,11 +311,14 @@ function planWidget(el, api){
       answer: 0,
       slips: { 1: "That one sets off, so it belongs at the start.", 2: "That one starts with Finally, so it belongs at the end." },
       hint: "Look at the time words. Which one is too early?",
-      why: "It happens later in the day, after First and Next, so it belongs fourth." },
+      why: "It happens later in the day, after First and Next, so it belongs fourth.",
+      ez: { q: "Which sentence is in the wrong place?" + "<p class=\"a2task\">[[T1]]<br>[[T4]]<br>[[T2]]<br>[[T3]]<br>[[T5]]</p>", hint: "Which one is too early?", why: "It happens later. It goes 4th.",
+        slips: { 1: "That one sets off. It goes first.", 2: "Finally goes at the end." } } },
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Plan and write", title: "Plan it, then write it",
       fig: PLAN,
+      ez: { title: "Plan, then write", html: "<p><b>Plan:</b> where you went, 3 stops, the end.</p><p><b>Write:</b> I or we, in order, with time words.</p>" },
       html: "<p>Your turn. Pick a journey: a real trip, a made up one, or a journey through time.</p>" +
         "<p><b>Plan first:</b> where you went and how, three stops with something you saw or felt at each, and how it ended.</p>" +
         "<p><b>Then write it:</b> as I or we, in order, with time words. Five sentences is a great travelogue.</p>",
@@ -321,7 +334,8 @@ function planWidget(el, api){
       answer: 0,
       slips: { 1: "This one goes home in the middle of the day.", 2: "This one is backwards: it starts by going home." },
       hint: "Which one starts by setting off and ends by going home?",
-      why: "Set off, the stops in the order they happened, then home. A reader can follow that." },
+      why: "Set off, the stops in the order they happened, then home. A reader can follow that.",
+      ez: { hint: "Set off first. Home last.", why: "Set off, the stops, then home.", slips: { 2: "This one starts by going home." } } },
 
     { type: "widget", topic: "Plan and write", unscored: true,
       title: "Route planner",
@@ -337,6 +351,7 @@ function planWidget(el, api){
       starters: ["At nine o'clock I", "First, I", "Next, we", "After that, I", "Finally, I", "I could see", "I felt"],
       checklist: ["I wrote as I or we", "My stops are in the order they happened", "I used time words like First, Next and Finally", "I said what I saw or felt"],
       minWords: 40,
+      ez: { q: "Write your travelogue, if you like. I or we, in order, with time words." },
       lv: {
         medium: { minWords: 100, q: "Write your travelogue, using your plan: a short paragraph for each part, as I or we, each starting with a time word. Send it to Jay if you would like him to read it.",
           starters: ["At nine o'clock I", "After an hour,", "At lunchtime,", "Later that afternoon,", "That evening,", "Finally,", "I felt"],
@@ -353,6 +368,11 @@ function planWidget(el, api){
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay stepping out of a time portal with a notebook">' + A2ART.portal(80, 75, 56) + A2ART.jay(240, 48, 0.85, "wow") +
       '<rect x="170" y="104" width="34" height="42" rx="3" fill="#ffd23f" stroke="#141a33" stroke-width="2"/><path d="M176 116h22M176 124h22M176 132h14" stroke="#141a33" stroke-width="2"/>' +
       A2ART.bubble(290, 6, 126, 52, "Dear diary:\nRomans!", 294) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Travel writing is everywhere", html: "<p>Explorers kept journals so people could follow them.</p><p>A time traveller would write one too!</p>" },
+    make: { intro: "Make a postcard from your journey. Where you went, and the best bit." }
   },
 
   make: {

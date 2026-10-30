@@ -163,6 +163,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
         "<p><b>Short sentences</b> speed up the pace and build tension. A one word sentence like \"Silence.\" stops you dead. <b>Long sentences</b> slow things down and feel calm or detailed.</p>" +
         "<p><b>Openers</b> (\"Without warning,\" \"Slowly,\" \"Deep underground,\") set up what is coming before it arrives. <b>Questions</b> pull the reader in. <b>Lists</b> pile things up to show how much there is.</p>" +
         "<p>The big move: never stop at naming it. Say <b>what it does to the reader</b>, and if you can, <b>why it matters at that moment</b>.</p>",
+      ez: { title: "Sentences are tools", html: "<p><b>Short</b> sentences feel fast and tense.</p><p><b>Long</b> sentences feel slow and calm.</p>" },
       lv: {
         mild: { html: "<p>Writers choose how to build their sentences, to make you feel something.</p>" +
           "<p><b>Short sentences</b> feel fast and tense. <b>Long sentences</b> feel slow and calm.</p>" +
@@ -178,6 +179,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { 1: "Short sentences can be easier to read, but here the writer chose them for a feeling, not for young readers.", 2: "Writers choose short sentences on purpose. Ask what they make you feel.", 3: "Lots of detail usually needs longer sentences. These are quick and bare." },
       hint: "How fast do you read them? How does that feel?",
       why: "Short sentences make you read in quick bursts, one moment at a time. That speed builds tension.",
+      ez: { q: "\"[[Tense]]\" Short sentences. How do they feel?", hint: "Read them fast.", why: "<b>Tense</b>. Short sentences feel quick and sharp.", slips: { 1: "Long sentences feel calm. These are short.", 2: "Short sentences wake you up." } },
       lv: { mild: { q: "\"[[Tense]]\" These sentences are short. How do they make you feel?",
         options: ["Tense, like something is about to happen", "Calm and sleepy", "Bored"],
         slips: { 1: "Calm and sleepy is more what long, slow sentences do.", 2: "Short sentences are quick. They tend to wake you up, not bore you." },
@@ -189,7 +191,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Tension usually comes from short, sharp sentences. This one drifts along.", 2: "The commas and \"and\" are a choice: they keep it flowing.", 3: "A long sentence with gentle detail slows you down rather than rushing you." },
           hint: "Does this sentence hurry or take its time?",
           why: "One long sentence full of gentle detail makes you read slowly. The calm pace matches the calm moment, and it can make a later shock hit harder.",
-          lv: { mild: { q: "\"[[Calm]]\" This is one long sentence. How does it feel?",
+          ez: { q: "\"[[Calm]]\" One long sentence. How does it feel?", hint: "Does it hurry?", why: "<b>Slow and calm</b>. Long sentences take their time.", slips: { 1: "Short sentences feel fast. This one is long.", 2: "Nothing angry happens here." } },
+      lv: { mild: { q: "\"[[Calm]]\" This is one long sentence. How does it feel?",
             options: ["Slow and calm", "Fast and scary", "Angry"],
             slips: { 1: "Fast and scary is more what short sentences do.", 2: "Nothing angry happens. Look at how gently it moves." },
             hint: "Does it hurry or take its time?", why: "Long, gentle sentences feel slow and calm." } } },
@@ -199,7 +202,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "One word cannot explain much. Its power is in how sudden it is.", 2: "It adds no new detail. It gives a reaction.", 3: "After a long paragraph, one word is a sudden stop, not a gentle slow down." },
           hint: "Long, long, long... then one word. What happens to your reading?",
           why: "After all that length, one word is a sudden stop. The contrast makes the reaction land hard, which is why it is funny.",
-          lv: { mild: { q: "Jay writes a long, boring paragraph. Then one word on its own: \"Outrageous.\" How does the one word feel?",
+          ez: { q: "Jay writes a long, boring bit. Then: \"Outrageous.\" How does it feel?", hint: "Long, long, then one word.", why: "<b>Sudden and strong</b>. One word stops you.", slips: { 1: "One word is a sudden stop.", 2: "It is different from the rest." } },
+      lv: { mild: { q: "Jay writes a long, boring paragraph. Then one word on its own: \"Outrageous.\" How does the one word feel?",
             options: ["Sudden and strong", "Slow and gentle", "Boring like the rest"],
             slips: { 1: "One word after a long paragraph is a sudden stop.", 2: "It is different from the rest, and that is the point." },
             hint: "Long, long, long... then one word.", why: "One word after a long paragraph feels sudden and strong. Outrageous." } } }
@@ -211,6 +215,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { any: "Look for the effect words that match the shape: quick, think, pile up, surprise." },
       hint: "A list piles things up. A question asks you something.",
       why: "Each feature has a typical effect. The skill is choosing the one that fits the moment.",
+      ez: { q: "Match each one to a feeling.", hint: "A list has lots of things.", why: "Each feature gives a feeling.", slips: { any: "Think: fast, think, or lots?" } },
       lv: { mild: { q: "Match each feature to how it makes you feel.", pairs: [["Short sentences", "Tense and fast"], ["A question", "Makes you think"], ["A long list", "There is a lot of it"]] } },
       vary: [
         { q: "Match each feature to its effect.",
@@ -218,13 +223,15 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { any: "Think about speed: what slows you down, what stops you dead?" },
           hint: "A one word sentence is the biggest stop of all.",
           why: "Long sentences slow you down, one word stops you, and openers set up how you read what follows.",
-          lv: { mild: { q: "Match each feature to how it makes you feel.", pairs: [["A long sentence", "Slow and calm"], ["A one word sentence", "A sudden shock"], ["Starting with \"Slowly,\"", "Waiting, wondering what happens"]] } } },
+          ez: { q: "Match each one to a feeling.", hint: "One word is a big stop.", why: "Each feature gives a feeling.", slips: { any: "What is slow? What is a shock?" } },
+      lv: { mild: { q: "Match each feature to how it makes you feel.", pairs: [["A long sentence", "Slow and calm"], ["A one word sentence", "A sudden shock"], ["Starting with \"Slowly,\"", "Waiting, wondering what happens"]] } } },
         { q: "Match each example to the feature it shows.",
           pairs: [["\"[[Ask]]\"", "Question to the reader"], ["\"Without warning, the floor gave way.\"", "Sentence opener"], ["\"[[List]]\"", "List"], ["\"Silence.\"", "One word sentence"]],
           slips: { any: "Find the one with a question mark first, then the one word one." },
           hint: "Look at the punctuation: question marks, lots of commas, a single full stop.",
           why: "Naming the feature correctly is step one. Then you can say what it does.",
-          lv: { mild: { q: "Match each example to the feature it shows.", pairs: [["\"[[Ask]]\"", "A question"], ["\"[[List]]\"", "A list"], ["\"Silence.\"", "A one word sentence"]] } } }
+          ez: { q: "Match each example to its name.", hint: "Look at the marks: ? and commas.", why: "Name the feature first. Then say what it does.", slips: { any: "Find the question mark first." } },
+      lv: { mild: { q: "Match each example to the feature it shows.", pairs: [["\"[[Ask]]\"", "A question"], ["\"[[List]]\"", "A list"], ["\"Silence.\"", "A one word sentence"]] } } }
       ] },
 
     { type: "mc", topic: "Sentences for effect",
@@ -234,6 +241,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { 1: "\"Without warning\" is not a time. It is about suddenness.", 2: "It does the opposite: it gets you ready for a sudden change.", 3: "There is no speech here. The opener is about how the event happens." },
       hint: "What does \"without warning\" tell you before the main bit arrives?",
       why: "The opener sets up the surprise. You feel the jolt even before you read what happened.",
+      ez: { q: "\"Without warning, [[Gone]]\" What do the first 2 words tell you?", hint: "A warning tells you first.", why: "<b>Something sudden</b> is about to happen.", slips: { 1: "It is not a time of day.", 2: "It means a surprise is coming." } },
       lv: { mild: { q: "\"Without warning, [[Gone]]\" What do the first words, \"Without warning,\" tell you?",
         options: ["Something sudden is about to happen", "It is the morning", "Everyone is calm"],
         slips: { 1: "\"Without warning\" is not a time of day.", 2: "\"Without warning\" means a surprise is coming." },
@@ -245,7 +253,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "\"Slowly\" does the opposite of quick. It makes you wait.", 2: "Where would be a place opener. This one is about how.", 3: "Writers do not add words just for length. Ask what the delay does to you." },
           hint: "How do you feel while you wait to find out what is behind the door?",
           why: "Putting the slowness first makes you wait for the main action. Waiting builds suspense.",
-          lv: { mild: { q: "\"Slowly, very slowly, [[who]] opened the door.\" How does starting with \"Slowly\" make you feel?",
+          ez: { q: "\"Slowly, very slowly, [[who]] opened the door.\" How does it feel?", hint: "Slowly means it takes a while.", why: "You <b>wait</b>, so you wonder what is coming.", slips: { 1: "Slowly means it takes a long time.", 2: "No food here. Unless you are Bonnie." } },
+      lv: { mild: { q: "\"Slowly, very slowly, [[who]] opened the door.\" How does starting with \"Slowly\" make you feel?",
             options: ["Like I am waiting, wondering what is behind it", "Like it all happened in a flash", "Hungry"],
             slips: { 1: "\"Slowly\" means it takes a long time.", 2: "Nothing about food here, unless you are thinking of Bonnie." },
             hint: "Slowly means it takes a while.", why: "\"Slowly\" makes you wait, and waiting makes you wonder what is coming." } } },
@@ -255,7 +264,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "The place is not hidden: it is given first, in detail.", 2: "This is a long sentence that takes its time, not a punchy one.", 3: "Making the reader wait for it usually makes something feel more important, not less." },
           hint: "What do you know, and what are you waiting for, by the time you reach the end?",
           why: "The place opener sets up a mysterious setting. By the time the object arrives, you are curious about it.",
-          lv: { mild: { q: "\"Deep under the city, in a room nobody had opened for fifty years, [[thing]] sat waiting.\" What do the first words tell you?",
+          ez: { q: "\"Deep under the city, in a room nobody had opened for fifty years, [[thing]] sat waiting.\" What do the first words tell you?", hint: "Deep under the city is a place.", why: "<b>Where</b> it is. It sounds mysterious.", slips: { 1: "It is a place, not a time.", 2: "Nobody is talking here." } },
+      lv: { mild: { q: "\"Deep under the city, in a room nobody had opened for fifty years, [[thing]] sat waiting.\" What do the first words tell you?",
             options: ["Where it is, and that it is a bit mysterious", "What time it is", "Who is talking"],
             slips: { 1: "\"Deep under the city\" is a place, not a time.", 2: "Nobody is talking here." },
             hint: "Deep under the city is a place.", why: "Starting with the place sets the scene, and it sounds mysterious." } } }
@@ -268,6 +278,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { 1: "A list can slow things a little, but here the point is how much there is.", 2: "A long pile up of things tends to feel busy, not relaxing.", 3: "There is no question mark. It is a list." },
       hint: "How many things are there? How does that feel?",
       why: "Listing item after item gives the reader the feeling of too much at once: busy, crowded, a bit overwhelming.",
+      ez: { q: "\"[[List]]\" This is a list. What does it show?", hint: "Count the things.", why: "<b>A lot</b> of stuff is there.", slips: { 1: "Count them. There are lots.", 2: "Lots of things sounds busy." } },
       lv: { mild: { q: "\"[[List]]\" This is a list. What does it show?",
         options: ["There is a lot of stuff there", "There is nothing there", "It is very quiet"],
         slips: { 1: "Count the things. There are lots.", 2: "A big list of things sounds busy, not quiet." },
@@ -279,7 +290,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Writers usually know where they are going. The question is for you to think about.", 2: "A question does not give a fact. It asks you something.", 3: "This one opens the text. It is a way in." },
           hint: "Who is the question talking to?",
           why: "A question to the reader (a rhetorical question) makes you answer it in your head. Now you are involved.",
-          lv: { mild: { q: "\"[[Ask]]\" Why start with a question?",
+          ez: { q: "\"[[Ask]]\" Why start with a question?", hint: "Who is it asking?", why: "It makes you <b>think</b> of your answer.", slips: { 1: "A question asks. It does not tell.", 2: "Questions wake you up." } },
+      lv: { mild: { q: "\"[[Ask]]\" Why start with a question?",
             options: ["It makes you think about your own answer", "It tells you a fact", "It makes you sleepy"],
             slips: { 1: "A question does not tell you a fact. It asks you something.", 2: "Questions tend to wake you up a bit." },
             hint: "Who is it asking?", why: "A question makes you think about your own answer." } } },
@@ -289,7 +301,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Three is a pattern here, not a count of objects.", 2: "Nothing scary here. The pattern makes it sound positive and certain.", 3: "The rhythm is upbeat. It is not sad." },
           hint: "Say it out loud. Why does three feel just right?",
           why: "Lists of three have a strong rhythm. They sound finished and certain, so the reader remembers them.",
-          lv: { mild: { q: "\"It was cheap, it was quick and it was brilliant fun.\" This says three good things. What does that do?",
+          ez: { q: "\"It was cheap, it was quick and it was brilliant fun.\" 3 good things. What does that do?", hint: "Good or bad things?", why: "It sounds <b>really good</b>, and it sticks.", slips: { 1: "All 3 are good things.", 2: "Nothing scary here." } },
+      lv: { mild: { q: "\"It was cheap, it was quick and it was brilliant fun.\" This says three good things. What does that do?",
             options: ["Makes it sound really good and easy to remember", "Makes it sound bad", "Makes it sound scary"],
             slips: { 1: "All three things are good things.", 2: "Nothing scary here." },
             hint: "Are the three things good or bad?", why: "Three good things in a row make it sound really good, and the rhythm sticks." } } }
@@ -302,6 +315,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
         "<p><b>Paragraph length:</b> long paragraphs slow you down and give detail. Paragraphs that get shorter and shorter speed things up. A <b>one line paragraph</b> stands alone, so it stands out: a shock, a turning point, a key idea.</p>" +
         "<p><b>Headings and subheadings</b> tell the reader what each part is about and help them find what they need. <b>Bullet points</b> make information quick to scan.</p>" +
         "<p><b>Order of information:</b> news puts the most important facts first. Stories often hold back key information to keep you reading.</p>",
+      ez: { title: "The whole text", html: "<p>A line <b>on its own</b> stands out.</p><p><b>Headings</b> help you find things.</p>" },
       lv: {
         mild: { html: "<p>Now look at the <b>whole text</b>.</p>" +
           "<p>A <b>paragraph on its own line</b> stands out. <b>Headings</b> tell you what each part is about. <b>Bullet points</b> are quick to read.</p>" },
@@ -316,6 +330,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { 1: "A new speaker does get a new line, but nobody is speaking here. This is a choice for effect.", 2: "Writers do not leave lines for space. Ask what it does to the reader.", 3: "Usually the opposite: on its own line it gets the spotlight." },
       hint: "Long, long, long... then one line. Where does your eye go?",
       why: "The contrast with the long paragraphs makes the single line jump out. The reader stops on it, so the shock lands.",
+      ez: { q: "Long paragraphs, then one line on its own: \"[[Gone]]\" Why?", hint: "Where does your eye go?", why: "So it <b>stands out</b>.", slips: { 1: "It is not just to fill space.", 2: "On its own, it matters more." } },
       lv: { mild: { q: "After some long paragraphs, the writer puts one line on its own: \"[[Gone]]\" Why?",
         options: ["So it stands out", "To fill space", "Because it does not matter"],
         slips: { 1: "Writers do not leave lines just to fill space.", 2: "On its own line, it matters even more." },
@@ -327,7 +342,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Subheadings in a leaflet are about clarity, not tension.", 2: "These subheadings just label each part. They do not give an opinion.", 3: "They make it easier, not harder: you can skip to the bit you want." },
           hint: "Imagine you only want to know what to bring.",
           why: "Subheadings organise the information. A reader can skim, find \"What to bring\" and go straight there.",
-          lv: { mild: { q: "A leaflet has subheadings like \"Getting there\" and \"What to bring\". What are they for?",
+          ez: { q: "A leaflet has subheadings like \"What to bring\". What are they for?", hint: "You want to know what to bring.", why: "To help you <b>find</b> the part you need.", slips: { 1: "Subheadings are signposts.", 2: "They help you find things fast." } },
+      lv: { mild: { q: "A leaflet has subheadings like \"Getting there\" and \"What to bring\". What are they for?",
             options: ["To help you find the part you need", "To make it scary", "To make it longer"],
             slips: { 1: "Subheadings are not scary. They are signposts.", 2: "They help you find things quickly." },
             hint: "Imagine you only want to know what to bring.", why: "Subheadings help you find the part you need." } } },
@@ -337,7 +353,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Shorter paragraphs give less detail, not more. They are about speed.", 2: "It is a deliberate choice. Ask what it does to the reader.", 3: "Shorter and shorter speeds up, it does not calm down." },
           hint: "What happens to your reading speed as the paragraphs shrink?",
           why: "Shrinking paragraphs make you read faster and faster, so the structure feels like the chase itself.",
-          lv: { mild: { q: "In a chase, the paragraphs get shorter and shorter. How does that feel?",
+          ez: { q: "In a chase, the paragraphs get shorter. How does it feel?", hint: "Short bits: fast or slow?", why: "<b>Faster</b>. Short bits feel quick.", slips: { 1: "Shorter bits make you read faster.", 2: "Shorter bits wake you up." } },
+      lv: { mild: { q: "In a chase, the paragraphs get shorter and shorter. How does that feel?",
             options: ["Faster and faster", "Slower and calmer", "Sleepy"],
             slips: { 1: "Shorter paragraphs make you read faster.", 2: "Shorter paragraphs wake you up." },
             hint: "Do you read short bits fast or slow?", why: "Short paragraphs feel fast, so the chase feels faster." } } }
@@ -350,12 +367,15 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { any: "Ask: does it happen inside one sentence, or does it shape the whole text?" },
       hint: "Inside one sentence, or across the whole page?",
       why: "Sentence level is the shape of a sentence. Text level is how the whole thing is organised.",
+      ez: { hint: "One sentence, or the whole page?", why: "Some sit in 1 sentence. Some shape the page.", slips: { any: "Is it in 1 sentence, or the whole page?" } },
       lv: { mild: { q: "Sort them: inside a <b>sentence</b>, or the <b>whole text</b>?", buckets: ["Inside a sentence", "The whole text"], cards: [["Short sentences", 0], ["A list", 0], ["Headings", 1], ["Bullet points", 1]] } },
       vary: [
         { cards: [["\"Silence.\"", 0], ["\"Without warning,\" at the start", 0], ["\"Have you ever...?\"", 0], ["Lots of items with commas", 0], ["A big bold title", 1], ["The ending links back to the opening", 1], ["The most important facts come first", 1], ["Paragraphs get shorter and shorter", 1]],
-          lv: { mild: { q: "Sort them: inside a <b>sentence</b>, or the <b>whole text</b>?", buckets: ["Inside a sentence", "The whole text"], cards: [["\"Silence.\"", 0], ["\"Have you ever...?\"", 0], ["A big bold title", 1], ["Bullet points down the side", 1]] } } },
+          ez: { hint: "One sentence, or the whole page?", why: "Some sit in 1 sentence. Some shape the page.", slips: { any: "Is it in 1 sentence, or the whole page?" } },
+      lv: { mild: { q: "Sort them: inside a <b>sentence</b>, or the <b>whole text</b>?", buckets: ["Inside a sentence", "The whole text"], cards: [["\"Silence.\"", 0], ["\"Have you ever...?\"", 0], ["A big bold title", 1], ["Bullet points down the side", 1]] } } },
         { cards: [["A long, flowing sentence", 0], ["A list of three", 0], ["Starting with \"Slowly,\"", 0], ["A one word sentence", 0], ["A flashback to years before", 1], ["A cliffhanger ending", 1], ["A paragraph on its own line", 1], ["A subheading", 1]],
-          lv: { mild: { q: "Sort them: inside a <b>sentence</b>, or the <b>whole text</b>?", buckets: ["Inside a sentence", "The whole text"], cards: [["A long sentence", 0], ["A one word sentence", 0], ["A subheading", 1], ["A paragraph on its own line", 1]] } } }
+          ez: { hint: "One sentence, or the whole page?", why: "Some sit in 1 sentence. Some shape the page.", slips: { any: "Is it in 1 sentence, or the whole page?" } },
+      lv: { mild: { q: "Sort them: inside a <b>sentence</b>, or the <b>whole text</b>?", buckets: ["Inside a sentence", "The whole text"], cards: [["A long sentence", 0], ["A one word sentence", 0], ["A subheading", 1], ["A paragraph on its own line", 1]] } } }
       ] },
 
     { type: "order", topic: "Paragraphs and layout",
@@ -364,6 +384,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { any: "News starts with the biggest facts and saves the background for the end." },
       hint: "What would a reader who only reads the start need?",
       why: "Many people only read the top of a news story, so the key facts go first and the extra detail comes later.",
+      ez: { q: "Put the news report in order.", hint: "Big news first.", why: "Headline first. What happens next goes last.", slips: { any: "The big news comes first." } },
       lv: { mild: { q: "Put these parts of a news report in order.", items: ["Headline", "What happened", "What happens next"] } },
       vary: [
         { q: "Put these parts of a story in the usual order.",
@@ -371,13 +392,15 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { any: "The most tense moment usually comes near the end, not the start." },
           hint: "Calm, then trouble, then worse, then the big moment.",
           why: "Building up from calm to the climax keeps the tension rising, so the reader keeps going.",
-          lv: { mild: { q: "Put these parts of a story in order.", items: ["Meet [[who]]", "A problem happens", "The problem is sorted"] } } },
+          ez: { q: "Put the story in order.", hint: "Calm, then trouble, then sorted.", why: "Meet them. A problem. Then it is sorted.", slips: { any: "The problem comes before it is sorted." } },
+      lv: { mild: { q: "Put these parts of a story in order.", items: ["Meet [[who]]", "A problem happens", "The problem is sorted"] } } },
         { q: "Put these parts of a persuasive leaflet in the order that works best.",
           items: ["An eye catching headline", "The problem", "The solution", "Evidence that it works", "What to do now: sign up today"],
           slips: { any: "Grab attention first, and tell the reader what to do at the very end, when they are convinced." },
           hint: "Grab them, worry them, fix it, prove it, then ask.",
           why: "The order leads the reader step by step from interested to convinced, then tells them what to do while they feel it.",
-          lv: { mild: { q: "Put these parts of a leaflet in order.", items: ["A headline to grab you", "The facts", "What to do now"] } } }
+          ez: { q: "Put the leaflet in order.", hint: "Grab them first.", why: "Grab them. Give the facts. Say what to do.", slips: { any: "What to do comes last." } },
+      lv: { mild: { q: "Put these parts of a leaflet in order.", items: ["A headline to grab you", "The facts", "What to do now"] } } }
       ] },
 
     /* ---------- chunk 3: openings, endings and repetition ---------- */
@@ -387,6 +410,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
         "<p><b>Endings:</b> a <b>cliffhanger</b> leaves you in suspense. A <b>circular</b> ending comes back to the opening, so the text feels complete and you notice what has changed. A <b>call to action</b> tells the reader what to do next.</p>" +
         "<p><b>Repetition:</b> a word, phrase or object that comes back again and again sticks in your head and shows it matters.</p>" +
         "<p>Watch for <b>shifts</b> too: a jump back in time (flashback), or zooming from a wide view to one small detail.</p>",
+      ez: { title: "Starts and ends", html: "<p>Start in the <b>action</b> to grab them.</p><p>A <b>cliffhanger</b> leaves them wanting more.</p>" },
       lv: {
         mild: { html: "<p>How a text <b>starts</b> and <b>ends</b> is a choice too.</p>" +
           "<p>Starting in the <b>middle of the action</b> grabs you. A <b>cliffhanger</b> ending leaves you wanting more.</p>" +
@@ -402,6 +426,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { 1: "Nothing is explained yet. That is the point: you are dropped in.", 2: "It gives nothing away about the ending.", 3: "Sudden and short is the opposite of slow and relaxing." },
       hint: "What do you know? What do you want to know?",
       why: "Starting in the middle of the action hooks you. You do not know who, where or why, so you read on to find out.",
+      ez: { q: "A story starts: \"[[Open]]\" How does it feel?", hint: "Do you know what is going on?", why: "You <b>want to know</b> what is going on.", slips: { 1: "A sudden start wakes you up.", 2: "It gives nothing away yet." } },
       lv: { mild: { q: "A story starts: \"[[Open]]\" How does this start make you feel?",
         options: ["I want to know what is going on", "Sleepy", "I already know the ending"],
         slips: { 1: "A sudden start tends to wake you up.", 2: "It gives nothing away. That is why you want to know more." },
@@ -413,7 +438,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Coming back to the start is a deliberate choice. Look at what is different.", 2: "A cliffhanger leaves things open. This one closes the loop.", 3: "Returning to the start tends to feel finished, not rushed." },
           hint: "Same object, start and end. What is different about it?",
           why: "Returning to the opening closes the loop. The dust makes you notice how much time has passed and what has changed.",
-          lv: { mild: { q: "A story starts and ends with [[thing]]. Why go back to the start?",
+          ez: { q: "A story starts and ends with [[thing]]. Why?", hint: "Think of a loop.", why: "It feels <b>finished</b>, like a loop.", slips: { 1: "It is on purpose.", 2: "A loop feels finished." } },
+      lv: { mild: { q: "A story starts and ends with [[thing]]. Why go back to the start?",
             options: ["It makes the story feel finished", "It is a mistake", "It makes it scary"],
             slips: { 1: "It is on purpose.", 2: "Going back to the start feels finished, more than scary." },
             hint: "Think of a loop.", why: "Going back to the start makes it feel finished, like a loop." } } },
@@ -423,7 +449,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Nothing is answered: that is what makes it a cliffhanger.", 2: "It is a new event, not a summary.", 3: "That would be a circular ending. This one leaves things hanging." },
           hint: "Do you know what happens next?",
           why: "A cliffhanger stops just before you find out. The suspense pulls you on to the next part.",
-          lv: { mild: { q: "A chapter ends: \"[[Cliff]]\" How does it make you feel?",
+          ez: { q: "A chapter ends: \"[[Cliff]]\" How does it feel?", hint: "What happens next?", why: "You <b>want to read on</b>. It is a cliffhanger.", slips: { 1: "Nothing is sorted yet.", 2: "Most people turn the page here." } },
+      lv: { mild: { q: "A chapter ends: \"[[Cliff]]\" How does it make you feel?",
             options: ["I want to know what happens next", "Everything is sorted", "Bored"],
             slips: { 1: "Nothing is sorted yet.", 2: "Most people want to turn the page here." },
             hint: "Do you know what happens next?", why: "It stops just before you find out, so you want to read on. That is a cliffhanger." } } }
@@ -436,6 +463,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { 1: "Repetition is a choice. Ask why the writer keeps coming back to it.", 2: "Repeating a negative word over and over does not feel calm.", 3: "There is no time given here." },
       hint: "Read it aloud. What does the repeated word do?",
       why: "Each repeat hits like a drumbeat. The pattern makes the reader feel the mistakes piling up.",
+      ez: { q: "\"[[Rep]]\" Wrong comes again and again. What does that do?", hint: "Read it out loud.", why: "It <b>sticks</b>. It all feels bad.", slips: { 1: "Wrong, wrong, wrong is not calm.", 2: "Writers repeat words on purpose." } },
       lv: { mild: { q: "\"[[Rep]]\" The word \"Wrong\" comes again and again. What does that do?",
         options: ["Makes it stick, so you feel it is all going badly", "Makes it calm", "Nothing at all"],
         slips: { 1: "Wrong, wrong, wrong does not feel calm.", 2: "Writers repeat words on purpose." },
@@ -447,7 +475,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "It could be, but the writer is using it for more than the setting. Midnight is getting closer.", 2: "The clock is a signal to the reader, not a lesson.", 3: "Time running out is the opposite of relaxing." },
           hint: "What is getting closer each time?",
           why: "A repeated detail that changes each time works like a countdown. The reader feels the pressure build.",
-          lv: { mild: { q: "A clock keeps coming back in a story, closer to midnight each time. Why?",
+          ez: { q: "A clock keeps coming back, nearer midnight each time. Why?", hint: "What is getting closer?", why: "<b>Time is running out</b>. It feels tense.", slips: { 1: "It is a signal, not a lesson.", 2: "Running out of time is not calm." } },
+      lv: { mild: { q: "A clock keeps coming back in a story, closer to midnight each time. Why?",
             options: ["To show time is running out", "To teach you to tell the time", "To make it calm"],
             slips: { 1: "It is a signal in the story, not a lesson.", 2: "Running out of time is not calm." },
             hint: "What is getting closer?", why: "It shows time running out, so it feels more and more tense." } } },
@@ -457,7 +486,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "Repeating it on purpose sounds certain, not lost.", 2: "\"We can\" is hopeful, not scary.", 3: "Repeating it puts the main point right at the front, again and again." },
           hint: "How would a crowd feel hearing \"We can\" again and again?",
           why: "Repeated openers create a rhythm. \"We\" includes the audience, and repeating it makes everyone feel part of it.",
-          lv: { mild: { q: "A speech keeps saying \"We can\" at the start of each part. How does that sound?",
+          ez: { q: "A speech keeps saying \"We can\". How does it sound?", hint: "Say \"We can\" 3 times.", why: "<b>Strong and hopeful</b>.", slips: { 1: "Saying it on purpose sounds sure.", 2: "\"We can\" is hopeful." } },
+      lv: { mild: { q: "A speech keeps saying \"We can\" at the start of each part. How does that sound?",
             options: ["Strong and hopeful", "Lost and confused", "Scary"],
             slips: { 1: "Saying it on purpose sounds sure, not lost.", 2: "\"We can\" is hopeful." },
             hint: "Say \"We can\" three times, loudly.", why: "Saying it again and again sounds strong and hopeful." } } }
@@ -470,6 +500,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { any: "Similes and alliteration are about word choice (language). Structure is about shape, order and position." },
       hint: "Is it about which words, or about where things go and in what order?",
       why: "One line paragraphs, cliffhangers, flashbacks and circular endings are all about shape and order. Similes and alliteration are language features.",
+      ez: { q: "Pick <b>2</b> about how the text is built.", hint: "Which words, or where things go?", why: "Own line and cliffhanger are shape. Spooky is a word.", slips: { any: "A describing word is word choice." } },
       lv: { mild: { q: "Pick the <b>two</b> features about how a text is built.", options: ["A paragraph on its own line", "A cliffhanger ending", "A describing word, like \"spooky\""], answers: [0, 1],
         slips: { any: "A describing word is about word choice. The other two are about how the text is built." },
         why: "A paragraph on its own line and a cliffhanger ending are about how the text is built. A describing word is word choice." } },
@@ -477,13 +508,15 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
         { options: ["Short sentences", "The most important facts first", "Paragraphs that get shorter", "A metaphor, like \"the room was a fridge\"", "Onomatopoeia, like \"crash\"", "A repeated opener"],
           answers: [0, 1, 2, 5],
           why: "Sentence length, the order of facts, paragraph length and repeated openers are structure. Metaphor and onomatopoeia are about the words.",
-          lv: { mild: { q: "Pick the <b>two</b> features about how a text is built.", options: ["Short sentences", "Headings", "A sound word, like \"crash\""], answers: [0, 1],
+          ez: { q: "Pick <b>2</b> about how the text is built.", hint: "Which words, or where things go?", why: "Short sentences and headings are shape. Crash is a word.", slips: { any: "A sound word is word choice." } },
+      lv: { mild: { q: "Pick the <b>two</b> features about how a text is built.", options: ["Short sentences", "Headings", "A sound word, like \"crash\""], answers: [0, 1],
             slips: { any: "A sound word is about word choice. Short sentences and headings are about how the text is built." },
             why: "Short sentences and headings are about how it is built. \"Crash\" is word choice." } } },
         { options: ["Opening in the middle of the action", "Subheadings", "Zooming in from a wide view to one detail", "A powerful verb, like \"smashed\"", "Personification, like \"the wind howled\"", "Ending with a call to action"],
           answers: [0, 1, 2, 5],
           why: "Where it opens, how it is divided, where the focus moves and how it ends are structure. Verbs and personification are language.",
-          lv: { mild: { q: "Pick the <b>two</b> features about how a text is built.", options: ["Starting in the middle of the action", "Subheadings", "A strong word, like \"smashed\""], answers: [0, 1],
+          ez: { q: "Pick <b>2</b> about how the text is built.", hint: "Which words, or where things go?", why: "Starting in the action and subheadings are shape.", slips: { any: "A strong word is word choice." } },
+      lv: { mild: { q: "Pick the <b>two</b> features about how a text is built.", options: ["Starting in the middle of the action", "Subheadings", "A strong word, like \"smashed\""], answers: [0, 1],
             slips: { any: "A strong word is about word choice. The other two are about how the text is built." },
             why: "Starting in the action and subheadings are about how it is built. \"Smashed\" is word choice." } } }
       ] },
@@ -495,6 +528,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
         "<p class=\"a2task\"><b>1 Name it:</b> The writer uses a series of short sentences.<br><b>2 Show it:</b> \"[[Tense]]\"<br><b>3 Effect:</b> This speeds up the pace, so the reader feels each moment land one after another. It builds tension <b>because</b> we sense something is about to go wrong.</p>" +
         "<p>Watch out for comments that would fit any text, like \"it makes it interesting\" or \"it makes you want to read on\". Say <b>what</b> the reader feels and <b>why here</b>.</p>" +
         "<p>Next you fill in a missing part, then you try a whole one. Have a go whenever you are ready.</p>",
+      ez: { title: "Name it, show it, say it", html: "<p><b>Name it</b>. <b>Show it</b>. Say how it <b>feels</b>.</p><p class=\"a2task\">Short sentences. \"[[Tense]]\" It feels tense.</p>" },
       lv: {
         mild: { html: "<p>Here is a comment in three parts.</p>" +
           "<p class=\"a2task\"><b>1 Name it:</b> short sentences.<br><b>2 Show it:</b> \"[[Tense]]\"<br><b>3 Effect:</b> This makes the reader feel tense.</p>" +
@@ -510,6 +544,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       model: "This speeds up the pace and builds tension, so the reader feels on edge.",
       hint: "Is it fast or slow? Calm or tense?",
       why: "Short sentences speed up the pace and build tension. Saying the feeling, and why, is what makes a comment strong.",
+      ez: { q: "Finish it.<br>Short sentences: \"[[Tense]]\" This makes the reader feel...", hint: "Fast or slow? Calm or tense?", why: "Short sentences feel <b>tense</b>.", slips: [[null, "Try a feeling word, like tense."]] },
       lv: { mild: { q: "Finish the comment.<br>The writer uses short sentences: \"[[Tense]]\" This makes the reader feel...", model: "This makes the reader feel tense and nervous." } },
       vary: [
         { q: "Parts 1 and 2 are done. Have a go at part 3, the effect.<br><b>1</b> The writer opens with a question to the reader. <b>2</b> \"[[Ask]]\" <b>3</b> This...",
@@ -518,14 +553,16 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           model: "This makes the reader think about their own answer, so they feel involved straight away.",
           hint: "What do you do in your head when someone asks you a question?",
           why: "A question pulls the reader in: they answer it in their head, so they are involved from the first line.",
-          lv: { mild: { q: "Finish the comment.<br>The writer starts with a question: \"[[Ask]]\" This makes the reader...", model: "This makes the reader think about it." } } },
+          ez: { q: "Finish it.<br>A question: \"[[Ask]]\" This makes the reader...", hint: "What do you do when asked?", why: "A question makes the reader <b>think</b>.", slips: [[null, "Say what the reader does in their head."]] },
+      lv: { mild: { q: "Finish the comment.<br>The writer starts with a question: \"[[Ask]]\" This makes the reader...", model: "This makes the reader think about it." } } },
         { q: "Parts 1 and 2 are done. Have a go at part 3, the effect.<br><b>1</b> The writer ends the chapter on a cliffhanger. <b>2</b> \"[[Cliff]]\" <b>3</b> This...",
           need: [["suspens", "want", "wonder", "curio", "next", "hang", "tens", "guess", "find out", "desperat", "keen", "unsure", "worr", "nerv"]],
           slips: [[["interesting", "good", "better"], "That could fit any text. Say what the reader feels when the chapter stops right there."]],
           model: "This leaves the reader in suspense, desperate to find out what happens next.",
           hint: "How do you feel when a chapter stops right there?",
           why: "A cliffhanger stops before the answer. The suspense makes the reader want the next chapter.",
-          lv: { mild: { q: "Finish the comment.<br>The chapter ends: \"[[Cliff]]\" This makes the reader...", model: "This makes the reader want to know what happens next." } } }
+          ez: { q: "Finish it.<br>The chapter ends: \"[[Cliff]]\" This makes the reader...", hint: "How do you feel here?", why: "A cliffhanger makes you <b>want more</b>.", slips: [[null, "Say how the reader feels here."]] },
+      lv: { mild: { q: "Finish the comment.<br>The chapter ends: \"[[Cliff]]\" This makes the reader...", model: "This makes the reader want to know what happens next." } } }
       ] },
 
     { type: "text", topic: "Feature, then effect",
@@ -535,6 +572,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       model: "The writer uses a one line paragraph. It stands out after the long paragraphs, so the reader stops and feels the shock.",
       hint: "Part 1: what is special about how it is laid out? Part 3: what does it make you notice?",
       why: "A one line paragraph after long ones grabs the spotlight. The reader pauses, so the moment hits hard.",
+      ez: { q: "This line is on its own: \"[[Gone]]\" Finish: \"It is on its own line, so it...\"", hint: "What does it make you notice?", why: "On its own, it <b>stands out</b>.", slips: [[null, "What does being alone make you notice?"]] },
       lv: { mild: { q: "This line is on its own: \"[[Gone]]\" Finish: \"It is on its own line, so it...\"",
         need: [["stand", "notice", "shock", "surpris", "importan", "see", "big", "attention", "out", "matter"]],
         model: "It is on its own line, so it stands out." } },
@@ -545,7 +583,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           model: "The writer uses a long list. It piles up detail, so the reader feels how busy and crowded it is.",
           hint: "Part 1: lots of commas. Part 3: how much is there?",
           why: "A list piles thing on thing. The reader feels the amount: busy, crowded, a bit too much.",
-          lv: { mild: { q: "\"[[List]]\" Finish: \"It is a list, so it shows...\"",
+          ez: { hint: "How much stuff is there?", why: "A list shows <b>a lot</b> of stuff.", slips: [[null, "How much is there? Say that."]] },
+      lv: { mild: { q: "\"[[List]]\" Finish: \"It is a list, so it shows...\"",
             need: [["lot", "much", "busy", "many", "loads", "full", "everything", "crowd"]],
             model: "It is a list, so it shows there is a lot of stuff." } } },
         { q: "Now parts 1 and 3. \"[[Rep]]\" Name the feature <b>and</b> say its effect.",
@@ -554,7 +593,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           model: "The writer uses repetition of \"Wrong\". It builds a rhythm, so the reader feels the mistakes piling up.",
           hint: "Part 1: which word keeps coming back? Part 3: what does that drumbeat do?",
           why: "Repetition makes a word stick. Here it hammers home that everything is going wrong.",
-          lv: { mild: { q: "\"[[Rep]]\" Finish: \"The word Wrong is repeated, so it...\"",
+          ez: { hint: "Which word keeps coming back?", why: "Saying it again makes it <b>stick</b>.", slips: [[null, "What does hearing it again do?"]] },
+      lv: { mild: { q: "\"[[Rep]]\" Finish: \"The word Wrong is repeated, so it...\"",
             need: [["stick", "stand", "remember", "notice", "bad", "importan", "strong", "wrong", "worse"]],
             model: "The word Wrong is repeated, so it sticks in your head." } } }
       ] },
@@ -566,6 +606,7 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       slips: { 1: "That names the feature, but stops there. Add what it does to the reader.", 2: "\"Interesting\" and \"read on\" could be said about any text. Name the feeling and why.", 3: "That retells what happens. A structure comment talks about how it is built." },
       hint: "Look for one that names it, says the effect, and says why.",
       why: "The strongest comment names the feature, says the precise effect on the reader, and explains why it works at this moment.",
+      ez: { hint: "Find a feature and a feeling.", why: "It says short sentences, and tense.", slips: { 1: "True, but no feeling.", 2: "Good how? Say a feeling." } },
       lv: { mild: { q: "Which comment on \"[[Tense]]\" is best?",
         options: ["The short sentences make me feel tense.", "There are some sentences.", "It is good."],
         slips: { 1: "True, but it does not say the feature or the feeling.", 2: "Good how? Try saying a feeling." },
@@ -577,7 +618,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "That spots the feature, then stops. What does it do?", 2: "\"More exciting\" is vague. What exactly does the reader do or feel?", 3: "That is what happens, not how it is built." },
           hint: "Name it, effect, why here.",
           why: "It names the feature, says what the reader does (pauses) and feels (shock), and why it works after long paragraphs.",
-          lv: { mild: { q: "Which comment on \"[[Gone]]\" (on its own line) is best?",
+          ez: { q: "\"[[Gone]]\" is on its own line. Which comment is best?", hint: "Which says what it does?", why: "It says what it does: it <b>stands out</b>.", slips: { 1: "True, but what does it do?", 2: "Nice how? Say what it does." } },
+      lv: { mild: { q: "Which comment on \"[[Gone]]\" (on its own line) is best?",
             options: ["It is on its own line, so it stands out and feels like a shock.", "It is a line.", "It is nice."],
             slips: { 1: "True, but say what it does.", 2: "Nice how? Say what it does." },
             hint: "Find the one that says what it does.", why: "It says the feature and what it does: it stands out like a shock." } } },
@@ -587,7 +629,8 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
           slips: { 1: "That names it, but does not say what it does.", 2: "\"Good and interesting\" fits anything. Name the feeling.", 3: "That retells the plot. Talk about why it ends there." },
           hint: "Name it, effect, why here.",
           why: "It says what the structure is, what the reader feels (suspense), and why (the answer is held back).",
-          lv: { mild: { q: "Which comment on \"[[Cliff]]\" is best?",
+          ez: { hint: "Find the one with a feeling.", why: "It names the cliffhanger and a feeling.", slips: { 1: "True, but how does it feel?", 2: "Good how? Say a feeling." } },
+      lv: { mild: { q: "Which comment on \"[[Cliff]]\" is best?",
             options: ["It is a cliffhanger, so I want to know what happens next.", "It is the end.", "It is good."],
             slips: { 1: "True, but say how it makes you feel.", 2: "Good how? Say how it makes you feel." },
             hint: "Find the one with a feeling in it.", why: "It names the cliffhanger and how it makes you feel." } } }
@@ -600,10 +643,17 @@ var NSE = '<svg viewBox="0 0 520 190" role="img" aria-label="Three steps: name t
       model: "The writer opens in the middle of the action with a short sentence. It drops the reader straight in, so they want to know what is going on.",
       hint: "Feature: where does it start? Effect: what questions pop into your head?",
       why: "Opening in the middle of the action hooks the reader: they have questions straight away, so they keep reading.",
+      ez: { q: "If you like: \"[[Open]]\" starts a story. Finish: \"It starts in the action, so the reader...\"", hint: "What do you want to know?", why: "Starting in the action makes you <b>want to know</b> more.", slips: [[null, "What does the reader not know yet?"]] },
       lv: { mild: { q: "If you fancy it: \"[[Open]]\" is how a story starts. Finish: \"It starts in the action, so the reader...\"",
         need: [["want", "know", "wonder", "excit", "grab", "hook", "tens", "curio", "ask", "question"]],
         model: "It starts in the action, so the reader wants to know what is going on." } } }
   ],
+
+  ez: {
+    blurb: "Writers build a text to make you feel. Spot how.",
+    realWorld: { title: "Built for effect", html: "<p>Trailers, news and adverts are all <b>built for effect</b>.</p><p>Writing home from the past? Dinosaur first!</p>" },
+    make: { intro: "Pick 1 feature. Say what it does to the reader." }
+  },
 
   realWorld: {
     title: "Structure is everywhere",

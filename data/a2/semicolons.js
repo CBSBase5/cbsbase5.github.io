@@ -107,6 +107,10 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
     music: { name: "Music", w: { who: "the singer", place: "the theatre", thing: "the curtain", item1: "a script", item2: "throat sweets", item3: "a costume" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>Colons and semicolons help writing sound clear and sure.</p><p>Letters from 200 years ago are full of semicolons!</p>" },
+    make: { intro: "Your own sentence for each mark." }
+  },
   startFig: TOOLS,
   steps: [
 
@@ -116,6 +120,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       html: "<p>A <b>colon</b> is two dots, one on top of the other ( : ). One of its jobs is to introduce a <b>list</b>.</p>" +
         "<p class=\"a2task\">[[Who]] packed three things: [[item1]], [[item2]] and [[item3]].</p>" +
         "<p>The part <b>before</b> the colon makes sense on its own: \"[[Who]] packed three things.\" The colon is like a drum roll. Here they are.</p>",
+      ez: { html: "<p>A <b>colon</b> can mean: here comes a list.</p><p class=\"a2task\">[[Who]] packed three things: [[item1]], [[item2]] and [[item3]].</p>" },
       lv: {
         mild: { html: "<p>This is a <b>colon</b> ( : ). It is two dots, one on top of the other.</p>" +
           "<p>A colon can mean <b>here comes a list</b>.</p>" +
@@ -134,6 +139,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       slips: { 0: "Just after the name, the sentence has hardly started. The colon goes right before the list.", 1: "\"[[Who]] needed\" does not make sense on its own yet. Keep going until the list starts." },
       hint: "Find the place just before the list begins.",
       why: "\"[[Who]] needed three things\" makes sense on its own, then the colon brings in the list.",
+      ez: { slips: { 0: "Too early. Go to just before the list.", 1: "Keep going. Find where the list starts." }, hint: "Just before the list.", why: "Just before the list: <b>Gap C</b>." },
       lv: { spicy: {
         fig: gaps(["For the trip to [[place]], [[who]] needed {A}", "three things {B} [[item1]], [[item2]] {C}", "and [[item3]]."]),
         answer: 1,
@@ -146,6 +152,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       cards: [["[[Who]] packed three things: [[item1]], [[item2]] and [[item3]].", 0], ["The menu had two choices: soup or salad.", 0], ["My: favourite colour is green.", 1], ["The bus: was late again.", 1]],
       hint: "Does the part before the colon make sense on its own? Does a list or explanation come after?",
       why: "A good colon comes after a complete idea and before the list. \"My:\" and \"The bus:\" chop the sentence in half.",
+      ez: { hint: "Does a list come after the colon?", why: "A good colon comes just before the list." },
       lv: {
         medium: { cards: [["[[Who]] packed three things: [[item1]], [[item2]] and [[item3]].", 0], ["The menu had two choices: soup or salad.", 0], ["My: favourite colour is green.", 1], ["The bus: was late again.", 1], ["We saw three animals: a fox, an owl and a deer.", 0], ["I went to: the shop.", 1]] },
         spicy: { cards: [["You will need the following: a pen, a ruler and a rubber.", 0], ["The kit includes: a pen, a ruler and a rubber.", 1], ["[[Who]] packed three things: [[item1]], [[item2]] and [[item3]].", 0], ["We visited: Leeds, York and Hull.", 1], ["Only two people turned up: Jay and Bonnie.", 0]],
@@ -158,6 +165,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       slips: { 1: "A full stop would leave \"check [[thing]], lock up...\" stranded as a fragment.", 2: "It is not a question. Something is being introduced." },
       hint: "What comes after the gap?",
       why: "A list of jobs follows, so a colon introduces it.",
+      ez: { slips: { 1: "A full stop leaves the list on its own.", 2: "It is not a question." }, why: "A list comes next. So, a <b>colon</b>." },
       lv: { spicy: { options: ["colon ( : )", "semicolon ( ; )", "comma ( , )"],
         slips: { 1: "A semicolon needs a full sentence after it. \"check..., lock up and switch off\" is a list.", 2: "A comma would run the list into the sentence. A colon announces it." },
         why: "The first part is complete, and a list follows: colon." } } },
@@ -168,6 +176,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       html: "<p>A colon can also bring in an <b>explanation</b>. The second part tells you more about the first.</p>" +
         "<p class=\"a2task\">The trip was cancelled: [[thing]] had broken down.</p>" +
         "<p>Test: could you say <b>\"because\"</b> or <b>\"and here it is\"</b> instead? \"The trip was cancelled because [[thing]] had broken down.\" Yes. So a colon works.</p>",
+      ez: { html: "<p>A colon can also mean: <b>here is why</b>.</p><p class=\"a2task\">The trip was cancelled: [[thing]] had broken down.</p>" },
       lv: {
         mild: { html: "<p>A colon can also mean <b>here is why</b>.</p>" +
           "<p class=\"a2task\">The trip was cancelled: [[thing]] had broken down.</p>" +
@@ -183,6 +192,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       cards: [["We packed three things: [[item1]], [[item2]] and [[item3]].", 0], ["[[Who]] was soaked: it had rained all day.", 1], ["The shop sold two flavours: mint and lemon.", 0], ["Bonnie had one wish: a walk.", 1]],
       hint: "Is it several things in a row, or the reason or answer?",
       why: "Lists name several things. Explanations give the why; reveals give the answer.",
+      ez: { q: "A list, or a reason? Sort them.", hint: "Lots of things, or the reason?", why: "Lists name things. The others give the why." },
       lv: {
         medium: { cards: [["We packed three things: [[item1]], [[item2]] and [[item3]].", 0], ["[[Who]] was soaked: it had rained all day.", 1], ["The shop sold two flavours: mint and lemon.", 0], ["Bonnie had one wish: a walk.", 1], ["The match was off: the pitch had flooded.", 1], ["The class had three pets: a fish, a hamster and a stick insect.", 0]] },
         spicy: { cards: [["Only one thing could fix this: tea.", 1], ["The kit list was short: a map, a whistle and a coat.", 0], ["[[Who]] froze: [[thing]] had gone.", 1], ["Three rules applied: no running, no shouting, no goblins.", 0], ["The answer was obvious: nobody had locked the door.", 1]],
@@ -195,6 +205,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       slips: { 1: "\"slowly and quietly\" does not explain why they stopped. After this colon we need the reason.", 2: "\"and then\" goes nowhere. The colon promises an explanation." },
       hint: "What would make someone stop dead?",
       why: "The colon promises a reason. \"[[Thing]] had vanished\" delivers it.",
+      ez: { slips: { 1: "That does not say why they stopped.", 2: "And then goes nowhere." }, why: "It gives the <b>reason</b>. [[Thing]] had vanished!" },
       lv: { spicy: { q: "Which sentence uses a colon to build suspense best?",
         options: ["The lights flickered, the door creaked, and then we saw it: a tiny, very fluffy poodle.", "The lights flickered: and the door creaked.", "We saw: a poodle.", "The poodle: was tiny and fluffy."],
         slips: { 1: "A colon before \"and\" does not introduce anything. It just interrupts.", 2: "\"We saw\" is not complete without what was seen, so the colon chops it.", 3: "This colon splits the subject from its verb." },
@@ -206,6 +217,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       pairs: [["The match was called off:", "...the pitch was flooded."], ["I know what to pack:", "...[[item1]], [[item2]] and [[item3]]."], ["There was only one way out:", "...the window."], ["[[Who]] could not sleep:", "...the noise was far too loud."]],
       hint: "Read each pair out loud with a pause at the colon.",
       why: "Each second part explains, lists or reveals what the first part set up.",
+      ez: { q: "Match each start to its ending.", hint: "Pause at the colon.", why: "The end gives a list, a reason or a reveal." },
       lv: {
         mild: { pairs: [["The match was called off:", "...the pitch was flooded."], ["I know what to pack:", "...[[item1]], [[item2]] and [[item3]]."], ["There was only one way out:", "...the window."]] },
         spicy: { pairs: [["The evidence was clear:", "...the footprints led straight to the kitchen."], ["Jay had one weakness:", "...birds."], ["The plan had a flaw:", "...nobody had checked the weather."], ["Three cities, three weeks:", "...Rome, Paris and Oslo."]],
@@ -217,6 +229,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       html: "<p>A <b>semicolon</b> ( ; ) is a full stop with a little tail. It joins <b>two full sentences</b> that are closely linked.</p>" +
         "<p class=\"a2task\">It was getting dark; [[who]] wanted to go home.</p>" +
         "<p>Test: cover the semicolon. Is each half a sentence on its own? \"It was getting dark.\" Yes. \"[[Who]] wanted to go home.\" Yes. They are about the same moment, so a semicolon can join them.</p>",
+      ez: { html: "<p>A <b>semicolon</b> joins <b>two sentences</b> that go together.</p><p class=\"a2task\">It was getting dark; [[who]] wanted to go home.</p>" },
       lv: {
         mild: { html: "<p>This is a <b>semicolon</b> ( ; ). It is a dot with a little tail under it.</p>" +
           "<p>It can join <b>two sentences</b> that go together.</p>" +
@@ -235,6 +248,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       slips: { 1: "\"nobody had arrived yet\" belongs together. Splitting it leaves two halves that are not sentences.", 2: "\"yet\" on its own is not a sentence. Both halves must stand alone." },
       hint: "Find the place where both halves would make a full sentence.",
       why: "\"[[Place]] was silent.\" and \"Nobody had arrived yet.\" are both full sentences, so the semicolon goes at gap A.",
+      ez: { slips: { 1: "Nobody had arrived yet goes together.", 2: "Yet is not a sentence on its own." }, hint: "Both halves need to be sentences.", why: "Both halves are sentences: <b>Gap A</b>." },
       lv: { spicy: {
         fig: gaps(["[[Who]] waited for an hour {A} then gave", "up {B} [[thing]] was never coming {C} after all."]),
         answer: 1,
@@ -247,6 +261,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       cards: [["It was cold / we lit a fire", 0], ["Because it was cold / we lit a fire", 1], ["The bus was late / [[who]] walked instead", 0], ["After the match / everyone went home", 1]],
       hint: "Cover one half. Could the other half be a sentence by itself?",
       why: "\"Because it was cold\" and \"After the match\" cannot stand alone, so no semicolon there. A comma would do.",
+      ez: { q: "Is each half a full sentence? Sort them.", hint: "Cover one half. Is the other a sentence?", why: "Because and After halves cannot stand alone." },
       lv: {
         spicy: { cards: [["It was cold / we lit a fire", 0], ["Because it was cold / we lit a fire", 1], ["Some people love horror films / others cannot watch them", 0], ["Although the map was old / it was still useful", 1], ["The tickets sold out / however, a few returns appeared", 0], ["Running for the bus / [[who]] dropped [[item1]]", 1]],
           why: "\"Because\", \"Although\" and \"Running for the bus\" open halves that cannot stand alone, so they need a comma, not a semicolon." } } },
@@ -258,6 +273,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       slips: { 1: "\"We stayed\" and \"inside because it was raining\" are not two full sentences. The semicolon splits it oddly.", 2: "\"It was\" is not a full sentence on its own." },
       hint: "Cover the semicolon. Is each side a sentence?",
       why: "\"It was raining.\" and \"We stayed inside.\" are both sentences, and they are linked.",
+      ez: { slips: { 1: "Both sides need to be sentences.", 2: "It was is not a full sentence." }, why: "Both sides are sentences. They go together." },
       lv: {
         medium: { options: ["The lights went out; everyone screamed.", "The lights went out; and everyone screamed.", "When the lights went out; everyone screamed."],
           slips: { 1: "With \"and\" you do not need a semicolon. Use one or the other.", 2: "\"When the lights went out\" cannot stand alone, so a comma fits, not a semicolon." },
@@ -276,6 +292,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
         "<p><b>Colon</b>: here it comes. A list, an explanation or a reveal follows.</p>" +
         "<p><b>Semicolon</b>: joins two full sentences that are closely linked.</p>" +
         "<p>Quick check: if what follows is a list or an answer, try a colon. If what follows is another full sentence about the same thing, try a semicolon.</p>",
+      ez: { html: "<p><b>Full stop</b>: the end.</p><p><b>Colon</b>: a list, or why. <b>Semicolon</b>: joins two sentences.</p>" },
       lv: {
         mild: { html: "<p><b>Full stop</b>: the end of a sentence.</p>" +
           "<p><b>Colon</b>: here comes a list, or here is why.</p>" +
@@ -292,6 +309,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       slips: { 1: "\"the dark\" is not a full sentence, so a semicolon cannot join it.", 2: "A comma is too weak here. The colon makes you wait, then reveals the fear." },
       hint: "Is what follows a full sentence, or an answer?",
       why: "\"the dark\" is a reveal, not a sentence: colon.",
+      ez: { hint: "A full sentence, or an answer?", why: "The dark is a reveal. So, a <b>colon</b>." },
       lv: { mild: { options: ["colon ( : )", "semicolon ( ; )", "question mark ( ? )"],
         slips: { 1: "\"the dark\" is not a full sentence, so a semicolon does not fit.", 2: "It is not a question." } } } },
 
@@ -302,6 +320,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       slips: { 1: "A comma on its own cannot join two full sentences. That mistake is called a comma splice.", 2: "Without a mark the two sentences crash into each other." },
       hint: "Are both halves full sentences?",
       why: "\"It was very late.\" and \"The streets were empty.\" are both full sentences, closely linked: a semicolon joins them.",
+      ez: { slips: { 1: "A comma cannot join two sentences.", 2: "The two sentences crash together." }, why: "Two full sentences. So, a <b>semicolon</b>." },
       lv: { spicy: { q: "Which version of the list is clearer, and why?",
         fig: LISTS,
         options: ["Version B: the semicolons show where each place ends.", "Version A: fewer kinds of punctuation is always clearer.", "Both are equally clear."],
@@ -315,6 +334,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       answers: [0, 1],
       hint: "Colon before a list or explanation. Semicolon between two full sentences.",
       why: "The first introduces a list with a colon. The second joins two full sentences. \"was:\" and \"like;\" chop sentences in half.",
+      ez: { hint: "Colon before a list. Semicolon between sentences.", why: "The first two. The others chop a sentence in half." },
       lv: { spicy: { options: ["Only one thing was missing: the key.", "We waited for ages, nobody came.", "The bus was late; however, we still made it.", "We visited Leeds, a busy city; Whitby, a seaside town; and Hull.", "Because it rained; we stayed in."],
         answers: [0, 2, 3],
         why: "A colon reveal, a semicolon with however, and semicolons tidying a list. \"We waited for ages, nobody came\" is a comma splice, and \"Because it rained\" cannot stand alone." } } },
@@ -324,6 +344,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       starters: ["I packed three things:", "It was getting dark;", "There was only one problem:"],
       checklist: ["I used a colon before a list or an explanation", "I used a semicolon between two linked full sentences", "Each side of my semicolon makes sense on its own"],
       minWords: 30,
+      ez: { q: "Only if you like: write a list with a colon." },
       lv: {
         mild: { q: "Your turn, if you like. Write one sentence with a colon before a list, like \"I packed three things: ...\". Add a semicolon sentence too if you fancy it.",
           minWords: 10, checklist: ["I used a colon before a list", "My list has commas and \"and\""] },

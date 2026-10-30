@@ -98,6 +98,7 @@ var ART = {
       html: "<p>A <b>point of view</b> is how one person sees something. Different people can look at the same plan and see it very differently.</p>" +
         "<p>The plan: <b>[[Place]] wants to [[change]]</b>.</p>" +
         "<p>To find whose view it is, look for <b>who is speaking</b>: speech marks, a name, or words like <b>said</b> and <b>thinks</b>.</p>",
+      ez: { title: "Whose view?", html: "<p>A <b>point of view</b> is how one person sees it.</p><p>Look for <b>who is speaking</b>.</p>" },
       lv: { spicy: { html: "<p>A <b>point of view</b> is how one person sees something. Different people can look at the same plan and see it very differently.</p>" +
         "<p>The plan: <b>[[Place]] wants to [[change]]</b>.</p>" +
         "<p>Look for who is speaking: speech marks, <b>according to</b>, <b>claimed</b>, <b>argued</b>. Then ask a sharper question: <b>what do they gain or lose?</b> Where someone stands often shapes what they see.</p>" } } },
@@ -109,12 +110,14 @@ var ART = {
       answer: 0,
       slips: { 1: "The boss thinks it will bring in visitors. That is for the plan.", 2: "The fan cannot wait. That is for the plan." },
       hint: "Who sounds worried?",
+      ez: { q: "Who is <b>against</b> the plan?", why: "The neighbour says it is too noisy. <b>Against</b>.", slips: { 1: "The boss wants visitors. That is for.", 2: "The fan cannot wait. That is for." } },
       why: "The neighbour says it is too noisy and nobody asked them. That is a view against the plan." },
 
     { type: "match", topic: "Whose view?",
       q: "Match each person to their point of view.",
       pairs: [["[[Boss]]", "It will bring in visitors and money."], ["[[Fan]]", "It will be really exciting."], ["[[Neighbour]]", "It will be noisy, and nobody asked."]],
       hint: "Think about how each person would feel about the plan.",
+      ez: { q: "Match each person to their view.", hint: "How would each one feel?", why: "The boss wants visitors. The fan wants fun. The neighbour wants quiet." },
       why: "Each person sees the plan from where they stand: the boss wants visitors, the fan wants excitement, the neighbour wants quiet.",
       lv: { spicy: { q: "Match each person to what they might gain or lose.",
         pairs: [["[[Boss]]", "Gains money and keeps the business going."], ["[[Fan]]", "Gains something exciting to do."], ["[[Neighbour]]", "Loses peace and quiet."], ["A council officer", "Has to check the cost is fair."]],
@@ -127,6 +130,7 @@ var ART = {
       answer: 0,
       slips: { 1: "Have another look: the boss and the neighbour are different people.", 2: "The boss is the one making the plan, so they know all about it." },
       hint: "What does the boss want more of?",
+      ez: { hint: "Pleased or worried?", why: "<b>For it</b>. They want visitors.", slips: { 1: "The boss wants visitors. That sounds pleased." } },
       why: "More visitors means more money for [[place]]. That helps explain the boss's point of view.",
       lv: {
         mild: { q: "Is [[boss]] for or against the plan?", options: ["For it", "Against it"], fixed: true,
@@ -144,6 +148,7 @@ var ART = {
       fig: SEESAW,
       html: "<p>An argument usually has <b>two sides</b>: the people <b>for</b> something and the people <b>against</b> it.</p>" +
         "<p>Each side gives <b>reasons</b>. A <b>balanced</b> text gives both sides. A <b>one sided</b> text only gives one.</p>",
+      ez: { title: "Two sides", html: "<p>An argument has <b>two sides</b>: <b>for</b> and <b>against</b>.</p><p><b>Balanced</b> means both sides.</p>" },
       lv: { spicy: { html: "<p>An argument usually has <b>two sides</b>: <b>for</b> and <b>against</b>. Each side gives reasons.</p>" +
         "<p>A <b>balanced</b> text gives both sides fairly. A <b>one sided</b> text only gives one. The sneaky middle: a text that mentions both sides but gives one side more space, better quotes or the last word. It looks balanced, but it leans.</p>" } } },
 
@@ -152,11 +157,13 @@ var ART = {
       buckets: ["For the plan", "Against the plan"],
       cards: [["It will bring in more [[crowd]].", 0], ["It will be noisy.", 1], ["It will make money for the town.", 0], ["It will cost 2 million pounds.", 1], ["It will create new jobs.", 0], ["Nobody asked the people who live nearby.", 1]],
       hint: "Would the boss say it, or the neighbour?",
+      ez: { q: "Sort the reasons: for or against the plan?", hint: "Boss or neighbour?", why: "Visitors and money are <b>for</b>. Noise is <b>against</b>." },
       why: "Visitors, money and jobs are reasons for. Noise, cost and not being asked are reasons against.",
       lv: { mild: { cards: [["It will bring in more [[crowd]].", 0], ["It will be noisy.", 1], ["It will make money for the town.", 0], ["Nobody asked the people who live nearby.", 1]] } } },
 
     { type: "widget", topic: "Two sides", unscored: true,
       title: "Weigh it up",
+      ez: { html: "Tap a reason to put it on the see saw. There is no right answer." },
       html: "Tap a reason to put it on the see saw: once for <b>for</b>, again for <b>against</b>, again to take it off. Give each one a weight: does it matter a little or a lot to you? There is no right answer here.",
       mount: function(el, api){
         var R = ["More [[crowd]] would come.", "It would be noisy at night.", "It makes money for the town.", "It costs 2 million pounds.", "New jobs for local people.", "Nobody asked the neighbours."].map(api.tok);
@@ -217,6 +224,7 @@ var ART = {
       answer: 0,
       slips: { 1: "That only gives reasons for. A balanced text gives both sides.", 2: "That only gives reasons against. A balanced text gives both sides." },
       hint: "Which one gives both sides?",
+      ez: { q: "Which one is <b>balanced</b>?", why: "It gives a reason for and against.", slips: { 1: "That only gives for.", 2: "That only gives against." } },
       why: "It gives a reason for and a reason against. That is balanced.",
       lv: { spicy: { q: "Which text <b>looks</b> balanced but actually leans to one side?",
         options: ["A few people moaned about noise. But the plan will bring hundreds of visitors, new jobs and a brighter future for everyone.", "Some people love the plan because it brings visitors. Others worry about the noise.", "The plan is awful. It is noisy and expensive."],
@@ -229,6 +237,7 @@ var ART = {
       need: [["noise", "noisy", "loud", "busy", "cost", "money", "expensive", "traffic", "parking", "mess", "litter", "nobody", "asked", "quiet", "late", "night", "crowd", "crowded", "spoil", "ruin", "damage", "danger", "dangerous", "unsafe", "pollution", "wildlife", "fish", "park", "rubbish", "neighbours", "people"]],
       model: "It will make the area noisy and busy.",
       hint: "Think about the neighbour. What would worry them?",
+      ez: { q: "A reason <b>for</b>: <b>It will bring in more [[crowd]].</b><br>Write a reason <b>against</b>.", hint: "What would worry the neighbour?", why: "Noise, cost or traffic are reasons <b>against</b>." },
       why: "Noise, cost, traffic and mess are all reasons against. Being able to give the other side is a big part of understanding an argument." },
 
     /* ---------- chunk 3: picking a side with words ---------- */
@@ -236,6 +245,7 @@ var ART = {
       fig: HEADS,
       html: "<p>Two newspapers tell the same story. One says <b>exciting plan</b>. The other says <b>noisy scheme</b>.</p>" +
         "<p>Same plan, different words, different side. Words like <b>exciting</b> and <b>save</b> lean <b>for</b>. Words like <b>fury</b>, <b>noisy</b> and <b>scheme</b> lean <b>against</b>.</p>",
+      ez: { title: "Words take a side", html: "<p><b>Exciting plan</b> is for. <b>Noisy scheme</b> is against.</p><p>Same plan. Different words.</p>" },
       lv: { spicy: { html: "<p>Two newspapers tell the same story. One says <b>exciting plan to save town</b>. The other says <b>fury over noisy scheme</b>.</p>" +
         "<p>Writers pick a side with <b>loaded words</b>: plan or <b>scheme</b>, crowd or <b>mob</b>, said or <b>claimed</b>, careful or <b>timid</b>. They also choose <b>who gets quoted</b>, <b>who gets the last word</b>, and what goes in the <b>headline</b>.</p>" +
         "<p>Different readers can take different meanings from the same text too: what sounds lively to one person sounds noisy to another.</p>" } } },
@@ -246,6 +256,7 @@ var ART = {
       answer: 0,
       slips: { 1: "Exciting and save are positive words. That headline is for the plan.", 2: "That one just gives a fact. It does not take a side." },
       hint: "Look for angry or worried words.",
+      ez: { hint: "Look for angry words.", why: "Fury and noisy make it sound <b>bad</b>.", slips: { 1: "Exciting is a happy word. That is for.", 2: "That is just a fact." } },
       why: "Fury, noisy and scheme all make the plan sound bad.",
       lv: { spicy: { q: "Which headline sounds neutral, taking no side?",
         options: ["Plan to go to a vote in March", "Fury over noisy scheme", "Exciting plan to save town", "Brave boss battles moaning neighbours"],
@@ -257,6 +268,7 @@ var ART = {
       q: "Each pair means nearly the same thing. Match the plain word to the word that sounds <b>against</b>.",
       pairs: [["plan", "scheme"], ["crowd", "mob"], ["said", "claimed"], ["busy", "packed out"]],
       hint: "Which word makes it sound worse?",
+      ez: { q: "Match each word to a word that sounds <b>bad</b>.", hint: "Which one sounds worse?", why: "Scheme sounds sneaky. Mob sounds scary." },
       why: "Scheme sounds sneaky, mob sounds dangerous, claimed sounds like it might not be true, and packed out sounds uncomfortable.",
       lv: {
         mild: { q: "Match each plain word to a word that makes it sound <b>bad</b>.", pairs: [["plan", "scheme"], ["crowd", "mob"], ["busy", "packed out"]] },
@@ -270,6 +282,7 @@ var ART = {
       options: ["noisy", "scheme", "mob", "will", "streets"],
       answers: [0, 1, 2],
       hint: "Look for the words that make it sound bad.",
+      ez: { q: "<b>The noisy plan will ruin our quiet streets.</b><br>Pick the 2 words that sound bad." },
       why: "Noisy, scheme and mob are loaded. Our quiet streets also makes you side with the people living there.",
       lv: {
         mild: { q: "<b>The noisy plan will ruin our quiet streets.</b><br>Pick the words that show the writer does not like the plan.",
@@ -284,6 +297,7 @@ var ART = {
     /* ---------- chunk 4: read it and weigh it up ---------- */
     { type: "learn", topic: "Read it and weigh it up", title: "One article, lots of views",
       html: "<p>Last chunk. Have a read of this news report. Look for whose views are in it, and which side the writer might be on.</p>" + ART.medium,
+      ez: { title: "Lots of views", html: "<p>Read this news report. Who is for? Who is against?</p>" + ART.mild },
       lv: { mild: { html: "<p>Last chunk. Have a read of this short news report. Look for who is for the plan and who is against it.</p>" + ART.mild },
             spicy: { html: "<p>Last chunk. Have a read of this report. Look for whose views are in it, and the choices that show the writer's own side, even though they never say it.</p>" + ART.spicy } } },
 
@@ -292,6 +306,7 @@ var ART = {
       options: ["[[Boss]]", "[[Fan]]", "[[Neighbour]]", "A council officer"],
       answers: [0, 1],
       hint: "Who sounds keen?",
+      ez: { q: "Pick the <b>2</b> people <b>for</b> the plan.", why: "The boss and the fan are keen." },
       why: "The boss and the fan are both keen. The neighbour is against it. The council officer just gives a fact.",
       lv: { mild: { options: ["[[Boss]]", "[[Fan]]", "[[Neighbour]]"],
         why: "The boss and the fan are both keen. The neighbour is against it." } } },
@@ -302,6 +317,7 @@ var ART = {
       answer: 0,
       slips: { 1: "Look again: the neighbour gets a say too.", 2: "Look again: the boss and the fan get a say too." },
       hint: "Does it give both sides?",
+      ez: { why: "<b>Yes</b>. It gives for and against.", slips: { 1: "The neighbour has a say too.", 2: "The boss and the fan have a say too." } },
       why: "It quotes people for (the boss and the fan) and against (the neighbour), and adds facts like the cost and the vote.",
       lv: { spicy: { q: "Which side does the writer lean towards?",
         options: ["Against: the headline, the loaded words and the last word all favour the neighbour.", "For: the boss is quoted first.", "Neither: the writer only gives facts."],
@@ -315,6 +331,7 @@ var ART = {
       answer: 0,
       slips: { 1: "That is the neighbour's view.", 2: "That is the fan's view." },
       hint: "Which one could you check on a calendar?",
+      ez: { q: "Which one is a <b>fact</b>, not a view?", hint: "Which could you check on a calendar?", why: "You can check the vote date. The rest are views." },
       why: "The vote date can be checked. The other two are people's points of view.",
       lv: {
         medium: { options: ["The plan would cost 2 million pounds.", "It will be noisy and busy.", "It is exactly what we need."],
@@ -333,9 +350,14 @@ var ART = {
       model: "I am on the neighbour's side because people who live nearby should be asked first.",
       slips: [[["for", "against", "agree", "side"], "Nice. Now add because and a reason."]],
       hint: "Start with I am on ... side because ...",
+      ez: { q: "Whose side are you on? Write 1 sentence with <b>because</b>.", why: "Any side works. Just give a reason." },
       why: "Any side works, as long as you give a reason. That is how to make your own point of view count." }
   ],
 
+  ez: {
+    realWorld: { title: "Votes, news and our big question", html: "<p>Votes and news have two sides.</p><p>Should we time travel? Whose side are you on?</p>" },
+    make: { intro: "Pick a question. Give a reason for and against." }
+  },
   realWorld: {
     title: "Votes, news and our big question",
     html: "<p>Every time there is a vote, a news story or a family argument about where to go on holiday, there are two sides. Spotting whose view you are reading helps you make up your own mind.</p>" +

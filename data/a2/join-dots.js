@@ -125,6 +125,10 @@ var GROW = {
     music: { name: "Music", w: { place: "the theatre", who: "the stage manager", who2: "the director", thing: "headset", job: "a sound check", role: "chorus member", event: "opening night" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { title: "Joining dots", html: "<p>Detectives and doctors join dots.</p><p>Historians do too. With time travel, we could just look!</p>" },
+    make: { intro: "Two clues and the idea they point to." }
+  },
   startFig: JOIN,
   steps: [
 
@@ -134,6 +138,8 @@ var GROW = {
       html: "<p>Writers do not always say things straight out. Often they leave <b>details</b> in different places and trust you to join them up.</p>" +
         dots("[[Who]] glanced at the clock three times in a minute.", "[[Who]]'s coat was already on.") +
         "<p>Neither detail says \"[[Who]] wants to leave\". Put them together, though, and that is the idea they point to. That is <b>joining the dots</b>.</p>",
+      ez: { html: "<p>One detail is a dot. Join <b>two dots</b> to get an idea.</p>" + dots("[[Who]] glanced at the clock three times in a minute.", "[[Who]]'s coat was already on.") +
+        "<p>Together: [[who]] wants to leave.</p>" },
       lv: { spicy: { html: "<p>Writers rarely say the important thing straight out. They plant <b>details</b> in different places and trust the reader to join them.</p>" +
         dots("[[Who]] glanced at the clock three times in a minute.", "[[Who]]'s coat was already on, but the shift had an hour left to run.") +
         "<p>The clock alone could be boredom. The coat alone could be a cold room. Together they point to one idea: [[who]] is desperate to leave early. The skill is finding an idea that <b>every</b> dot supports, not just one.</p>" } } },
@@ -149,7 +155,8 @@ var GROW = {
       answer: 0,
       slips: { 1: "Nothing points to a person. Look at what is on Bonnie's nose.", 2: "Gravy on her nose next to a knocked over bin is not a normal dinner." },
       hint: "What would put gravy on a poodle's nose?",
-      why: "The bin alone could be anyone. The gravy alone could be dinner. Together, they point to one very guilty poodle." },
+      why: "The bin alone could be anyone. The gravy alone could be dinner. Together, they point to one very guilty poodle.",
+      ez: { slips: { 1: "Look at Bonnie's nose.", 2: "Gravy on her nose is not normal." }, hint: "Why is there gravy on her nose?", why: "<b>Bonnie got into the bin</b>. One guilty poodle!" } },
 
     { type: "mc", topic: "Two dots make a line",
       q: dots("[[Who]] had not slept properly for two nights.", "Before lunch, [[who]] dropped the [[thing]] twice.") + "<p>What idea do the two dots point to?</p>",
@@ -158,6 +165,7 @@ var GROW = {
       slips: { 1: "Nothing says how [[who]] feels about it. Join it to the first dot.", 2: "Dot 1 says the opposite.", 3: "Nothing says it is broken. Dropping it is about the person holding it." },
       hint: "How does no sleep affect someone?",
       why: "No sleep plus dropping things adds up to tiredness causing mistakes. Neither dot says that on its own.",
+      ez: { slips: { 1: "Nothing says how [[who]] feels about it.", 2: "Dot 1 says the opposite.", 3: "Nothing says it is broken." }, hint: "What does no sleep do to you?", why: "Being <b>tired</b> makes [[who]] clumsy." },
       lv: { spicy: {
         q: dots("[[Who]] had not slept properly for two nights.", "Before lunch, [[who]] dropped the [[thing]] twice, then snapped at [[who2]] for asking if everything was all right.") + "<p>Which idea is best supported by <b>both</b> dots?</p>",
         options: ["Something is keeping [[who]] awake, and it is affecting [[who]]'s work and mood.", "[[Who]] has always been rude to [[who2]].", "[[Who]] does not like the [[thing]].", "[[Who2]] is to blame for everything."],
@@ -170,6 +178,7 @@ var GROW = {
       answers: [0, 1],
       hint: "Which two are things people do when they are worried?",
       why: "Checking the time and not eating are both signs of nerves. The jumper and the car park are just details that do not point anywhere.",
+      ez: { q: "Which <b>two</b> show [[who]] is nervous?", hint: "What do worried people do?", why: "Checking the time and not eating. Both are nerves." },
       lv: { spicy: {
         q: "Pick <b>every</b> detail that helps suggest [[who]] is nervous about [[event]].",
         options: ["[[Who]] checked the time again and again.", "[[Who]] left breakfast untouched.", "[[Who]] read the same page three times without turning it.", "[[Who]] was wearing a blue jumper.", "[[Place]] has a big car park."],
@@ -181,6 +190,7 @@ var GROW = {
       fig: FAR,
       html: "<p>In longer texts the dots are often in <b>different paragraphs</b>. Read this one, and keep an eye out for small things that seem odd.</p>" + TXT.medium +
         "<p>The writer never says what is going on. But there are dots in every paragraph.</p>",
+      ez: { html: "<p>The dots can be in <b>different paragraphs</b>. Look for odd things.</p>" + TXT.mild },
       lv: { mild: { html: "<p>Sometimes the dots are in <b>different paragraphs</b>. Read this, and look for anything that seems odd.</p>" + TXT.mild +
           "<p>The writer never says what is going on. But there are clues.</p>" },
         spicy: { html: "<p>In longer texts the dots are spread out, and some details are <b>red herrings</b> that point somewhere else. Read this carefully.</p>" + TXT.spicy +
@@ -193,6 +203,7 @@ var GROW = {
       slips: { 1: "Eleven years is a long time. This person is not new.", 2: "[[Who]] dodges the summer question. That does not sound like someone planning for summer.", 3: "Maybe, but join it to the box of photos and mugs. Why would someone pack those?" },
       hint: "Why would someone pack their photos and mugs into a box?",
       why: "A broken routine, a box of personal things, and dodging a question about the summer all point to the same idea: [[who]] is leaving.",
+      ez: { slips: { 1: "[[Who]] has worked there for years.", 2: "[[Who]] does not answer about the summer." }, hint: "Why pack photos and mugs in a box?", why: "[[Who]] is <b>leaving</b>. The box and the summer question show it." },
       lv: { mild: { q: TXT.mild + "<p>What idea do the details point to?</p>",
           options: ["[[Who]] is getting ready to leave [[place]].", "[[Who]] has just started at [[place]].", "[[Who]] is planning a summer party."],
           slips: { 1: "[[Who]] has worked there for years. Not new.", 2: "[[Who]] does not even answer the summer question." } },
@@ -205,6 +216,7 @@ var GROW = {
       answers: [0, 1, 2, 3],
       hint: "There are dots in all three paragraphs. Only one choice does not point anywhere.",
       why: "Late in, the [[thing]] gone, a box of personal things, and dodging the summer: four dots across three paragraphs. Monday on its own tells us nothing.",
+      ez: { hint: "One in the middle, one at the end.", why: "The box, and no answer about the summer." },
       lv: { mild: { q: TXT.mild + "<p>Pick the <b>two</b> details that point to [[who]] leaving.</p>",
           options: ["There was a box full of photos and old mugs.", "[[Who]] did not answer about the summer.", "[[Who]] has a desk.", "[[Who2]] asked a question."],
           answers: [0, 1],
@@ -222,6 +234,8 @@ var GROW = {
       slips: { 1: "That tells us nine is late, but not why. Which detail makes the lateness look meaningful?", 2: "A smile on its own could mean anything.", 3: "Lots of people are late on a Monday. That makes it less of a clue, not more." },
       hint: "Which detail shows something has really changed?",
       why: "Late on its own is weak. Late <b>plus</b> a packed box of personal things starts to look like someone winding down. Joined dots are stronger than single ones.",
+      ez: { q: TXT.mild + "<p>Late could just be traffic. Which detail makes it a clue?</p>", slips: { 1: "Look at what [[who]] did.", 2: "That says nine is late, not why." },
+        hint: "What shows something has changed?", why: "<b>The box</b>. Late plus a packed box is a clue." },
       lv: { mild: { q: TXT.mild + "<p>On its own, coming in at nine could just mean a traffic jam. Which other detail turns it into a clue?</p>",
           options: ["The box full of photos and old mugs", "[[Who2]] asked a question", "Every day, [[who]] comes in at seven"],
           slips: { 1: "Asking is what [[who2]] did. Look at what [[who]] has done.", 2: "That tells us nine is late, but not why." } },
@@ -238,6 +252,7 @@ var GROW = {
       slips: [[["sacked", "fired"], "Careful: nothing in the text says [[who]] was sacked. Stick to what the dots support, like leaving."]],
       hint: "Start with \"[[Who]] is leaving because...\" then name two things from the text.",
       why: "A strong answer names the idea and the dots: \"[[Who]] seems to be leaving: the photos are packed in a box and the summer question gets dodged.\"",
+      ez: { q: "What is going on with [[who]]? Give <b>two</b> clues.", slips: [[null, "Nothing says sacked. Stick to the clues."]], hint: "Try: [[Who]] is leaving because...", why: "Like: [[Who]] is leaving. The photos are in a box." },
       explain: true },
 
     /* ---------- chunk 3 ---------- */
@@ -246,6 +261,7 @@ var GROW = {
       html: "<p>Joining dots is not the same as making things up. A good idea is one that <b>the dots really support</b>.</p>" +
         "<p>From our text, \"[[Who]] is leaving\" is supported. \"[[Who]] has been sacked\" is a <b>leap</b>: nothing says why [[who]] is going.</p>" +
         "<p>Careful words help: <b>suggests, seems, probably, might</b>. They show you have joined the dots without jumping past them.</p>",
+      ez: { html: "<p>Only say what the dots <b>support</b>.</p><p>Leaving is fine. Sacked is a <b>leap</b>.</p>" },
       lv: { spicy: { html: "<p>Joining dots is not making things up. A strong reading is one that <b>every</b> dot supports and that does not go further than they allow.</p>" +
         "<p>\"[[Who]] is leaving\" is well supported. \"[[Who]] has been sacked\" is a <b>leap</b>. The binned badge and the unopened envelope are tempting, but they do not say why.</p>" +
         "<p>When two readings both fit, the better one is the one with <b>more dots</b> and <b>fewer leaps</b>. Careful words (suggests, seems, possibly) show you know where the evidence stops.</p>" } } },
@@ -256,6 +272,7 @@ var GROW = {
       cards: [["[[Who]] is getting ready to leave.", 0], ["[[Who]] has been sacked.", 1], ["[[Who]] does not want to talk about the summer.", 0], ["[[Who]] hates [[who2]].", 1], ["Something has changed in [[who]]'s routine.", 0], ["[[Who]] has won the lottery.", 1]],
       hint: "Can you point to a detail for it? If not, it is a leap.",
       why: "Leaving, dodging the summer and a changed routine all have details behind them. Sacked, hating [[who2]] and winning the lottery have nothing in the text.",
+      ez: { q: "Do the dots support it, or is it a leap?", hint: "Can you point to a clue?", why: "Leaving and the summer have clues. The lottery and spies do not." },
       lv: { mild: { cards: [["[[Who]] is getting ready to leave.", 0], ["[[Who]] has won the lottery.", 1], ["[[Who]] does not want to talk about the summer.", 0], ["[[Who]] is secretly a spy.", 1]],
           why: "Leaving and not wanting to talk about the summer have clues behind them. Lottery wins and spies do not." } } },
 
@@ -265,7 +282,8 @@ var GROW = {
       answer: 0,
       slips: { 1: "\"Proves\" is too strong. The writer never says it outright.", 2: "\"Definitely\" claims more than the dots can show.", 3: "\"Always\" goes back further than the text does." },
       hint: "Which word leaves a little room?",
-      why: "\"Suggests\" says the dots point that way, without pretending the text says it." },
+      why: "\"Suggests\" says the dots point that way, without pretending the text says it.",
+      ez: { q: "Which one sounds <b>careful</b>?", slips: { 1: "Proves is too strong.", 2: "Definitely claims too much.", 3: "Always goes too far." }, why: "<b>Suggests</b> leaves a little room." } },
 
     { type: "mc", topic: "Too big a leap", explain: true,
       q: "<p>Two readers explain the text.</p><p><b>Reader 1:</b> \"[[Who]] is leaving because of a big fight with [[who2]].\"</p><p><b>Reader 2:</b> \"[[Who]] seems to be leaving, but the text does not tell us why.\"</p><p>Whose reading is better supported?</p>",
@@ -274,6 +292,8 @@ var GROW = {
       slips: { 1: "There is no fight anywhere in the text. [[Who]] even smiles at [[who2]]." },
       hint: "Is there a fight anywhere in the text?",
       why: "Reader 2 joins the dots and stops where they stop. Reader 1 adds a fight that is not there. In fact [[who]] smiles at [[who2]], which points away from a fight.",
+      ez: { q: "<p><b>Reader 1:</b> \"[[Who]] is leaving because of a big fight with [[who2]].\"</p><p><b>Reader 2:</b> \"[[Who]] seems to be leaving, but the text does not tell us why.\"</p><p>Who sticks to the clues?</p>",
+        slips: { 1: "There is no fight in the text." }, hint: "Is there a fight in the text?", why: "<b>Reader 2</b>. There is no fight." },
       lv: { spicy: {
         q: "<p>Two readers explain the longer text.</p><p><b>Reader 1:</b> \"[[Who]] is leaving. The box, the missing [[thing]] and the binned name badge all point that way.\"</p><p><b>Reader 2:</b> \"[[Who]] is just late because of the car park, and is having a clear out.\"</p><p>Whose reading is better supported?</p>",
         options: ["Reader 1", "Reader 2"],
@@ -285,6 +305,7 @@ var GROW = {
       fig: CHANGE,
       html: "<p>Some of the best dots to join are one near the <b>start</b> and one near the <b>end</b>. Together they show how something <b>changed</b>.</p>" + GROW.medium +
         "<p>No sentence says \"the new [[role]] grew in confidence\". You get there by joining the first paragraph to the last.</p>",
+      ez: { html: "<p>Join a dot at the <b>start</b> to one at the <b>end</b>. It shows a change.</p>" + GROW.mild },
       lv: { mild: { html: "<p>Try joining a dot from the <b>start</b> to one at the <b>end</b>. Together they show how something <b>changed</b>.</p>" + GROW.mild +
           "<p>No sentence says \"the new [[role]] got more confident\". You get there by joining the start and the end.</p>" },
         spicy: { html: "<p>Join a dot near the <b>start</b> to one near the <b>end</b> and you can see how something <b>changed</b>.</p>" + GROW.spicy +
@@ -297,6 +318,7 @@ var GROW = {
       slips: { 1: "Look at the first day: back of the room, one word answers. That is not confident yet.", 2: "Arriving early and staying late do not sound like someone wanting to leave.", 3: "Nothing says how the speech felt. Stick to what the dots show." },
       hint: "Where do they stand at the start? Where at the end?",
       why: "Back of the room and one word answers at the start; front of the room giving a speech at the end. Joined up, that is someone growing in confidence.",
+      ez: { slips: { 1: "At the start they said nothing.", 2: "They stay all year." }, hint: "Back at the start. Front at the end.", why: "They got <b>more confident</b>." },
       lv: { mild: { q: GROW.mild + "<p>Join the start to the end. What do they show together?</p>",
           options: ["The new [[role]] got more confident.", "The new [[role]] was always confident.", "The new [[role]] wanted to leave."],
           slips: { 1: "At the start they said nothing. Not confident yet.", 2: "Nothing points to leaving. They stay all year." } },
@@ -312,6 +334,7 @@ var GROW = {
       slips: { 1: "That is the start, before the change.", 2: "That is the start, before the change.", 3: "That is the end, after the change." },
       hint: "Look in the middle paragraph.",
       why: "Arriving early and asking questions sits between the silent start and the speech at the end. It shows the change on its way.",
+      ez: { q: GROW.mild + "<p>Which detail shows the change <b>happening</b>?</p>", why: "<b>Asking questions</b>. It is in the middle." },
       lv: { mild: { q: GROW.mild + "<p>Which detail is the <b>middle dot</b>: the one that shows the change happening?</p>",
           options: ["Asking lots of questions", "Standing at the back", "Giving a speech"],
           slips: { 1: "That is the start.", 2: "That is the end." } },
@@ -328,6 +351,7 @@ var GROW = {
       slips: [[["always confident", "was always"], "Look again at the first day. They start quiet."]],
       hint: "Try: \"At first the new [[role]]... but by the end...\"",
       why: "\"At first the new [[role]] stood at the back saying nothing, but by the end they gave the speech at the front\" joins the first dot to the last.",
+      ez: { q: "How did the new [[role]] change? Use the start and the end.", slips: [[null, "Look at the start. They are quiet."]], hint: "Try: At first... but by the end...", why: "At first they said nothing. By the end, they gave a speech." },
       lv: { mild: { q: "Write one sentence about how the new [[role]] changed. Use the start and the end.",
         model: "The new [[role]] got more confident, from saying nothing at the back to giving a speech at the front." } } }
   ],

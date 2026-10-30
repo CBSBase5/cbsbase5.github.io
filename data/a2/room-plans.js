@@ -188,6 +188,7 @@ function mountBuilder(el, api){
     /* ---------- chunk 1: perimeter ---------- */
     { type: "learn", topic: "Round the edge", title: "Perimeter: all the way round",
       fig: WALK,
+      ez: { title: "Perimeter", html: "<p>The <b>perimeter</b> is all the way round the edge.</p><p>5 + 3 + 5 + 3 = <b>16 m</b></p>" },
       html: "<p>The <b>perimeter</b> is the distance all the way round the edge of a shape. Think of a fence, or Bonnie walking round the walls.</p>" +
         "<p>[[Who]] wants [[edge]] round the walls of the [[room]]. It is 5 m long and 3 m wide. Walk round it: 5 + 3 + 5 + 3 = <b>16 m</b>.</p>" +
         "<p>Opposite walls of a rectangle match, so two numbers tell you all four walls.</p>",
@@ -208,6 +209,7 @@ function mountBuilder(el, api){
       slips: { 1: "The space inside is the area. That is the next chunk.", 2: "A line across does not go round the edge. Perimeter goes all the way round." },
       hint: "Perimeter is like a fence round a field.",
       why: "The perimeter is the edge, all the way round, like a fence.",
+      ez: { slips: { 1: "The inside is the area.", 2: "Perimeter goes all the way round." }, hint: "Like a fence round a field.", why: "The perimeter is the edge, all the way round." },
       lv: { spicy: { q: "A rectangular room has a perimeter of 20 m. Which could be its size?", fig: "", fixed: false,
         options: ["6 m by 4 m", "10 m by 10 m", "5 m by 4 m", "10 m by 2 m"],
         slips: { 1: "10 + 10 = 20 is only two walls. All four walls would make 40 m.", 2: "5 + 4 + 5 + 4 = 18 m. Just short.", 3: "10 + 2 + 10 + 2 = 24 m." },
@@ -221,6 +223,7 @@ function mountBuilder(el, api){
       slips: [[2, 11, "11 m is two walls. Add all four: 7 + 4 + 7 + 4."], [2, 28, "28 is 7 &#215; 4, which is the area. For the edge, add."]],
       hint: "Opposite walls match. The bottom matches the top.",
       why: "Bottom 7 m, right 4 m. 7 + 4 + 7 + 4 = <b>22 m</b>.",
+      ez: { q: "Count round the edge. Each little side is 1 m.", slips: [[8, "8 is inside. Count round the edge."], [6, "Keep going all the way round."]], hint: "4 along, 2 down, 4 along, 2 up." },
       lv: {
         mild: { q: "Count round the edge of this rug. Each little side is 1 m. The first few are counted for you.",
           fig: grid(4, 2, { edge: "#ff8a1f", key: true, extra: T(73, 26, "1", 13, 'text-anchor="middle" font-weight="700" fill="#c25e00"') + T(107, 26, "2", 13, 'text-anchor="middle" font-weight="700" fill="#c25e00"') + T(141, 26, "3", 13, 'text-anchor="middle" font-weight="700" fill="#c25e00"') }),
@@ -242,6 +245,7 @@ function mountBuilder(el, api){
       slips: [[13, "13 m covers two walls. Double it for all four."], [40, "40 is 8 &#215; 5, the area. The edge needs adding."]],
       hint: "8 + 5 + 8 + 5.",
       why: "8 + 5 + 8 + 5 = <b>26 m</b>.",
+      ez: { q: "A rug is 3 m by 2 m. How far round is it?", slips: [[5, "Keep going round."], [6, "6 is inside. Count round the edge."]] },
       lv: {
         mild: { q: "A rug is 3 m long and 2 m wide. How far is it all the way round?",
           fig: grid(3, 2, { lab: true, key: true }),
@@ -259,6 +263,7 @@ function mountBuilder(el, api){
     /* ---------- chunk 2: area ---------- */
     { type: "learn", topic: "Covering the floor", title: "Area: the squares inside",
       fig: grid(5, 3, { fill: "#19c39a", nums: true, lab: true, key: true }),
+      ez: { title: "Area", html: "<p>The <b>area</b> is the squares inside.</p><p>Each square is 1 " + SQ + ". 3 rows of 5 is <b>15</b>.</p>" },
       html: "<p>The <b>area</b> is how much floor there is: the number of squares it takes to cover it.</p>" +
         "<p>This floor is 5 m long and 3 m wide. That is 3 rows of 5 squares: 5 &#215; 3 = <b>15 square metres</b>, written 15 " + SQ + ".</p>" +
         "<p><b>Area of a rectangle = length &#215; width.</b></p>",
@@ -278,6 +283,7 @@ function mountBuilder(el, api){
       slips: [[20, "20 m is the perimeter, round the edge. Area multiplies."], [10, "6 + 4 = 10. For area, multiply: 6 &#215; 4."]],
       hint: "Length &#215; width.",
       why: "6 &#215; 4 = <b>24 " + SQ + "</b>.",
+      ez: { slips: [[14, "That is round the edge. Count inside."], [7, "Count every square. Or 3 rows of 4."]] },
       lv: {
         mild: { q: "Count the squares. Each one is 1 " + SQ + ". What is the area?",
           fig: grid(4, 3, { fill: "#19c39a", key: true }),
@@ -294,6 +300,7 @@ function mountBuilder(el, api){
 
     { type: "sort", topic: "Covering the floor",
       q: "Is each job about the edge or the inside? Sort them.",
+      ez: { q: "Edge or inside? Sort them.", hint: "A line round, or filling the space?", why: "Fences go round: perimeter. Floors fill: area." },
       buckets: ["Perimeter (round the edge)", "Area (covers the inside)"],
       cards: [["[[Edge]] round the walls", 0], ["[[Cover]] for the floor", 1], ["A fence round a garden", 0], ["Paint for a ceiling", 1], ["Tiles for a bathroom floor", 1], ["A frame round a picture", 0]],
       hint: "Is it a line round the outside, or does it fill the space?",
@@ -310,6 +317,7 @@ function mountBuilder(el, api){
       slips: [[26, "26 m is the perimeter."], [13, "9 + 4. Multiply for area."]],
       hint: "9 &#215; 4.",
       why: "9 &#215; 4 = <b>36 " + SQ + "</b>.",
+      ez: { q: "What is the area of this mat?", slips: [[14, "That is round the edge. Count inside."], [7, "Try 2 rows of 5."]] },
       lv: {
         mild: { q: "What is the area of this mat? Count the squares, or count the rows.",
           fig: grid(5, 2, { fill: "#22b8e6", key: true }),
@@ -332,6 +340,7 @@ function mountBuilder(el, api){
       slips: { 0: "Room A is 6 &#215; 4 = 24 " + SQ + ". Work out Room B as well.", 2: "Their perimeters match, but the floor inside does not. Try length &#215; width for each." },
       hint: "Work out length &#215; width for both.",
       why: "A: 6 &#215; 4 = 24 " + SQ + ". B: 5 &#215; 5 = 25 " + SQ + ". Same edge, different floor. Squarer rooms hold more.",
+      ez: { q: "Same edge. Which room has more squares inside?", slips: { 0: "A has 8. Now count B.", 2: "A has 8. B has 9." }, why: "A has 8. B has 9. B has more floor." },
       lv: {
         mild: { q: "Room A and Room B have the same edge: 12 m each. Which has more squares inside?",
           fig: two([4, 2], [3, 3], "Room A", "Room B"),
@@ -346,6 +355,7 @@ function mountBuilder(el, api){
     /* ---------- chunk 3: floor plans ---------- */
     { type: "learn", topic: "Reading a floor plan", title: "A map of a building, from above",
       fig: plan({}),
+      ez: { title: "Floor plans", html: "<p>A <b>floor plan</b> shows a building from above.</p><p>Each square is 1 m by 1 m.</p>" },
       html: "<p>A <b>floor plan</b> is a drawing of a building seen from above, like a bird would see it with the roof off. Lengths are written along the walls.</p>" +
         "<p>This is [[place]]. The whole building is 10 m by 6 m, split into three rooms.</p>" +
         "<p>If a length is missing, look across: <b>opposite walls match</b>, and the parts along one side add up to the whole side.</p>",
@@ -366,6 +376,7 @@ function mountBuilder(el, api){
       slips: [[8, "8 m is two walls. Add all four."], [10, "10 m is the whole building's bottom wall. Just the [[room2]] here."]],
       hint: "4 + 4 + 4 + 4.",
       why: "4 + 4 + 4 + 4 = <b>16 m</b>.",
+      ez: { q: "How wide is the [[room]]? Count along the top.", slips: [[10, "That is the whole building."], [4, "That is the [[room2]]. Look left."]], hint: "Count along the top of the yellow room." },
       lv: {
         mild: { q: "How wide is the [[room]]? Count the squares along its top wall.",
           fig: plan({ grid: true, key: true }),
@@ -387,6 +398,7 @@ function mountBuilder(el, api){
       slips: [[24, "24 m is its perimeter."], [12, "6 + 6. Multiply for area."]],
       hint: "6 &#215; 6.",
       why: "6 &#215; 6 = <b>36 " + SQ + "</b>.",
+      ez: { slips: [[12, "That is round the edge. Count inside."], [6, "Count every square. 2 rows of 4."]], hint: "The pink room. 2 rows of 4." },
       lv: {
         mild: { q: "Count the squares in the [[room3]]. What is its area?",
           fig: plan({ grid: true, key: true }),
@@ -408,6 +420,7 @@ function mountBuilder(el, api){
       slips: [[32, "32 m is the perimeter of the whole building."], [16, "10 + 6. Multiply for area."], [52, "Check the [[room3]]: 4 &#215; 2 = 8."]],
       hint: "10 &#215; 6, or 36 + 16 + 8.",
       why: "10 &#215; 6 = 60. Or 36 + 16 + 8 = 60. Both give <b>60 " + SQ + "</b>.",
+      ez: { q: "Area of the [[room2]]? Try 4 rows of 4.", slips: [[8, "That is 2 rows. There are 4."], [4, "That is 1 row. There are 4."]], hint: "The blue room." },
       lv: {
         mild: { q: "What is the area of the [[room2]]? Count, or use 4 rows of 4.",
           fig: plan({ grid: true, key: true }),
@@ -426,6 +439,7 @@ function mountBuilder(el, api){
     { type: "widget", topic: "Design a room", unscored: true,
       title: "Room builder",
       html: "<p>Tap one corner square, then the opposite corner, to draw a room. The builder works out its perimeter and area. Have a go at the challenge, or just play.</p>",
+      ez: { html: "<p>Tap 2 corners to make a room. See its perimeter and area.</p>" },
       mount: mountBuilder },
 
     { type: "num", topic: "Design a room",
@@ -435,6 +449,7 @@ function mountBuilder(el, api){
       slips: [[24, "30 &#8722; 6 takes away. Think: 6 times what makes 30?"], [180, "That is 30 &#215; 6. Divide instead."]],
       hint: "6 &#215; ? = 30.",
       why: "30 &#247; 6 = <b>5 m</b>. Check: 6 &#215; 5 = 30.",
+      ez: { q: "A rug: area 12 " + SQ + ", 4 m long. How wide?", slips: [[8, "How many rows of 4 make 12?"], [48, "That multiplies. How many rows of 4 make 12?"]], hint: "4, 8, 12. How many rows?", why: "3 rows of 4 make 12. So <b>3 m</b>." },
       lv: {
         mild: { q: "A rug has an area of 12 " + SQ + ". It is 4 m long. How wide is it?",
           fig: grid(4, 1, { fill: "#ffd23f", key: true, extra: T(210, 70, "rows of 4 ...", 14, 'font-weight="700"') }),
@@ -456,6 +471,7 @@ function mountBuilder(el, api){
       slips: { 1: "Metres measure a length, like the perimeter.", 2: "Kilograms measure weight.", 3: "Millilitres measure liquid." },
       hint: "Area is counted in squares.",
       why: "Area counts squares, so it is square metres, " + SQ + ".",
+      ez: { q: "Which unit is right for area?", slips: { 1: "Metres are for length.", 2: "Kilograms are for weight.", 3: "Millilitres are for liquid." }, hint: "Area counts squares.", why: "Area counts squares: " + SQ + "." },
       lv: { spicy: { q: "A floor is 4 m by 3 m, which is 12 " + SQ + ". How many cm&#178; is that?",
         options: ["120 000 cm&#178;", "1 200 cm&#178;", "12 000 cm&#178;", "120 cm&#178;"],
         slips: { 1: "That multiplies by 100 once. But 1 " + SQ + " is 100 cm by 100 cm, which is 10 000 cm&#178;.", 2: "Close. 1 " + SQ + " is 100 &#215; 100 = 10 000 cm&#178;, so 12 " + SQ + " is 120 000.", 3: "That only multiplies by 10." },
@@ -464,6 +480,7 @@ function mountBuilder(el, api){
 
     { type: "text", topic: "Design a room", stretch: true,
       q: "In your own words, what is the difference between perimeter and area?",
+      ez: { q: "What is the difference between perimeter and area?", slips: [[["same"], "One goes round. One fills the space."]], model: "Perimeter is round the edge. Area is the space inside.", hint: "A fence, and a carpet.", why: "Perimeter goes round, like a fence. Area fills, like a carpet." },
       need: [["edge", "round", "around", "outside", "border", "fence"], ["inside", "cover", "squares", "space", "floor", "fill"]],
       model: "Perimeter is the distance round the edge, and area is the space inside.",
       slips: [[["same"], "They sound alike, but one is a line round the edge and the other fills the space."]],
@@ -477,6 +494,11 @@ function mountBuilder(el, api){
       "<p>And for our big question: if you could time travel to watch a castle being built, the builders would be pacing out walls and counting squares, just like you. Would you go back to check their sums?</p>",
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay next to a time portal, holding a plan">' + A.portal(70, 75, 54) + A.jay(220, 52, 0.8, "smile") +
       A.bubble(276, 8, 132, 52, "Measure twice,\ncut once.", 282) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Plans build buildings", html: "<p>Builders and carpet fitters use plans every day.</p><p>Area for floors. Perimeter for fences.</p>" },
+    make: { intro: "Design a room. The card works out the rest." }
   },
 
   make: {

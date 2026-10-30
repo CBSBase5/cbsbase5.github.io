@@ -133,6 +133,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       html: "<p>An <b>argument</b> tries to get you to agree with a <b>viewpoint</b>. The viewpoint is an opinion: \"[[Claim]]\"</p>" +
         "<p>To hold it up, writers use <b>facts</b> (things you could check) and more <b>opinions</b> (feelings and judgements).</p>" +
         "<p>Fact: \"[[Fact]]\" You could check that. Opinion: \"[[Opinion]]\" Someone else might disagree.</p>",
+      ez: { title: "An argument is built", html: "<p>An <b>argument</b> wants you to agree.</p><p>It uses <b>facts</b> you can check, and <b>opinions</b>.</p>" },
       lv: { spicy: { html: "<p>An <b>argument</b> is built to make you agree with a <b>viewpoint</b>, which is always an opinion: \"[[Claim]]\"</p>" +
         "<p>Writers <b>choose</b> which facts to include. A fact can be true and still be picked because it helps one side. Opinions then tell you how to feel about those facts.</p>" +
         "<p>So the question is not just \"fact or opinion?\" but \"<b>why has the writer put this here?</b>\"</p>" } } },
@@ -142,6 +143,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       options: ["[[Claim]]", "[[Fact]]", "[[Fact2]]"],
       answer: 0,
       slips: { 1: "That is a fact the writer might use, but it is not what they want you to agree with.", 2: "That is a checkable fact. A viewpoint says what should happen or what is best." },
+      ez: { q: "Which one does the writer want you to <b>agree</b> with?", why: "\"Should\" shows what the writer <b>wants</b>.", slips: { 1: "That is a fact. It backs the argument up.", 2: "That is a fact you could check." } },
       hint: "Look for \"should\".",
       why: "\"Should\" tells you this is what the writer wants. Everything else in the argument is there to back it up." },
 
@@ -151,6 +153,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       cards: [["[[Fact]]", 0], ["[[Opinion]]", 1], ["[[Fact2]]", 0], ["[[Emotive]]", 1]],
       hint: "Could you check it with a ticket, a map, a record or a count?",
       why: "Facts can be checked. Opinions are feelings or judgements that someone could disagree with.",
+      ez: { q: "Fact or opinion? Sort them.", hint: "Could you check it?", why: "Facts can be checked. Opinions can be argued with." },
       lv: { medium: { cards: [["[[Fact]]", 0], ["[[Opinion]]", 1], ["[[Fact2]]", 0], ["[[Emotive]]", 1], ["[[Claim]]", 1], ["[[Stat]]", 0]],
           why: "Facts and statistics can be checked. The viewpoint, the feelings and the judgements are opinions." },
             spicy: { cards: [["[[Fact]]", 0], ["[[Opinion]]", 1], ["[[Fact2]]", 0], ["[[Emotive]]", 1], ["[[Claim]]", 1], ["[[Stat]]", 0]],
@@ -163,6 +166,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       slips: { 1: "Facts are not usually there for jokes. They make the argument look trustworthy.", 2: "Good writers do not waste words. Every fact is there for a reason." },
       hint: "What does a fact you could check do to how much you trust it?",
       why: "Facts make an argument look reliable, so you are more likely to believe the opinions around them.",
+      ez: { q: "Why put a fact in an argument?", hint: "Do you trust things you can check?", why: "Facts make it sound <b>true</b>.", slips: { 1: "Facts are not there for jokes.", 2: "Every fact is there for a reason." } },
       lv: { spicy: { q: "Why might a writer mix facts <b>and</b> opinions in the same paragraph?",
         options: ["Facts make it seem solid, opinions tell the reader how to feel about it", "Because they could not find enough facts", "To confuse the reader so they give up", "Opinions are just facts that are harder to check"],
         slips: { 1: "Maybe, but the mix is usually on purpose. Each part has a job.", 2: "Arguments want you to keep reading and agree, not give up.", 3: "An opinion is a judgement, not a hard to check fact." },
@@ -175,6 +179,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
         "<p><b>Expert opinion:</b> someone who knows a lot agrees. \"[[Expert]]\"</p>" +
         "<p><b>Emotive language:</b> words that make you feel something. \"[[Emotive]]\"</p>" +
         "<p><b>Rhetorical question:</b> a question that does not need an answer. It makes you think the answer is obvious. \"[[Rq]]\"</p>",
+      ez: { title: "4 tricks", html: "<p><b>Numbers</b>. <b>Experts</b>. <b>Feeling words</b>. <b>Questions</b>.</p><p>All 4 try to make you agree.</p>" },
       lv: { spicy: { html: "<p><b>Statistic:</b> numbers sound objective. \"[[Stat]]\" Ask: who counted, and how many?</p>" +
         "<p><b>Expert opinion:</b> borrows someone's authority. \"[[Expert]]\" It is still an opinion: another expert might disagree.</p>" +
         "<p><b>Emotive language:</b> chosen words that trigger feelings: pity, anger, excitement. \"[[Emotive]]\"</p>" +
@@ -185,6 +190,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       pairs: [["Statistic", "[[Stat]]"], ["Emotive language", "[[Emotive]]"], ["Rhetorical question", "[[Rq]]"]],
       hint: "Numbers, feelings, a question.",
       why: "Numbers are statistics. Strong feeling words are emotive. A question that does not need answering is rhetorical.",
+      ez: { hint: "A number, a feeling, a question.", why: "Numbers, feeling words, a question with no answer needed." },
       lv: { medium: { pairs: [["Statistic", "[[Stat]]"], ["Expert opinion", "[[Expert]]"], ["Emotive language", "[[Emotive]]"], ["Rhetorical question", "[[Rq]]"]] },
             spicy: { pairs: [["Statistic", "[[Stat]]"], ["Expert opinion", "[[Expert]]"], ["Emotive language", "[[Emotive]]"], ["Rhetorical question", "[[Rq]]"]] } } },
 
@@ -195,6 +201,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       slips: { 1: "There is no number here. Look at the end of the sentence.", 2: "Nobody with special knowledge is quoted here." },
       hint: "Look at the punctuation at the end.",
       why: "It is a question, but the writer is not waiting for an answer. They want you to think the answer is obvious.",
+      ez: { hint: "Look at the end mark.", why: "It is a question that needs <b>no answer</b>.", slips: { 1: "No number here. Look at the end.", 2: "Nobody is quoted here." } },
       lv: { spicy: { options: ["Rhetorical question", "Statistic", "Expert opinion", "Emotive language only"],
         slips: { 1: "No number here.", 2: "Nobody is quoted.", 3: "It may have feeling in it, but its shape is a question with an obvious answer built in." } } } },
 
@@ -203,6 +210,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       options: ["[[Emotive]]", "[[Fact]]", "[[Fact2]]"],
       answer: 0,
       slips: { 1: "That is a plain fact. No feelings there.", 2: "That is a checkable fact. Emotive language makes you feel something." },
+      ez: { why: "Its words make you <b>feel</b> something.", slips: { 1: "That is a plain fact.", 2: "That is a fact you could check." } },
       hint: "Which one makes you feel something?",
       why: "It uses feeling words to pull at your emotions, so you care about the issue." },
 
@@ -213,6 +221,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       slips: { 1: "An expert is still giving an opinion. It just sounds more trustworthy.", 2: "That would be a statistic." },
       hint: "Why would you listen to a doctor about health?",
       why: "Experts sound trustworthy, so their opinion makes the writer's viewpoint seem sensible.",
+      ez: { q: "Why does an <b>expert</b> help an argument?", hint: "Would you listen to a doctor?", why: "We <b>trust</b> experts, so we agree more.", slips: { 1: "An expert still gives an opinion.", 2: "That would be a statistic." } },
       lv: { spicy: { q: "\"[[Expert]]\" Why is this still an opinion?",
         options: ["It is the expert's view: another expert could disagree", "It is not: experts only say facts", "Because there is no number in it", "Because the expert might not be real"],
         slips: { 1: "Experts give judgements too. Knowing a lot does not turn a judgement into a fact.", 2: "Lots of facts have no numbers. It is the judgement that makes it an opinion.", 3: "Even a real, brilliant expert is giving a view here." },
@@ -223,6 +232,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       fig: LEAFLET,
       html: "<p>Here is a short argument. Read it once, slowly, and watch for the tricks.</p>" +
         "<p class=\"a2task\">[[Claim]] [[Fact]] [[Stat]] [[Expert]] [[Emotive]] [[Rq]]</p>",
+      ez: { title: "A real argument", html: "<p>Read it slowly.</p><p class=\"a2task\">[[Claim]] [[Fact]] [[Opinion]] [[Rq]]</p>" },
       lv: { mild: { html: "<p>Here is a short argument. Read it once, slowly.</p>" +
         "<p class=\"a2task\">[[Claim]] [[Fact]] [[Opinion]] [[Rq]]</p>" } } },
 
@@ -232,6 +242,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       answers: [0, 1],
       hint: "One is a price or measurement, one has a number of people or things.",
       why: "The fact and the statistic can both be checked. The others are feelings and a viewpoint.",
+      ez: { q: "Which one could you <b>check</b>?", hint: "Could you count or look it up?", why: "That is a fact. The others are what the writer thinks." },
       lv: { mild: { q: "Pick the sentence from the argument that a reader could check.",
         options: ["[[Fact]]", "[[Opinion]]", "[[Claim]]"], answers: [0],
         hint: "Which one could you check?",
@@ -243,6 +254,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       cards: [["[[Stat]]", 0], ["[[Expert]]", 1], ["[[Emotive]]", 2], ["[[Rq]]", 3], ["Over half of all teenagers agree.", 0], ["A top scientist backs the plan.", 1], ["Think of the lonely, forgotten animals.", 2], ["Do you want to be the one who did nothing?", 3]],
       hint: "Number? Person who knows? Feelings? A question?",
       why: "Each trick has a shape: numbers, a trusted person, feeling words, or a question with the answer built in.",
+      ez: { q: "Fact or opinion? Sort them.", hint: "Could you check it?", why: "Facts can be checked. Opinions are what someone thinks." },
       lv: { mild: { q: "Sort the sentences from the argument.",
           buckets: ["Fact", "Opinion"],
           cards: [["[[Fact]]", 0], ["[[Opinion]]", 1], ["[[Claim]]", 1], ["[[Fact2]]", 0]],
@@ -262,6 +274,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       slips: { 1: "9 out of 10 sounds big. The problem is who he asked.", 2: "Plenty of people keep birds. The problem is the people he asked." },
       hint: "Who did he ask?",
       why: "A statistic is only as good as who was asked. Ten bird fans will not tell you what everyone thinks.",
+      ez: { q: "Jay writes: \"Birds make the best pets. 9 out of 10 people agree!\" Which part is a <b>statistic</b>?", hint: "Look for numbers.", why: "<b>9 out of 10</b>. He asked his bird club. Outrageous!", slips: { 1: "That is his opinion. Look for numbers." } },
       lv: { mild: { q: "Jay writes: \"Birds make the best pets. 9 out of 10 people agree!\" Which part is a <b>statistic</b>?",
           options: ["9 out of 10 people agree", "Birds make the best pets"],
           slips: { 1: "That is Jay's opinion. A statistic has numbers." },
@@ -278,6 +291,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       slips: { 1: "The writer knows the answer they want. That is the trick.", 2: "Nobody is marking your answer. It is there to make you agree." },
       hint: "What answer does the writer want you to think of?",
       why: "Ending on a rhetorical question leaves the obvious answer ringing in your head as you finish.",
+      ez: { q: "Why end with \"[[Rq]]\"?", hint: "What answer does the writer want?", why: "It leaves you <b>thinking</b>, and nudges you to agree.", slips: { 1: "The writer knows the answer they want.", 2: "It is not a quiz. It wants you to agree." } },
       lv: { spicy: { options: ["It leaves the reader to supply the answer, so the conclusion feels like their own idea", "It shows the writer is unsure", "It invites the reader to argue back", "It adds a statistic at the end"],
         slips: { 1: "The opposite: the writer is so sure they let you say it.", 2: "The answer is built in, so arguing back feels silly.", 3: "There is no number in it." },
         why: "If you answer it in your head, you have agreed without being told to. That is why it works as an ending." } } },
@@ -288,6 +302,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       html: "<p>Spotting a trick is step one. The skill is saying <b>what it does to the reader</b>.</p>" +
         "<p>Try this shape: <b>The writer uses</b> a statistic, <b>\"[[Stat]]\"</b>, <b>to make the reader</b> feel the argument is proven.</p>" +
         "<p>Useful words: makes the reader feel, makes it seem, persuades, suggests, so that.</p>",
+      ez: { title: "Say what it does", html: "<p>Spot the trick. Then say what it <b>does to the reader</b>.</p><p>Numbers make it <b>seem proven</b>.</p>" },
       lv: { spicy: { html: "<p>Spotting is easy. Explaining the <b>effect</b> precisely is the skill.</p>" +
         "<p><b>The writer uses</b> a statistic, \"[[Stat]]\", <b>which suggests</b> the problem is real and measurable, <b>so the reader</b> feels the viewpoint is the sensible, evidence based side.</p>" +
         "<p>Precise verbs help: suggests, implies, positions the reader, creates a sense of, makes the opposite view seem.</p>" } } },
@@ -299,6 +314,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       slips: { 1: "That names the trick but does not say what it does to the reader.", 2: "That is true of any sentence. What does this one do to the reader?" },
       hint: "Which one says what it does to the reader?",
       why: "It names the effect: numbers make the viewpoint sound proven.",
+      ez: { q: "\"[[Stat]]\" Which explanation is best?", hint: "What does it do to the reader?", why: "Numbers make it seem <b>proven</b>.", slips: { 1: "That names it. What does it do?", 2: "What does this one do to the reader?" } },
       lv: { spicy: { options: ["It suggests the problem is real and measurable, so the viewpoint seems the evidence based side", "It proves the writer is right", "It is a statistic, which is a persuasive technique", "It makes the reader feel sad"],
         slips: { 1: "One number cannot prove an opinion. It makes it <b>seem</b> more solid.", 2: "That names the trick but stops before the effect.", 3: "Statistics work on trust more than feelings. That is emotive language's job." },
         why: "It names what the number suggests and how that positions the reader. Effect, not just label." } } },
@@ -310,6 +326,7 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       model: "think about the answer and agree with the writer.",
       hint: "What happens in your head when you read a question?",
       why: "You answer it in your head, and the answer is the one the writer wanted.",
+      ez: { q: "Finish: \"A rhetorical question makes the reader...\"", hint: "What happens in your head?", why: "You <b>think</b> of the answer the writer wants.", slips: [[null, "That says what it is. What does it do?"]] },
       lv: { medium: { q: "Explain the effect of \"[[Rq]]\" Start: \"The writer uses a rhetorical question to make the reader...\"",
           need: [["reader", "you", "us", "people", "audience"], ["think", "feel", "agree", "wonder", "imagine", "consider", "realise", "realize", "believe", "answer"]],
           model: "The writer uses a rhetorical question to make the reader think the answer is obvious and agree." },
@@ -323,9 +340,16 @@ var LEAFLET = '<svg viewBox="0 0 520 200" role="img" aria-label="A campaign leaf
       starters: ["I believe", "Did you know that", "Imagine", "Why should"],
       checklist: ["My viewpoint", "A fact or a statistic", "Emotive language", "A rhetorical question"],
       minWords: 30,
+      ez: { q: "Your own argument, if you like. Try 2 tricks." },
       lv: { mild: { minWords: 20, checklist: ["My viewpoint", "A fact", "A question"] },
             spicy: { minWords: 60, checklist: ["My viewpoint", "A statistic", "An expert opinion", "Emotive language", "A rhetorical question to finish"] } } }
   ],
+
+  ez: {
+    blurb: "Spot the tricks that make you agree.",
+    realWorld: { title: "Tricks are everywhere", html: "<p>Adverts and leaflets use these <b>tricks</b>.</p><p>Spot them, and you decide for yourself.</p>" },
+    make: { intro: "A slogan, a number and a question. Make it yours." }
+  },
 
   realWorld: {
     title: "Tricks are everywhere",

@@ -162,7 +162,8 @@ function mountGrid(el, api){
         spicy: { fig: arr(8, 12, "#ff8a3d", "8 rows of 12 makes 96"),
           html: "<p><b>8 &times; 12</b> means <b>8 groups of 12</b>. Split the 12 into 10 and 2: 8 &times; 10 = 80 and 8 &times; 2 = 16, so 96.</p>" +
             "<p>Every fact works both ways round, so the 12 &times; 12 grid only has 78 different facts to know, not 144.</p>" +
-            "<p>And one fact grows into lots more: 8 &times; 12 = 96 means 80 &times; 12 = 960 and 0.8 &times; 12 = 9.6.</p>" } } },
+            "<p>And one fact grows into lots more: 8 &times; 12 = 96 means 80 &times; 12 = 960 and 0.8 &times; 12 = 9.6.</p>" } } ,
+      ez: { title: "Times means groups", html: "<p><b>3 &times; 5</b> means <b>3 groups of 5</b>.</p><p>Count in fives: 5, 10, 15.</p>" } },
 
     { type: "mc", topic: "Groups of",
       q: "Which times fact matches the picture?",
@@ -172,6 +173,7 @@ function mountGrid(el, api){
       slips: { 1: "That adds the 4 and the 2. Times means groups: 4 rows with 2 in each.", 2: "Count along one row: there are 2 in each, not 3." },
       hint: "How many rows? How many in each row?",
       why: "4 rows with 2 in each is 4 &times; 2 = 8. Count in twos: 2, 4, 6, 8.",
+      ez: { hint: "Count the rows. Count 1 row.", why: "4 rows of 2. 4 &times; 2 = 8.", slips: { 1: "That adds. Times means groups.", 2: "Each row has 2, not 3." } },
       lv: {
         medium: { fig: arr(6, 8, "#19c39a", ""), options: ["6 &times; 8 = 48", "6 + 8 = 14", "6 &times; 8 = 42", "6 &times; 9 = 54"],
           slips: { 1: "That adds them. Times means 6 groups of 8.", 2: "42 is 6 &times; 7. There are 8 in each row.", 3: "Count along a row again: 8 in each, not 9." },
@@ -188,6 +190,8 @@ function mountGrid(el, api){
       slips: [[9, "That is 5 + 4. Times means groups: 4 groups of 5."], [25, "That is 5 groups of 5. There are 4 [[packs]]."], [15, "That is 3 groups of 5. One more 5."]],
       hint: "Count in fives, once for each [[pack]]: 5, 10, ...",
       why: "4 groups of 5 is 4 &times; 5 = <b>20</b>.",
+      ez: { q: "5 [[items]] in each [[pack]]. 4 [[packs]]. How many [[items]]?", hint: "Count in fives: 5, 10 ...", why: "4 groups of 5 = <b>20</b>.",
+        slips: [[9, "That adds. Try 4 groups of 5."], [25, "That is 5 fives. There are 4 [[packs]]."], [15, "That is 3 fives. 1 more 5."]] },
       lv: {
         medium: { q: "[[Who]] puts 7 [[items]] in each [[pack]]. There are 8 [[packs]]. How many [[items]] altogether?",
           boxes: [{ label: "[[Items]]", a: 56 }],
@@ -207,6 +211,7 @@ function mountGrid(el, api){
       slips: { 1: "3 + 5 = 8, but 3 &times; 5 = 15.", 2: "35 just puts the digits side by side. 3 &times; 5 = 15." },
       hint: "Turn the picture of 3 rows of 5 on its side.",
       why: "3 rows of 5 turned round is 5 rows of 3. Both make 15.",
+      ez: { hint: "Turn 3 rows of 5 on its side.", why: "3 &times; 5 and 5 &times; 3 both make 15.", slips: { 1: "3 + 5 = 8. But 3 &times; 5 = 15.", 2: "That just puts 3 and 5 side by side." } },
       lv: {
         medium: { q: "Which one has the same answer as 7 &times; 9?", options: ["9 &times; 7", "7 + 9", "79", "7 &times; 8"],
           slips: { 1: "7 + 9 = 16, but 7 &times; 9 = 63.", 2: "79 puts the digits side by side. 7 &times; 9 = 63.", 3: "7 &times; 8 is one 7 fewer: 56." },
@@ -223,6 +228,8 @@ function mountGrid(el, api){
       slips: [[10, "That is 6 + 4. Six groups of 4 is 6 &times; 4."], [20, "That is 5 &times; 4. One more dog's paws."], [28, "That is 7 &times; 4. One dog too many."]],
       hint: "Count in fours, once for each dog.",
       why: "6 groups of 4 is 6 &times; 4 = <b>24</b> paws. And still no tails.",
+      ez: { q: "6 dogs like Bonnie. 4 paws each. How many paws?", hint: "Count in fours.", why: "6 &times; 4 = <b>24</b> paws. Still no tails!",
+        slips: [[10, "That adds. Try 6 groups of 4."], [20, "That is 5 dogs. Add 1 more dog."], [28, "That is 7 dogs. 1 too many."]] },
       lv: {
         medium: { q: "Picture 9 dogs just like Bonnie. Each one has 4 paws. How many paws altogether?",
           boxes: [{ label: "Paws", a: 36 }],
@@ -246,7 +253,8 @@ function mountGrid(el, api){
         medium: { fig: family(6, 7), html: "<p>6 rows of 7 gives four facts.</p><p>Times: 6 &times; 7 = 42 and 7 &times; 6 = 42.</p><p>Divide: 42 &divide; 6 = 7 and 42 &divide; 7 = 6.</p><p>That is a <b>fact family</b>. The biggest number always stays at the start of a divide fact.</p>" },
         spicy: { fig: family(6, 7), html: "<p>6 rows of 7 gives four facts: 6 &times; 7 = 42, 7 &times; 6 = 42, 42 &divide; 6 = 7 and 42 &divide; 7 = 6.</p>" +
           "<p>Scale it and the family grows: 60 &times; 7 = 420, so 420 &divide; 7 = 60. And 0.6 &times; 7 = 4.2, so 4.2 &divide; 7 = 0.6.</p>" +
-          "<p>Whatever you do to one number in the times fact, the matching number in the divide fact does the same.</p>" } } },
+          "<p>Whatever you do to one number in the times fact, the matching number in the divide fact does the same.</p>" } } ,
+      ez: { title: "One picture, four facts", html: "<p>3 &times; 4 = 12. 4 &times; 3 = 12.</p><p>12 &divide; 3 = 4. 12 &divide; 4 = 3. A <b>fact family</b>!</p>" } },
 
     { type: "multi", topic: "Fact families",
       q: "4 &times; 6 = 24. Pick <b>all</b> the facts in the same family.",
@@ -255,6 +263,7 @@ function mountGrid(el, api){
       answers: [0, 1, 2],
       hint: "The family only uses 4, 6 and 24, with times or divide.",
       why: "6 &times; 4, 24 &divide; 4 and 24 &divide; 6 all use the same three numbers. Taking away and adding are a different job.",
+      ez: { q: "4 &times; 6 = 24. Pick <b>all</b> of its family.", hint: "Only 4, 6 and 24. Times or divide.", why: "They all use 4, 6 and 24." },
       lv: {
         medium: { q: "7 &times; 8 = 56. Pick <b>all</b> the facts in the same family.", fig: arr(7, 8, "#22b8e6", "7 rows of 8"),
           options: ["8 &times; 7 = 56", "56 &divide; 7 = 8", "56 &divide; 8 = 7", "56 &minus; 8 = 48", "7 + 8 = 15"],
@@ -272,6 +281,7 @@ function mountGrid(el, api){
       slips: [[25, "That takes 5 away from 30. Divide asks how many fives make 30."], [150, "That multiplies. Divide is the other way: 30 shared into 5."], [5, "5 is the number you divide by. How many fives make 30?"]],
       hint: "5 times what makes 30?",
       why: "5 &times; 6 = 30, so 30 &divide; 5 = <b>6</b>.",
+      ez: { hint: "5 times what makes 30?", slips: [[25, "That takes away. How many fives make 30?"], [150, "That multiplies. Divide goes back."], [5, "How many fives make 30?"]] },
       lv: {
         medium: { q: "Use 8 &times; 9 = 72. What is 72 &divide; 8?", boxes: [{ label: "72 &divide; 8", a: 9 }],
           slips: [[64, "That takes 8 away from 72. Divide asks how many eights make 72."], [8, "8 is what you divide by. How many eights make 72?"], [576, "That multiplies. Divide goes back the other way."]],
@@ -285,6 +295,7 @@ function mountGrid(el, api){
       pairs: [["2 &times; 5 = 10", "10 &divide; 5 = 2"], ["3 &times; 4 = 12", "12 &divide; 3 = 4"], ["4 &times; 10 = 40", "40 &divide; 10 = 4"], ["3 &times; 5 = 15", "15 &divide; 3 = 5"]],
       hint: "Find the divide fact that starts with the answer to the times fact.",
       why: "The biggest number in the family goes first in the divide fact.",
+      ez: { q: "Match each times fact to its divide fact.", hint: "The divide fact starts with the answer.", why: "The biggest number goes first." },
       lv: {
         medium: { pairs: [["6 &times; 7 = 42", "42 &divide; 6 = 7"], ["8 &times; 9 = 72", "72 &divide; 9 = 8"], ["7 &times; 12 = 84", "84 &divide; 7 = 12"], ["6 &times; 8 = 48", "48 &divide; 8 = 6"]] },
         spicy: { pairs: [["0.6 &times; 7 = 4.2", "4.2 &divide; 7 = 0.6"], ["9 &times; 11 = 99", "99 &divide; 9 = 11"], ["12 &times; 12 = 144", "144 &divide; 12 = 12"], ["8 &times; 70 = 560", "560 &divide; 8 = 70"]],
@@ -296,6 +307,7 @@ function mountGrid(el, api){
       cards: [["8 &times; 3 = 24", 0], ["24 &divide; 8 = 3", 0], ["24 &divide; 3 = 8", 0], ["3 + 8 = 11", 1], ["24 &divide; 4 = 6", 1], ["8 &minus; 3 = 5", 1]],
       hint: "Members use only 3, 8 and 24, and only times or divide.",
       why: "24 &divide; 4 = 6 is true, but it belongs to the family of 4 &times; 6. Adding and taking away are not in times families.",
+      ez: { q: "3 &times; 8 = 24. In its family or not?", hint: "Only 3, 8 and 24. Times or divide.", why: "24 &divide; 4 = 6 is true. It is just in a different family." },
       lv: {
         medium: { q: "The family of 7 &times; 9 = 63. Sort each fact: in the family or not?",
           cards: [["9 &times; 7 = 63", 0], ["63 &divide; 7 = 9", 0], ["63 &divide; 9 = 7", 0], ["7 + 9 = 16", 1], ["72 &divide; 9 = 8", 1], ["63 &minus; 9 = 54", 1]],
@@ -321,7 +333,8 @@ function mountGrid(el, api){
           html: "<p>To work out <b>4.8 &divide; 6</b>, flip it round: <b>6 times what makes 4.8?</b></p>" +
             "<p>Ignore the decimal for a moment. 6 &times; 8 = 48.</p>" +
             "<p>4.8 is ten times smaller than 48, so the answer is ten times smaller than 8: 4.8 &divide; 6 = 0.8.</p>" +
-            "<p>Check it: 6 &times; 0.8 = 4.8. It works.</p>" } } },
+            "<p>Check it: 6 &times; 0.8 = 4.8. It works.</p>" } } ,
+      ez: { title: "Stuck on a divide?", html: "<p><b>35 &divide; 5</b>? Ask: <b>5 times what makes 35?</b></p><p>Count in fives. 7 jumps. So it is 7.</p>" } },
 
     { type: "num", topic: "Divide with a times table",
       q: "Your turn, with the steps laid out. Fill both gaps: 5 &times; ___ = 40, so 40 &divide; 5 = ___",
@@ -330,6 +343,8 @@ function mountGrid(el, api){
       slips: [[0, 35, "That takes 5 away from 40. Count the jumps of 5 instead."], [0, 200, "That multiplies 40 by 5. Count how many fives make 40."]],
       hint: "Count the jumps on the number line.",
       why: "8 jumps of 5 make 40, so 5 &times; <b>8</b> = 40 and 40 &divide; 5 = <b>8</b>. Both gaps have the same answer.",
+      ez: { q: "Fill both gaps: 5 &times; ___ = 40, so 40 &divide; 5 = ___", hint: "Count the jumps.", why: "8 jumps of 5. Both gaps are <b>8</b>.",
+        slips: [[0, 35, "That takes away. Count the jumps of 5."], [0, 200, "That multiplies. Count the fives."]] },
       lv: {
         medium: { q: "Your turn, with the steps laid out. Fill both gaps: 9 &times; ___ = 63, so 63 &divide; 9 = ___",
           fig: hops(9, 7, "Count in nines up to 63"),
@@ -350,6 +365,8 @@ function mountGrid(el, api){
       slips: [[20, "That takes away one [[pack]]. How many tens make 30?"], [300, "That multiplies. You are sharing 30 into tens."], [40, "That adds. How many tens make 30?"]],
       hint: "10 times what makes 30?",
       why: "10 &times; 3 = 30, so 30 &divide; 10 = <b>3</b> [[packs]].",
+      ez: { q: "30 [[items]]. 10 in each [[pack]]. How many [[packs]]?", why: "10 &times; 3 = 30. So <b>3</b> [[packs]].",
+        slips: [[20, "That takes away. How many tens make 30?"], [300, "That multiplies. Share 30 into tens."], [40, "That adds. How many tens make 30?"]] },
       lv: {
         medium: { q: "No steps this time. [[Who]] has 54 [[items]] to pack in [[packs]] of 6. How many [[packs]]?",
           boxes: [{ label: "[[Packs]]", a: 9 }],
@@ -369,6 +386,7 @@ function mountGrid(el, api){
       slips: { 1: "That is an adding fact. Divide needs a times fact.", 2: "18 &times; 3 makes it bigger. You want 3 times what makes 18." },
       hint: "3 times what makes 18?",
       why: "3 &times; 6 = 18, so 18 &divide; 3 = 6.",
+      ez: { q: "Which times fact helps with 18 &divide; 3?", slips: { 1: "That adds. You need a times fact.", 2: "That makes it bigger. 3 times what is 18?" } },
       lv: {
         medium: { q: "Which times fact helps you work out 63 &divide; 7?", options: ["7 &times; 9 = 63", "7 &times; 8 = 56", "63 &minus; 7 = 56", "63 &times; 7 = 441"],
           slips: { 1: "56 is close, but you need to land on 63.", 2: "That is taking away. Divide needs a times fact.", 3: "That makes it bigger. You want 7 times what makes 63." },
@@ -384,6 +402,8 @@ function mountGrid(el, api){
       slips: [[20, "That takes 4 away. Share 24 into 4 equal piles."], [96, "That multiplies. Sharing makes each pile smaller."], [28, "That adds. Sharing makes each pile smaller."]],
       hint: "4 times what makes 24?",
       why: "4 &times; 6 = 24, so each bird gets <b>6</b> seeds.",
+      ez: { q: "Jay shares 24 seeds between 4 birds. How many each?", why: "4 &times; 6 = 24. <b>6</b> seeds each.",
+        slips: [[20, "That takes away. Share 24 into 4 piles."], [96, "That multiplies. Sharing makes piles smaller."], [28, "That adds. Sharing makes piles smaller."]] },
       lv: {
         medium: { q: "Jay shares 72 seeds equally between the 8 birds on his fence. How many seeds does each bird get?",
           fig: BIRDS(8, 72), boxes: [{ label: "Seeds each", a: 9 }],
@@ -399,7 +419,8 @@ function mountGrid(el, api){
     { type: "widget", topic: "Factory floor", unscored: true,
       title: "The fact grid",
       html: "<p>Every times fact lives somewhere on this grid. Tap any number to see its rows of dots and its whole family. Try a few you find tricky, if you like.</p>",
-      mount: mountGrid },
+      mount: mountGrid,
+      ez: { html: "<p>Tap any number. See its dots and its family.</p>" } },
 
     { type: "num", topic: "Factory floor",
       q: "Quick fire, in any order you like.",
@@ -407,6 +428,8 @@ function mountGrid(el, api){
       slips: [[1, 16, "20 &divide; 4: that took 4 away. How many fours make 20?"], [3, 27, "30 &divide; 3: that took 3 away. How many threes make 30?"]],
       hint: "The second one comes from the first, and the fourth from the third.",
       why: "4 &times; 5 = 20 gives 20 &divide; 4 = 5. 3 &times; 10 = 30 gives 30 &divide; 3 = 10.",
+      ez: { hint: "Use the 1st to get the 2nd.", why: "4 &times; 5 = 20, so 20 &divide; 4 = 5. Same for 30.",
+        slips: [[1, 16, "That took 4 away. How many fours make 20?"], [3, 27, "That took 3 away. How many threes make 30?"]] },
       lv: {
         medium: { boxes: [{ label: "7 &times; 8", a: 56 }, { label: "56 &divide; 7", a: 8 }, { label: "9 &times; 6", a: 54 }, { label: "54 &divide; 9", a: 6 }],
           slips: [[0, 54, "7 &times; 8: remember 5, 6, 7, 8. That gives 56."], [2, 56, "9 &times; 6 is 54. 56 is 7 &times; 8."]],
@@ -423,6 +446,7 @@ function mountGrid(el, api){
       slips: { 0: "Count in fives four times: 5, 10, 15, 20. That one is fine.", 2: "Two tens make 20. That one is fine.", 3: "Five fives make 25. That one is fine." },
       hint: "Count in fives for each one.",
       why: "3 &times; 5 is 15 (5, 10, 15). 18 would be 3 &times; 6.",
+      ez: { q: "One fact has a slip. Which one?", hint: "Count in fives.", why: "3 &times; 5 is 15, not 18.", slips: { 0: "5, 10, 15, 20. That is fine.", 2: "2 tens make 20. Fine.", 3: "5 fives make 25. Fine." } },
       lv: {
         medium: { options: ["7 &times; 8 = 54", "6 &times; 9 = 54", "12 &times; 4 = 48", "11 &times; 7 = 77"],
           answer: 0, slips: { 1: "6 &times; 9 = 54 is fine. Check the one that also says 54.", 2: "12 &times; 4 = 48 is fine: 10 fours and 2 fours.", 3: "11 &times; 7 = 77 is fine." },
@@ -436,6 +460,7 @@ function mountGrid(el, api){
       items: ["2 &times; 3", "4 &times; 2", "3 &times; 4", "5 &times; 3", "4 &times; 5"],
       hint: "Work each one out first: 6, 8, 12...",
       why: "6, 8, 12, 15, 20.",
+      ez: { q: "Smallest answer first." },
       lv: {
         medium: { items: ["6 &times; 6", "7 &times; 6", "9 &times; 5", "8 &times; 6", "7 &times; 8"], hint: "Work each one out first.", why: "36, 42, 45, 48, 56." },
         spicy: { items: ["60 &divide; 12", "0.7 &times; 8", "4.8 &divide; 0.8", "0.9 &times; 9", "72 &divide; 8"], hint: "Work each one out first, then line them up.", why: "60 &divide; 12 = 5, 0.7 &times; 8 = 5.6, 4.8 &divide; 0.8 = 6, 0.9 &times; 9 = 8.1 and 72 &divide; 8 = 9." } } }
@@ -447,6 +472,11 @@ function mountGrid(el, api){
       "<p>And for our big question: if you went back 200 years, there would be no phones and no calculators. The only one that comes with you is in your head. Every times fact you know is something you would still have in 1826.</p>",
     fig: '<svg viewBox="0 0 420 140" role="img" aria-label="Jay stepping out of a time portal">' + A2ART.portal(80, 70, 56) + A2ART.jay(250, 50, 0.85, "wow") +
       A2ART.bubble(298, 6, 116, 52, "7 x 8 = 56\nin any year!", 302) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { html: "<p>No calculators 200 years ago!</p><p>Times facts in your head work in any year.</p>" },
+    make: { intro: "1 times fact, its divide fact, and a trick." }
   },
 
   make: {

@@ -200,6 +200,7 @@ function spotWidget(el, api){
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Signs and symbols", title: "Symbols are tiny pictures that save words",
+      ez: { title: "Symbols", html: "<p>A <b>symbol</b> is a tiny picture. It means something.</p><p>Bus: bus stop. P: parking. i: help.</p>" },
       fig: ICONS,
       html: "<p>A <b>symbol</b> is a small picture that means something. You do not have to read any words to understand it.</p>" +
         "<p>A <b>bus</b> means a bus stop. A big <b>P</b> means parking. An <b>i</b> means information: a place to ask for help. A <b>star on brown</b> means a place to visit.</p>",
@@ -220,6 +221,7 @@ function spotWidget(el, api){
       slips: { 1: "Good guess from the letter. But a white P on blue is the parking sign.", 2: "A P on blue is not the post office. It is where cars can park." },
       hint: "Where would a car stop and stay?",
       why: "A white P on a blue square means parking: a place to leave a car.",
+      ez: { why: "White P on blue means <b>parking</b>.", slips: { 1: "Good guess! A white P on blue means parking.", 2: "P on blue is where cars park." } },
       lv: { spicy: { q: "This sign is on a rectangle, not a circle. What does that tell you, and what does it mean?",
         options: ["It gives information: parking is here", "It is an order: you must park here", "It is a warning: parking is dangerous"],
         slips: { 1: "Orders come in circles. Rectangles give information.", 2: "Warnings are triangles. This is a rectangle." },
@@ -230,6 +232,7 @@ function spotWidget(el, api){
       q: "Match each symbol to what it means.",
       pairs: [["A bus", "Bus stop"], ["A big H", "Hospital"], ["An i", "Information"], ["A cup", "Cafe"]],
       hint: "Look back at the picture of symbols if you like.",
+      ez: { hint: "Look back at the symbols picture.", why: "Each symbol shows the thing, or its first letter." },
       why: "Each symbol is a tiny picture of the thing, or its first letter.",
       lv: {
         medium: { pairs: [["A bus", "Bus stop"], ["A big H", "Hospital"], ["An i", "Information"], ["A cup", "Cafe"], ["A red triangle", "Warning"]] },
@@ -245,6 +248,7 @@ function spotWidget(el, api){
       slips: { 1: "That is the toilets sign. Useful, but not for asking the way.", 2: "That is a cafe. The staff might help, but it is not the place for directions." },
       hint: "Which letter stands for information?",
       why: "The i means information. Staff there can help you find your way.",
+      ez: { q: "You are lost. Which symbol helps you ask for help?", why: "The <b>i</b> means information. Staff there can help.", slips: { 1: "That is the toilets. Not for asking the way.", 2: "That is a cafe. Not for directions." } },
       lv: {
         medium: { q: "You see a <b>red triangle</b> sign by the bus station. What is it doing?",
           fig: SHAPES,
@@ -261,6 +265,7 @@ function spotWidget(el, api){
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Map keys", title: "A map uses symbols, and the key tells you what they mean",
+      ez: { title: "The key", html: "<p>Maps use <b>symbols</b>.</p><p>The <b>key</b> tells you what each one means.</p>" },
       fig: townMap({}),
       html: "<p>Maps are too small for words everywhere, so they use <b>symbols</b>. The <b>key</b> is the box that tells you what each symbol means.</p>" +
         "<p>Find a symbol on the map, then find the same symbol in the key. On this map you can find the train station, the bus stops, and the way to the [[Dest]].</p>",
@@ -271,6 +276,7 @@ function spotWidget(el, api){
     { type: "widget", topic: "Map keys", unscored: true,
       title: "The key has gone missing",
       html: "<p>Tap any symbol on the map to find out what it is. There are seven kinds to find, if you fancy it.</p>",
+      ez: { html: "<p>Tap a symbol to see what it is.</p>" },
       mount: mapWidget,
       report: function(d){ var n = d && d.found ? Object.keys(d.found).length : 0; return n ? "Map symbols found: " + n + " of 7." : ""; } },
 
@@ -281,6 +287,8 @@ function spotWidget(el, api){
       slips: [[1, "There are more. Look along both roads for the blue bus symbol."], [2, "Nearly. Have a look along Park Road too."], [4, "Count again: only the blue square with a bus in it."]],
       hint: "Find the bus symbol in the key, then hunt for it on the map.",
       why: "There are <b>3</b> bus stops: two on High Street and one on Park Road.",
+      ez: { hint: "Find the bus in the key. Then hunt.", why: "<b>3</b> bus stops: 2 on High Street, 1 on Park Road.",
+        slips: [[1, "There are more. Look along both roads."], [2, "Nearly. Look along Park Road too."], [4, "Count only the blue bus squares."]] },
       lv: { spicy: { q: "How many bus stops are on the route of <b>Bus 7</b>?",
         fig: townMap({ routes: true }),
         boxes: [{ label: "Bus 7 stops", a: 2 }],
@@ -296,6 +304,7 @@ function spotWidget(el, api){
       slips: { 1: "The hospital is further down, near the bottom of the map.", 2: "The train station is at the top, by the railway line." },
       hint: "Find where the two roads cross. Which symbol is right next to it?",
       why: "The green i, the information point, is right by the corner.",
+      ez: { hint: "Find where the roads cross.", why: "The green <b>i</b> is right by the corner.", slips: { 1: "The hospital is near the bottom.", 2: "The station is at the top." } },
       lv: { spicy: { q: "You arrive at the train station and want to get to the [[Dest]]. Which bus should you look for?",
         fig: townMap({ routes: true }),
         options: ["Bus 7", "Bus 12"], fixed: true,
@@ -310,6 +319,7 @@ function spotWidget(el, api){
       slips: { 1: "Park Road goes up and down. Find the brown star: which road is it next to?" },
       hint: "Find the brown star symbol: place to visit.",
       why: "The brown star is at the end of High Street.",
+      ez: { hint: "Find the brown star.", slips: { 1: "Find the brown star. Which road is it on?" } },
       lv: { spicy: { q: "You get off Bus 7 at the stop nearest the [[Dest]]. What else is close by?",
         fig: townMap({ routes: true }),
         options: ["Parking", "The train station", "The hospital"],
@@ -320,6 +330,7 @@ function spotWidget(el, api){
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Bus timetables", title: "Reading a timetable: find the stop, read down the column",
       fig: table("mild", 1, 2),
+      ez: { title: "Reading a timetable", html: "<p>Stops go down the side. Each <b>column</b> is one bus.</p><p>The 9:30 bus gets to the Library at <b>9:42</b>.</p>" },
       html: "<p>A bus timetable has the <b>stops down the side</b> and <b>one column for each bus</b>.</p>" +
         "<p><b>Worked example:</b> when does the 9:30 bus get to the Library?</p>" +
         "<p>1. Find the bus: the column that starts with <b>9:30</b> at Bus Station (circled).<br>2. Find the stop: the <b>Library</b> row (yellow).<br>3. Where they meet is the time: <b>9:42</b>.</p>",
@@ -343,6 +354,8 @@ function spotWidget(el, api){
       slips: { 1: "That is the Library row. Park Road is one row further down.", 2: "That is Park Road, but on the 9:30 bus. Stay in the 10:00 column.", 3: "That is the last stop, the [[Dest]]. Park Road is the row before." },
       hint: "Stay in the circled column and stop at the Park Road row.",
       why: "The 10:00 column meets the Park Road row at <b>10:20</b>.",
+      ez: { q: "The 10:00 bus is circled. When does it reach <b>Park Road</b>?", hint: "Stay in the circle. Stop at Park Road.",
+        slips: { 1: "That is the Library. Park Road is next.", 2: "That is the 9:30 bus. Stay in the circle.", 3: "That is the last stop. Park Road is before it." } },
       lv: {
         medium: { q: "Your turn, with a head start. The 9:40 bus is circled. What time does it get to <b>Park Road</b>?",
           fig: table("medium", 2, null),
@@ -362,6 +375,8 @@ function spotWidget(el, api){
       slips: [[5, "That is only as far as Market Square. Go all the way down to the [[Dest]]."], [930, "That is the time it arrives. How long is it from 9:00 to 9:30?"]],
       hint: "It leaves at 9:00. Find when it gets to the [[Dest]], then count the minutes between.",
       why: "9:00 to 9:30 is <b>30 minutes</b>.",
+      ez: { q: "How long does the 9:00 bus take to the [[Dest]]?", hint: "9:00 to when? Count the minutes.",
+        slips: [[5, "That is only to Market Square. Go to the end."], [930, "That is the time it gets there. 9:00 to 9:30?"]] },
       lv: {
         medium: { q: "How many minutes does the 8:40 bus take to get from Bus Station to the [[Dest]]?",
           fig: table("medium"),
@@ -384,6 +399,8 @@ function spotWidget(el, api){
       slips: { 1: "That one gets there at 9:30, half an hour early. Which column has 10:00 in the [[Dest]] row?", 2: "That one leaves at 10:00, so it gets there at 10:30. A bit late." },
       hint: "Look along the [[Dest]] row for 10:00, then go up to the top of that column.",
       why: "The 9:30 bus gets to the [[Dest]] at exactly 10:00.",
+      ez: { q: "Which bus gets to the [[Dest]] at <b>10:00</b>?", hint: "Find 10:00 in the [[Dest]] row. Go up.",
+        slips: { 1: "That gets there at 9:30. Too early.", 2: "That leaves at 10:00. It gets there at 10:30." } },
       lv: {
         medium: { q: "You need to be at the [[Dest]] by 10:30 for [[trip]]. What is the <b>latest</b> bus you can catch from Bus Station?",
           fig: table("medium"),
@@ -405,6 +422,8 @@ function spotWidget(el, api){
       slips: { 1: "That is a row. The stops go down the side; each column is one bus.", 2: "Prices are usually somewhere else, not in the columns." },
       hint: "Read down a column. Does the time go up as you go?",
       why: "Each column follows one bus from the first stop to the last.",
+      ez: { q: "What does each <b>column</b> show?", hint: "Read down a column. What changes?", why: "Each column is <b>one bus</b>, stop by stop.",
+        slips: { 1: "That is a row. Each column is one bus.", 2: "Prices are not in the columns." } },
       lv: { spicy: { q: "Your friend wants to get off at the <b>Library</b>. Can they catch the 13:35 Express?",
         fig: table("spicy", 1, 2),
         options: ["No, the dash means it does not stop there", "Yes, it gets there at 13:41", "Yes, but it is late"],
@@ -415,6 +434,7 @@ function spotWidget(el, api){
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Out and about", title: "Before, during, and if you get stuck",
       fig: PLAN,
+      ez: { title: "Before, during, if stuck", html: "<p><b>Before:</b> map and timetable. <b>On the way:</b> look for signs.</p><p><b>Stuck?</b> Find the <b>i</b>. Ask staff.</p>" },
       html: "<p><b>Before:</b> look at the map and the timetable. Know your stop and your bus.</p>" +
         "<p><b>On the way:</b> look for the signs: bus stops, the i, and the name of your stop.</p>" +
         "<p><b>If you get stuck:</b> that is fine, it happens to everyone. Find the i, or ask someone in a uniform. Jay would probably start with \"When I was in China...\" and tell you a very long story about a train. The short version: everyone gets lost sometimes, and asking works.</p>",
@@ -428,11 +448,13 @@ function spotWidget(el, api){
       answer: 0,
       slips: { 1: "Better to stay where people expect you, and let someone know if plans change.", 2: "Any bus might go somewhere very different. Check the number first." },
       hint: "What does the timetable tell you?",
-      why: "The timetable shows when the next bus is due, so you can wait or make a new plan." },
+      why: "The timetable shows when the next bus is due, so you can wait or make a new plan.",
+      ez: { why: "The timetable shows when the next bus comes.", slips: { 1: "Stay put, and let someone know.", 2: "Any bus could go anywhere. Check the number." } } },
 
     { type: "widget", topic: "Out and about", unscored: true,
       title: "Take it with you",
       html: "<p>A sign spotter for the next trip out, with Jay or anyone. Use it on a phone or print it, whatever suits.</p>",
+      ez: { html: "<p>Take this on your next trip out.</p>" },
       mount: spotWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return (n ? "Sign spotter: " + n + " of " + SPOT.length + " spotted." : "") + (d && d.best ? " Best sign: " + d.best : ""); } },
 
@@ -440,7 +462,8 @@ function spotWidget(el, api){
       q: "After a trip out, have a go at telling Jay about it, if you like. Where did you go, which signs did you spot, and did a map or timetable help?",
       starters: ["We went to", "I spotted", "The sign that helped most was", "Next time I would"],
       checklist: ["Where you went", "A sign you spotted", "Something that helped"],
-      minWords: 20 }
+      minWords: 20,
+      ez: { q: "Only if you like: tell Jay about a trip. Which signs did you spot?" } }
   ],
 
   realWorld: {
@@ -449,6 +472,11 @@ function spotWidget(el, api){
       "<p>For our big question: if we could time travel, should we? A traveller landing in 1850 would find no bus stops and no i signs. Would they be able to find their way? What signs would help?</p>",
     fig: '<svg viewBox="0 0 440 160" role="img" aria-label="Jay next to a time portal, with an information sign">' + '<rect width="440" height="160" rx="16" fill="#f4f1ea"/>' +
       A2ART.portal(80, 80, 58) + A2ART.jay(230, 52, 0.85, "hmm") + icon("info", 372, 50, 1) + A2ART.bubble(280, 92, 150, 50, "Is there an i\nin 1850?", 290) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Someone designs every sign", html: "<p>Signs help anyone find their way.</p><p>In 1850 there were no bus stops. What would help?</p>" },
+    make: { intro: "Make a card for a trip. From, to, which bus, and a sign to spot." }
   },
 
   make: {

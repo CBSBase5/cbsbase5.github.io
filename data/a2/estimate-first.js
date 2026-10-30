@@ -106,6 +106,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       html: "<p>To estimate, you round each number so it has just <b>one</b> digit that is not zero. That is called rounding to <b>one significant figure</b>.</p>" +
         "<p class=\"a2task\"><b>Worked example: round 6482.</b><br>1. The first digit is <b>6</b>, in the thousands.<br>2. Look at the next digit: <b>4</b>.<br>3. 4 is less than 5, so the 6 stays. Everything after it becomes zero.<br>6482 rounds to <b>6000</b>.</p>" +
         "<p>If the next digit is 5 or more, the first digit goes up one instead.</p>",
+      ez: { title: "Round to the nearest 10", html: "<p>Look at the <b>ones</b> digit.</p><p>5 or more? Round <b>up</b>. 4 or less? Round <b>down</b>.</p>" },
       lv: {
         mild: { fig: NL(40, 50, 47, "47"),
           html: "<p>To estimate, we round numbers to make them easier. Here we round to the <b>nearest 10</b>.</p>" +
@@ -123,6 +124,9 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[300, "The next digit is 6, which is 5 or more, so the hundreds go up."], [360, "That is to the nearest 10. One significant figure keeps only the first digit, then zeros."], [4, "Keep the size: 362 is in the hundreds, so the answer needs zeros. 4 hundreds is 400."]],
       hint: "3 hundreds goes up to 4 hundreds.",
       why: "362 is nearer 400 than 300, so it rounds to <b>400</b>.",
+      ez: { q: "Round 47 to the nearest 10.<p class=\"a2task\">The ones digit is 7. Round up.<br>47 rounds to ___</p>",
+        slips: [[40, "7 is 5 or more. Go up."], [47, "That is 47 itself. Move it to a ten."]],
+        hint: "Round up means the bigger ten.", why: "47 is nearer 50. So <b>50</b>." },
       lv: {
         mild: { q: "Round 47 to the nearest 10. Most of the working is done for you.<p class=\"a2task\">47 is between 40 and 50.<br>The ones digit is 7. That is 5 or more, so round up.<br>47 rounds to ___</p>",
           fig: NL(40, 50, 47, "47"), boxes: [{ label: "47 rounds to", a: 50 }],
@@ -139,6 +143,9 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[1, 7000, "The deciding digit is 4, less than 5, so the 6 stays."], [1, 6500, "That keeps two digits. One significant figure keeps only the 6."], [1, 6, "Keep the size: 6 thousands is 6000."]],
       hint: "First digit 6. Which digit comes straight after it?",
       why: "The deciding digit is <b>4</b>, so the 6 stays: <b>6000</b>.",
+      ez: { q: "Round 83 to the nearest 10. Fill in the steps.",
+        slips: [[1, 90, "3 is 4 or less. Round down."], [0, 8, "The ones digit is the last one."]],
+        why: "The ones digit is <b>3</b>. So <b>80</b>." },
       lv: {
         mild: { q: "Round 83 to the nearest 10. This time, you fill in the steps.",
           boxes: [{ label: "The ones digit", a: 3 }, { label: "83 rounds to", a: 80 }],
@@ -155,6 +162,9 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[2000, "The next digit is 9, so the 2 goes up to 3."], [2900, "That is 2 significant figures. Keep just one."], [3, "Keep the size: 3 thousands is 3000."], [2950, "That is the number itself. Rounding moves it."]],
       hint: "First digit 2. Next digit 9.",
       why: "The 9 pushes the 2 up to 3: <b>3000</b>.",
+      ez: { q: "Your turn. Round 65 to the nearest 10.",
+        slips: [[60, "A 5 rounds up."], [65, "That is 65 itself. Move it to a ten."]],
+        hint: "5 means round up.", why: "A 5 rounds up. So <b>70</b>." },
       lv: {
         mild: { q: "Your turn, no help this time. Round 65 to the nearest 10.", boxes: [{ label: "65 rounds to", a: 70 }],
           slips: [[60, "When the ones digit is exactly 5, we round up."], [65, "That is the number itself. Rounding moves it to a ten."]],
@@ -169,6 +179,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       answers: [0, 1, 4],
       hint: "Anything from 250 up to just under 350 rounds to 300.",
       why: "251, 349 and 305 all round to 300. 350 rounds up to 400 and 249 rounds down to 200.",
+      ez: { q: "Pick <b>all</b> the ones that round to 50.", hint: "45 up to 54 rounds to 50.", why: "45, 54 and 49 round to 50." },
       lv: {
         mild: { q: "Pick <b>all</b> the numbers that round to 50 (nearest 10).", options: ["45", "54", "55", "44", "49"], answers: [0, 1, 4],
           hint: "Anything from 45 up to 54 rounds to 50.", why: "45, 54 and 49 round to 50. 55 rounds up to 60 and 44 rounds down to 40." },
@@ -181,6 +192,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       html: "<p>To estimate an answer, round <b>every</b> number to 1 significant figure first. Then do the easy sum in your head.</p>" +
         "<p class=\"a2task\"><b>Worked example.</b> [[Item]] costs 4.85 pounds. 21 [[crowd]] buy one each. Roughly how much is that?<br>4.85 rounds to <b>5</b>. 21 rounds to <b>20</b>.<br>5 " + X + " 20 = <b>100</b>. So about 100 pounds.</p>" +
         "<p>The sign " + ABOUT + " means \"is about\".</p>",
+      ez: { title: "Round first, then add", html: "<p><b>Round</b> each number first.</p><p>Then the sum is easy. 38 + 51 is about <b>40 + 50</b>.</p>" },
       lv: {
         mild: { fig: EST("38", "+", "51", "40", "50", "90"),
           html: "<p>To estimate, round each number to the nearest 10 first. Then the sum is easy.</p>" +
@@ -196,6 +208,8 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[101.85, "That is the exact answer. Well worked out, but an estimate uses the rounded numbers."], [25, "That is 5 + 20. It is times here."]],
       hint: "5 lots of 20.",
       why: "5 " + X + " 20 = <b>100</b>, so about 100 pounds.",
+      ez: { q: "38 [[crowd]] on one bus. 51 on another. About how many?<p class=\"a2task\">38 rounds to 40.<br>51 rounds to 50.<br>40 + 50 = ___</p>",
+        slips: [[89, "That is exact. Use 40 + 50."], [80, "4 tens and 5 tens make 9 tens."]] },
       lv: {
         mild: { q: "There are 38 [[crowd]] on one bus and 51 on another. Finish the estimate.<p class=\"a2task\">38 rounds to 40.<br>51 rounds to 50.<br>40 + 50 = ___</p>",
           boxes: [{ label: "About", a: 90 }],
@@ -212,6 +226,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[2, 80, "2 tens times 4 tens: 2 " + X + " 4 = 8, then two zeros. 800."], [2, 798, "That is exact. Use 20 " + X + " 40."], [2, 60, "That is 20 + 40. It is times here."]],
       hint: "20 " + X + " 40: do 2 " + X + " 4, then put back the zeros.",
       why: "20 " + X + " 40 = <b>800</b>.",
+      ez: { slips: [[2, 91, "That is exact. Use 30 + 60."], [0, 20, "29 is close to 30. Round up."]] },
       lv: {
         mild: { q: "Estimate 29 + 62. Fill in each step.",
           boxes: [{ label: "29 rounds to", a: 30 }, { label: "62 rounds to", a: 60 }, { label: "Estimate", a: 90 }],
@@ -228,6 +243,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[241.8, "That is exact. Round first: 6 " + X + " 40."], [180, "39 rounds to 40, not 30."], [24, "6 " + X + " 4 is 24, but it is 6 " + X + " 40. 240."]],
       hint: "6.2 is about 6. 39 is about 40.",
       why: "6 " + X + " 40 = <b>240</b>.",
+      ez: { q: "Your turn. Estimate 71 + 18." },
       lv: {
         mild: { q: "Your turn, no help this time. Estimate 71 + 18.", boxes: [{ label: "About", a: 90 }],
           slips: [[89, "That is exact. Round first: 70 + 20."], [80, "18 rounds to 20, not 10."]],
@@ -243,6 +259,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "Check the zeros: 3 tens times 5 tens is 15 hundreds.", 2: "Too many zeros. 30 " + X + " 50 = 1500.", 3: "48 rounds to 50, not 40." },
       hint: "30 " + X + " 50.",
       why: "30 " + X + " 50 = <b>1500</b>.",
+      ez: { slips: { 1: "39 rounds up to 40.", 2: "Too small. 40 + 40 is 80.", 3: "Too big. 40 + 40 is 80." } },
       lv: {
         mild: { q: "Which is the best estimate for 39 + 42?", options: ["80", "70", "8", "800"],
           slips: { 1: "39 rounds up to 40, not down to 30.", 2: "Far too small. 40 + 40 is 80.", 3: "Far too big. Two numbers under 50 cannot add up to anything near 800." },
@@ -257,6 +274,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       html: "<p>Calculators only do what you type. Miss a decimal point and they will happily give you nonsense.</p>" +
         "<p class=\"a2task\">21 [[items]] at 4.85 pounds each. The calculator says <b>1018.5</b>.<br>The estimate said <b>about 100</b>.<br>That is ten times too big. Someone typed 48.5 instead of 4.85.</p>" +
         "<p>So: <b>estimate first</b>, calculate, then check the two are close. If they are far apart, have another look.</p>",
+      ez: { html: "<p>Calculators do what you type. One slip gives <b>nonsense</b>.</p><p><b>Estimate first</b>. Then check the answer is close.</p>" },
       lv: {
         mild: { fig: CALC("189", "90"),
           html: "<p>Calculators only do what you type. One slip and the answer is nonsense.</p>" +
@@ -270,6 +288,8 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "Estimate: 20 " + X + " 3 = 60. 589 is nearly ten times too big.", 2: "Check: 20 " + X + " 3 = 60, not 6." },
       hint: "Round 19 and 3.10, then multiply.",
       why: "20 " + X + " 3 = 60. The real answer is 58.90, so 589 has lost its decimal point.",
+      ez: { q: "38 + 51 = 189? The estimate is 90. Does it make sense?",
+        slips: { 1: "189 is double the estimate. Something went wrong." }, why: "189 is not near 90. The answer is 89." },
       lv: {
         mild: { q: "Someone works out 38 + 51 and gets 189. The estimate is about 90. Does 189 make sense?",
           options: ["No, it should be about 90", "Yes, it looks fine"], fixed: true,
@@ -286,6 +306,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       answers: [0, 2],
       hint: "Estimate each one: 50 " + X + " 10, 3 " + X + " 20, 800 " + D + " 4, 0.5 " + X + " 60.",
       why: "Estimates: 500, 60, 200 and 30. So 509.6 and 203 look right. 589 and 299 are about ten times too big.",
+      ez: { hint: "Round each one first.", why: "70 and 38 look right. 180 and 30 are far off." },
       lv: {
         mild: { options: ["29 + 41 = 70", "58 + 22 = 180", "19 + 19 = 38", "61 + 29 = 30"], answers: [0, 2],
           hint: "Estimate each one: 30 + 40, 60 + 20, 20 + 20, 60 + 30.",
@@ -301,6 +322,9 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       model: "6.9 is about 7 and 31 is about 30. 7 x 30 = 210, so 2139 is about ten times too big.",
       hint: "Round 6.9 and 31, then multiply. Say that number.",
       why: "7 " + X + " 30 = 210. The calculator answer is about ten times bigger, so a decimal point has gone missing. The real answer is 213.9.",
+      ez: { q: "48 + 31 = 129? Why is that not right? Give your estimate.",
+        slips: [[["129", "too big", "wrong"], "Yes, it looks off. What should it be about?"]],
+        model: "50 + 30 = 80. So it is not 129.", why: "50 + 30 = 80. So 129 is too big." },
       lv: {
         mild: { q: "Someone says 48 + 31 = 129. How do you know that is not right? Put your estimate in your answer.",
           need: [["80", "79", "50 + 30", "50+30"]],
@@ -319,6 +343,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       items: ["Round each number to 1 significant figure", "Work out the estimate in your head", "Do the real calculation", "Compare the answer with the estimate", "If they are far apart, check again"],
       hint: "The estimate comes before the real calculation.",
       why: "Round, estimate, calculate, compare, and check again if they do not match.",
+      ez: { why: "Round, estimate, do the sum, then check." },
       lv: { mild: { items: ["Round each number to the nearest 10", "Work out the estimate", "Do the real sum", "Check they are close"] } } },
 
     /* ---------- chunk 4 ---------- */
@@ -327,6 +352,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       html: "<p>Estimating is what people actually do in shops, on trips and at work. Nobody gets a calculator out in a queue.</p>" +
         "<p class=\"a2task\">2.89 + 4.15 + 0.95 pounds. Round each to the nearest pound: 3 + 4 + 1 = <b>about 8 pounds</b>.</p>" +
         "<p>One more trick: if you rounded the numbers <b>up</b>, your estimate is a bit <b>more</b> than the real answer. Handy when you are checking you have enough money.</p>",
+      ez: { title: "Estimating in real life", html: "<p>In a shop, <b>round</b> each price. 3 + 4 + 1 = <b>about 8 pounds</b>.</p><p>Rounded <b>up</b>? The real total is a bit less.</p>" },
       lv: {
         spicy: { html: "<p>Estimating is what people actually do in shops, on journeys and at work.</p>" +
           "<p class=\"a2task\">2.89 + 4.15 + 0.95: 3 + 4 + 1 = <b>about 8</b>. The real total is 7.99.</p>" +
@@ -339,6 +365,8 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[26.95, "That is exact. Round 3.85 to 4 first."], [21, "3.85 rounds up to 4, not down to 3."], [11, "That is 7 + 4. It is 7 lots of 4."]],
       hint: "3.85 is about 4. Then 7 lots of 4.",
       why: "7 " + X + " 4 = <b>28</b>, so about 28 pounds.",
+      ez: { q: "2.89, 4.15 and 0.95 pounds. Round each one. About how much?",
+        slips: [[7.99, "That is exact. Round first."], [7, "0.95 rounds up to 1."]] },
       lv: {
         mild: { q: "You buy three things: 2.89 pounds, 4.15 pounds and 0.95 pounds. Round each to the nearest pound and estimate the total.",
           fig: RECEIPT, boxes: [{ label: "About", a: 8, post: "pounds" }],
@@ -356,6 +384,8 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: { 1: "5.85 is much nearer 6 than 5, so round it up.", 2: "Estimate first: 9 " + X + " 6 = 54. That is over 50." },
       hint: "5.85 is about 6.",
       why: "9 " + X + " 6 = 54. The real cost is 52.65, so 50 pounds is not quite enough.",
+      ez: { q: "You have 20 pounds. 4 [[items]] cost 4.80 pounds each. Is it enough?",
+        slips: { 1: "4.80 is less than 5. So it costs under 20." }, hint: "Is 4.80 more or less than 5?", why: "4.80 is less than 5. So it fits." },
       lv: {
         mild: { q: "You have 20 pounds. You want 4 [[items]] at 4.80 pounds each. Is 20 pounds enough?",
           options: ["Yes: 4.80 is a bit less than 5, so it costs a bit less than 20", "No: it costs more than 20"], fixed: true,
@@ -372,6 +402,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       slips: [[393.12, "That is exact. Round first: 20 " + X + " 4 " + X + " 5."], [80, "20 " + X + " 4 = 80. Then times by 5 as well: 400."], [29, "Those were added. It is times all the way."]],
       hint: "20 " + X + " 4 " + X + " 5. Try 4 " + X + " 5 first.",
       why: "4 " + X + " 5 = 20, and 20 " + X + " 20 = <b>400</b>.",
+      ez: { slips: [[76, "That is exact. Use 4 " + X + " 20."], [40, "19 rounds to 20."], [23, "That is adding. It is times here."]] },
       lv: {
         mild: { q: "Estimate 4 " + X + " 19.", boxes: [{ label: "About", a: 80 }],
           slips: [[76, "That is exact. Round 19 to 20: 4 " + X + " 20."], [40, "19 rounds to 20, so 4 " + X + " 20 = 80."], [23, "That is 4 + 19. It is times here."]],
@@ -383,6 +414,7 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
     { type: "widget", topic: "Estimate it for real", unscored: true,
       title: "The estimate-o-meter",
       html: "<p>Slide the marker to where you think the answer lands, then lock it in to see the real one. No pressure: it is just for fun.</p>",
+      ez: { html: "<p>Slide to your guess. Lock it in. Just for fun.</p>" },
       mount: function(el, api){
         var d = api.data;
         if(!Array.isArray(d.guesses)) d.guesses = [];
@@ -443,6 +475,11 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       },
       report: function(d){ var g = (d && d.guesses) || []; return "Estimate-o-meter: " + g.length + " goes" + (g.length ? " (last: " + g[g.length - 1].q + ", said " + g[g.length - 1].guess + ", real " + g[g.length - 1].real + ")." : "."); } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Builders, pilots and shoppers all <b>estimate</b>.</p><p>Time travel with no calculator? An estimate helps you spot a bad price.</p>" },
+    make: { intro: "Pick a sum. Estimate it, then check. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Estimating is a superpower",

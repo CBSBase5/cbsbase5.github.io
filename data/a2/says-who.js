@@ -102,6 +102,7 @@ var TXT = {
     /* ---------- chunk 1: how do you know? ---------- */
     { type: "learn", topic: "How do you know?", title: "Say how you know",
       fig: HOW,
+      ez: { title: "Say how you know", html: "<p>A <b>fact</b> is something you could check.</p><p>Count it. Measure it. Look it up. See it.</p>" },
       html: "<p>A fact is something you could check. If someone asks <b>how do you know it is a fact?</b>, tell them how you would check it.</p>" +
         "<p><b>[[Place]] has 40 [[spots]].</b> How do I know it is a fact? <b>Because I could count the [[spots]].</b></p>" +
         "<p>That is all it takes: say <b>count it, measure it, look it up</b> or <b>see it</b>.</p>",
@@ -116,6 +117,7 @@ var TXT = {
       slips: { 1: "Liking them is what you think. It does not tell anyone how many there are.", 2: "Looking comfy is a feeling about them. Comfy cannot be counted." },
       hint: "Which answer says how you would check it?",
       why: "You could count them. Counting is a way of checking, so it is a fact.",
+      ez: { why: "You could <b>count</b> them. That checks it.", slips: { 1: "Liking them is what you think.", 2: "Comfy is a feeling. You cannot count it." } },
       lv: {
         medium: { q: "<b>[[Event]] starts at [[start]].</b><br>How do you know this is a fact?",
           options: ["I could check the time on a poster or a ticket.", "It sounds like a good time to start.", "Lots of people say so."],
@@ -131,6 +133,7 @@ var TXT = {
       pairs: [["[[Who]] has 3 bags.", "I could count them."], ["The door is 2 metres tall.", "I could measure it."], ["[[Place]] opened in 1990.", "I could look it up."], ["The door is red.", "I could see it."]],
       hint: "How many: count. How tall: measure. A year: look it up. A colour: see it.",
       why: "Every fact has a way to check it. Saying that way is how you explain it is a fact.",
+      ez: { hint: "How many: count. How tall: measure. Colour: see.", why: "Every fact has a way to check it." },
       lv: {
         mild: { pairs: [["[[Who]] has 3 bags.", "I could count them."], ["The door is 2 metres tall.", "I could measure it."], ["The door is red.", "I could see it."]] },
         spicy: { pairs: [["[[Who]] was born in 1995.", "I could look at a birth certificate."], ["The bag weighs 4 kg.", "I could weigh it on scales."], ["It rained on Monday.", "I could check a weather record."], ["There are 12 steps up to the door.", "I could count them."]],
@@ -144,6 +147,8 @@ var TXT = {
       slips: [[["like", "nice", "good", "pretty", "big"], "That is what you think of the windows. Say how you would check: count, measure, look it up or see."]],
       hint: "How would you find out how many windows there are?",
       why: "You could count them, or see them. Either way, anyone could check, so it is a fact.",
+      ez: { q: "Finish it.<br><b>There are 3 windows in Base 5.</b> I know it is a fact because I could ...", hint: "How would you find out how many?",
+        why: "You could <b>count</b> them. Anyone could check.", slips: [[["like", "nice", "good", "pretty", "big"], "That is what you think. Say how you would check."]] },
       lv: { spicy: { q: "Explain how you know this is a fact. One sentence is plenty.<br><b>[[Place]] is 200 metres from the bus stop.</b>",
         need: [["measure", "walk", "map", "count", "step", "check", "look", "tape", "pace", "app", "wheel"]],
         model: "I could measure the distance on a map.",
@@ -159,11 +164,13 @@ var TXT = {
       answer: 0,
       slips: { 1: "Bonnie is a very good dog, but she is not great at talking. Scales would tell you.", 2: "Fluffy does not tell you kilograms. Scales do." },
       hint: "Kilograms are a weight.",
-      why: "Weigh her on scales. If the scales say 3 kg, the fact checks out. Bonnie would probably want a treat for helping." },
+      why: "Weigh her on scales. If the scales say 3 kg, the fact checks out. Bonnie would probably want a treat for helping.",
+      ez: { q: "How could you check what Jay says?", why: "Weigh her on <b>scales</b>. Bonnie wants a treat now.", slips: { 1: "Bonnie is a good dog. But she cannot talk!" } } },
 
     /* ---------- chunk 2: opinion clue words ---------- */
     { type: "learn", topic: "Opinion clue words", title: "Opinions leave clues",
       fig: CLUES,
+      ez: { title: "Opinions leave clues", html: "<p>An <b>opinion</b> is what someone thinks.</p><p>Clue words: <b>I think, best, amazing, should</b>.</p>" },
       html: "<p>An <b>opinion</b> is what someone thinks or feels. Somebody else could think something different, and nobody could check who is right.</p>" +
         "<p>Opinions often carry <b>clue words</b>:</p>" +
         "<ul><li><b>I think, I feel, I believe</b></li><li><b>best, worst</b>, and judging words like <b>amazing, boring, brilliant</b></li><li><b>should</b>, when someone says what they think ought to happen</li></ul>",
@@ -178,6 +185,7 @@ var TXT = {
       answers: [0, 2, 4],
       hint: "Which words show what someone thinks or feels? The others are things you could check.",
       why: "Best, amazing and I think show what someone thinks. Metres, Tuesday and seven are things you could check.",
+      ez: { hint: "2 are what someone thinks.", why: "<b>Best</b> and <b>amazing</b> are what someone thinks." },
       lv: {
         mild: { options: ["best", "amazing", "10", "Monday"], answers: [0, 1],
           hint: "Two of these are about what someone thinks. Two are a number and a day.",
@@ -193,6 +201,7 @@ var TXT = {
       slips: { 1: "Place just names where. It does not tell you what anyone thinks.", 2: "Town tells you where it is. Look for the word that judges it." },
       hint: "Which word judges it?",
       why: "Best is a judgement. Someone else might think somewhere else is best.",
+      ez: { q: "Which word shows an opinion?<br><b>[[Place]] is the best place in town.</b>", why: "<b>Best</b> is what someone thinks.", slips: { 1: "Place just names where.", 2: "Town says where. Find the judging word." } },
       lv: {
         medium: { q: "Which word shows this is an opinion?<br><b>You should try the cafe at [[place]].</b>",
           options: ["should", "cafe", "try"],
@@ -212,6 +221,8 @@ var TXT = {
       slips: [[["starts at", "start at"], "That still reads like a fact. Pop in a clue word, like best, amazing or I think."]],
       hint: "Try starting with I think, or add a word like amazing or boring.",
       why: "Once you add a word like amazing, boring or I think, it becomes what someone thinks.",
+      ez: { q: "Make this an opinion. Add a clue word.<br><b>[[Event]] starts at [[start]].</b>", hint: "Try I think, or amazing.", why: "A clue word makes it an opinion.",
+        slips: [[["starts at", "start at"], "Still a fact. Add a clue word, like amazing."]] },
       lv: { spicy: { q: "Turn this fact into an opinion <b>without</b> using I think, best or worst.<br><b>[[Event]] starts at [[start]].</b>",
         need: [SNEAKY],
         model: "Surely [[event]] starts far too early.",
@@ -228,6 +239,7 @@ var TXT = {
       slips: { 1: "Even Jay's opinions are opinions. Best is the clue word, and plenty of people prefer robins." },
       hint: "Look for a clue word.",
       why: "Best is a clue word. Jay thinks it. Someone else might say robins, or owls.",
+      ez: { why: "<b>Best</b> is a clue word. Some say robins!", slips: { 1: "Even Jay's opinions are opinions! Best is the clue." } },
       lv: { spicy: { q: "Jay says this. Which part could you actually check?",
         options: ["That pigeons are birds.", "That pigeons are the best birds.", "Neither part."], fixed: false,
         slips: { 1: "Best is Jay's opinion, a strong one, but still an opinion.", 2: "One part can be looked up in any bird book." },
@@ -237,6 +249,7 @@ var TXT = {
     /* ---------- chunk 3: says who? ---------- */
     { type: "learn", topic: "Says who?", title: "One sentence, two jobs",
       fig: SPLIT,
+      ez: { title: "Says who?", html: "<p>A fact and an opinion can share a sentence.</p><p>Spot an opinion? Ask <b>says who?</b></p>" },
       html: "<p>Sometimes a fact and an opinion share one sentence.</p>" +
         "<p><b>The cafe opened in 1990, and it is amazing.</b></p>" +
         "<p>Opened in 1990: you could look it up. It is amazing: <b>says who?</b> That part is somebody's opinion.</p>" +
@@ -252,6 +265,7 @@ var TXT = {
       slips: { 1: "A start time can be checked on a poster. Look for the clue word." },
       hint: "Find the clue word, then the part around it.",
       why: "Brilliant is a clue word. The start time could be checked.",
+      ez: { slips: { 1: "You can check a start time. Find the clue word." } },
       lv: {
         medium: { q: "Which part is the opinion?<br><b>[[Who]] has worked here for 10 years and is the friendliest person in [[place]].</b>",
           options: ["has worked here for 10 years", "is the friendliest person in [[place]]"], answer: 1,
@@ -270,6 +284,7 @@ var TXT = {
       cards: [["[[Place]] is open on Saturdays.", 0], ["You should visit [[place]].", 1], ["[[Who]] is 30 years old.", 0], ["[[Who]] is the nicest person here.", 1], ["The [[thing]] costs 20 pounds.", 0], ["The [[thing]] is worth every penny.", 1]],
       hint: "Look for clue words: should, nicest, worth every penny.",
       why: "Days, ages and prices can be checked. Should, nicest and worth every penny are what someone thinks.",
+      ez: { hint: "Look for should and nicest.", why: "Days and ages can be checked. Should and nicest are opinions." },
       lv: {
         mild: { cards: [["[[Place]] is open on Saturdays.", 0], ["You should visit [[place]].", 1], ["[[Who]] is 30 years old.", 0], ["[[Who]] is the nicest person here.", 1]] },
         spicy: { cards: [["[[Place]] is open on Saturdays.", 0], ["Everyone knows [[place]] is the best.", 1], ["[[Who]] is 30 years old.", 0], ["It is a fact that [[who]] is the nicest person here.", 1], ["Surely the [[thing]] is worth 20 pounds.", 1], ["The [[thing]] costs 20 pounds.", 0]],
@@ -282,6 +297,7 @@ var TXT = {
       model: "Boring is what someone thinks. Other people might not agree.",
       hint: "Could you count or measure boring? Who decides if it is boring?",
       why: "Boring is a judgement. One person might be bored, another might love it. You could not check it.",
+      ez: { q: "How do you know this is an opinion?<br><b>[[Place]] is boring.</b>", hint: "Could you count boring?", why: "<b>Boring</b> is what someone thinks. You cannot check it." },
       lv: { spicy: { q: "Explain why this is still an opinion, even though it sounds like a fact.<br><b>Everyone knows [[place]] is the best.</b>",
         need: [["best", "everyone", "opinion", "think", "check", "agree", "view", "ask", "sound", "judge", "prove"]],
         model: "Best is an opinion, and you could not check what everyone thinks.",
@@ -295,6 +311,7 @@ var TXT = {
       slips: { 1: "Only one person said it. Somebody else might find it warm.", 2: "Too cold is a judgement. Someone does think it: look for who said it." },
       hint: "Look for who is doing the saying.",
       why: "It is nan's opinion. Too cold for one person might be fine for another.",
+      ez: { q: "Says who?<br><b>My nan says [[place]] is too cold.</b><br>Who thinks it is too cold?", why: "It is <b>nan's</b> opinion.", slips: { 1: "Only 1 person said it.", 2: "Someone does think it. Who said it?" } },
       lv: {
         medium: { q: "Says who?<br><b>Our [[fans]] say [[place]] is the friendliest place around.</b>",
           options: ["The [[fans]] think it.", "Everybody in the world thinks it.", "Nobody: it is a checked fact."],
@@ -311,7 +328,8 @@ var TXT = {
     { type: "learn", topic: "Opinion hunt", title: "Opinion hunt",
       fig: PEN,
       html: TXT.medium,
-      lv: { mild: { html: TXT.mild }, spicy: { html: TXT.spicy } } },
+      lv: { mild: { html: TXT.mild }, spicy: { html: TXT.spicy } },
+      ez: { html: TXT.mild.replace("<p>Last chunk. Read this short piece, then hunt for the opinions.</p>", "<p>Read this. Then hunt for the opinions.</p>") } },
 
     { type: "multi", topic: "Opinion hunt",
       q: "Pick the <b>three</b> sentences with an opinion in them.",
@@ -336,6 +354,7 @@ var TXT = {
       slips: { 1: "Last tells you which one. It does not judge it.", 2: "Was is just a linking word. Look for the judging word." },
       hint: "Which word judges it?",
       why: "Amazing is a judging word. Someone else might have found it dull.",
+      ez: { q: "<b>I think it will be amazing.</b><br>Which word is the clue?", slips: { 1: "It is a tiny word. Find the judging word.", 2: "Will is about the future." } },
       lv: {
         mild: { q: "<b>I think it will be amazing.</b><br>Which word tells you what someone thinks of it?",
           options: ["amazing", "it", "will"],
@@ -352,6 +371,7 @@ var TXT = {
       slips: [[2, "Close. Look again for should, and for amazing."], [6, "That is every sentence. Some could be checked, like the place and the price."], [4, "One too many. 10 years could be checked."]],
       hint: "Go sentence by sentence and ask: says who?",
       why: "There are <b>3</b>: I think it is the best, you should bring a friend, and the last one was amazing.",
+      ez: { q: "How many sentences have an opinion?", slips: [[4, "That is every sentence."], [1, "Close. Look for should."], [3, "One too many."]] },
       lv: {
         mild: { boxes: [{ label: "Sentences", a: 2 }],
           slips: [[4, "That is every sentence. The place and the time could be checked."], [1, "Close. There is one more: look for should."], [3, "One too many. The time could be checked."]],
@@ -365,6 +385,7 @@ var TXT = {
       model: "I think the [[thing]] is brilliant.",
       hint: "Start with I think, or use a word like best, boring or amazing.",
       why: "Any sentence with a clue word like I think, best or amazing shows it is your opinion.",
+      ez: { q: "If you like: write an opinion about the [[thing]].", hint: "Start with I think.", why: "A clue word shows it is your opinion." },
       lv: { spicy: { q: "Your turn, if you like. Write one sentence about [[place]] with a fact <b>and</b> an opinion in it.",
         need: [DIGITS, OPW],
         model: "[[Place]] has 40 [[spots]], and it is the best place in town.",
@@ -379,6 +400,11 @@ var TXT = {
       "<p>It fits our big question too. If a time traveller came back and said \"1850 was amazing\", says who? That is their opinion. \"There were no cars\" is something you could check.</p>",
     fig: '<svg viewBox="0 0 420 140" role="img" aria-label="Jay next to a time portal asking says who">' + A2ART.portal(80, 70, 56) + A2ART.jay(250, 50, 0.85, "hmm") +
       A2ART.bubble(300, 6, 104, 34, "Says who?", 304) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Adverts and reviews", html: "<p>Adverts and reviews mix facts and opinions.</p><p>Ask <b>says who?</b></p>" },
+    make: { intro: "One thing. One fact. One opinion.", fields: [{ label: "A fact you could check" }] }
   },
 
   make: {

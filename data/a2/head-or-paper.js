@@ -195,6 +195,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
         "<p><b>Head</b> when the numbers are friendly: tens, doubles, fives, 25s. 30 " + X + " 4 is 3 " + X + " 4 with a zero on the end: 120.</p>" +
         "<p><b>Paper</b> when there are lots of digits or carrying, like 347 " + X + " 6. Writing it down stops numbers falling out of your head.</p>" +
         "<p>Either way, the last move is the same: <b>check it</b>.</p>",
+      ez: { title: "Head or paper?", html: "<p><b>Head</b> for easy numbers: 30 " + X + " 2.</p><p><b>Paper</b> for big ones: 67 " + X + " 8. Then <b>check</b>.</p>" },
       lv: {
         mild: { html: "<p>Ask: <b>head or paper?</b></p><p><b>Head</b> for friendly numbers: 30 " + X + " 2, 5 " + X + " 4, 40 " + D + " 2.</p><p><b>Paper</b> for lots of digits: 67 " + X + " 8.</p><p>Then <b>check it</b>.</p>" },
         spicy: { html: "<p>Before you start, ask: <b>head or paper?</b></p>" +
@@ -208,6 +209,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       cards: [["40 " + X + " 3", 0], ["347 " + X + " 6", 1], ["60 " + D + " 2", 0], ["1872 " + D + " 8", 1], ["25 " + X + " 4", 0], ["736 " + X + " 9", 1]],
       hint: "Tens, doubles and 25s are friendly. Three or four digits with carrying are not.",
       why: "Friendly numbers can be done in your head. Big numbers with carrying are safer written down.",
+      ez: { q: "Head or paper? Sort them.", hint: "Tens and 5s are easy.", why: "Easy numbers in your head. Big ones on paper." },
       lv: {
         mild: { cards: [["20 " + X + " 3", 0], ["67 " + X + " 8", 1], ["10 " + X + " 5", 0], ["96 " + D + " 4", 1]] },
         spicy: { cards: [["0.5 " + X + " 46", 0], ["8.47 " + X + " 3.9", 1], ["2.5 " + X + " 4", 0], ["452.6 " + D + " 7", 1], ["7.2 " + D + " 0.9", 0], ["38.6 " + X + " 47", 1]],
@@ -220,6 +222,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "That works, but it is slow and easy to lose count. Look for a 25 " + X + " 4 hiding in there.", 2: "Joining digits does not work for times. 16 is not 1 and 6, it is 10 and 6." },
       hint: "Four 25s make 100.",
       why: "25 " + X + " 4 = 100 and 100 " + X + " 4 = 400. Splitting 16 into 4 " + X + " 4 makes it easy.",
+      ez: { q: "A quick way to do 4 " + X + " 15?", hint: "Times 4 is double, double.", why: "Double 15 is 30. Double 30 is <b>60</b>.", slips: { 1: "That works, but it is slow.", 2: "15 is 10 and 5. Not 1 and 5." } },
       lv: {
         mild: { q: "What is a quick way to do 4 " + X + " 15 in your head?",
           options: ["Double 15, then double again", "Add 4 fifteen times", "Do 4 " + X + " 1 and 4 " + X + " 5, then join them up"],
@@ -238,6 +241,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[40, "Close, but there is a zero missing. 25 " + X + " 4 is 100, and 100 " + X + " 4 is 400."], [100, "That is 25 " + X + " 4. Now times it by 4 again."], [41, "That is 25 add 16. This one is a times."]],
       hint: "25 " + X + " 4 = 100. Then times by 4 again.",
       why: "25 " + X + " 16 = 25 " + X + " 4 " + X + " 4 = 100 " + X + " 4 = <b>400</b>.",
+      ez: { q: "In your head: 4 " + X + " 15", hint: "Double 15. Then double again.", slips: [[null, "That is double 15. Double once more."], [null, "That is 4 add 15. This is a times."]] },
       lv: {
         mild: { q: "Have a go in your head: 4 " + X + " 15", boxes: [{ label: "Answer", a: 60 }],
           slips: [[30, "That is double 15. Double it once more."], [19, "That is 4 add 15. This one is a times."]],
@@ -254,6 +258,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>7 " + X + " 46 looks hard. Split 46 into <b>40 and 6</b>.</p>" +
         "<p>7 " + X + " 40 = 280. 7 " + X + " 6 = 42. Add them: 280 + 42 = <b>322</b>.</p>" +
         "<p>Dividing splits too: 84 " + D + " 4 is 80 " + D + " 4 = 20 and 4 " + D + " 4 = 1, so <b>21</b>. To divide by 4, you can also halve and halve again.</p>",
+      ez: { html: "<p>3 " + X + " 24: split 24 into <b>20 and 4</b>.</p><p>60 + 12 = <b>72</b>.</p>" },
       lv: {
         mild: { fig: area(3, 20, 4, "60 + 12 = 72"),
           html: "<p>3 " + X + " 24: split 24 into <b>20 and 4</b>.</p><p>3 " + X + " 20 = 60. 3 " + X + " 4 = 12.</p><p>Add them: 60 + 12 = <b>72</b>.</p><p>To divide by 2, halve it. 48 " + D + " 2 is 24.</p>" },
@@ -268,6 +273,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[2, 247, "You added the 7 instead of timesing it. 8 " + X + " 7 is 56."], [0, 24, "8 " + X + " 30 is ten times bigger than 8 " + X + " 3."]],
       hint: "8 " + X + " 3 = 24, so 8 " + X + " 30 = 240.",
       why: "240 + 56 = <b>296</b>.",
+      ez: { q: "Your turn: 4 " + X + " 23", hint: "4 " + X + " 2 = 8. So 4 " + X + " 20 = 80.", slips: [[null, null, "You added the 3. 4 " + X + " 3 is 12."], [null, null, "4 " + X + " 20 is 10 times 4 " + X + " 2."]] },
       lv: {
         mild: { q: "Your turn, with the steps laid out: 4 " + X + " 23",
           boxes: [{ label: "4 " + X + " 20 =", a: 80 }, { label: "4 " + X + " 3 =", a: 12 }, { label: "Add them:", a: 92 }],
@@ -286,6 +292,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[308, "You timesed the 50 but just added the 8. 6 " + X + " 8 is 48."], [64, "That is 58 add 6. Six packs means times."], [300, "That is 6 " + X + " 50. Add on 6 " + X + " 8 as well."]],
       hint: "6 " + X + " 50, then 6 " + X + " 8, then add.",
       why: "6 " + X + " 50 = 300 and 6 " + X + " 8 = 48. 300 + 48 = <b>348</b>.",
+      ez: { q: "Packs of 34 [[things]]. How many in 5 packs?", hint: "5 " + X + " 30, then 5 " + X + " 4. Add.", why: "150 + 20 = <b>170</b>.", slips: [[null, "You added the 4. 5 " + X + " 4 is 20."], [null, "That is 34 add 5. Try times."], [null, "That is 5 " + X + " 30. Add 5 " + X + " 4 too."]] },
       lv: {
         mild: { q: "[[Shop]] sells [[things]] in packs of 34. How many in 5 packs? Split it in your head.",
           boxes: [{ label: "[[Things]]", a: 170 }],
@@ -304,6 +311,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[48, "That is halving once. Dividing by 4 means halve, then halve again."], [384, "That is 96 " + X + " 4. This one is a divide, so it gets smaller."], [21, "Split it: 80 " + D + " 4 = 20 and 16 " + D + " 4 = 4."]],
       hint: "Halve 96, then halve again. Or split it into 80 and 16.",
       why: "Half of 96 is 48, half of 48 is <b>24</b>.",
+      ez: { q: "In your head: 68 " + D + " 2", hint: "Halve 60. Halve 8.", why: "30 and 4 make <b>34</b>.", slips: [[null, "That is 68 " + X + " 2. Halve it instead."], [null, "That is halving twice. Halve once."]] },
       lv: {
         mild: { q: "Divide in your head: 68 " + D + " 2", boxes: [{ label: "Answer", a: 34 }],
           slips: [[136, "That is 68 " + X + " 2. Dividing by 2 makes it smaller: halve it."], [17, "That is halving twice. Divide by 2 only needs one halve."]],
@@ -319,6 +327,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>Times by 10 or 100: the <b>digits slide left</b>, one place for each zero. The decimal point stays still.</p>" +
         "<p>3.7 " + X + " 100 = <b>370</b>. A zero fills the empty ones column.</p>" +
         "<p>Divide by 10 or 100: the digits slide <b>right</b>.</p>",
+      ez: { html: "<p>Times 10: the digits <b>slide left</b>.</p><p>14 " + X + " 10 = <b>140</b>.</p>" },
       lv: {
         mild: { fig: pv("14", 1, "14 " + X + " 10 = 140: the digits slide one place"),
           html: "<p>Times by 10: the <b>digits slide left</b> one place.</p><p>14 " + X + " 10 = <b>140</b>. A zero fills the gap.</p>" },
@@ -334,6 +343,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "Zeros on the end of a decimal do not change it. The digits need to slide two places left.", 2: "That is one slide, for times 10. Times 100 slides two places.", 3: "That slid the other way. Times makes it bigger." },
       hint: "Times 100: the digits slide two places to the left.",
       why: "4 slides into the hundreds, 6 into the tens, and a zero fills the ones: <b>460</b>.",
+      ez: { hint: "Slide left. Add a zero.", slips: { 1: "Slide the digits. Do not add 10 on.", 2: "23.0 is still 23.", 3: "That slid right. Times makes it bigger." } },
       lv: {
         mild: { q: "23 " + X + " 10 = ?", options: ["230", "2310", "23.0", "2.3"],
           slips: { 1: "Do not just stick a 10 on the end. Slide the digits one place left and fill the gap with a zero.", 2: "23.0 is still 23. Times 10 makes it bigger.", 3: "That slid the other way. Times makes it bigger." },
@@ -350,6 +360,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
         { name: "Times", fig: colMul(347, 6), html: "<p><b>Short multiplication.</b> Start on the right. Times each digit, write the ones digit down, <b>carry</b> the tens to the next column.</p><p>347 " + X + " 6 = <b>2082</b>.</p>" },
         { name: "Divide", fig: bus("1872", 8), html: "<p><b>Bus stop division.</b> Start on the left. How many 8s in each digit? Any <b>remainder</b> hops to the next digit.</p><p>1872 " + D + " 8 = <b>234</b>.</p>" }
       ],
+      ez: { title: "On paper", routes: ["<p>Start on the right. Write 8, <b>carry</b> 1.</p><p>46 " + X + " 3 = <b>138</b>.</p>", "<p>Start on the left. The 1 left <b>hops</b> over.</p><p>72 " + D + " 3 = <b>24</b>.</p>"] },
       lv: {
         mild: { routes: [
           { name: "Times", fig: colMul(46, 3), html: "<p>Start on the right. 6 " + X + " 3 = 18: write 8, carry 1.</p><p>4 " + X + " 3 = 12, add the carry: 13.</p><p>46 " + X + " 3 = <b>138</b>.</p>" },
@@ -367,6 +378,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[3, 832, "Looks like a carry went missing. Each carry gets added to the next column."], [1, 20, "Do not forget the carry of 3 from the first column."], [3, 8232, "Write only the ones digit in each column and carry the tens."]],
       hint: "Right to left. Write the ones digit, carry the tens.",
       why: "32: write 2 carry 3. 20 + 3 = 23: write 3 carry 2. 8 + 2 = 10. <b>1032</b>.",
+      ez: { q: "Now you: 57 " + X + " 3. 1 row at a time.", hint: "7 " + X + " 3 = 21. Write 1, carry 2.", why: "15 + 2 = 17. <b>171</b>.", slips: [[null, null, "The carry went missing. Add it on."], [null, null, "Add the carry of 2."], [null, null, "Write the ones digit. Carry the tens."]] },
       lv: {
         mild: { q: "Have a go at 57 " + X + " 3 the same way. One row at a time.",
           fig: colMul(57, 3, true),
@@ -387,6 +399,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[3, 2134, "Only the answers to each step go on top. The remainders hop across underneath."], [3, 232, "The remainder of 1 hops over to make 13, not 3."]],
       hint: "How many 4s in 9? Two, with 1 left over. The 1 hops onto the 3.",
       why: "2 r 1, then 13 " + D + " 4 = 3 r 1, then 16 " + D + " 4 = 4. <b>234</b>.",
+      ez: { q: "Bus stop: 72 " + D + " 3. 1 step at a time.", hint: "How many 3s in 7?", slips: [[null, null, "Only the answers go on top."], [null, null, "The 1 left over hops on. Make 12."]] },
       lv: {
         mild: { q: "Now a bus stop: 72 " + D + " 3. One step at a time.",
           boxes: [{ label: "7 " + D + " 3 = 2 remainder", a: 1 }, { label: "12 " + D + " 3 =", a: 4 }, { label: "Answer:", a: 24 }],
@@ -405,6 +418,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[2862, "The carries went missing. Each one gets added to the next column."], [493, "That is 486 add 7. This one is a times."], [3362, "Check the middle column: 8 " + X + " 7 = 56, plus the carry of 4."]],
       hint: "6 " + X + " 7 = 42: write 2, carry 4. Keep going left.",
       why: "42: write 2 carry 4. 56 + 4 = 60: write 0 carry 6. 28 + 6 = 34. <b>3402</b>.",
+      ez: { q: "On your own: 68 " + X + " 4", hint: "8 " + X + " 4 = 32. Write 2, carry 3.", why: "24 + 3 = 27. <b>272</b>.", slips: [[null, "The carry went missing. Carry the 3."], [null, "That is 68 add 4. Try times."], [null, "Write the ones digit. Carry the tens."]] },
       lv: {
         mild: { q: "On your own: 68 " + X + " 4. Use the working space if you like.",
           boxes: [{ label: "Answer", a: 272 }],
@@ -423,6 +437,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[35, "A zero is hiding. 7 does not go into 3, so write 0 above it and hop the 3 over."], [3005, "Only one step has no 7s in it. Check each digit again."]],
       hint: "21 " + D + " 7 = 3. Then 3 " + D + " 7 = 0 remainder 3. Then 35 " + D + " 7.",
       why: "3, then 0 (remainder 3), then 35 " + D + " 7 = 5. <b>305</b>.",
+      ez: { q: "On your own: 78 " + D + " 3", slips: [[null, "The 1 left over hops on. Make 18."], [null, "That is 78 " + X + " 3. Divide makes it smaller."]] },
       lv: {
         mild: { q: "On your own: 78 " + D + " 3.",
           boxes: [{ label: "Answer", a: 26 }],
@@ -441,6 +456,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       html: "<p>Times and divide <b>undo</b> each other. They are called <b>inverse</b> operations.</p>" +
         "<p>1872 " + D + " 8 = 234? Check by going back the other way: 234 " + X + " 8. If you land on 1872, it is right.</p>" +
         "<p>A quick size check helps too: 1872 " + D + " 8 is roughly 1600 " + D + " 8 = 200, so 234 is a sensible size.</p>",
+      ez: { html: "<p>Times and divide <b>undo</b> each other.</p><p>84 " + D + " 4 = 21? Check: 21 " + X + " 4 = 84. Yes!</p>" },
       lv: {
         mild: { fig: inv("21", X, "4", "84", D),
           html: "<p>Times and divide <b>undo</b> each other.</p><p>84 " + D + " 4 = 21? Check it: 21 " + X + " 4 = 84. Yes.</p><p>If you do not land back where you started, have another look.</p>" },
@@ -456,6 +472,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "That makes a huge number. Start from the answer, 52, and undo the divide.", 2: "Dividing again does not undo a divide. Times undoes it.", 3: "Take away undoes add, not divide." },
       hint: "Start from the answer and do the opposite.",
       why: "The opposite of " + D + " 6 is " + X + " 6. 52 " + X + " 6 = 312, so it is right.",
+      ez: { hint: "Start from the answer. Do the opposite.", why: "21 " + X + " 4 = 84. So it is right.", slips: { 1: "That gets huge. Start from 21.", 2: "Times undoes a divide." } },
       lv: {
         mild: { q: "Which one checks 84 " + D + " 4 = 21?", options: ["21 " + X + " 4", "84 " + X + " 4", "21 " + D + " 4"],
           slips: { 1: "That makes a huge number. Start from the answer, 21, and do the opposite.", 2: "Dividing again does not undo a divide. Times undoes it." },
@@ -473,6 +490,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: { 1: "Have another go at 17 " + X + " 6: 10 " + X + " 6 = 60 and 7 " + X + " 6 = 42.", 2: "102 is where the check lands, not the answer. The check shows Jay lost a hiding zero." },
       hint: "Work out 17 " + X + " 6. Does it land on 642?",
       why: "17 " + X + " 6 = 102, nowhere near 642. Jay skipped the hiding zero: 6 " + D + " 6 = 1, 4 " + D + " 6 = 0 r 4, 42 " + D + " 6 = 7. The answer is 107.",
+      ez: { q: "Jay says 48 " + D + " 4 = 11. Check it. What do you find?", hint: "Work out 11 " + X + " 4.", why: "11 " + X + " 4 = 44, not 48. It is <b>12</b>.", slips: { 1: "Try again. Four 11s is 44." } },
       lv: {
         mild: { q: "Jay worked out 48 " + D + " 4 = 11. Check it with the inverse. What do you find?",
           fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay with a speech bubble">' + A2ART.jay(90, 54, 0.85, "wow") +
@@ -497,6 +515,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       answers: [0, 1],
       hint: "For a times, divide back. For a divide, times back.",
       why: "135 " + D + " 3 = 45 and 32 " + X + " 4 = 128 both land back. 382 " + D + " 7 does not give 56 (56 " + X + " 7 = 392), and 24 " + X + " 9 = 216, not 306 (it should be 34).",
+      ez: { q: "Which are right? Check each one.", hint: "Times? Divide back. Divide? Times back.", why: "The first 2 land back. The others do not." },
       lv: {
         mild: { options: ["12 " + X + " 4 = 48", "60 " + D + " 5 = 12", "7 " + X + " 8 = 54", "45 " + D + " 5 = 8"],
           why: "48 " + D + " 4 = 12 and 12 " + X + " 5 = 60 land back. 7 " + X + " 8 is 56, and 8 " + X + " 5 = 40, not 45 (it should be 9)." },
@@ -510,6 +529,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       slips: [[["divide", "divided", "dividing"], "Dividing again just repeats it. Undo it instead: which operation undoes a divide?"]],
       hint: "Start from 156 and undo the divide.",
       why: "156 " + X + " 9 = 1404, so it is right. Times undoes divide.",
+      ez: { q: "Is 84 " + D + " 4 = 21? How could you check?", hint: "Start from 21. Undo the divide.", why: "21 " + X + " 4 = 84. So it is right.", slips: [[null, "Dividing again repeats it. What undoes divide?"]] },
       lv: {
         mild: { q: "Someone says 84 " + D + " 4 = 21. How could you check it? Write it in your own words.",
           need: [["times", "x", "multiply", "multiplied", "multiplying", "lots"], ["4", "four"]],
@@ -523,6 +543,12 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
           hint: "Start from 4.56 and undo the times.",
           why: "4.56 " + D + " 0.3 = 15.2, so it lands back. Estimate: 15 " + X + " 0.3 = 4.5, close to 4.56." } } }
   ],
+
+  ez: {
+    blurb: "Times and divide. Head or paper? Then check it.",
+    realWorld: { title: "No calculator? No problem", html: "<p>Bills, pizza, paint. People <b>check</b> sums every day.</p><p>100 years ago? No calculators. Just head and paper.</p>" },
+    make: { intro: "Your best trick, an example, and how to check it." }
+  },
 
   realWorld: {
     title: "No calculator? No problem",

@@ -161,6 +161,7 @@ function mountRects(el, api){
       html: "<p>Count in threes: 3, 6, 9, 12, 15, 18, 21. These are the <b>multiples of 3</b>.</p>" +
         "<p>A multiple is any answer in that times table. 12 is a multiple of 3 because 4 &times; 3 = 12.</p>" +
         "<p>Multiples go on forever, and they are never smaller than the number itself.</p>",
+      ez: { title: "Multiples", html: "<p>Count in 3s: 3, 6, 9, 12. These are <b>multiples of 3</b>.</p><p>They are the answers in the 3 times table.</p>" },
       lv: { spicy: { html: "<p>The <b>multiples</b> of 3 are the answers in the 3 times table: 3, 6, 9, 12, 15... and on forever.</p>" +
         "<p>A number is a multiple of 3 if 3 goes into it with nothing left over. 3 000 003 is a multiple of 3 (1 000 001 &times; 3).</p>" +
         "<p>Every number is a multiple of itself, and a multiple of 1.</p>" } } },
@@ -171,6 +172,7 @@ function mountRects(el, api){
       answers: [0, 1, 2],
       hint: "Count in fives: 5, 10, 15, 20, 25...",
       why: "10, 15 and 25 are in the 5 times table. 12 and 52 are not: they end in 2.",
+      ez: { why: "10, 15 and 25 are in the 5s." },
       lv: {
         medium: { q: "Pick <b>all</b> the multiples of 6.", options: ["18", "36", "54", "26", "46"], answers: [0, 1, 2],
           hint: "6, 12, 18, 24, 30, 36...", why: "18 = 3 &times; 6, 36 = 6 &times; 6 and 54 = 9 &times; 6. 26 and 46 end in 6 but are not in the 6s." },
@@ -184,6 +186,8 @@ function mountRects(el, api){
       slips: [[10, "That adds 6 and 4. The 6th multiple is 6 jumps of 4."], [20, "That is the 5th. One more jump."], [6, "6 is how many jumps. Where do you land?"]],
       hint: "Count in fours six times: 4, 8, 12...",
       why: "4, 8, 12, 16, 20, <b>24</b>. The 6th multiple of 4 is 6 &times; 4.",
+      ez: { slips: [[10, "That adds. Do 6 jumps of 4."], [20, "That is the 5th. 1 more jump."], [6, "6 is the jumps. Where do you land?"]],
+        hint: "Count in 4s, 6 times.", why: "4, 8, 12, 16, 20, <b>24</b>." },
       lv: {
         medium: { q: "What is the 9th multiple of 7?", fig: jumps(7, 9, "Nine jumps of 7"), boxes: [{ label: "9th multiple of 7", a: 63 }],
           slips: [[16, "That adds 9 and 7. The 9th multiple is 9 &times; 7."], [56, "That is the 8th. One more jump."], [72, "72 is 9 &times; 8."]],
@@ -199,6 +203,7 @@ function mountRects(el, api){
       slips: { 1: "2026 &divide; 4 leaves 2 over.", 2: "2030 is in the 2s and the 10s, but not the 4s.", 3: "2031 is odd, so it cannot be a multiple of 4." },
       hint: "2000 is in the 4s. Then look at the 28, 26, 30 or 31.",
       why: "2000 is a multiple of 4 and so is 28 (7 &times; 4). So 2028 is too.",
+      ez: { slips: { 3: "31 is odd. It is not in the 4s." } },
       lv: { mild: { q: "Which of these is a multiple of 4?", options: ["28", "26", "30", "31"],
         slips: { 1: "26 &divide; 4 leaves 2 over.", 2: "30 is not in the 4s: 28, then 32.", 3: "31 is odd, so it cannot be a multiple of 4." },
         hint: "Count in fours: 4, 8, 12, 16, 20, 24...", why: "28 = 7 &times; 4." } } },
@@ -209,6 +214,7 @@ function mountRects(el, api){
       html: "<p>A <b>factor</b> of 12 is a number that goes into 12 with nothing left over.</p>" +
         "<p>Try making rectangles from 12 squares: 1 row of 12, 2 rows of 6, 3 rows of 4. The rows and columns are the factors: <b>1, 2, 3, 4, 6 and 12</b>.</p>" +
         "<p>5 is not a factor: 5 rows would leave 2 squares over.</p>",
+      ez: { html: "<p>A <b>factor</b> goes into a number exactly.</p><p>12 squares make 1 by 12, 2 by 6 and 3 by 4. So <b>1, 2, 3, 4, 6, 12</b>.</p>" },
       lv: {
         medium: { fig: rects(24, [[1, 24], [2, 12], [3, 8], [4, 6]], "24 squares make four rectangles"),
           html: "<p>A <b>factor</b> of 24 goes into 24 with nothing left over.</p><p>Rectangles from 24 squares: 1 &times; 24, 2 &times; 12, 3 &times; 8 and 4 &times; 6. So the factors of 24 are <b>1, 2, 3, 4, 6, 8, 12 and 24</b>.</p>" +
@@ -221,6 +227,7 @@ function mountRects(el, api){
     { type: "widget", topic: "Factors", unscored: true,
       title: "Rectangle builder",
       html: "<p>Pick a number of squares, then try rows and columns to make a rectangle. Every rectangle that works gives you a factor pair. Find as many as you like.</p>",
+      ez: { html: "<p>Pick a number. Try rows and columns. Make a rectangle!</p>" },
       mount: mountRects },
 
     { type: "multi", topic: "Factors",
@@ -229,6 +236,7 @@ function mountRects(el, api){
       answers: [0, 1, 2, 3],
       hint: "Which numbers go into 10 with nothing left?",
       why: "1 &times; 10 and 2 &times; 5. So 1, 2, 5 and 10. 20 is a multiple of 10, not a factor.",
+      ez: { hint: "Which go into 10 exactly?", why: "1, 2, 5 and 10. 20 is a multiple." },
       lv: {
         medium: { q: "Pick <b>all</b> the factors of 18.", options: ["1", "2", "3", "6", "9", "18", "36", "4"], answers: [0, 1, 2, 3, 4, 5],
           why: "1 &times; 18, 2 &times; 9, 3 &times; 6. 36 is a multiple, and 4 leaves 2 over." },
@@ -242,6 +250,7 @@ function mountRects(el, api){
       slips: [[2, "That counts the rectangles. Each one gives two factors."], [3, "Check again: 1, 2, 3 and 6."], [6, "6 is the number. Count its factors: 1, 2, 3, 6."]],
       hint: "Read the rows and columns: 1, 6, 2, 3.",
       why: "1, 2, 3 and 6: <b>4</b> factors.",
+      ez: { slips: [[2, "That is the rectangles. Each gives 2 factors."], [3, "Check: 1, 2, 3 and 6."], [6, "6 is the number. Count its factors."]], hint: "Read the rows and columns." },
       lv: {
         medium: { q: "How many factors does 36 have?", fig: rects(36, [[1, 36], [2, 18], [3, 12], [4, 9], [6, 6]], "36 squares"),
           boxes: [{ label: "How many factors", a: 9 }],
@@ -258,6 +267,7 @@ function mountRects(el, api){
       html: "<p>Factors come in <b>pairs</b> that multiply to the number. For 20: 1 &times; 20, 2 &times; 10, 4 &times; 5.</p>" +
         "<p>Start at 1 and work up. When the pairs meet in the middle, you have found them all.</p>" +
         "<p>Here is a full worked one for 18. 1 &times; 18. 2 &times; 9. 3 &times; 6. Try 4: no. Try 5: no. Next is 6, which we already have. Done.</p>",
+      ez: { html: "<p>Factors come in <b>pairs</b>. 1 &times; 20, 2 &times; 10, 4 &times; 5.</p><p>Start at 1. Stop when the pairs meet.</p>" },
       lv: { spicy: { fig: rainbow(60, [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]),
         html: "<p>Factors come in <b>pairs</b>. Start at 1 and work up until the pairs meet.</p>" +
           "<p>Worked example for 60: 1 &times; 60, 2 &times; 30, 3 &times; 20, 4 &times; 15, 5 &times; 12, 6 &times; 10. Try 7, 8, 9: none work. Next is 10, already found. Done: 12 factors.</p>" } } },
@@ -268,6 +278,8 @@ function mountRects(el, api){
       slips: [[0, 14, "That takes 2 away. 2 times what makes 16?"], [1, 12, "That takes 4 away. 4 times what makes 16?"]],
       hint: "2 times what makes 16? 4 times what?",
       why: "2 &times; <b>8</b> = 16 and 4 &times; <b>4</b> = 16. 4 pairs with itself.",
+      ez: { q: "Fill in the factor pairs of 16.", slips: [[0, 14, "That takes away. 2 times what is 16?"], [1, 12, "That takes away. 4 times what is 16?"]],
+        why: "2 &times; <b>8</b> and 4 &times; <b>4</b>." },
       lv: {
         medium: { q: "Fill in the missing factor pairs of 30. The first one is done: 1 &times; 30.",
           boxes: [{ label: "2 &times; ?", a: 15 }, { label: "3 &times; ?", a: 10 }, { label: "5 &times; ?", a: 6 }],
@@ -284,6 +296,8 @@ function mountRects(el, api){
       slips: [[12, "That takes 3 away. 3 times what makes 15?"], [45, "That multiplies. You are splitting 15 into 3 [[rows]]."]],
       hint: "3 times what makes 15?",
       why: "3 &times; <b>5</b> = 15. 3 and 5 are a factor pair of 15.",
+      ez: { q: "15 [[items]] in 3 equal [[rows]]. How many in each row?", slips: [[12, "That takes away. 3 times what is 15?"], [45, "That multiplies. Split 15 into 3."]],
+        why: "3 &times; <b>5</b> = 15." },
       lv: {
         medium: { q: "No help this time. [[Who]] has 42 [[items]] to set out in equal [[rows]]. 6 [[rows]] of 7 is one way. If there are 3 [[rows]] instead, how many in each?",
           boxes: [{ label: "In each", a: 14 }],
@@ -303,6 +317,9 @@ function mountRects(el, api){
       slips: { 1: "24 is a multiple of 12, not a factor.", 2: "5 does not go into 12 exactly.", 3: "Check the pairs: 2 pairs with 6." },
       hint: "Pair them up. Who is 2's partner?",
       why: "2 &times; 6 = 12, so 6 is a factor too. Pairing them up stops you missing one. Good effort for a dog.",
+      ez: { q: "Bonnie says the factors of 12 are 1, 2, 3, 4, 12. What is missing?",
+        slips: { 1: "24 is a multiple, not a factor.", 2: "5 does not go into 12.", 3: "2 pairs with something." },
+        hint: "Who is 2's partner?", why: "2 &times; 6 = 12. So 6! Good effort for a dog." },
       lv: {
         medium: { q: "Bonnie lists the factors of 28 as 1, 2, 4, 7, 28. What has she missed?",
           fig: '<svg viewBox="0 0 420 140" role="img" aria-label="Bonnie with a list">' + A2ART.bonnie(90, 74, 1, "sit") + A2ART.bubble(170, 20, 200, 46, "1, 2, 4, 7, 28", 182) + '</svg>',
@@ -321,6 +338,7 @@ function mountRects(el, api){
       html: "<p><b>Factors</b> go into a number. They are the same size or smaller.</p>" +
         "<p><b>Multiples</b> come out of the times table. They are the same size or bigger.</p>" +
         "<p>3 is a factor of 12, and 12 is a multiple of 3. Same fact, said from the other side.</p>",
+      ez: { html: "<p><b>Factors</b> go in. Same size or smaller.</p><p><b>Multiples</b> come out. Same size or bigger.</p>" },
       lv: { spicy: { html: "<p><b>Factors</b> go in; <b>multiples</b> come out. 3 is a factor of 12; 12 is a multiple of 3.</p>" +
         "<p>A <b>common factor</b> goes into two numbers: 4 is a common factor of 12 and 20. The biggest one is the <b>highest common factor</b> (4).</p>" +
         "<p>A <b>common multiple</b> is in both times tables: 60 is a common multiple of 12 and 20. The smallest one is the <b>lowest common multiple</b> (60).</p>" } } },
@@ -331,6 +349,7 @@ function mountRects(el, api){
       cards: [["1", 0], ["2", 0], ["4", 0], ["16", 1], ["24", 1], ["40", 1]],
       hint: "Smaller numbers that go in are factors. Bigger ones in the 8 times table are multiples.",
       why: "1, 2 and 4 go into 8. 16, 24 and 40 are in the 8 times table. (8 itself is both.)",
+      ez: { hint: "Smaller ones that go in are factors.", why: "1, 2 and 4 go into 8. 16, 24 and 40 are in the 8s." },
       lv: {
         medium: { q: "Think about 12. Sort these numbers.", buckets: ["Factor of 12", "Multiple of 12", "Neither"],
           cards: [["3", 0], ["6", 0], ["36", 1], ["60", 1], ["5", 2], ["30", 2]],
@@ -346,6 +365,7 @@ function mountRects(el, api){
       slips: { 1: "5 is smaller and goes into 20, so it is a factor. 20 is the multiple." },
       hint: "Does 5 go into 20, or come out of a times table?",
       why: "5 goes into 20 exactly (4 times). So 5 is a factor of 20, and 20 is a multiple of 5.",
+      ez: { slips: { 1: "5 goes into 20. So it is a factor." }, hint: "Does 5 go into 20?", why: "5 goes into 20 exactly. So it is a <b>factor</b>." },
       lv: {
         medium: { q: "Which sentence is true?", options: ["7 is a factor of 63.", "63 is a factor of 7.", "7 is a multiple of 63.", "63 is a factor of 9."], fixed: false,
           slips: { 1: "63 cannot go into 7: it is bigger.", 2: "7 is smaller than 63, so it cannot be a multiple of it.", 3: "63 is bigger than 9. It is a multiple of 9." },
@@ -360,6 +380,9 @@ function mountRects(el, api){
       slips: [[12, "12 is a multiple of 4, but it does not go into 16."], [4, "4 is not bigger than 4."], [16, "16 is not smaller than 16."]],
       hint: "List the factors of 16, then pick the one in the 4s.",
       why: "Factors of 16: 1, 2, 4, 8, 16. Only <b>8</b> is a multiple of 4 between 4 and 16.",
+      ez: { q: "I am in the 4s. I go into 16. I am between 4 and 16. What am I?",
+        slips: [[12, "12 is in the 4s. But it does not go into 16."], [4, "4 is not bigger than 4."], [16, "16 is not smaller than 16."]],
+        hint: "List the factors of 16.", why: "Only <b>8</b> fits." },
       lv: {
         medium: { q: "I am a multiple of 6. I am also a factor of 60. I am between 20 and 40. What am I?", boxes: [{ label: "Mystery number", a: 30 }],
           slips: [[24, "24 is a multiple of 6, but it does not go into 60."], [36, "36 is a multiple of 6, but 60 &divide; 36 leaves some over."], [20, "20 goes into 60, but it is not in the 6s."]],
@@ -369,6 +392,11 @@ function mountRects(el, api){
           slips: [[60, "60 works, but they meet sooner."], [16, "That adds them. You need the lowest common multiple."], [2, "2 is the highest common factor."]],
           hint: "Lowest common multiple of 6 and 10.", why: "6, 12, 18, 24, 30 and 10, 20, 30. They meet at <b>30</b> seconds." } } }
   ],
+
+  ez: {
+    realWorld: { html: "<p><b>Factors</b> help with equal rows and teams. <b>Multiples</b> help with things that repeat.</p><p>A time traveller could use multiples of 4 to pick years.</p>" },
+    make: { intro: "Pick a favourite number. Make it a profile card. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Where you would use this",

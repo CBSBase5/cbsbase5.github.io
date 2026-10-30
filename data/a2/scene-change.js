@@ -148,6 +148,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
         "<p>Writers start a new paragraph when one of four things changes:</p>" +
         "<p><b>Time</b> (later, the next day) &middot; <b>Place</b> (somewhere else) &middot; <b>Topic</b> (something new to talk about) &middot; <b>Person</b> (the focus moves to someone else).</p>" +
         "<p>Some people remember it as <b>TiPToP</b>: Time, Place, Topic, Person.</p>",
+      ez: { title: "New paragraph, new scene", html: "<p>A <b>new paragraph</b> is like a new scene.</p><p>Look for a new <b>time</b> or a new <b>place</b>.</p>" },
       lv: { mild: { html: "<p>Think of a play. When the scene changes, the lights dip and the set moves. In writing, a <b>new paragraph</b> does that job.</p>" +
           "<p>Writers start a new paragraph when something changes. The two you will spot most are:</p>" +
           "<p><b>Time</b>: the story jumps to later (\"The next day,\").<br><b>Place</b>: the story moves somewhere else (\"Back at home,\").</p>" +
@@ -162,6 +163,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 0, fixed: true,
       slips: { 1: "Home does come up, but look at the very start of the new paragraph: \"The next morning\" is a time.", 2: "It is still the same story. Look at the first three words of the new paragraph.", 3: "Nobody new comes in. Look at the first three words of the new paragraph." },
       hint: "Look at the first three words of the new paragraph.",
+      ez: { q: two("[[Who]] locked up [[place]] and went home to bed.", "The next morning, the alarm went off at seven.") + "<p>Why the new paragraph?</p>", hint: "Read the first 3 words.", why: "\"The next morning\" is a jump in <b>time</b>.", slips: { 1: "Look at \"The next morning\". That is a time.", 2: "Same story. Read the first 3 words.", 3: "Nobody new. Read the first 3 words." } },
       why: "\"The next morning\" jumps forward in time. A jump in time is a good reason for a new paragraph.",
       lv: { spicy: {
         q: two("[[Who]] stood in the doorway of [[place]] and looked around.", "Five years earlier, [[who]] had walked through those same doors for the very first time.") + "<p>Why did the writer start a new paragraph?</p>",
@@ -175,6 +177,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 1, fixed: true,
       slips: { 0: "No clock has moved on. Look at where the second paragraph happens.", 2: "It is still the same story. Look at where the second paragraph happens.", 3: "There is no new person here, just lights. Where are they?" },
       hint: "Where does the second paragraph happen?",
+      ez: { q: two("[[Who]] waited by the front door for what felt like ages.", "[[Place2]], the lights flickered on all by themselves.") + "<p>Why the new paragraph?</p>", hint: "Where is the second part?", why: "\"[[Place2]]\" is a new <b>place</b>.", slips: { 0: "No time jump. Where is it now?", 2: "Same story. Where is it now?", 3: "No new person. Where are the lights?" } },
       why: "\"[[Place2]]\" moves the reader somewhere else. A change of place gets a new paragraph.",
       lv: { spicy: {
         q: two("[[Place]] was busy all evening. People came and went, and the noise never seemed to stop.", "The building itself is over a hundred years old. Its walls have seen floods, fires and one very strange winter.") + "<p>Why did the writer start a new paragraph?</p>",
@@ -188,6 +191,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       buckets: ["Time", "Place", "Topic", "Person"],
       cards: [["Later that evening,", 0], ["Back at [[place]],", 1], ["Another problem was the noise.", 2], ["[[Who2]] had other ideas.", 3], ["The next day,", 0], ["Outside in the rain,", 1]],
       hint: "When? Where? What about? Who?",
+      ez: { q: "Is it a change of <b>time</b> or <b>place</b>?", hint: "Time is when. Place is where.", why: "Later and next day say <b>when</b>. Back at and outside say <b>where</b>." },
       why: "\"Later\" and \"the next day\" are times. \"Back at\" and \"outside\" are places. \"Another problem\" brings a new topic. \"[[Who2]]\" moves the focus to someone else.",
       lv: { mild: { q: "Each of these could start a new paragraph. Is it a change of time or of place?",
           buckets: ["Time", "Place"],
@@ -204,6 +208,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 3, fixed: true,
       slips: { 0: "\"Meanwhile\" means at the same time, so the time has not moved. Who is the paragraph about now?", 1: "She is in the same room as Jay, just by the window. Who is the paragraph about now?", 2: "Still the same lesson. Who has the spotlight now?" },
       hint: "Who is the second paragraph about?",
+      ez: { q: two("Jay spent the whole lesson trying to fix the printer. He pressed every button twice.", "Bonnie, meanwhile, had found a sunny spot by the window and fallen fast asleep.") + "<p>Why the new paragraph?</p>", hint: "Who is it about now?", why: "It moves from Jay to <b>Bonnie</b>. A new person.", slips: { 0: "Meanwhile means same time. Who is it about now?", 1: "Same room. Who is it about now?", 2: "Same lesson. Who is it about now?" } },
       why: "The spotlight moves from Jay to Bonnie. A change of person gets a new paragraph, and \"meanwhile\" tells us it is happening at the same time." },
 
     /* ---------- chunk 2 ---------- */
@@ -211,6 +216,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       fig: WALL,
       html: "<p>Here is a piece with no paragraphs at all. Have a read.</p>" + runOn(8) +
         "<p>Everything is there, but it is hard to follow. The scene changes three times and nothing tells your eyes. Hunt for the <b>first few words</b> of each sentence: that is where the changes hide.</p>",
+      ez: { title: "No paragraphs", html: "<p>No paragraphs is <b>hard to read</b>.</p><p>Look at the <b>first words</b> of each sentence.</p>" },
       lv: { mild: { html: "<p>Here is a piece with no paragraphs at all. Have a read.</p>" + runOn(7) +
         "<p>Everything is there, but it is hard to follow. The scene changes twice: once in <b>time</b> and once in <b>place</b>. The first few words of a sentence are where the changes hide.</p>" } } },
 
@@ -220,6 +226,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 0,
       slips: { 1: "That one carries on the same quiet moment. Look for a time word at the start.", 2: "That carries on from the sentence before it. Look for the sentence that jumps forward.", 3: "Same time, same place as the start. Look for a time word." },
       hint: "Look for words that say when.",
+      ez: { q: runOn(7) + "<p>The time jumps. Which sentence starts a new paragraph?</p>", hint: "Look for a when word.", why: "\"Two hours later\" jumps in <b>time</b>.", slips: { 1: "Same quiet moment. Look for a time word.", 2: "That carries on. Look for a time jump.", 3: "Same time. Look for a time word." } },
       why: "\"Two hours later\" jumps forward in time, so a new paragraph starts there.",
       lv: { mild: { q: runOn(7) + "<p>The time jumps in this piece. Which sentence should start a new paragraph?</p>" },
         spicy: { q: runOn(8) + "<p>Which sentence starts a new paragraph because of a change of <b>person</b>?</p>",
@@ -231,6 +238,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
     { type: "widget", topic: "Where does the break go?", unscored: true,
       title: "Cut it into paragraphs",
       html: "<p>Tap a gap between two sentences to start a new paragraph there. Tap it again to take it away. When you are happy, see where Jay would cut it. There is no score, so have a go.</p>",
+      ez: { html: "<p>Tap a gap to start a new paragraph. Then see where Jay cuts it.</p>" },
       mount: function(el, api){
         var d = api.data, mild = api.level === "mild", tk = api.tok || function(t){ return t; };
         var S = CUT.slice(0, mild ? 7 : 8).map(function(t){ return tk(t); });
@@ -283,6 +291,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       options: TRIP.slice(1),
       answers: [1, 3, 4],
       hint: "Look for a new time, a new place and a new person.",
+      ez: { q: '<p class="a2task">' + TRIP.slice(0, 5).join(" ") + '</p><p>Pick the <b>2</b> sentences that start a new paragraph.</p>', hint: "Find a time word and a place word.", why: "\"By lunchtime\" is <b>time</b>. \"At the service station\" is <b>place</b>." },
       why: "\"By lunchtime\" is a new time. \"At the service station\" is a new place. \"[[Who2]]\" moves the spotlight to one person.",
       lv: { mild: {
         q: '<p class="a2task">' + TRIP.slice(0, 5).join(" ") + '</p><p>This one has no paragraphs either. Pick the <b>two</b> sentences that should start a new paragraph.</p>',
@@ -295,6 +304,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       q: "These are the first lines of five paragraphs from a trip diary. Put them in order using the time markers.",
       items: ["Early that morning, we packed the bags.", "By lunchtime, we had reached [[place]].", "That afternoon, it rained without stopping.", "Later that night, the sky finally cleared.", "The next day, we headed home."],
       hint: "Morning, lunchtime, afternoon, night, next day.",
+      ez: { q: "Put the diary in time order.", hint: "Morning, lunchtime, night, next day.", why: "The time words give the order." },
       why: "The time markers do the ordering for you: early morning, lunchtime, afternoon, later that night, the next day.",
       lv: { mild: { items: ["In the morning, we got on the bus.", "At lunchtime, we reached [[place]].", "At night, we went to bed.", "The next day, we went home."] },
         spicy: { items: ["Two days before the trip, the tickets arrived.", "The night before, nobody could sleep.", "At six the next morning, the bus pulled up outside.", "An hour later, the first bag had already been left behind.", "By the time we got home, it was dark again."],
@@ -307,6 +317,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       html: "<p>The first few words of a new paragraph are often a <b>marker</b>. They work like a signpost, so the reader knows what kind of change is coming.</p>" +
         "<p><b>Time:</b> Later that night, / The next day, / Meanwhile,<br><b>Place:</b> Back at home, / Outside, / Across town,<br><b>Topic:</b> As for the food, / Another thing was...<br><b>Person:</b> a new name, or \"Her brother, on the other hand,\"</p>" +
         "<p>Notice the comma after a marker. It gives the reader a tiny pause before the scene starts.</p>",
+      ez: { title: "Marker words", html: "<p>The first words are a <b>marker</b>, like a signpost.</p><p><b>Later that night,</b> is time. <b>Back at home,</b> is place.</p>" },
       lv: { spicy: { html: "<p>The first few words of a new paragraph are often a <b>marker</b>: a signpost telling the reader what kind of change is coming.</p>" +
         "<p><b>Time:</b> Years before, / By the time... / Meanwhile,<br><b>Place:</b> Across town, / Far below,<br><b>Topic:</b> As for... / Another problem was...<br><b>Person:</b> a new name, or \"Not everyone agreed.\"</p>" +
         "<p>Good writers pick the marker that says <b>exactly</b> what changed. \"Meanwhile\" says same time, different place or person. \"Years before\" warns the reader that a flashback is coming.</p>" } } },
@@ -315,6 +326,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       q: "Match each marker to the change it signals.",
       pairs: [["Later that night,", "Time moves on"], ["Back at [[place]],", "A new place"], ["As for [[thing]],", "A new topic"], ["[[Who2]], on the other hand,", "A different person"]],
       hint: "When? Where? What about? Who?",
+      ez: { q: "Match each marker to its change.", why: "Each marker says what changed." },
       why: "Each marker tells the reader what has changed before the new scene starts." },
 
     { type: "text", topic: "Marker words",
@@ -323,6 +335,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       model: "The next morning,",
       slips: [[["back at", "outside", "inside", "across"], "That one moves the place. Try a time: later, the next day, that night."], [["meanwhile"], "Meanwhile means at the same time. Try one that jumps forward: later, the next day."]],
       hint: "Start with \"Later\", \"The next\" or \"That night\".",
+      ez: { q: "Write a marker that jumps <b>forward in time</b>. A few words is fine.", hint: "Try Later, or The next day.", why: "Anything that moves the clock on. \"The next morning,\"", slips: [[null, "That moves the place. Try a time, like later."], [null, "Meanwhile means same time. Try later."]] },
       why: "Anything that tells the reader the clock has moved on works: \"Later that day,\", \"The next morning,\", \"An hour after that,\".",
       lv: { spicy: { q: "Write a marker that could start a <b>flashback</b> paragraph: one that jumps <b>back</b> in time.",
         need: [["before", "earlier", "ago", "previously", "once", "when", "back", "last", "used", "had", "years", "year", "remembered", "remember"]],
@@ -337,6 +350,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 0,
       slips: { 1: "\"Ten minutes later\" moves the time, not the place.", 2: "That one brings in a new topic.", 3: "\"The next morning\" moves the time." },
       hint: "Which one answers \"where?\"",
+      ez: { q: "Which one moves to a <b>new place</b>?", hint: "Which one says where?", why: "\"Across the road\" is a new <b>place</b>.", slips: { 1: "That moves the time.", 2: "That is a new topic.", 3: "That moves the time." } },
       why: "\"Across the road\" tells the reader the scene has moved somewhere else.",
       lv: { spicy: { q: "Two things happen <b>at the same time</b> in two different places. Which marker best opens the second paragraph?",
         options: ["Meanwhile, across town,", "After that,", "Finally,", "Years before,"],
@@ -350,6 +364,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       html: "<p>A new paragraph moves on, but it should not feel like a different book. The best first sentences do two jobs: they <b>link back</b> to what came before, then <b>move on</b>.</p>" +
         "<p class=\"a2task\">[[Who]] finally found [[thing]] under a pile of coats.<br><br><b>This</b> was only the start of the trouble. <b>Later that night</b>, ...</p>" +
         "<p>\"This\" points back to the last paragraph. \"Later that night\" moves the time on. Words like <b>this, that, these, it, they</b>, or using the same name again, hold the paragraphs together.</p>",
+      ez: { title: "Hold it together", html: "<p>A good start <b>points back</b>, then moves on.</p><p class=\"a2task\">[[Who]] found [[thing]].<br><br><b>It</b> was dusty. <b>The next day</b>, ...</p>" },
       lv: { mild: { html: "<p>A new paragraph moves on, but it is still the same story. A good first sentence often <b>points back</b> to the last paragraph.</p>" +
         "<p class=\"a2task\">[[Who]] finally found [[thing]].<br><br><b>It</b> was covered in dust. <b>The next day</b>, ...</p>" +
         "<p>\"It\" points back to [[thing]]. \"The next day\" moves the time on. Small words like <b>it, this, they</b> hold the story together.</p>" },
@@ -364,6 +379,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 0,
       slips: { 1: "True, but it has nothing to do with the search. It does not link back.", 2: "That is a place, but it does not link back to the search or make a full sentence." },
       hint: "Which one links back to the search and also moves on?",
+      ez: { q: "<p class=\"a2task\">[[Who]] spent the whole morning searching [[place]] for [[thing]]. It was nowhere to be found.</p><p>Which is the best start for the <b>next</b> paragraph?</p>", hint: "Which links back to the search?", why: "\"The search\" links back. \"By the afternoon\" moves on.", slips: { 1: "True, but it is not about the search.", 2: "It does not link back. It is not a full sentence." } },
       why: "\"The search\" links back to the last paragraph. \"By the afternoon\" moves the time on. Both jobs in one sentence.",
       lv: { spicy: {
         options: ["That search went on all afternoon.", "The afternoon was warm and sunny.", "Later on.", "Searching for things is something lots of people do."],
@@ -377,6 +393,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 0,
       slips: { 1: "\"Once upon a time\" starts a whole new story, not the next part of this one.", 2: "\"In conclusion\" is for the end of an essay, not a story.", 3: "\"For example\" gives an example. Nothing is being explained here." },
       hint: "Which one tells you when?",
+      ez: { q: "<p class=\"a2task\">[[Event]] ended at ten. Everyone went home.</p><p class=\"a2task\">___, [[who]] was the only one left in [[place]].</p><p>Which marker fills the gap?</p>", hint: "Which one says when?", why: "\"An hour later\" moves the time on.", slips: { 1: "That starts a new story.", 2: "That is for the end of an essay.", 3: "Nothing is explained here." } },
       why: "\"An hour later\" moves the time on from ten o'clock and keeps the story flowing.",
       lv: { spicy: {
         options: ["An hour later", "Once upon a time", "In conclusion", "Even so"],
@@ -389,6 +406,7 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
       answer: 0,
       slips: { 1: "It might look like that, but the writer chose it. Imagine reading it out loud: what does the pause do?", 2: "Paragraphs can be any length. This one is short on purpose.", 3: "We are still at the same door. Something has <b>happened</b>, rather than moved." },
       hint: "Read it out loud in your head. What does the gap before it do?",
+      ez: { hint: "What does the gap do?", why: "The gap is a pause. The big moment <b>stands out</b>." },
       why: "The break works like a pause before a big moment. Putting one sentence on its own makes it land harder.",
       lv: { mild: { q: "<p class=\"a2task\">We crept along the corridor. Every door was shut. We reached the last door and stopped.</p><p class=\"a2task\">Then [[sound]].</p><p>Why is the last part on its own?</p>",
         options: ["To make the big moment stand out", "Because the writer forgot", "To show the place has changed"],
@@ -399,11 +417,16 @@ var TRIP = ["We set off from [[place]] at nine.", "The bus was packed.", "By lun
 
     { type: "write", topic: "Holding it together",
       q: "<p class=\"a2task\">...[[Who]] closed the door, turned off the light and walked away.</p><p>Write the <b>first sentence or two of the next paragraph</b>. Start with a marker, and if you can, link back to what just happened. If you like, send it to Jay.</p>",
+      ez: { q: "<p class=\"a2task\">...[[Who]] closed the door, turned off the light and walked away.</p><p>Write the first line of the <b>next paragraph</b>. Start with a marker.</p>" },
       starters: ["Later that night,", "Meanwhile,", "The next morning,", "Back inside,"],
       checklist: ["I started with a marker word", "I can say what changed (time, place, topic or person)", "Something links back to the last paragraph"],
       minWords: 6 }
   ],
 
+  ez: {
+    realWorld: { title: "Scene changes are everywhere", html: "<p>Films cut to a new scene. Paragraphs do the same.</p><p>A time traveller's diary would need lots!</p>" },
+    make: { intro: "A clapperboard for your own scene change." }
+  },
   realWorld: {
     title: "Scene changes are everywhere",
     html: "<p>Scripts mark every new scene. TV and films cut to a new place or time. Writers use paragraphs for exactly the same job.</p>" +

@@ -206,6 +206,7 @@ function fillWidget(el, api){
       fig: ruler(0, 5, 1, true),
       html: "<p>A <b>scale</b> is a line of numbers with marks, like on a ruler.</p>" +
         "<p>To measure, line one end up with the <b>0</b>. Then read the number at the <b>other end</b>. This pencil ends at 5, so it is <b>5 cm</b> long.</p>",
+      ez: { title: "Start at 0", html: "<p>Line one end up with <b>0</b>.</p><p>Read the number at the <b>other end</b>. This pencil is 5 cm.</p>" },
       lv: {
         medium: { fig: ruler(0, 4.5, 2, true),
           html: "<p>A <b>scale</b> is a line of numbers with marks. On this ruler the long marks are centimetres, and the short marks are <b>halfway</b> between.</p>" +
@@ -221,6 +222,8 @@ function fillWidget(el, api){
       slips: [[10, "One too many. Read the number right under the tip."], [8, "Nearly. Read the number right under the tip."]],
       hint: "It starts at 0. Which number is under the tip?",
       why: "It starts at 0 and the tip is at 9, so it is <b>9 cm</b>.",
+      ez: { q: "How long is this [[thing]]?", slips: [[10, "1 too many. Read the number under the tip."], [8, "Nearly. Read the number under the tip."]],
+        hint: "Which number is under the tip?", why: "The tip is at 9. So <b>9 cm</b>." },
       lv: {
         medium: { fig: ruler(0, 6.5, 2), boxes: [{ label: "Length", a: 6.5, post: "cm" }],
           slips: [[6, "The tip goes past 6, to the halfway mark."], [7, "The tip stops before 7, at the halfway mark."], [6.2, "The short mark is halfway: that is .5, not .2."]],
@@ -238,6 +241,8 @@ function fillWidget(el, api){
       slips: [[9, "That is where the tip is. But it starts at 2, not 0. Take the 2 away."], [11, "Take away, do not add: 9 take away 2."]],
       hint: "It runs from 2 to 9. How many centimetres is that?",
       why: "From 2 to 9 is <b>7 cm</b>. Count the jumps: 3, 4, 5, 6, 7, 8, 9.",
+      ez: { q: "This [[thing]] does <b>not</b> start at 0. How long is it?", slips: [[9, "It starts at 2. Take the 2 away."], [11, "Take away, do not add."]],
+        hint: "It runs from 2 to 9.", why: "From 2 to 9 is <b>7 cm</b>." },
       lv: {
         medium: { fig: ruler(1, 6.5, 2), boxes: [{ label: "Length", a: 6.5, post: "cm" }],
           slips: [[7.5, "That is where the tip is. It starts at 1, so take 1 away."], [8.5, "Take the start away, do not add it."]],
@@ -255,6 +260,8 @@ function fillWidget(el, api){
       slips: { 1: "Lots of rulers have a little gap before the 0, so the edge is not always 0.", 2: "Starting at 1 makes everything 1 cm too long." },
       hint: "Which number means nothing measured yet?",
       why: "Start at <b>0</b>. Then the number at the other end is the length.",
+      ez: { q: "Where should one end go on a ruler?", slips: { 1: "The edge is not always 0.", 2: "Starting at 1 adds 1 cm." },
+        hint: "Which number means nothing yet?", why: "Start at <b>0</b>. The other end is the length." },
       lv: { spicy: { q: "Your ruler has a snapped end and starts at 4 cm. You can still use it. How?",
         options: ["Start the object at 4, then take 4 away from the reading", "Start at 4 and add 4 to the reading", "You cannot measure with it any more"],
         slips: { 1: "Starting at 4 already adds 4 to the reading, so you take it away, not add it.", 2: "You can! Any mark can be your start, as long as you take it away." },
@@ -269,6 +276,7 @@ function fillWidget(el, api){
         "2. Count the gaps between them: <b>2 gaps</b>.<br>" +
         "3. Share the jump between the gaps: 10 shared by 2 is <b>5</b>. Each gap is 5.<br>" +
         "4. Count on from a label: the arrow is one gap after 20, so it is 20, then <b>25</b>.</p>",
+      ez: { title: "Work out the gaps", html: "<p>Some marks have <b>no number</b>. Find 2 labels. Count the <b>gaps</b>.</p><p>0 to 10 with 2 gaps: each gap is <b>5</b>.</p>" },
       lv: {
         medium: { fig: line(0, 100, 4, 5, 175, "25"),
           html: "<p>Lots of scales have marks with <b>no number</b>. Here is how to read them.</p>" +
@@ -291,6 +299,8 @@ function fillWidget(el, api){
       slips: [[10, "That is the jump from one label to the next. Share it between the 2 gaps."], [2, "That is how many gaps. What is 10 shared by 2?"], [1, "Each gap is not 1 here. 10 shared by 2 gaps?"]],
       hint: "10 shared between 2 gaps.",
       why: "10 shared by 2 is <b>5</b>. Each gap is 5.",
+      ez: { q: "Labels go up in <b>10s</b>. There are <b>2 gaps</b>. What is each gap worth?",
+        slips: [[10, "Share the 10 between the 2 gaps."], [2, "That is the gaps. What is 10 shared by 2?"], [1, "Not 1 here. 10 shared by 2?"]], why: "10 shared by 2 is <b>5</b>." },
       lv: {
         medium: { q: "Your turn, with steps 1 and 2 done. The labels go up in <b>100s</b>, and there are <b>4 gaps</b> between them. How much is each gap worth?",
           fig: line(0, 100, 4, 5, 325), boxes: [{ label: "Each gap", a: 25 }],
@@ -310,6 +320,7 @@ function fillWidget(el, api){
       slips: [[30, "That is the label just before. Count on one gap of 5."], [31, "Each gap is 5 here, not 1."], [40, "That is the next label. The arrow is halfway."]],
       hint: "Start at 30 and count on one gap of 5.",
       why: "30, then one gap of 5: <b>35</b>.",
+      ez: { q: "Each gap is 5. Where is the arrow?", slips: [[30, "Count on 1 gap of 5."], [31, "Each gap is 5, not 1."], [40, "That is the next label."]], hint: "Start at 30. Count on 5." },
       lv: {
         medium: { q: "Now step 4 on the same scale. Each gap is 25. Where is the arrow pointing?",
           fig: line(0, 100, 4, 5, 325), boxes: [{ label: "Arrow", a: 325 }],
@@ -329,6 +340,8 @@ function fillWidget(el, api){
       slips: [[45, "Each gap is not 5 here. The labels go up in 20s, with 2 gaps."], [41, "Each gap is 10 here: 20 shared by 2."], [55, "Each gap is 10 here, not 5 or 15."]],
       hint: "Steps: two labels, count the gaps, share the jump, count on.",
       why: "Labels go up in 20s with 2 gaps, so each gap is 10. The arrow is one gap after 40: <b>50</b>.",
+      ez: { q: "A new scale. Where is the arrow?", slips: [[45, "Labels go up in 20s, with 2 gaps."], [41, "Each gap is 10 here."], [55, "Each gap is 10 here."]],
+        hint: "Labels, gaps, share, count on.", why: "Each gap is 10. 1 gap after 40 is <b>50</b>." },
       lv: {
         medium: { fig: line(0, 50, 5, 5, 120), boxes: [{ label: "Arrow", a: 120 }],
           slips: [[125, "Each gap is not 25 here. 50 shared by 5 gaps?"], [102, "Each gap is 10 here, not 1."], [140, "Count the gaps after 100 again."]],
@@ -344,6 +357,7 @@ function fillWidget(el, api){
       html: "<p>A <b>jug</b> is a scale standing up. Read the number level with the <b>top of the liquid</b>, with your eyes level with it too.</p>" +
         "<p>A <b>dial</b> is a scale bent into a circle. Read where the <b>pointer</b> is.</p>" +
         "<p>Same steps as before: find the labels, work out the gaps. This jug shows <b>300 ml</b>. On the dial, the labels go up in 200s with 2 gaps, so each gap is 100: it shows <b>500 grams</b>.</p>",
+      ez: { html: "<p>A <b>jug</b> is a scale standing up. Read the top of the liquid.</p><p>A <b>dial</b> is a scale in a circle. Read the pointer.</p>" },
       lv: { spicy: { fig: '<svg viewBox="0 0 520 290" role="img" aria-label="A measuring jug in litres and a round dial in kilograms">' + '<rect width="520" height="290" rx="14" fill="#f4f1ea"/>' +
           jugG(40, 20, 0.5, 5, 4, 1.1, "litres") + dialG(370, 150, 100, 4, 1, 5, 2.4, "kg") + '</svg>',
         html: "<p>A <b>jug</b> is a scale standing up; read level with the top of the liquid. A <b>dial</b> is a scale bent into a circle; read where the pointer is.</p>" +
@@ -356,6 +370,7 @@ function fillWidget(el, api){
       slips: [[3, "That is 3 marks. Each mark is worth 100 ml."], [200, "Read the label level with the top of the liquid."], [400, "Read the label level with the top of the liquid."]],
       hint: "Look straight across from the top of the liquid to the scale.",
       why: "The top of the liquid is level with <b>300 ml</b>.",
+      ez: { slips: [[3, "That is 3 marks. Each is 100 ml."], [200, "Read level with the top."], [400, "Read level with the top."]], hint: "Look across from the top of the liquid." },
       lv: {
         medium: { fig: jug(200, 4, 5, 700, "ml"), boxes: [{ label: "Amount", a: 700, post: "ml" }],
           slips: [[650, "That is one gap. The liquid is two gaps above 600."], [620, "Each gap is 50 ml here: 200 shared by 4."], [602, "Each gap is 50 ml, not 1."], [750, "Count again: two gaps above 600."]],
@@ -373,6 +388,7 @@ function fillWidget(el, api){
       slips: [[4, "One too many. Read the number the red pointer is on."], [2, "One too few. Read the number the red pointer is on."]],
       hint: "Follow the red pointer to the number.",
       why: "The pointer is on <b>3 kg</b>. A toy poodle, all curls and no tail.",
+      ez: { slips: [[4, "1 too many. Read the red pointer."], [2, "1 too few. Read the red pointer."]], why: "The pointer is on <b>3 kg</b>. All curls, no tail." },
       lv: {
         medium: { fig: bonnieScale(5, 1, 5, 3.4), boxes: [{ label: "Bonnie", a: 3.4, post: "kg" }],
           slips: [[3.2, "Each gap is 0.2 here (1 kg shared by 5), so two gaps is 0.4."], [3.02, "Each gap is 0.2 kg, not 0.01."], [3.5, "Count the gaps after 3 again: two gaps of 0.2."]],
@@ -386,6 +402,7 @@ function fillWidget(el, api){
     { type: "widget", topic: "Jugs and dials", unscored: true,
       title: "Fill the jug",
       html: "<p>A jug to fill, for practice. Nothing is scored here.</p>",
+      ez: { html: "<p>Fill the jug. Just for practice.</p>" },
       mount: fillWidget,
       report: function(d){ return d && d.tries ? "Fill the jug: " + (d.hit ? "got it" : "had a go") + " in " + d.tries + " tr" + (d.tries === 1 ? "y" : "ies") + "." : ""; } },
 
@@ -397,6 +414,8 @@ function fillWidget(el, api){
       slips: { 1: "From above, the level looks lower than it is.", 2: "From below, the level looks higher than it is." },
       hint: "Crouch down so the jug and your eyes are at the same height.",
       why: "Eyes level with the top of the liquid gives the true reading.",
+      ez: { q: "Reading a jug: where should your eyes be?", slips: { 1: "From above, it looks too low.", 2: "From below, it looks too high." },
+        hint: "Crouch down to the jug.", why: "Level with the top. That is the true reading." },
       lv: { spicy: { q: "The top of the liquid is exactly halfway between the 1.2 and 1.3 litre marks. What is a sensible reading?",
         fig: "",
         options: ["1.25 litres", "1.5 litres", "1.23 litres", "1.2 litres exactly"],
@@ -409,6 +428,7 @@ function fillWidget(el, api){
       fig: thermo(0, 40, 10, 2, 15),
       html: "<p>A <b>thermometer</b> measures temperature in <b>degrees Celsius</b> (C). Read the number level with the <b>top of the red line</b>.</p>" +
         "<p>Labels go up in 10s with 2 gaps, so each gap is 5. The red line stops one gap above 10: <b>15 degrees</b>.</p>",
+      ez: { html: "<p>A <b>thermometer</b> shows temperature. Read the <b>top of the red line</b>.</p><p>Each gap is 5. It shows <b>15 degrees</b>.</p>" },
       lv: {
         medium: { fig: thermo(0, 40, 10, 5, 26),
           html: "<p>A <b>thermometer</b> measures temperature in <b>degrees Celsius</b> (C). Read level with the <b>top of the red line</b>.</p>" +
@@ -424,6 +444,7 @@ function fillWidget(el, api){
       slips: [[20, "That is the label below. The red line goes one gap higher."], [30, "That is the label above. The red line stops halfway."], [21, "Each gap is 5 here, not 1."]],
       hint: "Each gap is 5. Count on from 20.",
       why: "One gap of 5 above 20: <b>25 degrees</b>.",
+      ez: { slips: [[20, "The red line goes 1 gap higher."], [30, "The red line stops halfway."], [21, "Each gap is 5, not 1."]] },
       lv: {
         medium: { fig: thermo(0, 40, 10, 5, 18), boxes: [{ label: "Temperature", a: 18, post: "degrees C" }],
           slips: [[14, "Each gap is 2 degrees, not 1."], [16, "Count the gaps above 10 again: there are 4."], [19, "Each gap is 2 degrees. Try counting back from 20."]],
@@ -441,6 +462,7 @@ function fillWidget(el, api){
       slips: { 1: "A reaches 15. B reaches 30. The higher the red line, the warmer." },
       hint: "The higher the red line, the warmer it is.",
       why: "B reaches 30 degrees and A reaches 15. B is warmer.",
+      ez: { slips: { 1: "A is 15. B is 30. Higher is warmer." }, why: "B is 30. A is 15. B is warmer." },
       lv: {
         medium: { fig: thermo2(0, 40, 10, 5, 22, 18), options: ["A", "B"],
           slips: { 1: "B reaches 18. A reaches 22. The higher the red line, the warmer." },
@@ -458,6 +480,7 @@ function fillWidget(el, api){
       slips: [[45, "That is adding them. Count up from 15 to 30 instead."], [3, "Count degrees, not gaps. Each gap is 5."]],
       hint: "Count up from 15 to 30.",
       why: "From 15 to 30 is <b>15 degrees</b>.",
+      ez: { q: "How many degrees warmer is B than A?", slips: [[45, "That adds them. Count up from 15 to 30."], [3, "Count degrees, not gaps."]] },
       lv: {
         medium: { q: "Same two thermometers. How many degrees warmer is A than B?",
           fig: thermo2(0, 40, 10, 5, 22, 18), boxes: [{ label: "Difference", a: 4, post: "degrees" }],
@@ -470,6 +493,11 @@ function fillWidget(el, api){
           hint: "Count up from -3 to 0, then on to 2.",
           why: "-3 up to 0 is 3 degrees, then 0 up to 2 is 2 more: <b>5 degrees</b>." } } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Chefs, nurses, builders and vets all read <b>scales</b>.</p><p>Time travel? Pack a ruler. People once measured with their feet!</p>" },
+    make: { intro: "Pick a start, the labels and the gaps. The picture draws it. Try to trick Jay!" }
+  },
 
   realWorld: {
     title: "Scales are everywhere",

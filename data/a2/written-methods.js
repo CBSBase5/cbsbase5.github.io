@@ -286,7 +286,8 @@ function mountBus(el, api){
           html: "<p>Decimals use exactly the same method. The trick: <b>take the point out, multiply, then put it back</b>.</p>" +
             "<p><b>3.47 &times; 6:</b> work out 347 &times; 6 in columns. 7 &times; 6 = 42, carry 4. 4 &times; 6 + 4 = 28, carry 2. 3 &times; 6 + 2 = 20. That gives 2,082.</p>" +
             "<p>3.47 has <b>two</b> digits after the point, so the answer needs two as well: <b>20.82</b>.</p>" +
-            "<p>Sense check: 3.47 is about 3.5, and 3.5 &times; 6 = 21. So 20.82 sounds right, and 208.2 would not.</p>" } } },
+            "<p>Sense check: 3.47 is about 3.5, and 3.5 &times; 6 = 21. So 20.82 sounds right, and 208.2 would not.</p>" } },
+      ez: { html: "<p>Start with the <b>ones</b>. Then tens, then hundreds.</p><p>Too big for a column? <b>Carry</b> it to the next one.</p>" } },
 
     { type: "num", topic: "Short multiplication",
       q: "Jay has started this one and left you the rest. The ones are done: 8 &times; 4 = 32, so 2 is written and 3 is carried. Finish it off.",
@@ -295,6 +296,9 @@ function mountBus(el, api){
       slips: [[0, 20, "That is 5 &times; 4. Add the 3 that was carried."], [1, 802, "Looks like the carries got left behind. Add each one into the next column."], [1, 832, "So close. In the hundreds, 2 &times; 4 = 8, plus the 2 carried from the tens makes 10."]],
       hint: "Tens: 5 &times; 4 = 20, add the carried 3. Write the 3 and carry the 2. Hundreds: 2 &times; 4, then add that 2.",
       why: "Tens: 20 + 3 = 23, write 3, carry 2. Hundreds: 8 + 2 = 10. So 258 &times; 4 = <b>1,032</b>.",
+      ez: { q: "Jay did the ones. Can you finish it?",
+        slips: [[0, 20, "Add the 3 that was carried."], [1, 802, "Add each carry into the next column."], [1, 832, "Hundreds: 8, plus the 2 carried, is 10."]],
+        hint: "5 &times; 4, then add the 3.", why: "The tens make 23. So the answer is <b>1,032</b>." },
       lv: {
         medium: { q: "Jay has started this one. The ones are done: 6 &times; 6 = 36, so 6 is written and 3 is carried. Finish it off.",
           fig: C1FADE.medium,
@@ -315,6 +319,9 @@ function mountBus(el, api){
       slips: [[2821, "Looks like the carries got left behind. 3 &times; 7 = 21, so carry the 2 into the tens."], [3221, "Nearly. Tens: 6 &times; 7 = 42, plus the carried 2 is 44. Write 4, carry 4."]],
       hint: "Ones: 3 &times; 7 = 21. Write 1, carry 2. Then 6 &times; 7 and add the 2.",
       why: "3 &times; 7 = 21: write 1, carry 2. 6 &times; 7 + 2 = 44: write 4, carry 4. 4 &times; 7 + 4 = 32. So <b>3,241</b>.",
+      ez: { q: "Your turn: <b>463 &times; 7</b>.",
+        slips: [[2821, "Carry the 2 into the tens."], [3221, "Tens: 6 &times; 7 is 42, plus 2 is 44."]],
+        hint: "Ones first: 3 &times; 7 = 21.", why: "Ones, tens, hundreds, with carries: <b>3,241</b>." },
       lv: {
         medium: { q: "Your turn, start to finish. Have a go at <b>3,907 &times; 8</b>.",
           fig: cols([{ t: "3907" }, { t: "8", op: "&#215;" }, { t: "?????", rule: true }], { label: "3907 times 8 set out in columns" }),
@@ -337,6 +344,9 @@ function mountBus(el, api){
       slips: { 0: "4 &times; 3 = 12: write 2, carry 1. The ones are fine.", 2: "2 &times; 3 = 6, plus the 2 carried makes 8. That part is fine.", 3: "Have a look at the tens: 7 &times; 3 = 21, and there was a 1 carried." },
       hint: "Redo each column yourself, carries and all, and compare.",
       why: "Tens: 7 &times; 3 = 21, plus the carried 1 makes 22. Write 2, carry 2. The answer is <b>822</b>.",
+      ez: { q: "Someone got 812 for 274 &times; 3. Where is the slip?",
+        slips: { 0: "The ones are fine.", 2: "The hundreds are fine.", 3: "Look at the tens. There was a carry." },
+        hint: "Redo each column. Compare.", why: "Tens: 21, plus the carried 1, is 22. So <b>822</b>." },
       lv: {
         medium: { q: "Someone worked out 1,568 &times; 9 and got 13,512. Where did it go off track?",
           fig: C1SLIP.medium,
@@ -370,7 +380,8 @@ function mountBus(el, api){
           html: "<p>Decimal times decimal: <b>take both points out, multiply, then put them back</b>.</p>" +
             "<p><b>4.6 &times; 2.3</b> becomes 46 &times; 23. Long multiplication: 46 &times; 3 = 138, and 46 &times; 20 = 920 (with the 0 holding the place). Add: 1,058.</p>" +
             "<p>Count the decimal places in <b>both</b> numbers: one in 4.6 and one in 2.3 makes two. So <b>10.58</b>.</p>" +
-            "<p>Sense check: about 5 &times; 2 = 10. Yes.</p>" } } },
+            "<p>Sense check: about 5 &times; 2 = 10. Yes.</p>" } },
+      ez: { html: "<p><b>Split</b> both numbers into tens and ones.</p><p>Times each part. Then <b>add</b> the 4 boxes.</p>" } },
 
     { type: "num", topic: "Long multiplication",
       q: "Half done: <b>37 &times; 24</b>. The top row is filled in. Have a go at the two empty boxes and the total.",
@@ -379,6 +390,9 @@ function mountBus(el, api){
       slips: [[0, 12, "3 &times; 4 = 12, but it is 30, so ten times bigger: 120."], [2, 740, "That is the top row only. Add the bottom two boxes as well."]],
       hint: "Add all four boxes: 600 + 140 + your two.",
       why: "30 &times; 4 = 120 and 7 &times; 4 = 28. 600 + 140 + 120 + 28 = <b>888</b>.",
+      ez: { q: "<b>37 &times; 24</b>. Fill the 2 empty boxes, then the total.",
+        slips: [[0, 12, "It is 30, not 3. So 10 times bigger."], [2, 740, "Add the bottom 2 boxes too."]],
+        hint: "Add all 4 boxes.", why: "120 and 28. All 4 boxes make <b>888</b>." },
       lv: {
         medium: { q: "Half done: <b>238 &times; 45</b>. The first row, 238 &times; 5, is there. Have a go at the second row and the total.",
           fig: C2FADE.medium,
@@ -399,6 +413,9 @@ function mountBus(el, api){
       slips: [[312, "That is 52 &times; 6. There is a 52 &times; 10 to add as well."], [364, "Looks like 52 &times; 1 instead of 52 &times; 10. The 1 is really a ten."]],
       hint: "Grid: 50 and 2 across, 10 and 6 down. Four boxes, then add.",
       why: "500 + 20 + 300 + 12 = <b>832</b>.",
+      ez: { q: "Any way you like: <b>52 &times; 16</b>.",
+        slips: [[312, "Add 52 &times; 10 as well."], [364, "The 1 in 16 is really 10."]],
+        hint: "Split: 50 and 2, 10 and 6." },
       lv: {
         medium: { q: "On your own now: <b>324 &times; 27</b>.",
           boxes: [{ label: "324 &times; 27 =", a: 8748 }],
@@ -419,6 +436,9 @@ function mountBus(el, api){
       slips: { 1: "Each box is a times, not an add.", 2: "One zero would give 80. There are two tens (40 and 20), so two zeros.", 3: "Feeling it is right is a good start. The reason is 4 &times; 2 with two tens." },
       hint: "40 is 4 tens. 20 is 2 tens.",
       why: "4 &times; 2 = 8. Ten times ten makes it a hundred times bigger: <b>800</b>.",
+      ez: { q: "Why is 40 &times; 20 = 800?",
+        slips: { 1: "Each box is a times, not an add.", 2: "1 zero gives 80. There are 2 tens.", 3: "Good start. Now find the reason." },
+        why: "4 &times; 2 = 8. Two tens make it <b>800</b>." },
       lv: {
         medium: { q: "In long multiplication, why does the second row start with a 0?",
           fig: C2.medium,
@@ -454,11 +474,13 @@ function mountBus(el, api){
           html: "<p>Short division with a decimal: <b>the point on top sits right above the point underneath</b>. Then divide as normal.</p>" +
             "<p><b>14.58 &divide; 6:</b> 14 &divide; 6 = 2 r 2, so 25. 25 &divide; 6 = 4 r 1, so 18. 18 &divide; 6 = 3. Answer <b>2.43</b>.</p>" +
             "<p>Dividing <b>by</b> a decimal? Make it whole first. Multiply both numbers by 10 (or 100) and the answer does not change: <b>7.2 &divide; 0.4</b> is the same as 72 &divide; 4 = <b>18</b>.</p>" +
-            "<p>Bonnie is waiting at this bus stop. She has no tail to wag, so she just looks hopeful.</p>" } } },
+            "<p>Bonnie is waiting at this bus stop. She has no tail to wag, so she just looks hopeful.</p>" } },
+      ez: { html: "<p>Divide <b>left to right</b>. Left over? It <b>hops</b> to the next digit.</p><p>Bonnie waits at the bus stop. No tail to wag.</p>" } },
 
     { type: "widget", topic: "Short division", unscored: true,
       title: "Step through it",
       html: "<p>One step at a time. The yellow highlight shows the digit you are on. Type how many go in, or tap <b>Show me this step</b> whenever you like.</p>",
+      ez: { html: "<p>1 step at a time. Type how many go in.</p>" },
       mount: mountBus },
 
     { type: "num", topic: "Short division", explain: true,
@@ -468,6 +490,8 @@ function mountBus(el, api){
       slips: [[101, "Looks like the remainders did not hop across. 7 &divide; 5 = 1 remainder 2, so the next number is 23."], [146, "Nearly. Last step: 35 &divide; 5 = 7."]],
       hint: "7 &divide; 5 = 1 remainder 2. The 2 hops in front of the 3.",
       why: "7 &divide; 5 = 1 r 2. 23 &divide; 5 = 4 r 3. 35 &divide; 5 = 7. So <b>147</b>. Check: 147 &times; 5 = 735.",
+      ez: { slips: [[101, "The left over 2 hops across. Next is 23."], [146, "Last step: 35 &divide; 5 = 7."]],
+        hint: "7 &divide; 5 = 1, with 2 left.", why: "1, then 4, then 7. So <b>147</b>." },
       lv: {
         medium: { q: "Over to you: <b>2,916 &divide; 9</b>.",
           fig: bus("9", "2916", "????", "", { label: "2916 divided by 9 as a bus stop" }),
@@ -492,6 +516,9 @@ function mountBus(el, api){
       slips: [[0, 25, "25 &times; 4 = 100, which is more than 97. One fewer."], [1, 3, "Check: 24 &times; 4 = 96, so 97 leaves 1."]],
       hint: "9 &divide; 4 = 2 r 1, so 17. How many 4s in 17?",
       why: "9 &divide; 4 = 2 r 1. 17 &divide; 4 = 4 r 1. So <b>24 remainder 1</b>. Check: 24 &times; 4 + 1 = 97.",
+      ez: { q: "<b>97 &divide; 4</b>. How many 4s? What is left?",
+        slips: [[0, 25, "25 &times; 4 is 100. Too big."], [1, 3, "24 &times; 4 is 96. So 1 is left."]],
+        hint: "9 &divide; 4 = 2, with 1 left.", why: "<b>24</b>, with <b>1</b> left over." },
       lv: {
         medium: { q: "Some sums leave a bit over. Keep going past the point: <b>87 &divide; 4</b> as a decimal.",
           fig: bus("4", "87.00", "?????", "", { label: "87.00 divided by 4 as a bus stop" }),
@@ -514,6 +541,9 @@ function mountBus(el, api){
       slips: { 0: "6 &divide; 6 = 1 is right.", 2: "24 &divide; 6 = 4 is right.", 3: "Check it backwards: 14 &times; 6 = 84, not 624." },
       hint: "How many 6s in 2?",
       why: "2 &divide; 6 = 0 remainder 2. That 0 has to be written, or the 4 slides into the tens. 624 &divide; 6 = <b>104</b>.",
+      ez: { q: "Someone got 14 for 624 &divide; 6. What happened?",
+        slips: { 3: "Check it: 14 &times; 6 is only 84." },
+        why: "No 6s in 2, so write a 0. The answer is <b>104</b>." },
       lv: {
         medium: { q: "Someone worked out 4,836 &divide; 4 and got 129. What happened?",
           fig: C3SLIP.medium,
@@ -539,7 +569,8 @@ function mountBus(el, api){
       lv: { spicy: { fig: loop("2.75", "36", "99"),
         html: "<p>Real problems do not say \"multiply\". Ask: am I making <b>lots of the same</b> (multiply), or <b>sharing or grouping</b> (divide)?</p>" +
           "<p>Then check twice. <b>Backwards:</b> if 2.75 &times; 36 = 99, then 99 &divide; 36 must give 2.75. <b>Estimate:</b> 3 &times; 36 = 108, so 99 is in the right area.</p>" +
-          "<p>In the wise words of Jay's late, great grandfather: stop. And check.</p>" } } },
+          "<p>In the wise words of Jay's late, great grandfather: stop. And check.</p>" } },
+      ez: { title: "Then check it backwards", html: "<p><b>Lots of the same</b>? Times. <b>Sharing</b>? Divide.</p><p>Then check it <b>backwards</b>. As Jay's grandad said: stop. And check.</p>" } },
 
     { type: "num", topic: "Use it, check it",
       q: "[[Crew]] has 18 [[boxes]]. Each one holds 24 [[things]]. How many [[things]] is that altogether?",
@@ -547,6 +578,9 @@ function mountBus(el, api){
       slips: [[216, "The 1 in 18 is really a ten, so that row is 24 &times; 10 = 240."], [42, "That adds 18 and 24. Lots of the same means multiply."]],
       hint: "18 lots of 24. Grid: 10 and 8 down, 20 and 4 across.",
       why: "24 &times; 18: 200 + 40 + 160 + 32 = <b>432</b> [[things]].",
+      ez: { q: "18 [[boxes]]. 24 [[things]] in each. How many [[things]]?",
+        slips: [[216, "The 1 in 18 is really 10."], [42, "Lots of the same means times."]],
+        hint: "18 lots of 24.", why: "24 &times; 18 = <b>432</b> [[things]]." },
       lv: {
         medium: { q: "[[Crew]] has 35 [[boxes]]. Each one holds 156 [[things]]. How many [[things]] is that altogether?",
           boxes: [{ label: "[[Things]]", a: 5460 }],
@@ -565,6 +599,9 @@ function mountBus(el, api){
       slips: [[47, "Close. 47 &times; 9 = 423, so 9 would be left over. One more each."], [49, "Close. 49 &times; 9 = 441, a few too many."], [3888, "Sharing means divide. 432 &divide; 9."]],
       hint: "Bus stop: 43 &divide; 9 = 4 remainder 7. Then 72 &divide; 9.",
       why: "43 &divide; 9 = 4 r 7. 72 &divide; 9 = 8. So <b>48</b> in each. Check: 48 &times; 9 = 432.",
+      ez: { q: "Share 432 [[things]] into 9 [[boxes]]. How many in each?",
+        slips: [[47, "Close. 1 more each."], [49, "Close. 1 fewer each."], [3888, "Sharing means divide."]],
+        hint: "43 &divide; 9 = 4, with 7 left.", why: "432 &divide; 9 = <b>48</b> in each." },
       lv: {
         medium: { q: "1,350 [[things]] are shared equally between 6 [[boxes]]. How many go in each?",
           boxes: [{ label: "In each", a: 225 }],
@@ -585,6 +622,9 @@ function mountBus(el, api){
       slips: { 1: "Adding does not undo dividing. Multiplying does.", 2: "That would make it much bigger. Multiply the answer, not the start number.", 3: "That divides again. To undo a divide, multiply." },
       hint: "What undoes dividing?",
       why: "Multiplying undoes dividing: 48 &times; 9 = 432. Back where you started, so it checks out.",
+      ez: { q: "432 &divide; 9 = 48. Which sum checks it?",
+        slips: { 1: "Adding does not undo dividing.", 2: "Times the answer, not the start.", 3: "To undo a divide, times." },
+        why: "Times undoes divide. 48 &times; 9 = 432." },
       lv: {
         medium: { q: "You found 1,350 &divide; 6 = 225. Which calculation checks it?",
           fig: loop("225", "6", "1350"),
@@ -601,8 +641,14 @@ function mountBus(el, api){
       q: "Teach it back, if you fancy it: make up a problem for Jay that needs a written method. Solve it yourself too, and say how you checked it.",
       starters: ["[[Crew]] has", "Each [[box]] holds", "I worked it out by", "I checked it by"],
       checklist: ["A problem with real numbers in it", "Your method, step by step", "The answer, and how you checked it"],
-      minWords: 15 }
+      minWords: 15,
+      ez: { q: "If you fancy it: make up a sum for Jay. Say how you checked it." } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Builders, cooks and shops do sums on paper.</p><p>200 years ago, there were no calculators at all.</p>" },
+    make: { intro: "1 sum, done your way, with a top tip. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "No calculator? No problem",
