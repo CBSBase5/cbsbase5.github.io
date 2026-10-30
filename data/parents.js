@@ -7,8 +7,8 @@
    SAFEGUARDING CONTACTS: fill these in exactly as the school
    publishes them (names and routes only, nothing personal).
    Until they are filled in, the portal shows only the routes
-   that are always true: 999, the school office and Jay, and
-   the NSPCC helpline. Nothing is made up.
+   that are always true: the school office, Jay and Holly.
+   Nothing is made up.
 
    Edit it from the staff room: /teacher/parents.html builds a new
    copy of this file to upload.
