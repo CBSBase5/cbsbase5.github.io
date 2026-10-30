@@ -153,6 +153,10 @@ function tryWidget(el, api){
     music: { name: "Music", w: { skill: "a dance routine", pro: "dancers", s1: "Learn the first four counts", s2: "Learn the next four counts", s3: "Join the eight counts together", s4: "Add the music" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>Athletes and musicians warm up. Astronauts practise in a pool.</p><p>In 1800 people wrote with a feather!</p>" },
+    make: { intro: "A skill, what helps, and your warm up." }
+  },
   startFig: TOOLS,
   steps: [
 
@@ -162,6 +166,7 @@ function tryWidget(el, api){
       html: "<p>A warm up gets your body ready to move. It wakes up your muscles, loosens your joints and gets your brain switched on.</p>" +
         "<p><b>Big moves</b> like running or throwing: march on the spot, then arm circles.<br><b>Small moves</b> like writing or laces: shake your hands out, wiggle your fingers, roll your wrists.</p>" +
         "<p>A minute is plenty. Even [[pro]] warm up first, every time.</p>",
+      ez: { html: "<p>A <b>warm up</b> gets your body ready.</p><p>Big moves: arm circles. Small moves: wiggle your fingers.</p>" },
       lv: {
         medium: { html: "<p>A warm up gets your body ready. It wakes up your muscles, loosens your joints and switches your brain on to the job.</p>" +
           "<p>Two rules make a good one. <b>Gentle first, then bigger.</b> And <b>match it to the job</b>: big moves for running or throwing, hand and finger moves for writing, cutting or laces.</p>" +
@@ -177,6 +182,7 @@ function tryWidget(el, api){
       slips: { 1: "A warm up should be gentle. It gets you ready, it does not wear you out.", 2: "It might look good, but there is a better reason." },
       hint: "Think about what it does to your muscles.",
       why: "A warm up gets your muscles, joints and brain ready to move.",
+      ez: { slips: { 1: "A warm up is gentle. It does not tire you.", 2: "There is a better reason." }, hint: "What does it do to your muscles?", why: "It gets your <b>muscles</b> ready to move." },
       lv: { spicy: { q: "Which is the best reason to warm up?",
         options: ["Warmer muscles stretch more easily and react faster", "It burns off energy so you are calmer", "Cold muscles cannot move at all", "It makes you stronger straight away"],
         slips: { 1: "A warm up should leave you with more energy for the real thing.", 2: "Cold muscles do move, just not as smoothly.", 3: "Strength builds over weeks of practice, not in one warm up." },
@@ -189,6 +195,7 @@ function tryWidget(el, api){
       slips: { any: "Start with the gentlest move, and build up." },
       hint: "Which one is the gentlest?",
       why: "Gentle first, then bigger: march, small circles, big circles, jog.",
+      ez: { q: "Put it in order. Gentle first.", slips: { any: "Start with the gentlest one." }, why: "March, small circles, then big circles." },
       lv: {
         mild: { items: ["March on the spot", "Small arm circles", "Big arm circles"] },
         spicy: { items: ["March on the spot", "Arm circles and leg swings", "Jog on the spot", "An easy version of the real skill"],
@@ -201,6 +208,7 @@ function tryWidget(el, api){
       slips: { any: "Three help. Squeezing hard tires your hands out, and sitting on them does not warm them at all." },
       hint: "Which ones move your hands and fingers gently?",
       why: "Shaking, wiggling and rolling all wake your hands up gently. Squeezing hard just tires them out.",
+      ez: { q: "Pick <b>all</b> the warm ups for your hands.", slips: { any: "Two help. Sitting on them keeps them still." }, hint: "Which ones move your hands?", why: "Shake and wiggle. They wake your hands up." },
       lv: { mild: { options: ["Shake your hands out", "Wiggle your fingers", "Sit on your hands"], answers: [0, 1],
         slips: { any: "Two help. Sitting on your hands keeps them still." },
         why: "Shaking and wiggling wake your hands up. Sitting on them keeps them still." } } },
@@ -212,6 +220,7 @@ function tryWidget(el, api){
       slips: { 1: "Hard work would tire you out before you start. Gentle gets you ready." },
       hint: "Ready, not tired.",
       why: "A warm up is gentle. You want to start the real thing feeling ready, not worn out.",
+      ez: { slips: { 1: "Hard work tires you out first." }, why: "Not true. A warm up is <b>gentle</b>." },
       lv: { spicy: { q: "Before a sprint, which warm up is better?",
         options: ["Moving warm ups like leg swings and jogging", "Holding one long stretch for a minute", "No warm up, to save energy"],
         answer: 0, fixed: true,
@@ -225,6 +234,7 @@ function tryWidget(el, api){
       html: "<p>Everyone uses tools to make moving easier. Glasses help eyes. Football boots have studs for grip.</p>" +
         "<p>Tools can help with small moves too: a <b>pen grip</b>, <b>chunky cutlery</b>, <b>elastic laces</b>, a <b>zip puller</b>, a <b>non slip mat</b> under a plate or a bowl.</p>" +
         "<p>Using a tool is a smart choice, not a cheat.</p>",
+      ez: { html: "<p>Everyone uses <b>tools</b>. Glasses. Football boots.</p><p>A pen grip is a smart choice, not a cheat.</p>" },
       lv: {
         medium: { html: "<p>Everyone uses tools to make moving easier. [[Pro]] all have their own kit.</p>" +
           "<p>Tools work by changing the job. A <b>chunky handle</b> means less squeezing, so hands tire more slowly. A <b>non slip mat</b> holds the plate, so one hand is free. A <b>zip puller</b> gives small fingers something bigger to hold.</p>" +
@@ -239,6 +249,7 @@ function tryWidget(el, api){
       slips: { any: "Think about what each helper does: grips, holds still, or gives you something bigger to hold." },
       hint: "Which helper stops things sliding?",
       why: "Each helper changes the job a little, so the tricky bit gets easier.",
+      ez: { q: "Match each problem to a helper.", slips: { any: "Does it grip, hold still, or give you more to hold?" }, hint: "Which one stops sliding?", why: "Each helper makes the job easier." },
       lv: { spicy: { pairs: [["My pen keeps slipping", "A pen grip"], ["My laces come undone", "Elastic laces or a double knot"], ["My plate slides about when I cut", "A non slip mat"], ["The zip is tiny and fiddly", "A zip puller"], ["My hand aches after writing for a while", "A sloped board and short breaks"]] } } },
 
     { type: "mc", topic: "Tools and grips", explain: true,
@@ -250,7 +261,8 @@ function tryWidget(el, api){
       answer: 0, fixed: true,
       slips: { 1: "Expert birdwatchers use binoculars all the time. Tools are part of doing it well.", 2: "Whether anyone sees makes no difference to whether it helps." },
       hint: "Do experts use binoculars?",
-      why: "Not cheating at all. It is the same with a pen grip or elastic laces: the right tool lets you do the thing." },
+      why: "Not cheating at all. It is the same with a pen grip or elastic laces: the right tool lets you do the thing.",
+      ez: { q: "Jay uses binoculars to watch birds. Is that cheating?", slips: { 1: "Experts use binoculars all the time.", 2: "Who sees makes no difference." }, hint: "Do experts use them?", why: "<b>No</b>. The right tool helps you do it." } },
 
     { type: "sort", topic: "Tools and grips",
       q: "Cutting up food. Which of these are likely to help?",
@@ -259,6 +271,7 @@ function tryWidget(el, api){
       slips: { any: "Ask: does it keep things still and steady, or wobbly and rushed?" },
       hint: "Steady and still helps. Wobbly and rushed does not.",
       why: "A mat, chunky handles and a steady fork all make cutting easier. Rushing and wobbly plates make it harder.",
+      ez: { q: "Cutting up food. What helps?", slips: { any: "Is it steady, or wobbly and rushed?" }, hint: "Steady and still helps.", why: "A mat, chunky handles and a steady fork help." },
       lv: {
         medium: { q: "Writing for a long time. Which of these are likely to help?",
           cards: [["A pen grip", 0], ["Short breaks to shake your hands out", 0], ["Sitting with both feet flat on the floor", 0], ["Gripping the pen as tight as possible", 1], ["Writing on a wobbly lap", 1]],
@@ -273,6 +286,7 @@ function tryWidget(el, api){
       html: "<p>A tricky skill is easier in small steps. Learn one step, then add the next.</p>" +
         "<p>Here are four steps for [[skill]]:<br><b>1.</b> [[S1]].<br><b>2.</b> [[S2]].<br><b>3.</b> [[S3]].<br><b>4.</b> [[S4]].</p>" +
         "<p>Each step on its own is small enough to have a go at.</p>",
+      ez: { html: "<p>Learn one <b>small step</b>, then add the next.</p><p><b>1.</b> [[S1]].<br><b>2.</b> [[S2]].<br><b>3.</b> [[S3]].<br><b>4.</b> [[S4]].</p>" },
       lv: {
         medium: { html: "<p>A tricky skill is easier in small steps. Practise step 1 until it feels OK, then add step 2, and so on. This is called <b>chaining</b>: each step links on to the last.</p>" +
           "<p><b>[[Skill]]</b>:<br><b>1.</b> [[S1]].<br><b>2.</b> [[S2]].<br><b>3.</b> [[S3]].<br><b>4.</b> [[S4]].</p>" },
@@ -286,7 +300,8 @@ function tryWidget(el, api){
       items: ["[[S1]]", "[[S2]]", "[[S3]]", "[[S4]]"],
       slips: { any: "Which step has to happen before anything else can?" },
       hint: "What would you do first of all?",
-      why: "Step 1, then 2, then 3, then 4. Each step builds on the one before, and each one is small enough to practise on its own." },
+      why: "Step 1, then 2, then 3, then 4. Each step builds on the one before, and each one is small enough to practise on its own.",
+      ez: { slips: { any: "What has to happen first?" }, why: "1, 2, 3, then 4. Each step builds on the last." } },
 
     { type: "mc", topic: "Small steps",
       q: "Tying laces feels like a lot. What is a good small first step?",
@@ -295,6 +310,7 @@ function tryWidget(el, api){
       slips: { 1: "The whole thing, fast, is a lot at once. One small step first.", 2: "Fun, but a record is not a first step." },
       hint: "Small enough to try right now.",
       why: "Crossing the laces is one small step. When that feels OK, add the next one.",
+      ez: { q: "Laces feel like a lot. What is a small first step?", slips: { 1: "That is a lot at once.", 2: "Fun, but not a first step." }, why: "Just <b>cross the laces</b>. Then add the next step." },
       lv: { spicy: { q: "Backward chaining for laces. Which step do you do yourself first?",
         options: ["Pulling the loops tight, the very last step", "Crossing the laces, the very first step", "Making the two loops, the middle step"],
         slips: { 1: "That is forward chaining. Backward chaining starts from the end.", 2: "Backward chaining starts at the very end, not the middle." },
@@ -307,6 +323,7 @@ function tryWidget(el, api){
       slips: [[["cannot", "can't", "cant", "never"], "That is fine to feel. For now, have a go at one tiny first step, like: hold the pen the comfy way."]],
       model: "Just practise holding the pen the comfy way.",
       hint: "Something small enough to try for one minute.",
+      ez: { q: "Pick a skill. Write one small first step.", slips: [[null, "That is OK to feel. Try one tiny step."]] },
       why: "Any small first step counts. Small steps add up." },
 
     /* ---------- chunk 4 ---------- */
@@ -314,6 +331,7 @@ function tryWidget(el, api){
       fig: OFTEN,
       html: "<p>Practice makes a skill smoother. <b>A little and often</b> works better than one long go.</p>" +
         "<p>Mistakes are useful: they show you what to try next. And everyone's body is different, so everyone's helpers are different. There is no right list.</p>",
+      ez: { html: "<p><b>A little and often</b> works best.</p><p>Everyone's helpers are different.</p>" },
       lv: {
         medium: { html: "<p>Every time you practise, your brain builds a stronger path for that move, so it gets smoother and needs less thinking. <b>A little and often</b> builds the path better than one long go.</p>" +
           "<p>Mistakes are useful information. And everyone's body is different, so everyone's helpers are different.</p>" },
@@ -329,6 +347,7 @@ function tryWidget(el, api){
       slips: { 1: "Long goes get tiring, and there is a week of forgetting in between.", 2: "Things feel easier because of practice, so waiting does not help it along." },
       hint: "Look at the green bars.",
       why: "A little and often. Short goes on lots of days help your brain keep hold of it.",
+      ez: { slips: { 1: "Long goes get tiring.", 2: "Practice makes it easier. Waiting does not." }, why: "<b>A little and often</b> helps you remember." },
       lv: { spicy: { why: "Spaced practice: short sessions, with sleep in between, help your brain store the skill. One long go mostly gets tiring." } } },
 
     { type: "sort", topic: "What works for me",
@@ -338,12 +357,14 @@ function tryWidget(el, api){
       slips: { any: "Ask: does the thought make it easier to have another go?" },
       hint: "The word \"yet\" is a helpful one.",
       why: "\"Yet\" and learning from mistakes keep you going. Comparing and thinking tools are failing get in the way, and they are not true either.",
+      ez: { q: "Does each thought help, or get in the way?", slips: { any: "Does it help you have another go?" }, hint: "Yet is a helpful word.", why: "Yet and mistakes help. Comparing gets in the way." },
       lv: { spicy: { cards: [["I cannot do it yet", 0], ["Mistakes show me what to try next", 0], ["A tool is a smart choice", 0], ["Everyone else finds it easy", 1], ["Using a tool means I failed", 1], ["If it is not perfect, it does not count", 1]],
         why: "Helpful thoughts keep you having goes. Comparing, perfectionism and seeing tools as failing all get in the way." } } },
 
     { type: "widget", topic: "What works for me", unscored: true,
       title: "My helpers",
       html: "<p>Just for you. Your list can go to Jay with the rest if you choose to send it.</p>",
+      ez: { html: "<p>Just for you. Tap what helps.</p>" },
       mount: helperWidget,
       report: function(d){
         var on = (d && d.on || []).map(function(v, k){ return v ? HELPERS[k] : ""; }).filter(Boolean);
@@ -354,6 +375,7 @@ function tryWidget(el, api){
     { type: "widget", topic: "What works for me", unscored: true,
       title: "Try it card",
       html: "<p>Away from the screen, whenever suits you. Ticks can go to Jay with the rest if you send it.</p>",
+      ez: { html: "<p>Away from the screen. Whenever suits you.</p>" },
       mount: tryWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Try a helper card: " + n + " of " + TRY.length + " ticked." : ""; } },
 
@@ -362,6 +384,7 @@ function tryWidget(el, api){
       starters: ["A skill I would like to feel easier is", "Something that helps me is", "I would like to try", "A warm up I like is", "It helps when"],
       checklist: ["I named a skill", "I named something that helps, or that I would like to try"],
       minWords: 20,
+      ez: { q: "Only if you like: tell Jay a skill, and what helps." },
       lv: { spicy: { minWords: 40, checklist: ["I named a skill", "I named a helper and said why it works", "I planned how I might practise it"] } } }
   ],
 

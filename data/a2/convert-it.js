@@ -134,6 +134,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "The magic numbers", title: "Five magic numbers",
+      ez: { title: "5 magic numbers", html: "<p>1 m = <b>100</b> cm. 1 kg = <b>1000</b> g. 1 l = <b>1000</b> ml.</p><p>1 hour = <b>60</b> minutes. &pound;1 = <b>100</b>p.</p>" },
       fig: FIVE,
       html: "<p>Converting means writing the same amount in a different unit. You only need five <b>magic numbers</b>.</p>" +
         "<p>1 m = <b>100</b> cm. 1 kg = <b>1000</b> g. 1 l = <b>1000</b> ml. 1 hour = <b>60</b> minutes. &pound;1 = <b>100</b>p.</p>",
@@ -146,6 +147,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       pairs: [["1 m", "100 cm"], ["1 kg", "1000 g"], ["1 hour", "60 minutes"], ["&pound;1", "100p"]],
       hint: "Look back at the five magic numbers, if you like.",
       why: "1 m = 100 cm, 1 kg = 1000 g, 1 hour = 60 minutes, &pound;1 = 100p.",
+      ez: { hint: "Look back at the magic numbers." },
       lv: { medium: { pairs: [["1 m", "100 cm"], ["1 kg", "1000 g"], ["1 l", "1000 ml"], ["1 hour", "60 minutes"], ["&pound;1", "100p"]] },
         spicy: { pairs: [["1 m", "100 cm"], ["1 kg", "1000 g"], ["1 hour", "60 minutes"], ["&pound;1", "100p"], ["1 cm", "10 mm"], ["1 km", "1000 m"]] } } },
 
@@ -155,6 +157,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       cards: [["cm and m", 0], ["g and kg", 1], ["minutes and hours", 2], ["pence and pounds", 0]],
       hint: "Only one pair uses 60.",
       why: "cm and m, and pence and pounds, use 100. g and kg use 1000. Minutes and hours use 60.",
+      ez: { hint: "Only 1 pair uses 60.", why: "cm and m, p and &pound;: 100. g and kg: 1000. Time: 60." },
       lv: { medium: { cards: [["cm and m", 0], ["g and kg", 1], ["minutes and hours", 2], ["pence and pounds", 0], ["ml and l", 1]],
           why: "cm/m and p/&pound; use 100. g/kg and ml/l use 1000. Minutes and hours use 60." },
         spicy: { buckets: ["10", "100", "1000", "60"],
@@ -169,6 +172,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: { 1: "Time is the odd one out: it uses 60, not 100.", 2: "That is the number for kilograms and litres." },
       hint: "Think of a clock: the minute hand goes round once.",
       why: "60 minutes make 1 hour. Time does not use 100.",
+      ez: { q: "How many minutes in 1 hour?", hint: "Think of a clock.", why: "60 minutes make 1 hour.", slips: { 1: "Time uses 60, not 100.", 2: "1000 is for kg and litres." } },
       lv: { spicy: { q: "How many seconds are in one hour?",
           options: ["3600", "360", "6000"],
           slips: { 1: "That is 60 x 6. You need 60 x 60.", 2: "That uses 100 somewhere. Time is 60 seconds in a minute, 60 minutes in an hour." },
@@ -177,6 +181,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Big to small", title: "Big unit to small unit: multiply",
+      ez: { title: "Big to small: multiply", routes: ["<p>Big unit to small unit? <b>Multiply</b>.</p><p>3 m = 3 x 100 = <b>300 cm</b>.</p>", "<p>Every metre is 100 cm.</p><p>100 + 100 + 100 = <b>300 cm</b>.</p>"] },
       routes: [
         { name: "Worked example", fig: STAIRS("m", "cm", 100, "3 m = 3 x 100 = 300 cm"),
           html: "<p>Going from a <b>big unit</b> to a <b>small unit</b>, you need <b>more</b> of them, so <b>multiply</b>.</p>" +
@@ -198,6 +203,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[0, 100, "That is the number for cm and m. For g and kg, it is 1000."], [1, 400, "That multiplied by 100. Kilograms to grams uses 1000."]],
       hint: "1 kg = 1000 g.",
       why: "Multiply by 1000: 4 x 1000 = <b>4000 g</b>.",
+      ez: { q: "Change 4 kg to grams.", slips: [[null, null, "That is for cm and m. Use 1000."], [null, null, "That used 100. Use 1000."]] },
       lv: { medium: { q: "Fill in the steps. Convert 2.4 kg to grams.",
           boxes: [{ label: "Multiply by", a: 1000 }, { label: "Grams", a: 2400, post: "g" }],
           slips: [[0, 100, "That is the number for cm and m. For g and kg, it is 1000."], [1, 240, "That multiplied by 100. Kilograms to grams uses 1000."], [1, 2.4, "Big to small: the number should get bigger."]],
@@ -217,6 +223,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[300, "That used 100. An hour is 60 minutes."], [63, "That added. Each hour is 60 minutes, so multiply."]],
       hint: "3 lots of 60.",
       why: "3 x 60 = <b>180 minutes</b>.",
+      ez: { q: "The [[event]] is 3 hours. How many minutes?", slips: [[null, "That used 100. An hour is 60 minutes."], [null, "That added. Multiply instead."]] },
       lv: { medium: { q: "The [[event]] lasts 2.5 hours. How many minutes is that?",
           boxes: [{ label: "Minutes", a: 150, post: "min" }],
           slips: [[250, "That used 100. An hour is 60 minutes."], [125, "Half an hour is 30 minutes, not 5."]],
@@ -234,6 +241,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[40, "That is only 40p. Each pound is 100p."], [4000, "That used 1000. Pounds to pence uses 100."]],
       hint: "&pound;1 = 100p.",
       why: "4 x 100 = <b>400p</b>.",
+      ez: { q: "A [[buy]] is &pound;4. How many pence?", slips: [[null, "Only 40p. Each pound is 100p."], [null, "That used 1000. Use 100."]] },
       lv: { medium: { q: "A [[buy]] costs &pound;3.45. How many pence is that?",
           boxes: [{ label: "Pence", a: 345, post: "p" }],
           slips: [[34.5, "That multiplied by 10. Pounds to pence uses 100."], [3450, "That used 1000. Pounds to pence uses 100."]],
@@ -247,6 +255,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
 
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Small to big", title: "Small unit to big unit: divide",
+      ez: { title: "Small to big: divide", routes: ["<p>Small unit to big unit? <b>Divide</b>.</p><p>250 cm = 250 / 100 = <b>2.5 m</b>.</p>", "<p>An hour is <b>60</b> minutes.</p><p>90 minutes = <b>1 hour 30 minutes</b>.</p>"] },
       routes: [
         { name: "Worked example", fig: STAIRS("m", "cm", 100, "250 cm = 250 / 100 = 2.5 m"),
           html: "<p>Going from a <b>small unit</b> to a <b>big unit</b>, you need <b>fewer</b> of them, so <b>divide</b>.</p>" +
@@ -263,6 +272,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[0, 100, "That is the number for cm and m. For ml and l, it is 1000."], [1, 30, "That divided by 100. Millilitres to litres uses 1000."], [1, 3000000, "Small to big: divide, so the number gets smaller."]],
       hint: "1000 ml = 1 l.",
       why: "3000 / 1000 = <b>3 litres</b>.",
+      ez: { q: "A [[drink]] holds 3000 ml. How many litres?", slips: [[null, null, "That is for cm and m. Use 1000."], [null, null, "That used 100. Use 1000."], [null, null, "Small to big: divide. It gets smaller."]] },
       lv: { medium: { q: "Fill in the steps. A [[drink]] holds 750 ml. How many litres?",
           boxes: [{ label: "Divide by", a: 1000 }, { label: "Litres", a: 0.75, post: "l" }],
           slips: [[0, 100, "For ml and l, the magic number is 1000."], [1, 7.5, "That divided by 100. Millilitres to litres uses 1000."], [1, 750000, "Small to big: divide, so the number gets smaller."]],
@@ -280,6 +290,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[60, "That divided by 10. Pence to pounds uses 100."], [60000, "Small to big: divide, so the number gets smaller."]],
       hint: "600 / 100.",
       why: "600 / 100 = <b>&pound;6</b>.",
+      ez: { slips: [[null, "That used 10. Use 100."], [null, "Divide. The number gets smaller."]] },
       lv: { medium: { q: "You have 1250p. How much is that in pounds?",
           boxes: [{ label: "Pounds", a: 12.5, pre: "&pound;" }],
           slips: [[125, "That divided by 10. Pence to pounds uses 100."], [1.25, "That divided by 1000. Pence to pounds uses 100."]],
@@ -298,6 +309,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[1.2, "That divided by 100. An hour is 60 minutes."], [12, "That divided by 10. An hour is 60 minutes."]],
       hint: "How many 60s make 120?",
       why: "120 / 60 = <b>2 hours</b>.",
+      ez: { q: "The [[event]] is 120 minutes. How many hours?", slips: [[null, "That used 100. An hour is 60 minutes."], [null, "That used 10. An hour is 60 minutes."]] },
       lv: { medium: { q: "The [[event]] lasts 90 minutes. How long is that in hours and minutes?",
           boxes: [{ label: "Hours", a: 1 }, { label: "Minutes", a: 30 }],
           slips: [[1, 50, "90 / 60 = 1.5, but 0.5 of an hour is 30 minutes, not 50."], [0, 0.9, "That divided by 100. An hour is 60 minutes."]],
@@ -311,6 +323,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
 
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Mixed units", title: "Same unit first, then compare",
+      ez: { title: "Same unit first", html: "<p>Make the units <b>match</b> first.</p><p>1.2 kg = 1200 g. So it beats 900 g!</p>" },
       fig: SCALES("1.2 kg", "900 g", true),
       html: "<p>When two amounts are in different units, <b>convert one so they match</b>. Then compare or add.</p>" +
         "<p>1.2 kg or 900 g? Convert: 1.2 kg = 1200 g. Now it is easy: <b>1200 g is heavier</b> than 900 g. The bigger number (900) was not the bigger amount.</p>" },
@@ -323,6 +336,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: { 1: "1500 looks bigger, but 2 kg is 2000 g.", 2: "Convert first: 2 kg = 2000 g." },
       hint: "Turn the kg into grams.",
       why: "2 kg = 2000 g, which is more than 1500 g.",
+      ez: { hint: "Turn kg into grams.", why: "2 kg = 2000 g. More than 1500 g.", slips: { 1: "1500 looks big. But 2 kg is 2000 g.", 2: "Convert first. 2 kg = 2000 g." } },
       lv: { medium: { fig: SCALES("1.2 kg", "900 g", 0), options: ["The 1.2 kg one", "The 900 g one", "They weigh the same"],
           slips: { 1: "900 looks bigger than 1.2, but 1.2 kg is 1200 g.", 2: "Convert first: 1.2 kg = 1200 g." },
           why: "1.2 kg = 1200 g, which is more than 900 g." },
@@ -337,6 +351,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[501, "That added 1 and 500. Change the 1 l into 1000 ml first."], [600, "1 l is 1000 ml, not 100 ml."]],
       hint: "1 l = 1000 ml.",
       why: "1000 ml + 500 ml = <b>1500 ml</b>.",
+      ez: { q: "1 l and 500 ml. How many ml in all?", slips: [[null, "Change 1 l to 1000 ml first."], [null, "1 l is 1000 ml, not 100."]] },
       lv: { medium: { q: "You pour 1.5 l and then 750 ml into a big jug. How many litres altogether?",
           boxes: [{ label: "Altogether", a: 2.25, post: "l" }],
           slips: [[751.5, "That added 1.5 and 750 in different units. Make them match first."], [9, "That added 1.5 and 7.5. 750 ml is 0.75 l."], [2250, "Right amount, but in ml. The question asks for litres."]],
@@ -353,6 +368,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       items: ["50 cm", "1 m", "150 cm", "3 m"],
       hint: "Turn them all into cm first.",
       why: "In cm: 50, 100, 150, 300.",
+      ez: { hint: "Turn them all into cm.", why: "50, 100, 150, 300 cm." },
       lv: { medium: { items: ["90 cm", "1.2 m", "150 cm", "2 m"], why: "In cm: 90, 120, 150, 200." },
         spicy: { items: ["850 mm", "0.9 m", "95 cm", "1.05 m"], hint: "Turn them all into cm (or all into mm) first.", why: "In cm: 85, 90, 95, 105." } } },
 
@@ -363,6 +379,7 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
       slips: [[250, "That divided 500 by 2. Change 2 kg into grams first: 2000 g."], [1000, "That is the grams in one kg. How many 500 g bags make 2000 g?"]],
       hint: "2 kg = 2000 g. How many 500s in 2000?",
       why: "2000 / 500 = <b>4 bags</b>. The birds are very grateful.",
+      ez: { q: "Jay's bird feeder holds 2 kg. Bags are 500 g. How many bags?", hint: "2 kg = 2000 g.", why: "2000 / 500 = <b>4 bags</b>. Happy birds!", slips: [[null, "Change 2 kg to 2000 g first."], [null, "That is grams. How many 500 g bags?"]] },
       lv: { medium: { q: "Jay's bird feeder holds 1.5 kg of seed. Seed comes in 500 g bags. How many bags fill it?",
           boxes: [{ label: "Bags", a: 3 }],
           slips: [[0.003, "Different units. Change 1.5 kg into grams first."], [1500, "That is the grams. How many 500 g bags make 1500 g?"]],
@@ -374,6 +391,11 @@ var FEEDER = '<svg viewBox="0 0 520 210" role="img" aria-label="Jay next to a bi
           hint: "3 x 750 g, then turn it into kg.",
           why: "3 x 750 = 2250 g, and 2250 / 1000 = <b>2.25 kg</b>. Outrageous amounts of seed. The birds approve." } } }
   ],
+
+  ez: {
+    realWorld: { title: "Converting is everywhere", html: "<p>Recipes, drinks, journeys and prices all use units.</p><p>Old money had 240 pennies in a pound!</p>" },
+    make: { intro: "Make a pocket card with your best tip." }
+  },
 
   realWorld: {
     title: "Converting is everywhere",
