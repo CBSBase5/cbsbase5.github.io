@@ -22,7 +22,7 @@ window.B5PARENTS = {
      Leave text "" for none. until: "YYYY-MM-DD", the last day it shows (or ""). */
   notice: { text: "Monday 2 November is an INSET day, and we look forward to seeing everyone on Tuesday 3 November.", until: "2026-11-03" },
 
-  /* Who parents get in touch with about Base 5 */
+  /* Who parents and carers get in touch with about Base 5 */
   contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
 
   /* Sections that can be switched off. "Worried about something?" is always shown. */
@@ -73,8 +73,8 @@ window.B5PARENTS = {
   /* Small things that can help, from home. */
   helps: [
     ["Outdoor clothes", "Forest school and horticulture run in most weathers, so a coat on Mondays and Thursdays is rarely a mistake. Tuesdays are trip days."],
-    ["Knowing the plan", "Every day has the same shape. If your child likes to know what is coming, the home page shows what is on now and next."],
-    ["At home", "The website works at home too, if your child would like to show you anything."],
+    ["Knowing the plan", "Every day has the same shape. If your young person likes to know what is coming, the home page shows what is on now and next."],
+    ["At home", "The website works at home too, if your young person would like to show you anything."],
     ["Tricky mornings", "If a morning has been hard, a quick word with us or the office helps us shape the day around it."]
   ],
 

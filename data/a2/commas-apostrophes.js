@@ -199,11 +199,11 @@ var SEG = {
       hint: "Is \"pizza chips\" one thing or two?",
       why: "Without the comma, \"pizza chips\" looks like one food. The comma tells the reader they are two separate things.",
       lv: { spicy: {
-        q: vers(["I would like to thank my parents, Jay and Bonnie.", "I would like to thank my parents, Jay, and Bonnie."]) + "<p>Which version makes it clear that Jay and Bonnie are <b>not</b> your parents?</p>",
+        q: vers(["I would like to thank my teachers, Jay and Bonnie.", "I would like to thank my teachers, Jay, and Bonnie."]) + "<p>Which version makes it clear that Jay and Bonnie are <b>not</b> your teachers?</p>",
         options: ["B", "A"], answer: 0, fixed: true,
-        slips: { 1: "In A, \"Jay and Bonnie\" could be read as the names of your parents. Which would be quite something, as Bonnie is a poodle." },
-        hint: "In which one could \"Jay and Bonnie\" be explaining who your parents are?",
-        why: "In A, \"Jay and Bonnie\" could be a description of your parents. B adds a comma before \"and\" (an Oxford comma), which makes it a list of three: your parents, Jay, and Bonnie. This is exactly when that extra comma earns its place." } } },
+        slips: { 1: "In A, \"Jay and Bonnie\" could be read as the names of your teachers. Which would be quite something, as Bonnie is a poodle." },
+        hint: "In which one could \"Jay and Bonnie\" be explaining who your teachers are?",
+        why: "In A, \"Jay and Bonnie\" could be a description of your teachers. B adds a comma before \"and\" (an Oxford comma), which makes it a list of three: your teachers, Jay, and Bonnie. This is exactly when that extra comma earns its place." } } },
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Commas after openers", title: "A comma after an opener",
