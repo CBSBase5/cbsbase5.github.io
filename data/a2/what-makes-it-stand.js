@@ -417,7 +417,7 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
       starters: ["I will use", "My base will be", "I will put triangles", "My joints will", "I think it will be"],
       checklist: ["I said what I will build with", "I used at least one of the big ideas"],
       minWords: 20,
-      ez: { q: "Only if you like: plan a tower to build. How will you make it stand?" },
+      ez: { q: "Only if you like: plan a tower. How will it stand?" },
       lv: { mild: { minWords: 8, starters: ["I will use", "I will put triangles", "My base will be wide"] },
         spicy: { minWords: 40, checklist: ["I said what I will build with", "I explained how I will stop it tipping", "I explained how I will stop it buckling"] } } }
   ],

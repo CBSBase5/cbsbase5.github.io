@@ -255,8 +255,8 @@ function phraseWidget(el, api){
           "<p>No can come without the word, too: going quiet, looking away, \"maybe later\". And being an ally means backing up other people's no, not only your own.</p>" } } },
 
     { type: "mc", topic: "Hearing no",
-      q: "You ask [[mate]] if you can borrow [[item]], and they say no. What shows you are really listening?",
-      ez: { q: "You ask to borrow [[item]]. [[Mate]] says no. What shows you listened?", slips: { 1: "Asking again is not hearing the no.", 2: "Sulking puts pressure on them." }, why: "\"No worries\", and leave it." },
+      q: "You ask [[mate]] if you can borrow something of theirs, and they say no. What shows you are really listening?",
+      ez: { q: "You ask to borrow something. [[Mate]] says no. What shows you listened?", slips: { 1: "Asking again is not hearing the no.", 2: "Sulking puts pressure on them." }, why: "\"No worries\", and leave it." },
       fig: HEAR,
       options: ["Say \"no worries\" and leave it", "Ask again five more times", "Go quiet and sulk until they change their mind"],
       answer: 0,

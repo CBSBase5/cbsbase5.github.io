@@ -344,7 +344,7 @@ var LISTS = '<svg viewBox="0 0 520 230" role="img" aria-label="Two versions of a
       starters: ["I packed three things:", "It was getting dark;", "There was only one problem:"],
       checklist: ["I used a colon before a list or an explanation", "I used a semicolon between two linked full sentences", "Each side of my semicolon makes sense on its own"],
       minWords: 30,
-      ez: { q: "Only if you like: write a list sentence with a colon. Like: I packed three things: ..." },
+      ez: { q: "Only if you like: write a list with a colon." },
       lv: {
         mild: { q: "Your turn, if you like. Write one sentence with a colon before a list, like \"I packed three things: ...\". Add a semicolon sentence too if you fancy it.",
           minWords: 10, checklist: ["I used a colon before a list", "My list has commas and \"and\""] },

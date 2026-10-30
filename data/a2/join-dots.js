@@ -318,7 +318,7 @@ var GROW = {
       slips: { 1: "Look at the first day: back of the room, one word answers. That is not confident yet.", 2: "Arriving early and staying late do not sound like someone wanting to leave.", 3: "Nothing says how the speech felt. Stick to what the dots show." },
       hint: "Where do they stand at the start? Where at the end?",
       why: "Back of the room and one word answers at the start; front of the room giving a speech at the end. Joined up, that is someone growing in confidence.",
-      ez: { slips: { 1: "At the start they said nothing.", 2: "They stay all year." }, hint: "At the back at the start. At the front at the end.", why: "They got <b>more confident</b>." },
+      ez: { slips: { 1: "At the start they said nothing.", 2: "They stay all year." }, hint: "Back at the start. Front at the end.", why: "They got <b>more confident</b>." },
       lv: { mild: { q: GROW.mild + "<p>Join the start to the end. What do they show together?</p>",
           options: ["The new [[role]] got more confident.", "The new [[role]] was always confident.", "The new [[role]] wanted to leave."],
           slips: { 1: "At the start they said nothing. Not confident yet.", 2: "Nothing points to leaving. They stay all year." } },

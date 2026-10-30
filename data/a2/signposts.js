@@ -184,7 +184,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { 0: "Lunch is food, so that one is in the right place.", 2: "A snack is food too. Look for the one about travel." },
       hint: "Which one is not about eating?",
       why: "Taking the bus is about getting there. It belongs in a different section.",
-      ez: { q: "Which line is in the wrong section?" + leaflet("[[Place]]", [["Food", ["Have lunch at [[cafe]].", "Take [[bus]].", "There is [[snack]]."]]]), slips: { 0: "Lunch is food.", 2: "A snack is food too." },
+      ez: { q: "Which line does not belong here?" + leaflet("[[Place]]", [["Food", ["Have lunch at [[cafe]].", "Take [[bus]].", "There is [[snack]]."]]]), slips: { 0: "Lunch is food.", 2: "A snack is food too." },
         why: "The bus is about <b>getting there</b>." },
       lv: { spicy: { q: "Odd one out. Which line is in the wrong section?" + leaflet("[[Place]]", [["Things to see", ["Start at [[see1]].", "Then try [[see2]].", "Entry costs [[price]]."]]]),
         options: ["Start at [[see1]].", "Then try [[see2]].", "Entry costs [[price]]."],
@@ -334,7 +334,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       starters: ["Getting there", "Things to see", "Food", "Top tip", "Opening times"],
       checklist: ["I have a title", "Each section has a heading", "Each line is under the right heading"],
       minWords: 25,
-      ez: { q: "Only if you like: make a mini guide. A title, and 2 or 3 headings." } }
+      ez: { q: "Only if you like: make a mini guide with headings." } }
   ],
 
   realWorld: {
