@@ -119,7 +119,9 @@ function run(j, list, voice, triedLocal){
 
 function say(text, opts){
   opts = opts || {};
-  text = String(text || "").replace(/\s+/g, " ").trim();
+  /* symbols a voice would read out oddly */
+  text = String(text || "").replace(/\u2192|->/g, ", becomes, ").replace(/\s*\u00b7\s*/g, ", ").replace(/\s&\s/g, " and ")
+    .replace(/\s+/g, " ").trim();
   if(!OK || !text){ if(opts.onend) opts.onend(); return false; }
   var busyBefore = synth.speaking || synth.pending;
   stop();

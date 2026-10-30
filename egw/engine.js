@@ -890,7 +890,7 @@ function a2Explain(s, i){
 /* the speaking is done by /data/b5speak.js (prefers a voice on the device, so it works on school Chromebooks) */
 function speakLoad(){
   if(window.B5Speak || document.querySelector('script[src^="/data/b5speak.js"]')) return;
-  var sc = document.createElement("script"); sc.src = "/data/b5speak.js?v=1"; document.head.appendChild(sc);
+  var sc = document.createElement("script"); sc.src = "/data/b5speak.js?v=2"; document.head.appendChild(sc);
 }
 var speakBtn = null;
 function speakStop(){
