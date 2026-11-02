@@ -69,7 +69,7 @@ SHELL = """<!DOCTYPE html>
 
 <script src="/data/send.js?v=1"></script>
 <script>window.PROJECT = {{ who: "{w}" }};</script>
-<script src="/data/project.js?v=1"></script>
+<script src="/data/project.js?v=2"></script>
 </body>
 </html>
 """

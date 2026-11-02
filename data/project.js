@@ -120,8 +120,26 @@ function save(){
   savedT = setTimeout(function(){ [].forEach.call(document.querySelectorAll(".pj .saved"), function(n){ n.textContent = ""; }); }, 1800);
 }
 
-/* ---------- the Idea Lab, if it was used on this device ---------- */
+/* ---------- the Idea Lab ----------
+   The Idea Lab keeps this student's jar under the same prefix as this page
+   (<prefix>lab.v1), so it arrives here on any device with the rest of the
+   project. The idea they tapped "This one" on comes first, then a starred
+   one. The old device-only shelf (b5.projects.ideas.v1) is still read. */
+var LABKEY = prefix + (/[.]$/.test(prefix) ? "" : ".") + "lab.v1";
 function ideaLab(){
+  try{
+    var lab = JSON.parse(localStorage.getItem(LABKEY) || "null");
+    if(lab && Array.isArray(lab.jar) && lab.jar.length){
+      var chosen = lab.pick ? lab.jar.filter(function(i){ return i.id === lab.pick; })[0] : null;
+      var star = lab.jar.filter(function(i){ return i.star; })[0];
+      var one = chosen || star || null;
+      if(one){
+        var MK = { film:"Film", song:"Song", comic:"Comic", musical:"Musical", model:"Model", game:"Game", podcast:"Podcast", poster:"Art or poster", art:"Art or poster", diary:"Story" };
+        var mk = chosen && lab.bp && lab.bp.make ? lab.bp.make : (one.make || "");
+        return { text: String(one.text || ""), form: MK[mk] || "" };
+      }
+    }
+  }catch(e){}
   try{
     var st = JSON.parse(localStorage.getItem("b5.projects.ideas.v1") || "null");
     if(!st || !Array.isArray(st.shelf) || !st.shelf.length) return null;
@@ -173,7 +191,7 @@ function build(){
     (labDraft
       ? '<div class="fromlab" id="fromLab"><b>From your Idea Lab:</b> ' + esc(labDraft.text) + (labDraft.form ? ' <i>(might be: ' + esc(labDraft.form) + ')</i>' : '') +
         '<br><button type="button" class="btn btn-quiet" id="useLab">Pop it in my notes</button></div>'
-      : '<p class="lead" style="margin-top:12px">Need a spark? <a href="/projects/ideas.html">The Idea Lab</a> spins a time machine for you.</p>') +
+      : '<p class="lead" style="margin-top:12px">Need a spark? <a href="/projects/ideas.html">The Idea Lab</a> has a time machine that prints ideas. Pick one there and it lands here.</p>') +
     '<p class="saved"></p>');
 
   h += card("bright", "w12",

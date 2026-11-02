@@ -171,6 +171,14 @@ ICONS = {
         '<path d="M19 42L16 55L31 44Z" fill="%s"/>' % T +
         '<path d="M26.5 23a5.5 5.5 0 1 1 7.5 5.1c-1.6.7-2 1.8-2 3.6" fill="none" stroke="%s" stroke-width="4" stroke-linecap="round"/>' % P +
         '<circle cx="32" cy="38.5" r="2.7" fill="%s"/>' % O),
+    "icons/idea-lab": (P,
+        '<path d="M53 49V23" stroke="%s" stroke-width="4" stroke-linecap="round"/>' % K +
+        '<circle cx="53" cy="19.5" r="5.5" fill="%s"/>' % O +
+        '<path d="M17 24a12 12 0 0 1 24 0Z" fill="%s"/>' % Y +
+        '<rect x="8" y="23" width="40" height="33" rx="7" fill="%s"/>' % T +
+        '<circle cx="28" cy="38" r="10.5" fill="%s"/>' % P +
+        '<path d="M28 32a6 6 0 1 1-6 6" fill="none" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % O +
+        '<circle cx="28" cy="38" r="2" fill="%s"/>' % K),
     "icons/ideas": (P,
         '<path d="M32 5V10M13 13l3.5 3.5M51 13l-3.5 3.5M6 30h5M53 30h5" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % C +
         '<path d="M32 15a14 14 0 0 1 8 25.5V44H24V40.5A14 14 0 0 1 32 15Z" fill="%s"/>' % O +

@@ -22,6 +22,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 ICON_MAP = [
     # games in the vault, each with its own icon
     ("/projects/its-time.html", "/icons/its-time.svg"),
+    ("/projects/ideas.html", "/icons/idea-lab.svg"),
     ("/games/timeline-tantrum/", "/icons/timeline-tantrum.svg"),
     ("/practice/build-a-life.html", "/icons/build-a-life.svg"),
     ("/practice/hooked.html", "/icons/hooked.svg"),
