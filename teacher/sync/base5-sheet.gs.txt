@@ -575,7 +575,9 @@ function tag_(r){
 function votesHead_(sh){ if(String(sh.getRange(1, 7).getValue()) !== "Approved") sh.getRange(1, 7).setValue("Approved").setFontWeight("bold"); }
 function vote_(r){
   var kind = String(r.kind || ""), voter = String(r.voter || ""), choice = String(r.choice || "");
-  if(!/^(bigq|wyr:\d{4}-\d{2}-\d{2})$/.test(kind) || !voterOk_(voter) || !/^[a-z0-9]{1,12}$/.test(choice)) throw new Error("bad vote");
+  /* lab:<id> is the Idea Lab's "Should you?" on a ticket or a swipe card, shown back only as an anonymous tally */
+  if(!/^(bigq|wyr:\d{4}-\d{2}-\d{2}|lab:[a-z0-9]{1,16})$/.test(kind) || !voterOk_(voter) || !/^[a-z0-9]{1,12}$/.test(choice)) throw new Error("bad vote");
+  if(kind.indexOf("lab:") === 0){ r.reason = ""; if(!/^[ynd]$/.test(choice)) throw new Error("bad vote"); }
   var sh = sheet_("Votes"), v = sh.getDataRange().getValues(), reason = clean_(String(r.reason || "").trim(), 140);
   votesHead_(sh);
   for(var i = 1; i < v.length; i++){
@@ -1493,6 +1495,8 @@ function activity_(r){
   e.subject = clean_(r.subject || (kind === "game" ? "Project" : "Practice"), 60);
   e.minutes = Math.max(e.minutes, Math.round((+r.secs || 0) / 60));
   e.line = clean_(r.line || "", 300);
+  /* something they made or decided (the Idea Lab sends the idea they picked), so a note goes even before three minutes */
+  if(r.made) e.made = clean_(r.made, 200);
   if(kind === "game" && !e.target) e.target = "Project: " + String(setting_("Project question") || "If we could time travel, should we?");
   old.line = R.row ? (old.note.indexOf(e.line) >= 0 ? e.line : "~") : "";
   evWrite_(R, e, old);
