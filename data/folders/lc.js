@@ -2,7 +2,7 @@
    Written by /teacher/folders.html (or by hand: keep the same shape). ASCII only. */
 window.B5FOLDER = {
  "who": "LC",
- "updated": "2026-10-18T19:42:01Z",
+ "updated": "2026-11-02T08:30:00Z",
  "data": {
   "v": 2,
   "messages": [
@@ -20,6 +20,13 @@ window.B5FOLDER = {
     "note": "For the new project, if you fancy it. Spin a time machine, sort some should we? dilemmas and keep anything that sounds good. Nothing you pick is final."
    }
   ],
-  "files": []
+  "files": [
+   {
+    "id": "f-absurd-city",
+    "title": "Absurd City",
+    "href": "/lc/absurd-city.html",
+    "note": "A video and some photos. Thought of you."
+   }
+  ]
  }
 };
