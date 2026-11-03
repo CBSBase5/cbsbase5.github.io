@@ -126,6 +126,16 @@ function save(){
    project. The idea they tapped "This one" on comes first, then a starred
    one. The old device-only shelf (b5.projects.ideas.v1) is still read. */
 var LABKEY = prefix + (/[.]$/.test(prefix) ? "" : ".") + "lab.v1";
+/* the stage goes into the Idea Lab jar too, so its project card fills up its
+   stickers on any device (the jar key syncs with the rest of this page) */
+function labStage(){
+  try{
+    var lab = JSON.parse(localStorage.getItem(LABKEY) || "null");
+    if(!lab || !lab.pick) return;
+    lab.stage = data.stage; lab.stageT = Date.now(); lab.t = Date.now();
+    localStorage.setItem(LABKEY, JSON.stringify(lab));
+  }catch(e){}
+}
 function ideaLab(){
   try{
     var lab = JSON.parse(localStorage.getItem(LABKEY) || "null");
@@ -316,7 +326,7 @@ function wire(){
     var b = e.target.closest(".stop"); if(!b) return;
     var i = +b.dataset.i;
     data.stage = data.stage === i && i === 0 ? -1 : i;
-    save(); drawStage();
+    save(); drawStage(); labStage();
   });
   /* a small hidden thing: tap the time machine a few times */
   el("pod").addEventListener("click", function(){
