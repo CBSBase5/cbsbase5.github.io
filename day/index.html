@@ -48,6 +48,14 @@
 }
 .nothing{max-width:60ch}
 .tl-time small{white-space:normal}
+
+/* sessions only some students go to (Horizon): their own lane in the timeline */
+.tl-row.lane .tl-card{border-style:dashed;border-width:4px}
+.tl-row.lane .tl-time{opacity:.85}
+.lanewho{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:.72rem;letter-spacing:.08em;vertical-align:middle}
+.mytag{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);font-size:.72rem;letter-spacing:.06em;vertical-align:middle}
+.dayview{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:22px 0 -8px;font-size:.92rem;color:var(--body-tint)}
+.dayview a{color:var(--teal);font-weight:700}
 </style>
 <script src="/data/b5site.js?v=8"></script>
 </head>
@@ -68,7 +76,7 @@
   </div>
 </footer>
 
-<script src="/data/term.js?v=8"></script>
+<script src="/data/term.js?v=9"></script>
 <script>
 (function(){
   var T = window.B5TERM;
@@ -99,6 +107,13 @@
   var isoDate = T.iso(date);
   var dd = (week.days && week.days[key]) || {};
   var slots = T.timetable[key];
+  /* sessions only some students go to today (Horizon for LP and EGW) */
+  var lanes = T.alongsideOn ? T.alongsideOn(key) : [];
+  var me = T.me ? T.me() : '';
+  var mine = me ? lanes.filter(function(a){ return a.who.indexOf(me) > -1; }) : [];
+  /* on LP's or EGW's device their own day shows first; ?all=1 shows the whole group's */
+  var personal = mine.length > 0 && q.get('all') !== '1';
+  var daySlots = personal ? T.slotsFor(key, me) : slots;
   var isToday = isoDate === T.todayIso();
   var dayName = T.dayNames[key];
   var trip = slots.some(function(s){return s[2]==='trip'});
@@ -145,7 +160,9 @@
   var now = new Date();
   var nowM = now.getHours()*60 + now.getMinutes();
 
-  var rows = slots.map(function(s){
+  var laneKeys = {};
+  lanes.forEach(function(a){ laneKeys[a.key] = a; });
+  var rows = daySlots.map(function(s){
     var ses = T.session(s[2], week);
     if(s[2]==='trip' && T.tripPlace(dd)){ ses.line = T.tripPlace(dd) + '. Out from half ten until two.'; }
     var on = isToday && nowM >= T.mins(s[0]) && nowM < T.mins(s[1]);
@@ -153,15 +170,33 @@
     return '<div class="tl-row'+(on?' now':'')+'">'+
       '<div class="tl-time">'+s[0]+' - '+s[1]+'<small>'+T.length(s[0],s[1])+'</small></div>'+
       '<'+tag+' class="tl-card '+(T.subjectOf(s[2]) ? 'subjfill s-'+T.subjectOf(s[2]) : (TYPE[ses.type]||''))+'"'+(ses.plain?'':' href="#'+s[2]+'" data-open="'+s[2]+'"')+'>'+
-        '<h3>'+ses.title+(on?'<span class="nowtag">Now</span>':'')+'</h3>'+
+        '<h3>'+ses.title+(laneKeys[s[2]] && personal ? '<span class="mytag">Yours</span>' : '')+(on?'<span class="nowtag">Now</span>':'')+'</h3>'+
         (ses.line ? '<p>'+ses.line+'</p>' : '')+
       '</'+tag+'>'+
     '</div>';
-  }).join('');
+  });
+  /* the whole group's day: lanes sit in their own dashed row, in time order */
+  if(!personal) lanes.slice().reverse().forEach(function(a){
+    var ses = T.session(a.key, week), sub = T.subjectOf(a.key);
+    var on = isToday && nowM >= T.mins(a.start) && nowM < T.mins(a.end);
+    var at = 0; while(at < slots.length && T.mins(slots[at][0]) < T.mins(a.start)) at++;
+    rows.splice(at, 0, '<div class="tl-row lane'+(on?' now':'')+'">'+
+      '<div class="tl-time">'+a.start+' - '+a.end+'<small>'+T.whoList(a)+' only</small></div>'+
+      '<a class="tl-card '+(sub ? 'subjfill s-'+sub : 'tl-work')+'" href="#'+a.key+'" data-open="'+a.key+'">'+
+        '<h3>'+ses.title+'<span class="lanewho">'+T.whoList(a)+'</span>'+(on?'<span class="nowtag">Now</span>':'')+'</h3>'+
+        '<p>'+ses.line+' At the same time as the sessions either side.</p>'+
+      '</a></div>');
+  });
+  rows = rows.join('');
+  var viewNote = '';
+  if(personal) viewNote = '<p class="dayview"><span>Your day, with '+mine.map(function(a){ return T.session(a.key, week).title; }).join(' and ')+' in it.</span><a href="?w='+week.n+'&amp;d='+key+'&amp;all=1">See the whole group\'s day</a></p>';
+  else if(mine.length) viewNote = '<p class="dayview"><span>The whole group\'s day.</span><a href="?w='+week.n+'&amp;d='+key+'">Back to my day</a></p>';
 
   /* ---------- the blocks under it ---------- */
   var seen = {};
-  var blocks = slots.filter(function(s){
+  var blockSlots = personal ? daySlots : slots.concat(lanes.map(function(a){ return [a.start, a.end, a.key]; }))
+    .sort(function(x, y){ return T.mins(x[0]) - T.mins(y[0]); });
+  var blocks = blockSlots.filter(function(s){
     var ses = T.sessions[s[2]];
     if(!ses || ses.plain || seen[s[2]]) return false;
     seen[s[2]] = true; return true;
@@ -184,6 +219,12 @@
     if(ses.body && !(k==='trip' && dd.trip && dd.trip.where)) body += '<p>'+ses.body+'</p>';
     if(ses.options){
       body += '<div class="grid3">'+ses.options.map(function(o){return '<div class="mini"><span class="n">'+o[0]+'</span>'+o[1]+'</div>'}).join('')+'</div>';
+    }
+    if(laneKeys[k]){
+      var la = laneKeys[k];
+      /* on their own device, only their own HQ */
+      if(personal) ses.links = (ses.links || []).filter(function(l){ return l[1].indexOf('/' + me.toLowerCase() + '/') === 0; });
+      body += '<div class="chiplabel">Who</div><p>'+T.whoList(la)+'. '+(personal ? 'Everyone else carries on with the timetable.' : 'Everyone else carries on with the sessions either side.')+'</p>';
     }
     if(ses.hq){
       body += '<div class="chiplabel">Your own HQ</div><div class="hqchips">'+
@@ -208,6 +249,7 @@
   }).join('');
 
   main.innerHTML =
+    viewNote+
     '<div class="tl" style="margin-top:26px">'+rows+'</div>'+
     '<p class="stripnote">The times are when things are happening, not orders. If a session is not working for you today, saying so is a reasonable thing to do.</p>'+
     blocks+

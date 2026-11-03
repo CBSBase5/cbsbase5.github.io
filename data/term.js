@@ -53,6 +53,18 @@ window.B5TERM = {
     ]
   },
 
+  /* --------------------------------------------------------
+     ALONGSIDE. Sessions only some students go to, running at
+     the same time as the timetable above. who: initials.
+     The day page shows them as their own lane, the home page
+     now/next and the clock help follow them on those students'
+     devices (the HQ the device last opened), and their HQ front
+     door says so on the day. Parents' page: no initials.
+     -------------------------------------------------------- */
+  alongside: [
+    { key:"horizon", who:["LP","EGW"], days:["mon","tue","thu"], start:"10:00", end:"12:15" }
+  ],
+
   /* What each day is like, in a line. Used on the index cards
      and at the top of each day page. A week can override it. */
   dayLines: {
@@ -83,6 +95,14 @@ window.B5TERM = {
       options:[["Play","Take one on, on your own or with someone."],["Watch","Sit near it and see how other people are doing it."],["Swap","Drop one that is annoying you and pick another."]],
       links:[["The game vault","/games/"],["Tools","/tools/"]],
       ways:["Do the same one every day","Work with Jay or HB","Bring one in of your own","Sit this one out"]
+    },
+
+    horizon: {
+      title:"Horizon", line:"Maths, English and Science.", type:"work",
+      heading:"Horizon: Maths, English and Science",
+      sub:"10:00 to 12:15, Monday, Tuesday and Thursday.",
+      body:"Horizon Maths, English and Science sessions, from 10:00 until 12:15 on Mondays, Tuesdays and Thursdays.",
+      links:[["EGW's GCSE HQ","/egw/"],["LP's GCSE HQ","/lp/"]]
     },
 
     cc: {
@@ -353,8 +373,50 @@ window.B5TERM = {
     return s;
   };
 
+  /* ---------- sessions only some students go to ---------- */
+  function hm(m){ var h = Math.floor(m / 60), mm = m % 60; if(h > 12) h -= 12; return h + ":" + ("0" + mm).slice(-2); }
+  /* what runs alongside on a day, optionally only for one student */
+  T.alongsideOn = function(key, who){
+    return (T.alongside || []).filter(function(a){
+      return a.days.indexOf(key) > -1 && (!who || a.who.indexOf(who) > -1);
+    });
+  };
+  /* who this device belongs to: the student HQ it last opened (never on a staff device) */
+  T.me = function(){
+    try{
+      if(localStorage.getItem("b5.sync.off") === "1") return "";
+      var w = window.B5Site && B5Site.hq || localStorage.getItem("b5.myhq.v1") || "";
+      return /^(EGW|LP|LW|LC|HK|JT)$/.test(w) ? w : "";
+    }catch(e){ return ""; }
+  };
+  /* one student's day: the timetable with their alongside sessions dropped in,
+     and anything they overlap trimmed or taken out */
+  T.slotsFor = function(key, who){
+    var base = T.timetable[key] || [], add = who ? T.alongsideOn(key, who) : [];
+    if(!add.length) return base;
+    var out = [];
+    base.forEach(function(s){
+      var pieces = [[T.mins(s[0]), T.mins(s[1])]];
+      add.forEach(function(a){
+        var as = T.mins(a.start), ae = T.mins(a.end), next = [];
+        pieces.forEach(function(p){
+          if(p[1] <= as || p[0] >= ae){ next.push(p); return; }
+          if(p[0] < as) next.push([p[0], as]);
+          if(p[1] > ae) next.push([ae, p[1]]);
+        });
+        pieces = next;
+      });
+      pieces.forEach(function(p){ if(p[1] - p[0] >= 5) out.push([hm(p[0]), hm(p[1]), s[2]]); });
+    });
+    add.forEach(function(a){ out.push([a.start, a.end, a.key]); });
+    out.sort(function(x, y){ return T.mins(x[0]) - T.mins(y[0]); });
+    return out;
+  };
+  /* "LP and EGW" */
+  T.whoList = function(a){ var w = a.who || []; return w.length < 2 ? w.join("") : w.slice(0, -1).join(", ") + " and " + w[w.length - 1]; };
+
   /* The subject a session belongs to, for its colour (s-<subject> in style.css) */
-  var SUBJ = { maths:"maths", english:"english", core:"core", forest:"science", hort:"science", digital:"dm",
+  var SUBJ = { horizon:"core", maths:"maths", english:"english", core:"core", forest:"science", hort:"science", digital:"dm",
     project:"project", aesthetic:"ac", physical:"pw", pe:"pe", pfa:"pfa", phse:"phse", cc:"cc", brain:"brain", trip:"trip" };
   T.subjectOf = function(key){ return SUBJ[key] || ""; };
 

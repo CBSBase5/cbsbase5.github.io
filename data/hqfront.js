@@ -12,6 +12,9 @@
      a room that has just opened     "New in your HQ: Swipe deck"
      new things in their folder      "2 new things from Jay"
      Fridays                         "Your Friday postcard is ready"
+     a day with a session only some students go to, for those students
+     (from "alongside" in /data/term.js, loaded here if the page has not)
+                                      "Horizon today, 10:00 to 12:15"
 
    HQ home pages only, loaded in the head straight after
    /data/b5site.js and /data/hqrooms.js, so nothing flashes up first.
@@ -141,6 +144,7 @@ function tagNew(){
 var ICON = {
   door: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M3 21h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="14.5" cy="12.5" r="1.3" fill="currentColor"/></svg>',
   star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z" fill="currentColor"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   folder: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" fill="currentColor"/></svg>',
   card: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="currentColor"/><path d="M6 9h6M6 12h4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><rect x="15" y="8" width="4" height="4" rx=".8" fill="#fff"/></svg>',
   rooms: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
@@ -161,6 +165,16 @@ function drawFront(){
     front.appendChild(news("star", nr.length === 1 ? "New in your HQ: " + esc(first.name) : nr.length + " new things in your HQ",
       nr.length === 1 ? "Have a look whenever you like." : nr.map(function(r){ return esc(r.name); }).join(", "),
       function(){ var t = d.querySelector(first.sel[0]); openRest(t && t.id ? t.id : null); if(t && !t.id) setTimeout(function(){ try{ t.scrollIntoView({ block: "center" }); }catch(e){} }, 30); }));
+  }
+  /* Horizon (or anything else only this student goes to) today */
+  var T = window.B5TERM;
+  if(T && T.alongsideOn && !guest){
+    var tk = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][new Date().getDay()], tiso = T.iso(new Date());
+    var wk = (T.weeks || []).filter(function(w){ return tiso >= w.start && tiso <= w.end; })[0];
+    if(wk && !((wk.days || {})[tk] || {}).off) T.alongsideOn(tk, WHO).forEach(function(a){
+      var ses = T.session(a.key, wk), past = new Date().getHours() * 60 + new Date().getMinutes() >= T.mins(a.end);
+      if(!past) front.appendChild(news("clock", esc(ses.title) + " today, " + a.start + " to " + a.end, esc(ses.line), null, "/day/"));
+    });
   }
   if(folderNew && !guest) front.appendChild(news("folder", folderNew + " new thing" + (folderNew === 1 ? "" : "s") + " from Jay", "In your folder, just for you.", null, BASE + "folder.html"));
   if(new Date().getDay() === 5 && window.HQExtras && window.HQExtras.postcard)
@@ -192,6 +206,12 @@ function arrange(){
   var after = hero;
   [front, top, core].forEach(function(n){ if(after.nextSibling !== n) after.parentNode.insertBefore(n, after.nextSibling); after = n; });
   var hc = hero.querySelector(".hp-core"); if(hc) core.appendChild(hc);
+}
+/* the term file holds the alongside sessions; HQ pages do not load it themselves */
+if(!window.B5TERM && /^(EGW|LP|LW|LC|HK|JT)$/.test(WHO)){
+  var ts = d.createElement("script"); ts.src = "/data/term.js?v=9";
+  ts.onload = function(){ drawFront(); };
+  d.head.appendChild(ts);
 }
 function boot(){
   arrange();

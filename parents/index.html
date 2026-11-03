@@ -192,6 +192,7 @@
     <div class="weektheme"><h2 id="tt-h">The timetable</h2><span id="ttLine">The same every week this half term.</span></div>
     <div class="tt" id="tt"></div>
     <p class="ttnote">Days run from 9:30 to 2:30. The times are a guide, and we adapt sessions whenever a student needs it.</p>
+    <p class="ttnote" id="ttAlong" hidden></p>
     <button class="btn btn-quiet print" type="button" id="printIt">Print or save as PDF</button>
   </section>
 
@@ -285,7 +286,7 @@
   </div>
 </footer>
 
-<script src="/data/term.js?v=8"></script>
+<script src="/data/term.js?v=9"></script>
 <script src="/data/parents.js?v=18"></script>
 <script src="/data/cc.js?v=7"></script>
 <script src="/cc/cc-art.js?v=8"></script>
@@ -359,6 +360,20 @@ $("tt").innerHTML = T.dayKeys.map(function(k){
     return '<li class="' + (sub ? "s-" + sub : "") + '"><span>' + s[0] + '</span>' + esc(PLAIN[s[2]] || ses.title) + '</li>';
   }).join("") + '</ol></div>';
 }).join("");
+
+/* sessions only some students go to (Horizon): general words only, never who */
+(function(){
+  var A = T.alongside || [];
+  if(!A.length) return;
+  function andL(a){ return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
+  var n = $("ttAlong");
+  n.textContent = A.map(function(a){
+    var ses = T.session(a.key);
+    return "Some students also have " + (ses.heading ? ses.heading.replace(/^Horizon: /, "Horizon ") : ses.title) + " sessions from " + a.start + " to " + a.end +
+      " on " + andL(a.days.map(function(k){ return T.dayNames[k] + "s"; })) + ", alongside the timetable above.";
+  }).join(" ");
+  n.hidden = false;
+})();
 
 /* ---------- rhythms ---------- */
 $("dayShape").innerHTML = (P.day || []).map(function(d){ return '<li><div><b>' + esc(d[0]) + '</b><small>' + esc(d[1]) + '</small></div><p>' + esc(d[2]) + '</p></li>'; }).join("");

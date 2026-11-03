@@ -108,7 +108,8 @@ function nextUp(now){
   var wk = (T.weeks || []).filter(function(w){ return iso >= w.start && iso <= w.end; })[0];
   if(!wk || !T.timetable[key] || ((wk.days || {})[key] || {}).off) return null;
   var mins = now.getHours() * 60 + now.getMinutes();
-  var slot = T.timetable[key].filter(function(s){ return T.mins(s[0]) > mins; })[0];
+  var day = T.slotsFor ? T.slotsFor(key, T.me()) : T.timetable[key];   /* their own day on LP's or EGW's device */
+  var slot = day.filter(function(s){ return T.mins(s[0]) > mins; })[0];
   if(!slot) return null;
   var ses = T.session ? T.session(slot[2], wk) : { title: slot[2] };
   var p = slot[0].split(":");

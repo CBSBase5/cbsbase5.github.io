@@ -11,6 +11,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css?v=13">
 <style>
+/* Horizon and anything else only some students go to, on the day passes */
+.ticket .alongline{display:inline-block;margin:8px 0 2px;padding:3px 11px;border-radius:999px;border:2px dashed currentColor;font-weight:700;font-size:.86rem;background:rgba(255,255,255,.16)}
+
 /* Index only. Everything else lives in style.css */
 
 /* today's two */
@@ -557,9 +560,9 @@ html[data-tod="evening"] body{background:
   </div>
 </footer>
 
-<script src="/data/term.js?v=8"></script>
+<script src="/data/term.js?v=9"></script>
 <script src="/data/games.js?v=2"></script>
-<script src="/data/clockhelp.js?v=1"></script>
+<script src="/data/clockhelp.js?v=2"></script>
 <script src="/data/onthisday.js?v=1"></script>
 <script src="/data/dailyfun.js?v=3"></script>
 <script src="/data/jaypix.js?v=2"></script>
@@ -609,12 +612,18 @@ html[data-tod="evening"] body{background:
     var title = dd.title || (isTrip ? "Trip day" : T.dayNames[k]);
     var line = dd.line || T.dayLines[k];
     var stubL = isTrip ? "Out 10:30 to 2:00" : "Departs 9:30";
+    /* sessions only some students go to (Horizon): one line, "You" on their own device */
+    var me = T.me ? T.me() : '';
+    var along = (T.alongsideOn ? T.alongsideOn(k) : []).map(function(a){
+      var mineA = me && a.who.indexOf(me) > -1;
+      return '<span class="alongline">' + (mineA ? 'You' : T.whoList(a)) + ': ' + T.session(a.key, w).title + ' ' + a.start + ' to ' + a.end + '</span>';
+    }).join('');
     var stubR = T.tripPlace(dd) || "Back 2:30";
     var isToday = T.iso(date) === today;
     return '<a class="card ticket '+look.w+' '+look.fill+(isToday?' today':'')+'" href="/day/?w='+w.n+'&amp;d='+k+'">'+
       (isToday ? '<span class="sticker">Today</span>' : '')+
       '<span class="kicker">'+T.niceDate(date)+'</span>'+
-      '<h3>'+title+'</h3><p>'+line+'</p>'+
+      '<h3>'+title+'</h3><p>'+line+'</p>'+along+
       '<div class="stub"><span>'+stubL+'</span><span>'+stubR+'</span></div></a>';
   }
 
@@ -778,7 +787,8 @@ html[data-tod="evening"] body{background:
   }
 
   if(today){
-    var slots = T.timetable[today.k];
+    /* on LP's or EGW's device, now and next follow their own day (Horizon) */
+    var slots = T.slotsFor ? T.slotsFor(today.k, T.me()) : T.timetable[today.k];
     var cur = slots.filter(function(s){ return mins >= T.mins(s[0]) && mins < T.mins(s[1]); })[0];
     var nxt = slots.filter(function(s){ return T.mins(s[0]) > mins; })[0];
     if(cur){
