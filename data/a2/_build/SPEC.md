@@ -81,3 +81,12 @@ Every theme must define every word used.
     node data/a2/_build/validate.js <slug>
     python3 data/a2/_build/build_a2.py <slug>
     WALK_PORT=81xx python3 data/a2/_build/walk.py <slug>
+
+## The play layer (4 Nov 2026)
+
+`/egw/play.js` is loaded by the engine before any activity starts and adds, to every activity in every HQ:
+the HQ's world as a scene across the top of the question card, stage names (Drill, Op, Shift, Act, Sheet, Round),
+a themed burst on right answers, the combo meter (three right first go in a row doubles the next one's sparks),
+big tiles for short answers, Bonnie peeking, hopping and trotting, a boss round on the last marked question of
+each chunk (+5 sparks), animated reading cards with "Tell me more", and the next HQ game unlock at each chunk end.
+Nothing in a pack needs to change for it. Keep each learn card's first block short: it is the one line that shows.

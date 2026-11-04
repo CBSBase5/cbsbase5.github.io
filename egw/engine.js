@@ -375,6 +375,8 @@ function findLearn(all, i){
 
 /* Sparks: everything you do earns some. Learning from Show me still counts. */
 var SPARK = { right1: 10, right2: 6, shown: 3, done: 8 };
+/* plus any combo or boss bonus the play layer earned on that answer */
+function sparkOf(a){ return a ? (SPARK[a.status] || 0) + (a.bonus && (a.status === "right1" || a.status === "right2") ? a.bonus : 0) : 0; }
 
 function summary(){
   var total = 0, marked = 0, got1 = 0, got2 = 0, shown = 0, done = 0, skipped = 0, sparks = 0;
@@ -384,7 +386,7 @@ function summary(){
     total++;
     if(scored(s)) marked++;
     if(!a) return;
-    sparks += SPARK[a.status] || 0;
+    sparks += sparkOf(a);
     if(a.status === "right1"){ got1++; done++; }
     else if(a.status === "right2"){ got2++; done++; }
     else if(a.status === "shown"){ shown++; done++; }
@@ -508,7 +510,7 @@ function build(){
           '<p class="lead">' + cfg.blurb + '</p>' +
           (cfg.startFig ? '<div class="fig a2startfig">' + tok(cfg.startFig) + '</div>' : '') +
           '<ul class="howlist">' +
-            '<li><b>' + chunks.length + ' short chunks' + (a2() ? ', about five minutes each' : '') + '.</b> Any order, any day. It saves itself.</li>' +
+            '<li><b>' + chunks.length + ' short ' + unitsWord() + (a2() ? ', about five minutes each' : '') + '.</b> Any order, any day. It saves itself.</li>' +
             '<li><b>Two goes</b> at each question, and <b>Show me</b> whenever you want it.</li>' +
             (a2() ? '<li>Every activity ends with something you make, and there may be a surprise or two hidden on the way.</li>' :
             '<li><span class="stretch">Stretch</span> questions are optional extras.</li>') +
@@ -663,7 +665,7 @@ function showStart(){
   if(cfg.review) return;
   var any = !!(state.answers && Object.keys(state.answers).length);
   $("resumeBtn").classList.toggle("hidden", !any);
-  $("beginBtn").textContent = EASY ? (any ? "Start again" : "Start") : any ? "Start again from scratch" : (cfg.escape ? "Enter the first room" : "Begin with chunk 1");
+  $("beginBtn").textContent = EASY ? (any ? "Start again" : "Start") : any ? "Start again from scratch" : (cfg.escape ? "Enter the first room" : "Begin with " + unitWord().toLowerCase() + " 1");
   if(EASY) $("resumeBtn").textContent = "Carry on";
   $("beginBtn").className = any ? "btn btn-quiet" : "btn";
   $("resumeBtn").className = any ? "btn" : "btn btn-quiet hidden";
@@ -765,7 +767,7 @@ function chunkDone(k){
   for(var i = c.from; i <= c.to; i++){
     var a = state.answers[i];
     if(!a || steps[i].type === "learn") continue;
-    sp += SPARK[a.status] || 0;
+    sp += sparkOf(a);
     if(a.status === "right1") g1++;
     else if(a.status === "right2") g2++;
     else if(a.status === "shown") sh++;
@@ -788,7 +790,7 @@ function chunkDone(k){
   }else{
     $("stampNum").textContent = String(k + 1);
     $("chunkDoneH").textContent = pick(CHEERS);
-    $("chunkDoneP").textContent = "Chunk " + (k + 1) + " of " + chunks.length + ": " + stripTags(c.topic) + ". " +
+    $("chunkDoneP").textContent = unitWord() + " " + (k + 1) + " of " + chunks.length + ": " + stripTags(c.topic).replace(/[.?!]+$/, "") + ". " +
       (sk ? "You skipped " + sk + "; they will be there whenever you fancy them." : "Nothing skipped.") +
       (cfg.extra ? "" : " A new star is lit in your sky.");
   }
@@ -799,6 +801,7 @@ function chunkDone(k){
   $("nextChunkBtn").onclick = function(){ go(chunks[nk].from); };
   confetti($("stampNum"), 26);
   state.pos = chunks[nk].from; save();
+  if(P() && !cfg.escape) try{ P().chunkEnd($("chunkCard"), { k: k, n: chunks.length }); }catch(e){}
 }
 
 function confetti(from, n){
@@ -828,9 +831,19 @@ var cur = null;   // live handle for the current step: {get:fn, mark:fn}
 function drawChips(){
   var st = state.streak || 0;
   var sc = $("streakChip");
-  sc.innerHTML = '<span class="ico">&#9889;</span>' + st + ' in a row';
-  sc.classList.toggle("hot", st >= 3);
-  sc.classList.toggle("hidden", st < 2);
+  if(P() && !cfg.review){
+    /* combo meter: three pips fill with right first go answers, then sparks double */
+    var pips = "";
+    for(var q = 0; q < 3; q++) pips += '<i class="' + (q < st ? "on" : "") + '"></i>';
+    sc.innerHTML = '<span class="hp-combo" title="Three right first go in a row doubles your sparks">' + pips + (st >= 3 ? '<b>x2</b>' : '') + '</span>';
+    sc.setAttribute("aria-label", st >= 3 ? "Combo on: sparks doubled" : "Combo " + Math.min(st, 3) + " of 3");
+    sc.classList.remove("hot", "hidden");
+    sc.classList.toggle("hp-hot", st >= 3);
+  }else{
+    sc.innerHTML = '<span class="ico">&#9889;</span>' + st + ' in a row';
+    sc.classList.toggle("hot", st >= 3);
+    sc.classList.toggle("hidden", st < 2);
+  }
   var sp = summary().sparks;
   $("sparkChip").innerHTML = '<span class="ico">&#10022;</span>' + sp + ' sparks';
   $("sparkChip").classList.toggle("hidden", !sp);
@@ -846,7 +859,7 @@ function go(i){
   var k = chunkOf[i], c = chunks[k];
   $("chunkLabel").innerHTML = cfg.review ? "Second look <span>" + (i + 1) + " of " + steps.length + "</span>" :
     cfg.escape ? (k === chunks.length - 1 ? "The final door" : "Room " + (k + 1) + " <span>of " + (chunks.length - 1) + "</span>") :
-    "Chunk " + (k + 1) + " <span>of " + chunks.length + "</span>";
+    unitWord() + " " + (k + 1) + " <span>of " + chunks.length + "</span>";
   var dots = "";
   for(var j = c.from; j <= c.to; j++) dots += '<i class="' + (j < i ? "past" : j === i ? "now" : "") + '"></i>';
   $("dots").innerHTML = dots;
@@ -898,6 +911,7 @@ function go(i){
     cur.restore(a.value, false);
   }
   if(a2() && a && (a.status === "right1" || a.status === "right2") && s.explain) a2Explain(s, i);
+  if(P()) try{ P().step($("qCard"), { learn: s.type === "learn", boss: isBoss(i), body: body, i: i, k: k }); }catch(e){}
 }
 /* "How did you get that?" now and then, never required */
 function a2Explain(s, i){
@@ -1020,6 +1034,28 @@ function optionOrder(s){
 
 var R = {};
 
+/* Animated intro (play layer): the picture builds itself in, one line
+   shows, and the rest waits behind "Tell me more". Next is never held
+   back by it. */
+function hpIntro(body, seen){
+  var f = body.querySelector(".fig");
+  if(f && !seen) f.classList.add("hp-intro");
+  var lb = body.querySelector(".learnbody");
+  if(!lb) return;
+  var kids = [].slice.call(lb.children), total = 0;
+  kids.forEach(function(el){ var m = (el.textContent || "").trim().match(/\S+/g); total += m ? m.length : 0; });
+  if(kids.length < 2 || total <= (EASY ? 22 : 34)) return;
+  lb.classList.add("hp-one");
+  kids.slice(1).forEach(function(el){ el.classList.add("hidden"); });
+  var more = h("button", "btn btn-quiet hp-more", EASY ? "More" : "Tell me more");
+  more.type = "button";
+  more.onclick = function(){
+    kids.slice(1).forEach(function(el){ el.classList.remove("hidden"); el.classList.add("hp-fresh"); });
+    more.remove();
+  };
+  lb.parentNode.insertBefore(more, lb.nextSibling);
+}
+
 /* Learn cards show one short bit at a time, so a long card is
    never a wall of text. "Show it all" is always there instead. */
 var revealPending = false;
@@ -1048,6 +1084,7 @@ R.learn = function(s, body, i){
   var seen = !!state.answers[i];
   state.answers[i] = { status: "done" }; save();
   revealPending = false;
+  if(P()){ hpIntro(body, seen); return; }
   if(seen) return;
   var lb = body.querySelector(".learnbody");
   var kids = [].slice.call(lb.children);
@@ -1088,6 +1125,13 @@ R.learn = function(s, body, i){
   draw(false);
 };
 
+/* short answers become big tiles (play layer): every option short, or a picture */
+function tileUp(box, s){
+  if(!P() || !s.options || s.options.length < 2 || s.options.length > 6) return;
+  var ok = s.options.every(function(o){ var t = String(o); return t.indexOf("<svg") >= 0 || (stripTags(t).length <= 26 && t.indexOf("<br") < 0); });
+  if(ok){ box.classList.add("tiles"); box.classList.add("n" + s.options.length); }
+}
+
 R.mc = function(s, body){
   body.innerHTML = prompt(s);
   var box = h("div", "choices");
@@ -1103,6 +1147,7 @@ R.mc = function(s, body){
     btns[k] = b;
     box.appendChild(b);
   });
+  tileUp(box, s);
   body.appendChild(box);
   cur = {
     get: function(){ return picked; },
@@ -1135,6 +1180,7 @@ R.multi = function(s, body){
     btns[k] = b;
     box.appendChild(b);
   });
+  tileUp(box, s);
   body.appendChild(box);
   function list(){ return Object.keys(on).filter(function(k){ return on[k]; }).map(Number).sort(); }
   cur = {
@@ -1574,7 +1620,17 @@ function check(giveUp){
   }
   cur.mark(a.status === "shown");
   if(cfg.review) reviewResult(s._orig, a.status); else noteForReview(i, a.status);
+  /* combo: three right first go in a row doubles the sparks for the next one; a boss round adds 5 */
+  var combo = false, boss = isBoss(i);
+  if(P()){
+    delete a.bonus;
+    if(a.status === "right1" && (state.streak || 0) >= 3){ a.bonus = SPARK.right1; combo = true; }
+    if(boss && (a.status === "right1" || a.status === "right2")) a.bonus = (a.bonus || 0) + 5;
+    if(!a.bonus) delete a.bonus;
+    save();
+  }
   bump(a.status, $("checkBtn"));
+  if(P()) try{ P().result({ status: a.status, boss: boss, combo: combo || (a.status === "right1" && state.streak === 3) }); }catch(e){}
   showFeedback(s, a.status, false);
   if(slip && a.status === "shown") $("qFb").insertAdjacentHTML("beforeend", '<p class="tiny a2slip">The likely slip: ' + slip + '</p>');
   if(a2() && (a.status === "right1" || a.status === "right2") && s.explain) a2Explain(s, i);
@@ -1603,7 +1659,8 @@ function showFeedback(s, status, quiet){
   var extra = "";
   if(status === "shown" && s.model) extra = '<div class="model"><span class="tiny">A good answer:</span> ' + s.model + '</div>';
   fb.className = "fb " + (status === "shown" ? "show" : "good");
-  var plus = quiet ? "" : '<span class="plus">+' + (SPARK[status] || 0) + ' sparks</span>';
+  var aNow = state.answers[state.pos], bon = aNow && aNow.bonus && aNow.status === status ? aNow.bonus : 0;
+  var plus = quiet ? "" : '<span class="plus">+' + ((SPARK[status] || 0) + bon) + ' sparks' + (bon ? '<span class="hp-x2">' + (bon >= SPARK.right1 ? 'combo' : 'boss') + '</span>' : '') + '</span>';
   var streak = !quiet && status === "right1" && state.streak >= 3 ? ' <span class="tiny">That is ' + state.streak + ' first go in a row.</span>' : "";
   fb.innerHTML = plus + head + streak + (s.why ? '<div class="why">' + s.why + '</div>' : "") + extra;
   if(reads()) addReader(fb, fb);
@@ -1942,8 +1999,36 @@ function buildReviewStart(){
   if(n) $("beginBtn").onclick = function(){ go(0); };
 }
 
+/* ---------- the play layer (4 Nov 2026) ----------
+   /egw/play.js draws each HQ's world, boss rounds, Bonnie and the
+   game unlock bar (Jay's picks from the HQ activities audit). It is
+   only decoration: if it does not arrive within 2.5 seconds the
+   activity starts as before. */
+function P(){ return window.HQPlay || null; }
+function unitWord(){ var p = P(); return p && p.unit ? p.unit() : "Chunk"; }
+function unitsWord(){ var u = unitWord().toLowerCase(); return u === "chunk" ? "chunks" : u + "s"; }
+/* the boss round: the last marked question of a chunk with at least two */
+function isBoss(i){
+  if(!P() || !cfg || cfg.review || cfg.escape || !steps[i]) return false;
+  var s = steps[i], c = chunks[chunkOf[i]];
+  if(!c || !scored(s) || s.type === "widget" || s.type === "unlock" || s.stretch) return false;
+  var last = -1, n = 0;
+  for(var j = c.from; j <= c.to; j++){ var t = steps[j]; if(scored(t) && t.type !== "widget" && t.type !== "unlock" && !t.stretch){ last = j; n++; } }
+  return n >= 2 && last === i;
+}
+
 /* ---------- start ---------- */
 function run(c){
+  if(!window.HQPlay && !run.asked){
+    run.asked = true;
+    var sc = document.createElement("script"), started = false;
+    var start = function(){ if(started) return; started = true; run(c); };
+    sc.src = "/egw/play.js?v=1";
+    sc.onload = sc.onerror = start;
+    setTimeout(start, 2500);
+    document.head.appendChild(sc);
+    return;
+  }
   var reviewMode = (location.hash || "") === "#review";
   if(EASY && c.ez){ var ce = c.ez; c = mergeEz(c, ce); delete c.ez; }
   if(EASY && !c.a2 && c.steps){ var cs = {}; Object.keys(c).forEach(function(k){ cs[k] = c[k]; }); cs.steps = c.steps.map(ezStep); c = cs; }
