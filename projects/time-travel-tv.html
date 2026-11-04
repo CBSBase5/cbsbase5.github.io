@@ -635,6 +635,13 @@ html.flow .psend img{height:auto;width:min(100%,320px)}
   <div class="left"><a href="/" aria-label="Base 5 home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg><span>Home</span></a>
   <a href="/projects/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Projects</span></a></div>
   <div class="right">
+    <button type="button" id="resetbtn" title="Start a fresh show"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Reset</span></button>
+    <div class="menu hidden" id="resetask" role="dialog" aria-label="Start a fresh show?" style="padding:14px;min-width:260px">
+      <p style="font-weight:700;margin:0 0 4px">Start a fresh show?</p>
+      <p style="font-size:14px;margin:0 0 10px">Scores, guesses and the tier list on this device go back to round one. The adverts and running order stay.</p>
+      <button type="button" id="resetyes" style="background:#ef7724;color:#1c1530;font-weight:700;justify-content:center">Yes, fresh show</button>
+      <button type="button" id="resetno" style="justify-content:center">Keep it</button>
+    </div>
     <button type="button" id="soundbtn" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundwave" d="M16 8.5q2.5 3.5 0 7M18.5 6q4.5 6 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Sound on</span></button>
     <button type="button" id="menubtn" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.2" fill="currentColor"/><circle cx="12" cy="6" r="2.2" fill="currentColor"/><circle cx="18" cy="6" r="2.2" fill="currentColor"/><circle cx="6" cy="12" r="2.2" fill="currentColor"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><circle cx="18" cy="12" r="2.2" fill="currentColor"/><circle cx="6" cy="18" r="2.2" fill="currentColor"/><circle cx="12" cy="18" r="2.2" fill="currentColor"/><circle cx="18" cy="18" r="2.2" fill="currentColor"/></svg>Backstage</button>
     <div class="menu hidden" id="menu">
@@ -2094,11 +2101,23 @@ function finish(skipped){
 function resetShow(){ var keep = { off:st.off, vol:st.vol, effects:st.effects, base:st.base, poster:st.poster, sound:st.sound }; st = fresh(); for(var k in keep) st[k] = keep[k]; save(); display = "game"; finPage = null; lastDigits = ""; render(); }
 
 /* ---------- top bar ---------- */
-on("menubtn", function(){ var m = $("#menu"), open = m.classList.toggle("hidden") === false; $("#menubtn").setAttribute("aria-expanded", String(open)); });
+on("menubtn", function(){ closeReset(); var m = $("#menu"), open = m.classList.toggle("hidden") === false; $("#menubtn").setAttribute("aria-expanded", String(open)); });
 $$("#menu [data-go]").forEach(function(b){ b.addEventListener("click", function(){
   if(b.dataset.go === "make"){ $("#menu").classList.add("hidden"); $("#menubtn").setAttribute("aria-expanded", "false"); if(PSTEP[st.step] && st.pitch){ go("game"); } else startPitch(); return; }
   if(b.dataset.go === "board"){ boardData = null; boardMsg = ""; } go(b.dataset.go); }); });
 document.addEventListener("click", function(e){ var m = $("#menu"); if(!m.classList.contains("hidden") && !e.target.closest(".right")){ m.classList.add("hidden"); $("#menubtn").setAttribute("aria-expanded", "false"); } });
+/* reset: asks once first, so a stray tap cannot wipe the show */
+function closeReset(){ $("#resetask").classList.add("hidden"); $("#resetbtn").setAttribute("aria-expanded", "false"); }
+on("resetbtn", function(){
+  var a = $("#resetask"), open = a.classList.toggle("hidden") === false;
+  $("#resetbtn").setAttribute("aria-expanded", String(open));
+  $("#menu").classList.add("hidden"); $("#menubtn").setAttribute("aria-expanded", "false");
+  if(open) $("#resetno").focus();
+});
+on("resetyes", function(){ closeReset(); resetShow(); toast("Fresh show ready. Round one."); });
+on("resetno", closeReset);
+document.addEventListener("click", function(e){ if(!$("#resetask").classList.contains("hidden") && !e.target.closest("#resetask") && !e.target.closest("#resetbtn")) closeReset(); });
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeReset(); });
 on("soundbtn", function(){ st.sound = st.sound === false; save(); header(); if(st.sound) SFX.pick(); });
 
 /* ---------- hidden surprises (never scored) ---------- */
