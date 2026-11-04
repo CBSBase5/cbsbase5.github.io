@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lunch orders</title>
+<link rel="icon" href="/lunch/favicon-32.png" sizes="32x32">
+<link rel="icon" href="/lunch/favicon.svg" type="image/svg+xml">
+<!--
+  Lunch orders launcher, for the home screen of a school tablet or phone.
+  It gives the home screen the lunch bowl icon and the name "Lunch orders",
+  then opens the staff link. The lunch orders page itself (a Google Apps
+  Script web app) cannot be added with its own icon, so this stands in front.
+
+  Opened the first time on a device (or with ?setup), it shows how to add it
+  to the home screen. After that, and always from the home screen icon, it
+  goes straight to the staff link.
+-->
+<link rel="apple-touch-icon" href="/lunch/apple-touch-icon.png">
+<link rel="manifest" href="/lunch/app.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Lunch orders">
+<meta name="application-name" content="Lunch orders">
+<meta name="theme-color" content="#00697f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7f2e9; --tile: #fffdf8; --ink: #0a2f38; --muted: #4d6670; --teal: #007291; --teal-d: #005a73;
+  --orange: #ef7724; --line: #eadfd6;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper); color: var(--ink); min-height: 100vh;
+  font: 17px/1.5 "Atkinson Hyperlegible", Arial, sans-serif;
+  display: flex; align-items: flex-start; justify-content: center; padding: 32px 16px 48px;
+}
+main { width: 100%; max-width: 560px; }
+.hero { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.hero img { width: 76px; height: 76px; border-radius: 18px; box-shadow: 0 2px 10px rgba(10, 47, 56, .12); flex: none; }
+h1 { font: 800 30px/1.1 "Archivo", Arial, sans-serif; margin: 0; }
+.sub { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+.open {
+  display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; padding: 12px 20px;
+  background: var(--teal); color: #fff; border: 0; border-radius: 14px; font: 700 19px/1.2 "Atkinson Hyperlegible", Arial, sans-serif;
+  text-decoration: none; box-shadow: 0 2px 0 var(--teal-d);
+}
+.open:hover, .open:focus-visible { background: var(--teal-d); }
+.open:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.going { text-align: center; color: var(--muted); margin: 0 0 16px; }
+.card { background: var(--tile); border: 1px solid var(--line); border-radius: 18px 14px 18px 16px; padding: 18px 20px; margin-top: 18px; }
+.card h2 { font: 800 19px/1.2 "Archivo", Arial, sans-serif; margin: 0 0 8px; }
+.card ol { margin: 0; padding-left: 22px; }
+.card li + li { margin-top: 6px; }
+.card p { margin: 0 0 8px; }
+.tabs { display: flex; gap: 6px; margin: 0 0 12px; }
+.tabs button {
+  border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; padding: 6px 14px;
+  font: 700 15px "Atkinson Hyperlegible", Arial, sans-serif; cursor: pointer;
+}
+.tabs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+.small { font-size: 14px; color: var(--muted); }
+.hidden { display: none !important; }
+kbd { font: inherit; font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <div class="hero">
+    <img src="/lunch/apple-touch-icon.png" alt="">
+    <div>
+      <h1>Lunch orders</h1>
+      <p class="sub">Chilton Bridge School, for staff</p>
+    </div>
+  </div>
+
+  <p id="going" class="going hidden" role="status">Opening lunch orders...</p>
+  <a id="open" class="open" href="#">Open lunch orders</a>
+
+  <div id="setup" class="card hidden">
+    <h2>Put it on this tablet's home screen</h2>
+    <p>Then it opens from its own lunch bowl icon, like an app.</p>
+    <div class="tabs" role="group" aria-label="Which kind of tablet">
+      <button type="button" data-os="ios" aria-pressed="true">iPad or iPhone</button>
+      <button type="button" data-os="android" aria-pressed="false">Android</button>
+    </div>
+    <ol id="os-ios">
+      <li>Make sure this page is open in <b>Safari</b>.</li>
+      <li>Tap the <b>Share</b> button (the square with an arrow pointing up).</li>
+      <li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+      <li>Tap the new <b>Lunch orders</b> icon, and sign in with your school Google account the first time.</li>
+    </ol>
+    <ol id="os-android" class="hidden">
+      <li>Make sure this page is open in <b>Chrome</b>.</li>
+      <li>Tap the <b>menu</b> (three dots, top right).</li>
+      <li>Tap <b>Add to Home screen</b>, then <b>Add</b>.</li>
+      <li>Tap the new <b>Lunch orders</b> icon, and sign in with your school Google account the first time.</li>
+    </ol>
+    <p class="small" style="margin-top:12px">After this, opening this page on this device goes straight to lunch orders. To see these steps again, add <kbd>?setup</kbd> to the end of the address.</p>
+  </div>
+
+  <div class="card">
+    <h2>Using it at the hatch or in the kitchen</h2>
+    <p class="small" style="margin:0">To keep a shared tablet on lunch orders: on an iPad, turn on <b>Guided Access</b> (Settings, Accessibility, Guided Access, then triple click the side or home button with lunch orders open). On Android, use <b>App pinning</b> (Settings, Security, App pinning).</p>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+  // The staff link: the lunch orders web app. It only opens for school
+  // Google accounts, and stays the same when a new version is published.
+  var STAFF_URL = 'https://script.google.com/a/macros/chiltonbridgeschool.co.uk/s/AKfycbz102Xd3txKa5bN434jLFPwTVU2vc-F-N95rFTQdYwVvkivgumQ_4XEQucRBRtXY3HE9g/exec';
+  var KEY = 'cbLunchApp.seen';
+
+  function $(id) { return document.getElementById(id); }
+  function get() { try { return window.localStorage.getItem(KEY); } catch (e) { return null; } }
+  function set() { try { window.localStorage.setItem(KEY, '1'); } catch (e) { /* this device only shows the steps each time */ } }
+
+  $('open').href = STAFF_URL;
+
+  var q = window.location.search;
+  var fromHome = /[?&]from=home\b/.test(q);
+  var wantSetup = /[?&]setup\b/.test(q);
+  var android = /Android/i.test(navigator.userAgent);
+  var standalone = (window.navigator.standalone === true) ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+
+  // Straight on to lunch orders: from the home screen icon, or on a device
+  // that has already seen the steps.
+  if (!wantSetup && (fromHome || standalone || get())) {
+    $('going').classList.remove('hidden');
+    window.location.replace(STAFF_URL);
+    return;
+  }
+
+  // First time on this device: show how to add it to the home screen. The
+  // address is quietly changed first, so the home screen icon saves the
+  // version that always goes straight to lunch orders.
+  set();
+  try { window.history.replaceState(null, '', window.location.pathname + '?from=home'); } catch (e) { /* the saved flag does the same job */ }
+  $('setup').classList.remove('hidden');
+  function pick(os) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-os]'), function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-os') === os));
+    });
+    $('os-ios').classList.toggle('hidden', os !== 'ios');
+    $('os-android').classList.toggle('hidden', os !== 'android');
+  }
+  pick(android ? 'android' : 'ios');
+  Array.prototype.forEach.call(document.querySelectorAll('[data-os]'), function (b) {
+    b.addEventListener('click', function () { pick(b.getAttribute('data-os')); });
+  });
+})();
+</script>
+</body>
+</html>
