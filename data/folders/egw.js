@@ -25,7 +25,7 @@ window.B5FOLDER = {
     "title": "English mock practice: Paper 2",
     "href": "/practice/edexcel-lang-paper-2.html",
     "date": "2026-11-04",
-    "note": "The second paper. The two texts are on paper only, so grab the printed source booklet from me before you start."
+    "note": "The second paper. The source booklet with both texts opens beside the questions, just like the real thing."
    },
    {
     "id": "a-idealab",
