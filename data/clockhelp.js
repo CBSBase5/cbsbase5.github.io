@@ -111,7 +111,7 @@ function nextUp(now){
   var day = T.slotsFor ? T.slotsFor(key, T.me()) : T.timetable[key];   /* their own day on LP's or EGW's device */
   var slot = day.filter(function(s){ return T.mins(s[0]) > mins; })[0];
   if(!slot) return null;
-  var ses = T.session ? T.session(slot[2], wk) : { title: slot[2] };
+  var ses = T.session ? T.session(slot[2], wk, key) : { title: slot[2] };
   var p = slot[0].split(":");
   var hh = +p[0], mm = +p[1];
   return { title: ses.title, time: slot[0], hh: hh, mm: mm };

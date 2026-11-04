@@ -23,6 +23,7 @@ ICON_MAP = [
     # games in the vault, each with its own icon
     ("/projects/its-time.html", "/icons/its-time.svg"),
     ("/projects/ideas.html", "/icons/idea-lab.svg"),
+    ("/projects/time-travel-tv.html", "/icons/time-travel-tv.svg"),
     ("/games/timeline-tantrum/", "/icons/timeline-tantrum.svg"),
     ("/practice/build-a-life.html", "/icons/build-a-life.svg"),
     ("/practice/hooked.html", "/icons/hooked.svg"),

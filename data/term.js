@@ -230,6 +230,9 @@ window.B5TERM = {
      days:    anything special about a day:
                 off:true  no school that day
                 title / line   replace the card title and line
+                sessions: change a session on that day only, e.g.
+                  project: { title:"Time Travel TV", line:"...", body:"...",
+                             links:[["Play","/href"]] }
                 trip:     { where, body, prompts:[[label,text]] }
      sessions: add to a session for the whole week, e.g.
                 cc: { line:"Remembrance.", body:"...", links:[["text","/href"]] }
@@ -248,6 +251,22 @@ window.B5TERM = {
       sub:"Four days. The first one starts with a trip.",
       days:{
         mon:{ off:true, line:"INSET day. No school, see you Tuesday." },
+        wed:{
+          line:"Digital media with Andy, then Time Travel TV after lunch: a game show of real adverts from British TV.",
+          sessions:{
+            project:{
+              title:"Time Travel TV", hook:true,
+              line:"A game show of real adverts, hosted by Jay.",
+              heading:"Time Travel TV",
+              sub:"This week's hook: a game show, hosted by Jay.",
+              body:"Real adverts from seventy years of British TV, on the board. Guess when each one was made, spot the tricks it uses to sell you something, then rate it and put it in the tier list. Base vs Base. Nothing gets written down.",
+              options:[["Guess","When was it made? Have a go at the year."],["Spot","What tricks is it using to sell?"],["Rank","Is it convincing? Into the tier list it goes."]],
+              links:[["Time Travel TV","/projects/time-travel-tv.html"]],
+              wayslabel:"Ways to be part of it",
+              ways:["Shout out guesses","Just watch","Be the one on the buzzers","Keep score for Jay"]
+            }
+          }
+        },
         tue:{
           title:"First day back",
           line:"Straight out on the first trip back in time.",
@@ -262,7 +281,11 @@ window.B5TERM = {
           }
         }
       },
-      feature:[]
+      feature:[
+        { kicker:"Wednesday 4 November, 12:30", title:"Time Travel TV", sticker:"This week's hook",
+          text:"Jay hosts a game show of real adverts from British TV. Guess when each one was made, spot the tricks, build the tier list. Base vs Base.",
+          href:"/projects/time-travel-tv.html", fill:"orange" }
+      ]
     },
     {
       n:2, start:"2026-11-09", end:"2026-11-13",
@@ -353,19 +376,26 @@ window.B5TERM = {
     return T.weeks[T.weeks.length-1];
   };
 
-  /* A session with any week additions folded in */
-  T.session = function(key, week){
+  /* A session with any week additions folded in, then any for that one day */
+  T.session = function(key, week, day){
     var base = T.sessions[key] || { title:key, line:"", type:"plain" };
     var add = (week && week.sessions && week.sessions[key]) || null;
+    var one = (day && week && week.days && week.days[day] && week.days[day].sessions && week.days[day].sessions[key]) || null;
     var s = {}, k;
     for(k in base) s[k] = base[k];
-    if(add){
-      if(add.line) s.line = add.line;
-      if(add.sub) s.sub = add.sub;
-      if(add.body) s.body = add.body;
-      if(add.options) s.options = add.options;
-      if(add.links) s.links = add.links.concat(base.links || []);
-    }
+    [add, one].forEach(function(a){
+      if(!a) return;
+      if(a.title) s.title = a.title;
+      if(a.heading) s.heading = a.heading;
+      if(a.line) s.line = a.line;
+      if(a.sub) s.sub = a.sub;
+      if(a.body) s.body = a.body;
+      if(a.options) s.options = a.options;
+      if(a.links) s.links = a.links.concat(s.links || []);
+      if(a.ways) s.ways = a.ways;
+      if(a.wayslabel) s.wayslabel = a.wayslabel;
+      if(a.hook) s.hook = a.hook;
+    });
     if(key === "cc" && week && week.cc){
       s.line = "Cultural calendar: " + week.cc + ".";
       s.sub = "This week: " + week.cc + ".";

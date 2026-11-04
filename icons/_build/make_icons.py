@@ -171,6 +171,14 @@ ICONS = {
         '<path d="M19 42L16 55L31 44Z" fill="%s"/>' % T +
         '<path d="M26.5 23a5.5 5.5 0 1 1 7.5 5.1c-1.6.7-2 1.8-2 3.6" fill="none" stroke="%s" stroke-width="4" stroke-linecap="round"/>' % P +
         '<circle cx="32" cy="38.5" r="2.7" fill="%s"/>' % O),
+    "icons/time-travel-tv": (P,
+        '<path d="M24 16 17 6M40 16 47 6" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % K +
+        '<circle cx="17" cy="6" r="3" fill="%s"/><circle cx="47" cy="6" r="3" fill="%s"/>' % (O, O) +
+        '<rect x="7" y="16" width="50" height="38" rx="9" fill="%s"/>' % T +
+        '<rect x="12" y="21" width="32" height="28" rx="6" fill="%s"/>' % P +
+        '<path d="M24 28.5v13l10.5-6.5z" fill="%s"/>' % O +
+        '<circle cx="50.5" cy="27" r="3" fill="%s"/><circle cx="50.5" cy="36" r="3" fill="%s"/>' % (Y, P) +
+        '<path d="M15 54l-3 5M49 54l3 5" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % K),
     "icons/idea-lab": (P,
         '<path d="M53 49V23" stroke="%s" stroke-width="4" stroke-linecap="round"/>' % K +
         '<circle cx="53" cy="19.5" r="5.5" fill="%s"/>' % O +
