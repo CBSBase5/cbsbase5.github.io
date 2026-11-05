@@ -6763,7 +6763,7 @@ function cardboyUpdate(c, dt) {
         else if (r < 0.55) { cbPlanes(c); c.state = 'move'; c.st = rnd(1.4, 1.9); }
         else if (r < 0.8 || c.coverT > 0) { c.state = 'beam'; c.st = 0.9; c.wind = 0.9; c.face = angTo(c, P); c.blen = beamLen(c.x, c.z, c.face, 30); fxLine(c.x, c.z, c.face, c.blen, 1.3, '#41e0d0', 0.9); UI.say(c, 'Charging!', 0.9); }
         else {
-          c.coverT = 9; UI.say(c, pick(['Fort time!', 'Build build build!', 'Boxes everywhere!']), 1.6);
+          c.coverT = 9; UI.say(c, pick(['Fort time!', 'Build build build!', 'Boxes everywhere!', "It's time to build a fort!"]), 1.6);
           for (var k = 0; k < 3; k++) { var ca = rnd(0, PI * 2), cr = rnd(3, 5.5); spawnCover(P.x + Math.sin(ca) * cr, P.z + Math.cos(ca) * cr, Math.random() < 0.5); }
           var liveN = G.enemies.filter(function (e) { return !e.dead && !e.boss; }).length;
           if (liveN < 5) for (var q2 = 0; q2 < 2; q2++) { var sp2 = spawnPoint(); G.pending.push({ type: Math.random() < 0.3 ? 'cutter' : 'lbox', x: sp2.x, z: sp2.z, t: 0.4 + q2 * 0.3 }); }
@@ -18802,6 +18802,7 @@ SPECIAL_FN.friend = function (P) {
     P.critNext = G.t + 0.5; specHit(t, 40, { melee: true }); UI.say(t, 'I look nothing like him.', 1.4);
     return;
   }
+  if (Math.random() < 0.6) UI.say(t, 'Yeah, I do kind of look like him.', 1.6);
   t.charmed = true; t.untargetable = true; t.tint = [1.25, 0.75, 1.05]; t.wind = 0; t.charmCd = 0.4; t.lostT = 0; t.stunT = 0;
   if (t.badge) t.badge.visible = false;
   after(0.6, function () { if (!t.dead) UI.say(t, pick(['I DO look like him.', 'Thank you so much.', 'Whose side am I on? Yours.']), 1.6); });
@@ -20608,6 +20609,70 @@ voicesScreen = function () {
   st.textContent = '.vgroup { margin: 18px 0 6px; font: 600 16px var(--f-pix); color: var(--gold-hi); letter-spacing: 1px; border-bottom: 2px solid #3d3560; padding-bottom: 4px; } #vjump { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0 4px; } #vjump .btn { margin: 0; font-size: 13px; padding: 4px 10px; }';
   document.head.appendChild(st);
 })();
+
+/* ===================== V49: THE RECORDED VOICES ===================== */
+/* LW's group recorded 165 lines. They ship inside the game as a built-in voice pack (voices/pack.json),
+   so they play on every computer. A recording made in the voice studio on a device still wins.
+   A few recordings were ad-libs, too good to waste, so they became new lines:
+   Bean only ever says "Bean", Todd mutters from his bush, Ginger-beard winces when he is hit and
+   panics when Box-man turns up, a charmed criminal agrees he looks like him, Card-boy announces
+   his fort, a fan gives four stars, and fans groan when they are knocked out. */
+BAKED_VOICE_PACK = /^https?:$/.test(location.protocol); // the pack sits beside the page on the web; a file opened straight from a folder has no way to fetch it
+var VOICE49 = [
+  ['g49holy', 'Ginger-beard', 'Ginger-beard', "You never mention church, but you're looking pretty holy.", 'Now and then in a fight'],
+  ['g49ohno', 'Ginger-beard', 'Ginger-beard', 'Oh no! Box-man!', 'Box-man turns up in his lair'],
+  ['g49ouch', 'Ginger-beard', 'Ginger-beard', 'Ouch! That hurt!', 'Gets hit, now and then'],
+  ['g49ugh', 'Ginger-beard', 'Ginger-beard', 'Ugh.', 'Gets hit, now and then (a sigh)'],
+  ['b49bean', 'Bean', 'Bean', 'Bean.', 'Now and then in a fight'],
+  ['b49beean', 'Bean', 'Bean', 'BEEEAN!', 'Ultimate goes off'],
+  ['b49beanq', 'Bean', 'Bean', 'Bean? Bean?', 'Down to his last heart'],
+  ['t49see', 'Peeping Todd', 'Peeping Todd', 'I see...', 'Hiding in a bush'],
+  ['t49hide', 'Peeping Todd', 'Peeping Todd', 'I am hiding!', 'Hiding in a bush'],
+  ['t49watch', 'Peeping Todd', 'Peeping Todd', "Hey, I'm watching ya.", 'Hiding in a bush'],
+  ['c49look', "Jay's friend", 'A charmed criminal', 'Yeah, I do kind of look like him.', "Just been charmed by Jay's friend"],
+  ['c49fort', 'Card-boy (the boss)', 'Card-boy', "It's time to build a fort!", 'Builds a box fort'],
+  ['f49four', 'Fans and crooks', 'Fans', 'Four stars!', 'Just after they hit you'],
+  ['fan_down', 'Fans and crooks', 'Fans', '*knocked out groan*', 'A fan gets knocked out, now and then']
+];
+(function () {
+  VOICE49.forEach(function (r) {
+    if (VOICE_LINES.some(function (l) { return l.id === r[0]; })) return;
+    var l = { id: r[0], group: r[1], who: r[2], line: r[3], when: r[4] };
+    // sit with the rest of that character's lines in the studio
+    var at = -1; VOICE_LINES.forEach(function (x, i) { if (x.group === r[1]) at = i; });
+    VOICE_LINES.splice(at + 1, 0, l);
+    var k = vKey(l.line); (VTEXT[k] = VTEXT[k] || []).push(l);
+  });
+  // the new words go into the game's own speech
+  CATCH.gingerbeard.reply.push("You never mention church, but you're looking pretty holy.");
+  CATCH.bean.reply.push('Bean.', 'Bean.'); CATCH.bean.ult.push('BEEEAN!'); CATCH.bean.low.push('Bean? Bean?');
+  TAUNT_LINES.push('Four stars!');
+})();
+/* one recording can serve two lines that say the same thing */
+var VOICE_SAME = {};
+/* Ginger-beard winces when hit */
+var _hurtPlayer49 = hurtPlayer;
+hurtPlayer = function (n, src, o) {
+  var r = _hurtPlayer49(n, src, o), P = G.P;
+  if (r !== false && P && !G.doom && P.hero === 'gingerbeard' && P.hp > 0 && Math.random() < 0.35 && G.t - (G.hurtLine49 || -99) > 6) { G.hurtLine49 = G.t; UI.say(P, pick(['Ouch! That hurt!', 'Ugh.']), 1.3); }
+  return r;
+};
+/* Ginger-beard panics when Box-man turns up */
+var _startBoxman49 = startBoxman;
+startBoxman = function (room) { var r = _startBoxman49(room); if (G.P && G.P.hero === 'gingerbeard') after(5.6, function () { if (G.P && !G.P.dead) UI.say(G.P, 'Oh no! Box-man!', 1.8); }); return r; };
+/* Todd mutters from his bush */
+var _updatePlayer49 = updatePlayer;
+updatePlayer = function (dt) {
+  _updatePlayer49(dt); var P = G.P; if (!P || P.hero !== 'todd' || G.doom) return;
+  if ((P.bushT || 0) < 0.5) { P.bush49 = false; return; }
+  if (!P.bush49 && P.bushT > 3) { P.bush49 = true; UI.say(P, pick(['I see...', 'I am hiding!', "Hey, I'm watching ya."]), 1.8); }
+};
+/* fans groan when knocked out, now and then */
+var _feelKill49 = feelKill;
+feelKill = function (e, o) {
+  _feelKill49(e, o);
+  if (e && !e.boss && /fan|autograph|thrower|scoot|para/.test(e.type || '') && Math.random() < 0.22 && G.t - (G.fanDown49 || -99) > 3 && typeof hasVoice === 'function' && hasVoice('fan_down') && !voiceBusy()) { G.fanDown49 = G.t; playVoice('fan_down'); }
+};
 
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
