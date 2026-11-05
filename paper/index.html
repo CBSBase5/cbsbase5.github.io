@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-GB" class="look-base5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>On paper - Base 5</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/paper.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/data/a2/paper.css?v=1">
+<style>
+/* The print page for Autumn 2 activities on paper. Everything is
+   chosen in the address (the staff desk at /teacher/paper.html
+   builds it):
+     ?list=slug.level,slug.level   these activities, at these levels
+     ?who=LP&from=2026-11-09&to=2026-11-13   that student's drops
+          landing in those days (levels from their folder links)
+     &core=1   also that student's core target activities
+     &ans=back | end | none   where the Check it pages go
+     &sure=0   leave off the "how sure?" circles
+     &t=time   a theme for every activity that has one
+   The activities are the same packs the screens use, so the
+   sheets always match what is on the site. ASCII only. */
+.ptool{position:sticky;top:0;z-index:5;background:#0b2840;color:#fff;font-family:"Atkinson Hyperlegible",Arial,sans-serif;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ptool b{font-family:"Chakra Petch",Arial,sans-serif;font-size:1.1rem}
+.ptool span{opacity:.85;font-size:.92rem}
+.ptool button,.ptool a{font:inherit;font-weight:700;border:2px solid #fff;border-radius:10px;padding:6px 14px;background:#ff7a2f;color:#0b2840;cursor:pointer;text-decoration:none}
+.ptool a{background:transparent;color:#fff}
+.ptool .sp{flex:1}
+.pmsg{max-width:150mm;margin:30mm auto;background:#fff;padding:14mm;font-family:"Atkinson Hyperlegible",Arial,sans-serif;border-radius:8px}
+</style>
+</head>
+<body class="paper">
+<div class="ptool noprint">
+  <b>On paper</b><span id="sum">Getting the sheets ready...</span><span class="sp"></span>
+  <a href="/teacher/paper.html">Back to the desk</a>
+  <button type="button" id="go" disabled>Print</button>
+</div>
+<main class="pdoc" id="doc"></main>
+
+<script src="/data/a2/art.js?v=1"></script>
+<script src="/data/a2/drops.js"></script>
+<script src="/data/a2/core.js"></script>
+<script src="/data/a2/paper.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+var Q = {};
+location.search.replace(/^\?/, "").split("&").forEach(function(p){ if(!p) return; var i = p.indexOf("="); Q[decodeURIComponent(i < 0 ? p : p.slice(0, i))] = i < 0 ? "" : decodeURIComponent(p.slice(i + 1).replace(/\+/g, " ")); });
+var doc = document.getElementById("doc"), sum = document.getElementById("sum"), go = document.getElementById("go");
+var HQ = { LP: "LP's HQ on paper", EGW: "EGW's HQ on paper", LW: "LW's HQ on paper", LC: "LC's HQ on paper", HK: "HK's HQ on paper", JT: "JT's HQ on paper" };
+var LOOK = { LP: "look-blueprint" };
+var who = String(Q.who || "").toUpperCase().replace(/[^A-Z]/g, "");
+document.documentElement.className = LOOK[who] || "look-base5";
+
+function lvOf(href){ var m = String(href || "").match(/[?&]lv=([a-z]+)/); return m ? m[1] : ""; }
+function nice(iso){ var d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }); }
+function oops(t){ doc.innerHTML = '<div class="pmsg"><h2>Nothing to print yet</h2><p>' + t + '</p><p><a href="/teacher/paper.html">Back to the desk</a></p></div>'; sum.textContent = ""; }
+
+/* what to print */
+var want = [], title = "", line = "";
+if(Q.list){
+  Q.list.split(",").forEach(function(x){ var p = x.split("."); if(/^[a-z0-9-]+$/.test(p[0])) want.push({ slug: p[0], level: p[1] || "" }); });
+} else if(who && Q.from){
+  var to = Q.to || Q.from, D = window.B5DROPS || { items: [] };
+  D.items.filter(function(it){ return it.who === who && it.date >= Q.from && it.date <= to; })
+    .sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; })
+    .forEach(function(it){ want.push({ slug: it.slug, level: lvOf(it.href) }); });
+  title = (Q.from === to ? nice(Q.from) : nice(Q.from) + " to " + nice(to));
+}
+if(who && Q.core === "1" && window.B5CORE){
+  window.B5CORE.items.filter(function(it){ return (it.who || []).indexOf(who) >= 0; }).forEach(function(it){
+    if(!want.some(function(w){ return w.slug === it.slug; })) want.push({ slug: it.slug, level: lvOf((it.href || {})[who]) });
+  });
+}
+if(Q.title) title = Q.title;
+if(!want.length){ oops("Pick some activities on the staff desk first."); return; }
+
+/* load each pack, then lay them out */
+var left = want.length;
+want.forEach(function(w){
+  var s = document.createElement("script");
+  s.src = "/data/a2/" + w.slug + ".js";
+  s.onload = s.onerror = function(){ if(--left === 0) build(); };
+  document.body.appendChild(s);
+});
+function build(){
+  var P = window.A2PACKS || {}, items = [], missing = [];
+  want.forEach(function(w){ if(P[w.slug]) items.push({ pack: P[w.slug], level: w.level }); else missing.push(w.slug); });
+  if(!items.length){ oops("Those activities could not be found."); return; }
+  var many = items.length > 1;
+  var r = window.A2PAPER.pack(items, {
+    who: who, theme: Q.t || "", hq: HQ[who] || "Base 5 on paper",
+    answers: Q.ans || (many ? "end" : "back"), sure: Q.sure !== "0",
+    packTitle: many ? (title || "Paper pack") : "", packLine: many ? "Your sheets. Any order, any pace." : ""
+  });
+  doc.innerHTML = r.html;
+  var sheets = r.acts.reduce(function(n, a){ return n + a.sheets; }, 0);
+  sum.textContent = r.acts.length + (r.acts.length === 1 ? " activity" : " activities") + ", " + sheets + " sheets" +
+    (missing.length ? ". Not found: " + missing.join(", ") : "") + ". Print double sided if you can.";
+  document.title = (many ? (title || "Paper pack") : r.acts[0].title) + " - on paper";
+  var ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  ready.then(function(){ go.disabled = false; window.__paperReady = true; if(Q.print === "1") setTimeout(function(){ window.print(); }, 300); });
+}
+go.addEventListener("click", function(){ window.print(); });
+})();
+</script>
+</body>
+</html>

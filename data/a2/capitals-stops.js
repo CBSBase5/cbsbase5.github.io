@@ -81,6 +81,18 @@ var PROOF =
   '</svg>';
 
 /* the fix it widget: tap words to give them a capital, or to add a full stop after them */
+/* paper: the same text with its capitals and full stops gone, spaced out for a pen */
+function paperFix(texts, title, tip){
+  return function(api){
+    var right = api.tok(texts[api.level] || texts.medium);
+    var broken = right.replace(/\./g, "").toLowerCase();
+    return { type: "task", icon: "write", title: title, how: "Pen it in",
+      html: "<p>Every capital and full stop has fallen out. Write a capital letter over any letter that needs one, and put the full stops back in." + (tip ? " " + tip : "") + "</p>" +
+        '<p style="font-size:16pt;line-height:2.6;letter-spacing:.02em;word-spacing:.45em;border:1.2pt solid #9cc0dc;border-radius:6px;padding:4px 12px;margin:6px 0">' + broken + '</p>',
+      boxes: [["How many full stops did you put in?", "", 1], ["How many capitals?", "", 1]],
+      answer: right };
+  };
+}
 function fixer(texts, intro){
   return function(el, api){
     var d = api.data, lv = api.level || "medium";
@@ -286,6 +298,11 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
               why: "<b>It was dark, so [[Name]] switched on the [[thing]]. We heard a noise. Nobody moved for a whole minute. Then the lights came back on.</b> Four." } } },
 
     { type: "widget", topic: "Where does it stop?", unscored: true,
+      paper: paperFix({
+        mild: "We got on the bus. It was full.",
+        medium: "We got to the station at noon. It was raining. We ran to the cafe and waited.",
+        spicy: "The train was late, so we waited on the platform. It was freezing. Then the doors opened and everyone rushed on."
+      }, "Fix it: where does it stop?"),
       title: "Fix it: where does it stop?",
       html: "<p>Pick a mode, then tap words. Add the full stops where each idea ends, and the capitals where each new one starts. Check whenever you like.</p>",
       ez: { html: "<p>Pick a mode. Tap words to add full stops and capitals.</p>" },
@@ -358,6 +375,11 @@ var MISSING = ["A capital letter at the start", "A full stop at the end", "Both 
       ez: { title: "3 checks", html: "<p>1. Full stops. 2. Sentence starts. 3. Names and I.</p><p>Now fix a travel log!</p>" } },
 
     { type: "widget", topic: "Proofread the travel log", unscored: true,
+      paper: paperFix({
+        mild: "We went to [[Place]] on Friday. I saw Bonnie.",
+        medium: "On Monday, [[Name]] and I went to [[Place]]. The [[thing]] broke. We fixed it by lunch.",
+        spicy: "Last July, [[Name]] and I set off for [[Place]]. The [[thing]] broke near Leeds on a Sunday, so we stopped. I phoned Jay. He said it was outrageous."
+      }, "Fix the travel log", "Tip: do the full stops first, then the capitals."),
       title: "Fix the travel log",
       html: "<p>Every capital and full stop has fallen out. Tap to put them back, then check it.</p>",
       ez: { html: "<p>Tap to put the capitals and full stops back.</p>" },

@@ -362,6 +362,8 @@ function tryWidget(el, api){
         why: "Helpful thoughts keep you having goes. Comparing, perfectionism and seeing tools as failing all get in the way." } } },
 
     { type: "widget", topic: "What works for me", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "My helpers", how: "Just for you",
+        html: "<p>Tick any that help you, or that you would like to try. There are no right answers here: everyone's list is different.</p>", ticks: HELPERS, boxes: [["Something else that helps me", "", 1]] }; },
       title: "My helpers",
       html: "<p>Just for you. Your list can go to Jay with the rest if you choose to send it.</p>",
       ez: { html: "<p>Just for you. Tap what helps.</p>" },
@@ -373,6 +375,8 @@ function tryWidget(el, api){
       } },
 
     { type: "widget", topic: "What works for me", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Try it card", how: "This week, or whenever",
+        html: "<p>Any order, any amount. Tick what you tried.</p>", ticks: TRY, boxes: [["What helped, even a little bit", "", 1]] }; },
       title: "Try it card",
       html: "<p>Away from the screen, whenever suits you. Ticks can go to Jay with the rest if you send it.</p>",
       ez: { html: "<p>Away from the screen. Whenever suits you.</p>" },

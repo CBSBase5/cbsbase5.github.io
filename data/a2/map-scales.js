@@ -454,6 +454,17 @@ function mountRoute(el, api){
 
     /* ---------- chunk 4: plan a route ---------- */
     { type: "widget", topic: "Plan a route", unscored: true,
+      paper: function(api){
+        var cfgs = { mild: { per: 100, unit: "m", say: "Each square on the map is 100 m in real life." },
+          medium: { per: 0.5, unit: "km", say: "Each square is 1 cm. The scale is 1 cm = 0.5 km." },
+          spicy: { per: 0.25, unit: "km", say: "Each square is 1 cm. The scale is 1 : 25 000." } };
+        var c = cfgs[api.level] || cfgs.medium, names = SPOTS.map(function(s){ return api.tok(s.k); });
+        return { type: "task", icon: "write", title: "Route planner", how: "Pencil a route",
+          html: "<p>Plan a trip round the map for [[who]]. " + c.say + " Roads follow the grid, so go along and up, never across a corner. Draw your route in pencil, count the squares, then work out how far it is.</p>",
+          fig: api.tok(mapSvg({ route: "", aria: "Route map with four places to visit" })),
+          table: { head: ["My order of places", "Squares", "Real distance (" + c.unit + ")"], rows: [["", "", ""], ["Another route, if you fancy it", "", ""]] },
+          answer: "Route planner, one way: " + names.join(", ") + " is 13 squares, which is " + (Math.round(13 * c.per * 1000) / 1000) + " " + c.unit + "." };
+      },
       title: "Route planner",
       html: "<p>Plan a trip round the map for [[who]]. Tap the places in order, then work out how far it is in real life. Try a few routes, if you like.</p>",
       ez: { html: "<p>Plan a trip for [[who]]. Tap the places in order.</p><p>How far is it for real?</p>" },

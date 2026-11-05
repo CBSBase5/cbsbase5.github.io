@@ -274,6 +274,15 @@ function spotWidget(el, api){
           "<p>Lines can be symbols too. On this map, a <b>red dashed line</b> shows where Bus 7 goes, and a <b>blue dashed line</b> shows Bus 12. Bus stops sit on the routes. To plan a trip, find where you are, find where you want to be, and find a route that joins them.</p>" } } },
 
     { type: "widget", topic: "Map keys", unscored: true,
+      paper: function(api){
+        var keys = ["train", "bus", "hospital", "parking", "info", "park", "visit"];
+        var map = api.tok(townMap({ tap: true })).replace(/<text[^>]*>(Tap a symbol|on the map to|find out what|it is\.)<\/text>/g, "").replace(">Hidden!<", ">Gone!<");
+        return { type: "task", icon: "write", title: "The key has gone missing", how: "Write the key",
+          html: "<p>Someone tore the key off this map. Write your own key: what do you think each symbol means?</p>",
+          fig: map,
+          table: { head: ["Symbol", "I think it means"], rows: keys.map(function(k){ return ['<svg viewBox="-16 -16 32 32" width="30" height="30" role="img" aria-label="A map symbol">' + icon(k, 0, 0, 0.7) + '</svg>', ""]; }) },
+          answer: "Map key, top to bottom: " + keys.map(function(k){ return NAMES[k]; }).join(", ") + "." };
+      },
       title: "The key has gone missing",
       html: "<p>Tap any symbol on the map to find out what it is. There are seven kinds to find, if you fancy it.</p>",
       ez: { html: "<p>Tap a symbol to see what it is.</p>" },
@@ -452,6 +461,8 @@ function spotWidget(el, api){
       ez: { why: "The timetable shows when the next bus comes.", slips: { 1: "Stay put, and let someone know.", 2: "Any bus could go anywhere. Check the number." } } },
 
     { type: "widget", topic: "Out and about", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Sign spotter", how: "Next time you are out",
+        html: "<p>For your next trip out, with Jay or anyone. Tick the signs you spot, whenever you like.</p>", ticks: SPOT, boxes: [["The best sign I spotted", "", 1]] }; },
       title: "Take it with you",
       html: "<p>A sign spotter for the next trip out, with Jay or anyone. Use it on a phone or print it, whatever suits.</p>",
       ez: { html: "<p>Take this on your next trip out.</p>" },

@@ -417,6 +417,20 @@ function mountGrid(el, api){
 
     /* ---------- chunk 4 ---------- */
     { type: "widget", topic: "Factory floor", unscored: true,
+      paper: function(api){
+        /* the grid with gaps to fill in by hand, then three families */
+        var N = api.level === "mild" ? 10 : 12, s = 7, t = '<table style="border-collapse:collapse;margin:4px auto;font-size:10.5pt;text-align:center"><tr><th style="border:1px solid #0b2840;width:7.2mm;height:6.6mm;background:#eaf3fa">&#215;</th>';
+        for(var c = 1; c <= N; c++) t += '<th style="border:1px solid #0b2840;width:7.2mm;background:#eaf3fa">' + c + '</th>';
+        t += '</tr>';
+        for(var r = 1; r <= N; r++){
+          t += '<tr><th style="border:1px solid #0b2840;height:6.6mm;background:#eaf3fa">' + r + '</th>';
+          for(var c2 = 1; c2 <= N; c2++){ s = (s * 31 + r * 7 + c2 * 13) % 97; var gap = r > 1 && c2 > 1 && s % 3 === 0; t += '<td style="border:1px solid #9cc0dc">' + (gap ? '' : r * c2) + '</td>'; }
+          t += '</tr>';
+        }
+        return { type: "task", icon: "write", title: "Fill the fact grid", how: "Fill any gaps",
+          html: "<p>Some numbers have fallen off the factory wall. Fill in any gaps you like. The row and the column multiply to make the number.</p>" + t + "</table>",
+          boxes: [["A fact I find tricky, and its family", "like 7 &#215; 8 = 56, 8 &#215; 7 = 56, 56 &#247; 8 = 7, 56 &#247; 7 = 8", 2], ["Another one, if you fancy it", "", 2]] };
+      },
       title: "The fact grid",
       html: "<p>Every times fact lives somewhere on this grid. Tap any number to see its rows of dots and its whole family. Try a few you find tricky, if you like.</p>",
       mount: mountGrid,

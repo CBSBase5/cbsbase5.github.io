@@ -140,6 +140,10 @@ ICONS = {
         '<rect x="14" y="13" width="36" height="44" rx="6" fill="%s"/>' % T +
         '<rect x="23" y="8" width="18" height="10" rx="4" fill="%s"/>' % O +
         '<path d="M22 36l7 7 13-15" fill="none" stroke="%s" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>' % P),
+    "icons/paper": (P,
+        '<path d="M15 9H40L50 19V55H15Z" fill="%s"/>' % T +
+        '<path d="M40 9V19H50Z" fill="%s"/>' % O +
+        '<path d="M21 28H43M21 36H43M21 44H35" stroke="%s" stroke-width="3.2" stroke-linecap="round"/>' % P),
     "icons/cc": (P,
         '<rect x="10" y="14" width="44" height="40" rx="8" fill="%s"/>' % TINT +
         '<path d="M10 22a8 8 0 0 1 8-8h28a8 8 0 0 1 8 8v4H10Z" fill="%s"/>' % T +

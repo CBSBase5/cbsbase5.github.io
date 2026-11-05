@@ -437,6 +437,17 @@ function mountBuilder(el, api){
 
     /* ---------- chunk 4: design your own ---------- */
     { type: "widget", topic: "Design a room", unscored: true,
+      paper: { type: "task", icon: "write", title: "Room builder", how: "Draw and work out",
+        html: "<p><b>Challenge, if you like:</b> draw a room with an area of 24 " + SQ + " and a perimeter of 20 m. Shade it on the squares. Each square is 1 m by 1 m.</p>",
+        grid: { cols: 16, rows: 9, label: "1 square = 1 m by 1 m" },
+        boxes: [["My room is ___ m by ___ m", "", 1], ["Perimeter (all the way round)", "add up all four sides", 1], ["Area (squares inside)", "count them, or length times width", 1], ["Another room, if you fancy it", "", 1]],
+        answer: "Room builder: 6 m by 4 m makes area 24 " + SQ + " and perimeter 20 m.",
+        lv: {
+          mild: { html: "<p><b>Challenge, if you like:</b> draw a room with an area of 6 " + SQ + ". Shade it on the squares. Each square is 1 m by 1 m.</p>",
+            answer: "Room builder: 2 m by 3 m, or 1 m by 6 m, both make 6 " + SQ + "." },
+          spicy: { html: "<p><b>Challenge, if you like:</b> draw a room with an area of 36 " + SQ + " and the smallest perimeter you can. Try a few and compare.</p>",
+            answer: "Room builder: 6 m by 6 m (a square) gives 36 " + SQ + " with the smallest perimeter, 24 m." }
+        } },
       title: "Room builder",
       html: "<p>Tap one corner square, then the opposite corner, to draw a room. The builder works out its perimeter and area. Have a go at the challenge, or just play.</p>",
       ez: { html: "<p>Tap 2 corners to make a room. See its perimeter and area.</p>" },

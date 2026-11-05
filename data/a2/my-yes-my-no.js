@@ -307,6 +307,9 @@ function phraseWidget(el, api){
         "<p>There are no right answers here, and you can change your mind any time.</p>" },
 
     { type: "widget", topic: "My yes and no", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "My ways of saying no", how: "Just for you",
+        html: "<p>Tick any that feel OK for you, or that you might try. Everyone's list is different, and you can change it any time. This page is yours: you choose who sees it.</p>",
+        ticks: PHRASES, boxes: [["My own way", "", 1]] }; },
       title: "My ways of saying no",
       html: "<p>Just for you. Your list can go to Jay with the rest, only if you choose to send it.</p>",
       ez: { html: "<p>Just for you. Send it to Jay only if you want.</p>" },

@@ -338,6 +338,9 @@ function planWidget(el, api){
       ez: { hint: "Set off first. Home last.", why: "Set off, the stops, then home.", slips: { 2: "This one starts by going home." } } },
 
     { type: "widget", topic: "Plan and write", unscored: true,
+      paper: function(){ return { type: "task", icon: "write", title: "Route planner", how: "Short notes",
+        html: "<p>A real trip, a made up one, or a journey through time. Short notes are perfect: this is a plan, not the writing.</p>",
+        boxes: BOXES.map(function(b){ return [b[1], "like: " + b[2], 1]; }) }; },
       title: "Route planner",
       html: "<p>Jot down your plan, if you like. It saves as you type.</p>",
       mount: planWidget,

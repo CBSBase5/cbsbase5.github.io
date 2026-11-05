@@ -442,6 +442,14 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
         slips: { 1: "The teller did not see it. Look at the first words: \"My cousin's mate...\"" } } } },
 
     { type: "widget", topic: "Urban myths today", unscored: true,
+      paper: function(api){
+        var tk = api.tok;
+        return { type: "task", icon: "circle", title: "Pass it on", how: "Circle and build",
+          html: "<p>Here is how an urban myth grows. It starts like this:</p><p style=\"font-size:13pt;border:1.2pt dashed #ff7a2f;border-radius:6px;padding:6px 10px\"><b>" + tk(PASS.src[0] + " " + PASS.who[0] + " saw [[sight]] at [[place]] " + PASS.when[0] + ".") + "</b></p>" +
+            "<p>Every time it is passed on, someone changes it. Circle one from each column to make the next version. Go further down each column and watch it get bigger.</p>",
+          table: { head: ["Who says so", "Who saw it", "When"], rows: [0, 1, 2].map(function(k){ return [PASS.src[k], tk(PASS.who[k]), PASS.when[k]]; }) },
+          boxes: [["The wildest version, in my own words", "", 2], ["What changed each time it was passed on?", "", 1]] };
+      },
       title: "Pass it on",
       html: "<p>Here is how an urban myth grows. Every time the story is passed on, you choose how that person changes it. Have a go, and watch what happens.</p>",
       ez: { html: "<p>Pass the story on. Pick how it changes.</p>" },
@@ -536,6 +544,8 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
           checklist: ["I compared an old story with a modern one", "I said what job each story does", "I said what each one shows about the people who told it"] } } },
 
     { type: "widget", topic: "Then and now", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Myth hunt", how: "Whenever you fancy it",
+        html: "<p>Every family and every place has its own stories. See what you can find, in any order. One is plenty.</p>", ticks: HUNT, boxes: [["What I found", "", 2]] }; },
       title: "Myth hunt: try it for real",
       html: "<p>A challenge for away from the screen, whenever you fancy it. Every family and every place has its own stories. See what you can find.</p>",
       ez: { html: "<p>A challenge away from the screen. Only if you like.</p>" },

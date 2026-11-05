@@ -290,6 +290,10 @@ function tryWidget(el, api){
         why: "Arms out and eyes on one spot help. Spinning and shutting your eyes make it harder." } } },
 
     { type: "widget", topic: "Balance", unscored: true,
+      paper: { type: "task", icon: "write", title: "Try it: one leg balance", how: "If you are somewhere you can stand",
+        html: "<p>Stand somewhere clear, near a wall or a chair in case of wobbles. Lift one foot and count slowly, or ask someone to time you. Only if you fancy it.</p>",
+        table: { head: ["", "Go 1", "Go 2", "Go 3", "Best"], rows: [["Standing on my left foot", "", "", "", ""], ["Standing on my right foot", "", "", "", ""]] },
+        after: "<p>Is one side steadier? Most people have a better side. Bonnie, with no tail, has to use her ears.</p>" },
       title: "Try it: one leg balance",
       ez: { html: "<p>Have a go if you can stand up. Or save it for later.</p>" },
       html: "<p>If you are somewhere you can stand up, have a go. If not, save it for later.</p>",
@@ -376,6 +380,8 @@ function tryWidget(el, api){
         why: "A lighter grip and a resting hand let the small muscles do less work, so they tire more slowly." } } },
 
     { type: "widget", topic: "Small skills", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Try it challenge", how: "Any order",
+        html: "<p>Pick any you like, in any order. Tick the ones you had a go at. Having a go is the whole point.</p>", ticks: TRY, boxes: [["The one I want to practise", "", 1]] }; },
       title: "Try it challenge",
       ez: { html: "<p>Away from the screen, when you are ready.</p>" },
       html: "<p>Away from the screen, whenever you are ready. Results can go to Jay with the rest if you send it.</p>",

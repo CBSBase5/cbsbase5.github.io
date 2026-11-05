@@ -461,6 +461,8 @@ var STORY_MIDAS_MILD = "<p class=\"a2task\"><b>The golden touch</b><br>" +
           starters: ["One story I know well is", "Its hidden message seems to be", "The clearest clue is when", "People might have told it because", "Today, the message still holds / does not hold because"] } } },
 
     { type: "widget", topic: "Legends of your world", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Legend hunt", how: "Pick any you fancy",
+        html: "<p>A real world task for whenever you are ready. Pick any, in any order. One is plenty.</p>", ticks: HUNT.map(function(h){ return typeof h === "string" ? h : (h.t || h[0] || ""); }), boxes: [["What I found", "", 2]] }; },
       title: "Your challenge, away from the screen",
       html: "<p>A real world task for whenever you are ready. Results can go to Jay with the rest, if you send it.</p>",
       mount: huntWidget,

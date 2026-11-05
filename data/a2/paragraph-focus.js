@@ -391,6 +391,13 @@ var BUILD = {
           why: "\"Though\" and \"the wait was soon forgotten\" link back to paragraph one. The focus is a great lunch that made the wait worth it." } } },
 
     { type: "widget", topic: "Focus finder", unscored: true,
+      paper: function(api){
+        var set = BUILD[api.level] || BUILD.medium, s = set.s.map(function(x){ return [api.tok(x[0]), x[1]]; });
+        return { type: "task", icon: "tick", title: "Build a paragraph", how: "Tick, then write",
+          html: "<p><b>Focus: " + api.tok(set.focus) + "</b></p><p>Tick the sentences that belong to this focus. Then, if you fancy it, copy them out as one paragraph.</p>",
+          ticks: s.map(function(x){ return x[0]; }), lines: 4,
+          answer: "Build a paragraph, the ones that fit: " + s.filter(function(x){ return x[1]; }).map(function(x){ return x[0]; }).join(" ") };
+      },
       title: "Build a paragraph",
       html: "Here is a focus. Tap the sentences that belong to it to build a paragraph. Tap again to take one out. When you are happy, tap <b>Check my paragraph</b>.",
       ez: { html: "Tap the sentences that fit the focus. Then tap <b>Check my paragraph</b>." },

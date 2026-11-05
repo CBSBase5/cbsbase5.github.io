@@ -516,6 +516,17 @@ function goWidget(el, api){
       lv: { mild: { items: ["Measure the space", "Draw the walls", "Add door and window symbols", "Add labels and a title"] } } },
 
     { type: "widget", topic: "Your turn", unscored: true,
+      paper: function(api){
+        var per = api.level === "mild" ? "1 metre" : "50 cm";
+        var k = '<svg viewBox="0 0 520 60" role="img" aria-label="Plan symbols: a wall, a door, a window"><rect width="520" height="60" fill="#fff"/>' +
+          '<path d="M20 30h80" stroke="#0b2840" stroke-width="8"/><text x="60" y="54" font-family="Arial" font-size="13" text-anchor="middle" fill="#0b2840">wall</text>' +
+          '<path d="M190 34h20M250 34h20" stroke="#0b2840" stroke-width="8"/><path d="M210 34v-36" stroke="#0b2840" stroke-width="2"/><path d="M210 -2a36 36 0 0 1 36 36" fill="none" stroke="#0b2840" stroke-width="2" stroke-dasharray="4 3" transform="translate(0 0)"/><text x="230" y="54" font-family="Arial" font-size="13" text-anchor="middle" fill="#0b2840">door</text>' +
+          '<path d="M340 30h20M420 30h20" stroke="#0b2840" stroke-width="8"/><path d="M360 26h60M360 34h60" stroke="#0b2840" stroke-width="2"/><text x="390" y="54" font-family="Arial" font-size="13" text-anchor="middle" fill="#0b2840">window</text></svg>';
+        return { type: "task", icon: "write", title: "Your drawing board", how: "Pencil and ruler",
+          html: "<p>Draw any building you like: [[building]], your dream bedroom, a den. Walls first, then gaps for doors and windows. Only if you fancy it.</p>",
+          fig: k, grid: { cols: 22, rows: 13, label: "Scale: 1 square = " + per },
+          boxes: [["Title", "", 1], ["Scale", "", 1]] };
+      },
       title: "Try the drawing board",
       ez: { html: "<p>Draw any building you like. Only if you fancy it.</p>" },
       html: "<p>Draw any building you like: [[building]], your dream bedroom, a den. Only if you fancy it.</p>",
@@ -523,6 +534,8 @@ function goWidget(el, api){
       report: function(d){ var n = d && d.cells ? Object.keys(d.cells).length : 0; return n ? "Drawing board: " + n + " squares drawn." : ""; } },
 
     { type: "widget", topic: "Your turn", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Challenge card: draw a real plan", how: "Whenever you are ready",
+        html: "<p>A real world drawing. Do as much or as little as you like, in any order. A photo of it would make Jay very happy.</p>", ticks: GO }; },
       title: "Challenge card",
       ez: { html: "<p>A real drawing, away from the screen.</p>" },
       html: "<p>A real world drawing, away from the screen. What you tick can go to Jay with the rest if you send it.</p>",

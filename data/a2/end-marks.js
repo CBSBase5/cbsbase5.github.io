@@ -74,6 +74,28 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
 
 var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
 
+/* the sentences for Tap the end mark (also used on paper) */
+var END_SETS = {
+    mild: [["Where is [[thing]]", "?", "Where is asking. Asking needs a question mark."],
+      ["Wow, [[big]]", "!", "Wow is a big surprise. That needs an exclamation mark."],
+      ["[[Who]] is at [[place]]", ".", "This one is calm telling. It needs a full stop."],
+      ["Can you see it", "?", "Can you... is asking. It needs a question mark."],
+      ["Help", "!", "Help is shouted. It needs an exclamation mark."],
+      ["I like chips", ".!", "That is telling. A full stop works (or ! if you really love chips)."]],
+    medium: [["What time does it start", "?", "What time... wants an answer: question mark."],
+      ["That was amazing", "!.", "Either works: ! if you say it with feeling, . if it is calm."],
+      ["[[Who]] went home at six", ".", "Calm telling: full stop."],
+      ["Did you hear that", "?", "Did you... is asking: question mark."],
+      ["Get out of the way, it is falling", "!", "An urgent warning: exclamation mark."],
+      ["How brilliant that was", "!", "It starts with How, but it is not asking. It is a strong feeling."]],
+    spicy: [["I wonder where [[thing]] is", ".", "It is about a question but does not ask one. Indirect questions take a full stop."],
+      ["Why would anyone miss this", "?", "A question that does not need an answer still takes a question mark."],
+      ["What a night that was", "!", "What a... is an exclamation, not a question."],
+      ["She asked if we were ready", ".", "A reported question tells you what was asked. Full stop."],
+      ["Are we nearly there yet", "?", "A direct question: question mark."],
+      ["How dare you", "!", "How dare you is a strong feeling, not a real question."]]
+  };
+
 (window.A2PACKS = window.A2PACKS || {})["end-marks"] = {
   a2: true,
   id: "a2-end-marks",
@@ -244,6 +266,13 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
       lv: { mild: { html: "<p>Every sentence needs an end mark.</p><p>Asking? <b>?</b><br>Big feeling or a shout? <b>!</b><br>Calm telling? <b>.</b></p>" } } },
 
     { type: "widget", topic: "Choose the mark", unscored: true,
+      paper: function(api){
+        var set = END_SETS[api.level] || END_SETS.medium;
+        return { type: "task", icon: "write", title: "Pen in the end mark", how: ". ? or !",
+          html: "<p>Each sentence is missing its end mark. Write the one you think fits in the box: a full stop, a question mark or an exclamation mark.</p>" +
+            set.map(function(x, k){ return '<div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:13pt"><span style="width:18px;font-size:10pt;opacity:.7">' + (k + 1) + '</span>' + api.tok(x[0]) + '<span style="display:inline-block;width:11mm;height:10mm;border:1.6pt solid #ff7a2f;border-radius:5px;margin-left:3px"></span></div>'; }).join(""),
+          answer: "End marks: " + set.map(function(x, k){ return (k + 1) + " " + x[1].split("").join(" or "); }).join(", ") };
+      },
       title: "Tap the end mark",
       ez: { html: "<p>Tap the end mark that fits. Change it any time.</p>" },
       html: "<p>Each sentence is missing its end mark. Tap the one you think fits. Change your mind as often as you like.</p>",
@@ -252,26 +281,7 @@ var MARKS = ["A question mark", "An exclamation mark", "A full stop"];
         if(!d.marks || typeof d.marks !== "object") d.marks = {};
         d.tries = d.tries || 0;
         var tk = typeof api.tok === "function" ? api.tok : function(x){ return x; };
-        var SETS = {
-          mild: [["Where is [[thing]]", "?", "Where is asking. Asking needs a question mark."],
-            ["Wow, [[big]]", "!", "Wow is a big surprise. That needs an exclamation mark."],
-            ["[[Who]] is at [[place]]", ".", "This one is calm telling. It needs a full stop."],
-            ["Can you see it", "?", "Can you... is asking. It needs a question mark."],
-            ["Help", "!", "Help is shouted. It needs an exclamation mark."],
-            ["I like chips", ".!", "That is telling. A full stop works (or ! if you really love chips)."]],
-          medium: [["What time does it start", "?", "What time... wants an answer: question mark."],
-            ["That was amazing", "!.", "Either works: ! if you say it with feeling, . if it is calm."],
-            ["[[Who]] went home at six", ".", "Calm telling: full stop."],
-            ["Did you hear that", "?", "Did you... is asking: question mark."],
-            ["Get out of the way, it is falling", "!", "An urgent warning: exclamation mark."],
-            ["How brilliant that was", "!", "It starts with How, but it is not asking. It is a strong feeling."]],
-          spicy: [["I wonder where [[thing]] is", ".", "It is about a question but does not ask one. Indirect questions take a full stop."],
-            ["Why would anyone miss this", "?", "A question that does not need an answer still takes a question mark."],
-            ["What a night that was", "!", "What a... is an exclamation, not a question."],
-            ["She asked if we were ready", ".", "A reported question tells you what was asked. Full stop."],
-            ["Are we nearly there yet", "?", "A direct question: question mark."],
-            ["How dare you", "!", "How dare you is a strong feeling, not a real question."]]
-        };
+        var SETS = END_SETS;
         var set = SETS[api.level] || SETS.mild;
         var NAMES = { ".": "full stop", "?": "question mark", "!": "exclamation mark" };
         var html = '<div style="display:grid;gap:10px">';

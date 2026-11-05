@@ -212,6 +212,18 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
         hint: "Trans means across or through.", why: "Transparent materials let light straight through, like glass or clear plastic." } } },
 
     { type: "widget", topic: "What is it like?", unscored: true,
+      paper: function(api){
+        var R = { wood: ["Wood", "no", "soaks slowly", "stiff", "opaque", "no"], steel: ["Steel", "sticks", "runs off", "stiff", "opaque", "conducts"],
+          glass: ["Glass", "no", "runs off", "snaps", "see through", "no"], wool: ["Wool", "no", "soaks", "bends", "a little", "no"],
+          plastic: ["Clear plastic", "no", "runs off", "bends", "see through", "no"], alu: ["Aluminium foil", "no", "runs off", "bends", "opaque", "conducts"] };
+        var lv = api.level || "medium";
+        var mats = lv === "mild" ? ["wood", "steel", "glass", "wool"] : lv === "spicy" ? ["wood", "steel", "glass", "wool", "plastic", "alu"] : ["wood", "steel", "glass", "wool", "plastic"];
+        var head = ["Material", "Magnet", "Water drop", "Bend it", "Hold to the light"].concat(lv === "spicy" ? ["Bulb circuit"] : []), cols = head.length - 1;
+        return { type: "task", icon: "write", title: "Test lab", how: "Guess, then test",
+          html: "<p>Fill in what you think each material will do. If you have the real things (a magnet, a drop of water, a torch), test them and see if you were right. Glass is a look, not a bend!</p>",
+          table: { head: head, rows: mats.map(function(m){ return [R[m][0]].concat(new Array(cols).fill("")); }) },
+          answer: "Test lab: " + mats.map(function(m){ return R[m][0] + " " + R[m].slice(1, 1 + cols).join(", "); }).join("; ") };
+      },
       title: "Test lab",
       html: "<p>Pick a material, then pick a test, and see what happens. Try a few. Your results fill in the table.</p>",
       ez: { html: "<p>Pick a material. Pick a test. See what happens!</p>" },

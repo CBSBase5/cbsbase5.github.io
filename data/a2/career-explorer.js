@@ -372,6 +372,11 @@ function huntWidgetEz(el, api){
           why: "Official careers websites check their figures. A random post has no one checking it." } } },
 
     { type: "widget", topic: "Your career hunt", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Career hunt", how: "Pick a start",
+        html: "<p>Job profiles live on careers websites, like the National Careers Service. Jay can print one for you, or look one up with you, whichever suits. Circle where to start:</p>",
+        chips: STARTS.map(function(x){ return x[1]; }),
+        ticks: ["Get a job profile (printed, or looked up with Jay)", "Read the whole profile", "Underline three facts that interest me", "Put them in my career fact file, if I like"],
+        boxes: [["The job", "", 1], ["Three facts", "", 3]] }; },
       title: "Career hunt",
       html: "<p>Pick where to start, and tick things off as you go. This bit happens on a real careers website.</p>",
       mount: huntWidget,

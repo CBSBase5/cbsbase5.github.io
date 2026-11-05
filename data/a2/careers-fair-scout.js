@@ -393,6 +393,13 @@ function bingoWidget(el, api){
         why: "Knowing the routes means you can ask \"How did you get in?\" and understand the answer." } } },
 
     { type: "widget", topic: "Three jobs", unscored: true,
+      paper: function(){
+        var t = '<table style="border-collapse:collapse;width:100%;table-layout:fixed;margin:6px 0">';
+        for(var r = 0; r < 3; r++){ t += '<tr>'; for(var c = 0; c < 3; c++) t += '<td style="border:1.6pt solid #0b2840;height:25mm;padding:6px;text-align:center;vertical-align:middle;font-size:11pt;font-weight:700' + (r === 1 && c === 1 ? ';background:#fff2e8' : '') + '">' + BINGO[r * 3 + c] + '</td>'; t += '</tr>'; }
+        return { type: "task", icon: "tick", title: "Scout bingo", how: "Take it to the fair",
+          html: "<p>Take this page to the real fair. Draw a star in a square whenever you do it. A line of three is a bingo, but any star counts.</p>" + t + "</table>",
+          boxes: [["Three jobs I spotted", "", 2]] };
+      },
       title: "Take it with you: scout bingo",
       ez: { title: "Scout bingo", html: "<p>A challenge for the real fair. Your ticks save here.</p>" },
       html: "<p>This is your challenge for the real fair, away from the screen. Use it on a phone or print the page, whatever suits. Your ticks save here and can go to Jay.</p>",

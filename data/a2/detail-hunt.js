@@ -342,6 +342,13 @@ var HL = {
               why: "The cost is a real, specific detail, but it does not prove the visit is good or the cafe is poor. Background, not a supporting detail." } } },
 
     { type: "widget", topic: "Details in a review", unscored: true,
+      paper: function(api){
+        var rows = HL[api.level] || HL.medium;
+        return { type: "task", icon: "write", title: "Highlighter", how: "Highlight or underline",
+          html: "<p>Grab a highlighter, or just underline. Mark the details that show the trip was <b>worth it</b>. Leave the padding alone.</p>" +
+            '<div style="border:1.2pt solid #9cc0dc;border-radius:6px;padding:6px 12px;font-size:13pt;line-height:2">' + rows.map(function(r){ return api.tok(r[0]); }).join(" ") + '</div>',
+          answer: "Worth it: " + rows.filter(function(r){ return r[1] === "k"; }).map(function(r){ return api.tok(r[0]); }).join(" / ") };
+      },
       title: "Highlighter",
       html: "<p>Tap the details that show the trip was <b>worth it</b>. Tap again to take the highlight off. When you are happy, check your highlights.</p>",
       ez: { html: "<p>Tap the details that show the trip was <b>worth it</b>. Then check.</p>" },

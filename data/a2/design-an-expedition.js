@@ -285,6 +285,17 @@ function checkWidget(el, api){
           why: "8 squares x 500 m = 4000 m, which is <b>4 km</b>." } } },
 
     { type: "widget", topic: "Plan the route", unscored: true,
+      paper: function(api){
+        var per = api.level === "spicy" ? 500 : 250, perKm = api.level === "spicy" ? 12 : 15;
+        var s = '<svg viewBox="0 0 620 270" role="img" aria-label="A map to draw your own route on, starting at the school gate"><rect width="620" height="270" fill="#fff"/>' +
+          mapBase(false).replace(/stroke-opacity="\.12"/g, 'stroke-opacity=".35"') + marker(0, 4, "S", "#ffd23f") +
+          T(410, 46, "S  School gate", 14, { b: 1 }) + T(410, 74, "Draw your route", 13) + T(410, 94, "square to square.", 13) +
+          '<rect x="410" y="120" width="' + SQ + '" height="10" fill="#141a33"/>' + T(462, 130, "= " + per + " m", 13) + '</svg>';
+        return { type: "task", icon: "write", title: "Draw your own route", how: "Pencil time",
+          html: "<p>Draw a route of your own from the school gate, square to square. Maybe one that avoids the road, or visits the woods. Then count the squares.</p>",
+          fig: s,
+          boxes: [["Squares on my route", "", 1], ["How far? (squares &#215; " + per + " m)", "", 1], ["Walking time, about", "about " + perKm + " minutes for every 1000 m", 1], ["Where my route goes", "the woods, the bridge...", 1]] };
+      },
       title: "Draw your own route",
       html: "<p>Have a go at drawing a route of your own from the school gate. Maybe one that avoids the road, or visits the woods. The map works out how far it is.</p>",
       ez: { html: "<p>Draw your own route. The map says how far.</p>" },
@@ -456,6 +467,8 @@ function checkWidget(el, api){
       minWords: 30 },
 
     { type: "widget", topic: "Staying safe", unscored: true,
+      paper: function(){ return { type: "task", icon: "tick", title: "Try it for real", how: "Whenever you fancy it",
+        html: "<p>A short walk somewhere local, planned your way. Tick things off as you go. Any amount counts.</p>", ticks: GO_LIST }; },
       title: "Try it for real",
       html: "<p>A challenge for away from the screen, whenever you fancy it: a short walk somewhere local, planned your way.</p>",
       ez: { html: "<p>Try a short local walk for real, if you fancy it.</p>" },

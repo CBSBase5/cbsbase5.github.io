@@ -189,6 +189,16 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
             "<p>Going up can carry over: 19.6 rounds up to <b>20</b>, and 99.5 rounds up to <b>100</b>.</p>" } } },
 
     { type: "widget", topic: "Nearest whole number", unscored: true,
+      paper: function(api){
+        var sp = api.level === "spicy";
+        var a = sp ? nline(3, 4, 3.72, { arrow: false, vLab: "3.72" }) : nline(3, 4, 3.7, { arrow: false }),
+            b = sp ? nline(4, 5, 4.38, { arrow: false, vLab: "4.38" }) : nline(4, 5, 4.2, { arrow: false });
+        return { type: "task", icon: "write", title: "Draw the arrow", how: "Arrow, then write",
+          html: "<p>On each line, draw an arrow from the dot to the whole number it is nearer to. Then write where it rounds to.</p>",
+          fig: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">' + a + b + '</div>',
+          boxes: [["Top left rounds to", "", 1], ["Top right rounds to", "", 1], ["Where exactly does it flip from rounding down to rounding up?", "the halfway point", 1]],
+          answer: sp ? "Draw the arrow: 3.72 rounds to 4, 4.38 rounds to 4. It flips at the halfway point, 3.5 (or 4.5)." : "Draw the arrow: 3.7 rounds to 4, 4.2 rounds to 4. It flips at the halfway point, 3.5 (or 4.5)." };
+      },
       title: "Slide and see",
       html: "<p>Slide the dot along the line and watch where it rounds to. Try to find the exact spot where it flips, if you like.</p>",
       ez: { html: "<p>Slide the dot. Where does it round to?</p>" },

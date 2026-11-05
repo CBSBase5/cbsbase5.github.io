@@ -165,6 +165,21 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
           "<p>The fix for a wobbly square is a <b>diagonal brace</b>: one extra piece corner to corner, which turns it into two triangles.</p>" } } },
 
     { type: "widget", topic: "Shapes that stay strong", unscored: true,
+      paper: function(api){
+        function L(x1, y1, x2, y2, c, dash){ return '<path d="M' + x1 + ' ' + y1 + 'L' + x2 + ' ' + y2 + '" stroke="' + (c || "#8a5a2b") + '" stroke-width="7" stroke-linecap="round"' + (dash ? ' stroke-dasharray="3 12" stroke-opacity=".55"' : '') + '/>'; }
+        function P(x, y){ return '<circle cx="' + x + '" cy="' + y + '" r="7" fill="#ffd23f" stroke="#141a33" stroke-width="2"/>'; }
+        var s = '<svg viewBox="0 0 520 210" role="img" aria-label="A square frame being pushed over, a triangle frame staying put, and a square with a dotted diagonal to draw"><rect width="520" height="210" fill="#fff"/><path d="M0 180h520" stroke="#7a5532" stroke-width="3"/>' +
+          L(30, 172, 130, 172) + L(30, 172, 90, 92) + L(130, 172, 190, 92) + L(90, 92, 190, 92) + P(30, 172) + P(130, 172) + P(90, 92) + P(190, 92) +
+          '<path d="M60 70q30 -18 60 -4" fill="none" stroke="#ff4f8b" stroke-width="3"/><path d="M120 66l-10 -6M120 66l-9 6" stroke="#ff4f8b" stroke-width="3"/>' +
+          L(220, 172, 320, 172) + L(220, 172, 270, 82) + L(320, 172, 270, 82) + P(220, 172) + P(320, 172) + P(270, 82) +
+          L(380, 172, 480, 172) + L(380, 172, 380, 72) + L(480, 172, 480, 72) + L(380, 72, 480, 72) + L(380, 172, 480, 72, "#19c39a", 1) + P(380, 172) + P(480, 172) + P(380, 72) + P(480, 72) +
+          '<text x="110" y="202" font-family="Arial" font-size="14" text-anchor="middle" fill="#141a33">Square, pushed</text><text x="270" y="202" font-family="Arial" font-size="14" text-anchor="middle" fill="#141a33">Triangle, pushed</text><text x="430" y="202" font-family="Arial" font-size="14" text-anchor="middle" fill="#141a33">Draw the diagonal</text></svg>';
+        return { type: "task", icon: "write", title: "Push test", how: "Try it for real",
+          html: "<p>A pushed square leans right over. A pushed triangle stays put. Have a go for real if you like: lolly sticks, straws or card strips, joined at the corners with split pins or a blob of tack.</p>",
+          fig: s,
+          table: { head: ["Frame", "What I think will happen", "What happened"], rows: [["Square", "", ""], ["Triangle", "", ""], ["Square with a diagonal", "", ""]] },
+          after: "<p>Pen on the drawing: trace the dotted diagonal on the last square. That turns it into two triangles.</p>" };
+      },
       title: "Push test",
       html: "<p>Give each frame a push and see what happens. Then try adding a diagonal to the square, if you like.</p>",
       ez: { html: "<p>Push each one. What happens?</p>" },

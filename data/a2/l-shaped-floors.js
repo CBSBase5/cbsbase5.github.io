@@ -429,6 +429,10 @@ function gridWidget(el, api){
           why: "88 / 2.5 = 35.2. You cannot buy part of a pack, and 35 is not enough, so <b>36 packs</b>." } } },
 
     { type: "widget", topic: "Real floor plans", unscored: true,
+      paper: { type: "task", icon: "write", title: "Design a floor", how: "Shade and count",
+        html: "<p>Shade your own floor on the squares, if you like: an L, or any shape made of rectangles. Each square is 1 m by 1 m. Then split it into rectangles to check your count.</p>",
+        grid: { cols: 16, rows: 9, label: "1 square = 1 m by 1 m" },
+        boxes: [["Rectangle 1: ___ m by ___ m = ___", "", 1], ["Rectangle 2: ___ m by ___ m = ___", "", 1], ["Total area", "add the rectangles", 1], ["Did counting the squares agree?", "", 1]] },
       title: "Design a floor",
       html: "<p>Build your own floor on the grid, if you like. It counts the area for you, so you can check your sums.</p>",
       ez: { html: "<p>Build a floor, if you like. It counts the area for you.</p>" },

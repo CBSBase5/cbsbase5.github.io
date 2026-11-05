@@ -449,6 +449,15 @@ function wrap(t, n, max){ var w = String(t).split(/\s+/), out = [], cur = ""; w.
           why: "The 09:42 train arrives 10:38, walk to 10:53. The bus that reaches the Station before 09:42 leaves Millbrook at <b>09:05</b>." } } },
 
     { type: "widget", topic: "Read the timetable", unscored: true,
+      paper: function(api){
+        var tw = api.level === "mild", target = api.level === "spicy" ? 630 : 660, dest = api.tok("at [[dest]]").slice(3);
+        var best = api.level === "spicy" ? [1, 1] : [2, 2], b = BUS[best[0]], t = TRAIN[best[1]];
+        return { type: "task", icon: "write", title: "Journey planner", how: "Pick, then work it out",
+          html: "<p>Be at " + dest + " by <b>" + hm(target, tw) + "</b>. Pick a bus to the Station, then a train. The train takes " + RIDE + " minutes, then it is a " + WALK + " minute walk. Can you find the one with the shortest wait?</p>",
+          table: { head: ["Buses: leave Millbrook", "reach the Station", "", "Trains: leave the Station"], rows: BUS.map(function(x, k){ return [hm(x[0], tw), hm(x[2], tw), "", hm(TRAIN[k], tw)]; }) },
+          boxes: [["My bus leaves at", "", 1], ["My train leaves at", "", 1], ["Wait at the Station", "minutes", 1], ["I get there at", "train + " + RIDE + " min, then walk " + WALK + " min", 1]],
+          answer: "Journey planner: the " + hm(b[0], tw) + " bus, then the " + hm(t, tw) + " train (wait " + (t - b[2]) + " minutes), there at " + hm(t + RIDE + WALK, tw) + "." };
+      },
       title: "Journey planner",
       html: "<p>Have a go at planning the whole journey from Millbrook to [[dest]]. Try a few combinations and see which gets you there in time with the shortest wait.</p>",
       ez: { html: "<p>Plan the trip to [[dest]]. Try a few. Can you get there on time?</p>" },

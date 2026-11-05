@@ -269,6 +269,23 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       ez: { html: "<p>Now make a guide page for [[place]].</p>" } },
 
     { type: "widget", topic: "Signpost a page", unscored: true,
+      paper: function(api){
+        var mild = api.level === "mild", spicy = api.level === "spicy";
+        var secs = [
+          { lines: ["Take [[bus]].", "Or park in [[park]]."], right: "Getting there" },
+          { lines: ["Have lunch at [[cafe]].", "There is also [[snack]]."], right: "Food" },
+          { lines: ["Start at [[see1]].", "Then visit [[see2]]."], right: "Things to see" }
+        ];
+        if(!mild) secs.push({ lines: ["Open [[open]].", "Entry costs [[price]]."], right: "Times and prices" });
+        var bank = secs.map(function(s){ return s.right; }).concat(spicy ? ["Stuff", "Read this bit"] : ["Stuff"]).sort();
+        var page = '<div style="border:1.6pt solid #0b2840;border-radius:8px;padding:8px 14px;margin:6px 0">' + secs.map(function(s, k){
+          return '<div style="margin:0 0 8px"><div style="border-bottom:1.6pt solid #ff7a2f;height:9mm;width:70mm;font-size:9pt;color:#9cc0dc">heading ' + (k + 1) + '</div><p style="margin:3px 0 0">' + api.tok(s.lines.join(" ")) + '</p></div>';
+        }).join("") + '</div>';
+        return { type: "task", icon: "write", title: "Pick the signposts", how: "Write a heading on each line",
+          html: "<p>This guide page has lost its headings. Pick one from the box for each section and write it on the line. One heading in the box does not really fit anywhere.</p>",
+          chips: bank, after: page,
+          answer: "Signposts: " + secs.map(function(s, k){ return (k + 1) + " " + s.right; }).join(", ") };
+      },
       title: "Pick the signposts",
       html: "<p>Pick a heading for each section. If you like, change your mind and see what happens to the page.</p>",
       ez: { html: "<p>Pick a heading for each part.</p>" },
