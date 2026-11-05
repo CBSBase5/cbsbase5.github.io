@@ -20674,6 +20674,77 @@ feelKill = function (e, o) {
   if (e && !e.boss && /fan|autograph|thrower|scoot|para/.test(e.type || '') && Math.random() < 0.22 && G.t - (G.fanDown49 || -99) > 3 && typeof hasVoice === 'function' && hasVoice('fan_down') && !voiceBusy()) { G.fanDown49 = G.t; playVoice('fan_down'); }
 };
 
+/* ===================== V50: NO VOICE LINE GETS WORN OUT ===================== */
+/* A recording that plays too often stops being funny. Three rules keep them fresh:
+   1. The same clip waits at least 25 seconds before it can play again, and plays at most 3 times in 3 minutes.
+   2. No clip can take more than about one in eight of the recent lines.
+   3. A hero's own line only plays when you are that hero (so a popped bubble no longer makes Sweet-tooth shout "Pop!").
+   The same speech bubble from the same kind of speaker also waits 15 seconds before it can show again.
+   Fans groan less often when knocked out, and Ginger-beard winces less often when hit. */
+var VGOV = { last: {}, hist: [], recent: [], say: {} };
+VGOV.now = function () { return performance.now() / 1000; };
+VGOV.GAP = 25; VGOV.WIN = 180; VGOV.MAXWIN = 3; VGOV.SHARE = 0.13; VGOV.SHAREN = 40;
+function voiceAllowed(id) {
+  var t = VGOV.now(), last = VGOV.last[id];
+  if (last != null && t - last < VGOV.GAP) return false;
+  var inWin = VGOV.hist.filter(function (h) { return h.id === id && t - h.t < VGOV.WIN; }).length;
+  if (inWin >= VGOV.MAXWIN) return false;
+  var r = VGOV.recent; if (r.length >= 10 && r.filter(function (x) { return x === id; }).length / r.length > VGOV.SHARE) return false;
+  return true;
+}
+function voiceNote(id) {
+  var t = VGOV.now(); VGOV.last[id] = t; VGOV.hist.push({ id: id, t: t });
+  VGOV.hist = VGOV.hist.filter(function (h) { return t - h.t < VGOV.WIN; });
+  VGOV.recent.push(id); if (VGOV.recent.length > VGOV.SHAREN) VGOV.recent.shift();
+}
+/* lines picked in the studio (Play buttons) always play: only the game's own calls are limited */
+var _playVoice50 = playVoice;
+playVoice = function (id, force) {
+  if (!hasVoice(id)) return false;
+  var studio = document.getElementById('vlist'); if (studio && studio.offsetParent) force = true;
+  if (!force && !voiceAllowed(id)) return false;
+  var ok = _playVoice50(id); if (ok && !force) voiceNote(id); return ok;
+};
+/* a hero's own lines belong to that hero */
+vSpeak = function (text, who) {
+  if (getSet('lwvoice') === 0) return false;
+  var list = VTEXT[vKey(text)]; if (!list) return false;
+  var hero = G.P ? HERO_WHO[G.P.hero] : null, mine = null, other = null;
+  list.forEach(function (l) {
+    if (!VREC.urls[l.id]) return;
+    if (HERO_WHO_LIST.indexOf(l.who) >= 0) { if (l.who === hero && !mine) mine = l; }
+    else if (!other) other = l;
+  });
+  // the hero speaking uses their own take first; anything else prefers a take that is not a hero's,
+  // and only falls back on the current hero's own (so every POP! is Sweet-tooth's, but only when you are her)
+  var pickL = who === G.P ? (mine || other) : (other || mine);
+  if (!pickL) return false;
+  if (voiceBusy() && performance.now() - (VREC.lastAt || 0) < 700) return false;
+  return playVoice(pickL.id);
+};
+/* the same speech bubble from the same kind of speaker waits a while before it shows again */
+(function () {
+  var s = UI.say;
+  UI.say = function (e, text) {
+    if (text && VTEXT[vKey(text)] && !G.doom) {
+      var k = (e === G.P ? 'hero' : (e && e.type) || 'x') + '|' + vKey(text), t = VGOV.now();
+      if (VGOV.say[k] != null && t - VGOV.say[k] < 15) return;
+      VGOV.say[k] = t;
+    }
+    return s.apply(UI, arguments);
+  };
+})();
+/* fans groan less, Ginger-beard winces less */
+feelKill = function (e, o) {
+  _feelKill49(e, o);
+  if (e && !e.boss && /fan|autograph|thrower|scoot|para/.test(e.type || '') && Math.random() < 0.1 && G.t - (G.fanDown49 || -99) > 40 && hasVoice('fan_down') && !voiceBusy()) { G.fanDown49 = G.t; playVoice('fan_down'); }
+};
+hurtPlayer = function (n, src, o) {
+  var r = _hurtPlayer49(n, src, o), P = G.P;
+  if (r !== false && P && !G.doom && P.hero === 'gingerbeard' && P.hp > 0 && Math.random() < 0.25 && G.t - (G.hurtLine49 || -99) > 15) { G.hurtLine49 = G.t; UI.say(P, pick(['Ouch! That hurt!', 'Ugh.']), 1.3); }
+  return r;
+};
+
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
 function fontsReady(done) {
