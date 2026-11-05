@@ -88,7 +88,7 @@ function paperFix(texts, title, tip){
     var broken = right.replace(/\./g, "").toLowerCase();
     return { type: "task", icon: "write", title: title, how: "Pen it in",
       html: "<p>Every capital and full stop has fallen out. Write a capital letter over any letter that needs one, and put the full stops back in." + (tip ? " " + tip : "") + "</p>" +
-        '<p style="font-size:16pt;line-height:2.6;letter-spacing:.02em;word-spacing:.45em;border:1.2pt solid #9cc0dc;border-radius:6px;padding:4px 12px;margin:6px 0">' + broken + '</p>',
+        '<p style="font-size:16pt;line-height:2.6;letter-spacing:.02em;word-spacing:.45em;border:.8pt solid #c3ced7;border-radius:6px;padding:4px 12px;margin:6px 0">' + broken + '</p>',
       boxes: [["How many full stops did you put in?", "", 1], ["How many capitals?", "", 1]],
       answer: right };
   };

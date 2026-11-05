@@ -346,7 +346,7 @@ function checkWidget(el, api){
       paper: function(){
         var z = [["Comfort", "#19c39a"], ["Stretch", "#ffd23f"], ["Too much", "#ff8a8a"]];
         var row = function(lab){ return '<div style="display:flex;align-items:center;gap:8px;margin:7px 0"><b style="width:40mm;font-size:11pt">' + lab + '</b>' +
-          z.map(function(x){ return '<span style="flex:1;border:1.4pt solid #0b2840;border-radius:99px;padding:5px 10px;text-align:center;background:' + x[1] + '33;font-weight:700">' + x[0] + '</span>'; }).join("") + '</div>'; };
+          z.map(function(x){ return '<span style="flex:1;border:.8pt solid #c3ced7;border-radius:99px;padding:5px 10px;text-align:center;background:' + x[1] + '33;font-weight:700">' + x[0] + '</span>'; }).join("") + '</div>'; };
         return { type: "task", icon: "circle", title: "Where were you?", how: "Circle a zone",
           html: "<p>Circle where you think you will be before you try, and where you ended up after, if you like. No right answer: it is just for you.</p>" +
             row("Before I tried it") + row("After I tried it (later)") };

@@ -229,7 +229,7 @@ function reviewHtml(lv){
         var list = (SENT[api.level] || SENT.medium).map(function(s){ return [api.tok(s[0]), s[1]]; });
         return { type: "task", icon: "write", title: "Highlight the opinions", how: "Highlight or underline",
           html: "<p>Grab a highlighter, or just underline. Mark every sentence that has an opinion in it. The facts stay plain.</p>" +
-            '<div style="border:1.2pt solid #9cc0dc;border-radius:6px;padding:6px 12px;font-size:13pt;line-height:2">' + list.map(function(s){ return s[0]; }).join(" ") + '</div>',
+            '<div style="border:.8pt solid #c3ced7;border-radius:6px;padding:6px 12px;font-size:13pt;line-height:2">' + list.map(function(s){ return s[0]; }).join(" ") + '</div>',
           answer: "Opinions: " + list.filter(function(s){ return s[1]; }).map(function(s){ return s[0]; }).join(" / ") };
       },
       title: "Highlight the opinions",

@@ -270,7 +270,7 @@ var END_SETS = {
         var set = END_SETS[api.level] || END_SETS.medium;
         return { type: "task", icon: "write", title: "Pen in the end mark", how: ". ? or !",
           html: "<p>Each sentence is missing its end mark. Write the one you think fits in the box: a full stop, a question mark or an exclamation mark.</p>" +
-            set.map(function(x, k){ return '<div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:13pt"><span style="width:18px;font-size:10pt;opacity:.7">' + (k + 1) + '</span>' + api.tok(x[0]) + '<span style="display:inline-block;width:11mm;height:10mm;border:1.6pt solid #ff7a2f;border-radius:5px;margin-left:3px"></span></div>'; }).join(""),
+            set.map(function(x, k){ return '<div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:13pt"><span style="width:18px;font-size:10pt;opacity:.7">' + (k + 1) + '</span>' + api.tok(x[0]) + '<span style="display:inline-block;width:11mm;height:10mm;border:1pt solid #5d7384;border-radius:5px;margin-left:3px"></span></div>'; }).join(""),
           answer: "End marks: " + set.map(function(x, k){ return (k + 1) + " " + x[1].split("").join(" or "); }).join(", ") };
       },
       title: "Tap the end mark",

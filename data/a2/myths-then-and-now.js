@@ -445,7 +445,7 @@ var LAMBTON_MED = "<p class=\"a2task\"><b>The Lambton Worm</b>, a legend from th
       paper: function(api){
         var tk = api.tok;
         return { type: "task", icon: "circle", title: "Pass it on", how: "Circle and build",
-          html: "<p>Here is how an urban myth grows. It starts like this:</p><p style=\"font-size:13pt;border:1.2pt dashed #ff7a2f;border-radius:6px;padding:6px 10px\"><b>" + tk(PASS.src[0] + " " + PASS.who[0] + " saw [[sight]] at [[place]] " + PASS.when[0] + ".") + "</b></p>" +
+          html: "<p>Here is how an urban myth grows. It starts like this:</p><p style=\"font-size:13pt;border:.8pt solid #c3ced7;border-radius:6px;padding:6px 10px\"><b>" + tk(PASS.src[0] + " " + PASS.who[0] + " saw [[sight]] at [[place]] " + PASS.when[0] + ".") + "</b></p>" +
             "<p>Every time it is passed on, someone changes it. Circle one from each column to make the next version. Go further down each column and watch it get bigger.</p>",
           table: { head: ["Who says so", "Who saw it", "When"], rows: [0, 1, 2].map(function(k){ return [PASS.src[k], tk(PASS.who[k]), PASS.when[k]]; }) },
           boxes: [["The wildest version, in my own words", "", 2], ["What changed each time it was passed on?", "", 1]] };

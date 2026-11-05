@@ -346,7 +346,7 @@ var HL = {
         var rows = HL[api.level] || HL.medium;
         return { type: "task", icon: "write", title: "Highlighter", how: "Highlight or underline",
           html: "<p>Grab a highlighter, or just underline. Mark the details that show the trip was <b>worth it</b>. Leave the padding alone.</p>" +
-            '<div style="border:1.2pt solid #9cc0dc;border-radius:6px;padding:6px 12px;font-size:13pt;line-height:2">' + rows.map(function(r){ return api.tok(r[0]); }).join(" ") + '</div>',
+            '<div style="border:.8pt solid #c3ced7;border-radius:6px;padding:6px 12px;font-size:13pt;line-height:2">' + rows.map(function(r){ return api.tok(r[0]); }).join(" ") + '</div>',
           answer: "Worth it: " + rows.filter(function(r){ return r[1] === "k"; }).map(function(r){ return api.tok(r[0]); }).join(" / ") };
       },
       title: "Highlighter",

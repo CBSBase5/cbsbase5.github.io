@@ -433,7 +433,7 @@ function tripWidget(el, api){
         var pick = api.level === "spicy" ? "plan" : api.level === "medium" ? "ride" : "spot";
         return { type: "task", icon: "tick", title: "Trip challenge", how: "Pick one",
           html: "<p>Three challenges for real life. Circle the one you fancy (this level suggests <b>" + CH.filter(function(c){ return c.id === pick; })[0].name + "</b>), then tick things off whenever you do them.</p>" +
-            CH.map(function(c){ return '<div style="border:1.2pt solid #0b2840;border-radius:8px;padding:6px 10px;margin:6px 0"><b style="font-size:12pt">' + c.name + '</b> <span style="font-size:10.5pt">' + c.line + '</span>' +
+            CH.map(function(c){ return '<div style="border:.8pt solid #c3ced7;border-radius:8px;padding:6px 10px;margin:6px 0"><b style="font-size:12pt">' + c.name + '</b> <span style="font-size:10.5pt">' + c.line + '</span>' +
               c.ticks.map(function(x){ return '<div style="display:flex;gap:8px;margin:4px 0 0 6px;font-size:11pt"><i class="pbox sm" style="margin-top:3px"></i>' + x + '</div>'; }).join("") + '</div>'; }).join("") };
       },
       title: "Trip challenge",

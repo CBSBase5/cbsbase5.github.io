@@ -278,8 +278,8 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
         ];
         if(!mild) secs.push({ lines: ["Open [[open]].", "Entry costs [[price]]."], right: "Times and prices" });
         var bank = secs.map(function(s){ return s.right; }).concat(spicy ? ["Stuff", "Read this bit"] : ["Stuff"]).sort();
-        var page = '<div style="border:1.6pt solid #0b2840;border-radius:8px;padding:8px 14px;margin:6px 0">' + secs.map(function(s, k){
-          return '<div style="margin:0 0 8px"><div style="border-bottom:1.6pt solid #ff7a2f;height:9mm;width:70mm;font-size:9pt;color:#9cc0dc">heading ' + (k + 1) + '</div><p style="margin:3px 0 0">' + api.tok(s.lines.join(" ")) + '</p></div>';
+        var page = '<div style="border:.8pt solid #c3ced7;border-radius:8px;padding:8px 14px;margin:6px 0">' + secs.map(function(s, k){
+          return '<div style="margin:0 0 8px"><div style="border-bottom:1pt solid #5d7384;height:9mm;width:70mm;font-size:9pt;color:#9cc0dc">heading ' + (k + 1) + '</div><p style="margin:3px 0 0">' + api.tok(s.lines.join(" ")) + '</p></div>';
         }).join("") + '</div>';
         return { type: "task", icon: "write", title: "Pick the signposts", how: "Write a heading on each line",
           html: "<p>This guide page has lost its headings. Pick one from the box for each section and write it on the line. One heading in the box does not really fit anywhere.</p>",

@@ -7,22 +7,26 @@
    pen and paper form.
      mc      letter bubbles to circle (big tiles when short)
      multi   boxes to tick
-     num     answer boxes, plus a working out grid in maths
+     num     answer boxes, plus a little working out space in maths
      text    ruled lines
      sort    lettered bins; write the bin letter by each card
      order   a box by each item to number them
      match   two columns of dots to join with a line
      write   starters, a ticklist and ruled lines
-     learn   a "Look first" panel
+     learn   a short read, picture beside it
      widget  needs a paper version on the step (see below)
 
-   One chunk = one sheet (about five minutes), each starting on
-   a new page and ending at a natural stop. Hints are printed
-   upside down under the question, so looking is a choice.
-   Answers go on a "Check it" page (at the back of the activity,
-   at the end of a pack, or left out). The activity ends with the
-   real world moment, a card to make and cut out, a "how was
-   that?" line, and a small corner for Jay.
+   Calm on purpose (5 Nov 2026: the first version was visually
+   overwhelming). One chunk = one sheet, each on its own page, with
+   plenty of white space: the question, somewhere to answer, and
+   little else. No pills, borders or coloured bars; quiet words only
+   for the pen moves that are not obvious (tick two, write A or B,
+   number them, join with a line). Optional bonus (stretch) questions
+   are left off unless opts.bonus. Hints go on their own page after
+   the activity, numbered to match. Answers go on a "Check it" page
+   (at the back of the activity, at the end of a pack, or left out).
+   The last page has the real world moment, a card to cut out and
+   a "how was that?" line. Bonnie hides small on one sheet.
 
    Paper versions of steps. Any step can carry
      paper: false              leave it off paper
@@ -40,8 +44,8 @@
    A2PAPER.activity(pack, opts) -> HTML
    A2PAPER.pack(items, opts)     -> HTML (cover + activities)
    opts: { level, theme, who, hq, look:"blueprint"|"base5",
-           answers:"back"|"end"|"none", sure:true, easy:false,
-           packTitle, packLine }
+           answers:"back"|"end"|"none", sure:false, hints:true,
+           bonus:false, easy:false, packTitle, packLine }
    Needs /data/a2/art.js. ASCII only.
    ========================================================== */
 (function(){
@@ -167,19 +171,14 @@ function sureStrip(){
   return '<div class="psure" aria-label="How sure are you?"><span>How sure?</span>' +
     ['guess', 'think so', 'sure'].map(function(t){ return '<i></i><em>' + t + '</em>'; }).join("") + '</div>';
 }
-function hintFlip(h){
-  if(!h) return "";
-  return '<div class="phint"><span class="phl">Stuck? Turn the page round:</span><span class="phu">' + paperWords(h) + '</span></div>';
-}
-function explainBox(){ return '<div class="pexplain"><b>How did you get that?</b> <span>(only if you fancy it)</span><div class="plines l2"></div></div>'; }
 function lines(n, cls){ return '<div class="plines l' + clamp(n, 1, 14) + (cls ? " " + cls : "") + '"></div>'; }
-function how(icon, words){ return '<span class="phow">' + ICON[icon] + '<span>' + words + '</span></span>'; }
 
 /* ---------------------------------------------------------- one question */
+/* only the pen moves that are not obvious from the page get a few quiet words */
+var QUIET = { tick: 1, sort: 1, number: 1, join: 1 };
 function qHead(n, s, icon, words){
   return '<div class="pqh">' + (n ? '<span class="pqn">' + n + '</span>' : '') +
-    '<div class="pqt">' + (s.stretch ? '<span class="pbonus">Bonus</span> ' : '') + paperWords(s.q || s.title || "") + '</div>' +
-    (icon ? how(icon, words) : '') + '</div>';
+    '<div class="pqt">' + paperWords(s.q || s.title || "") + (icon && QUIET[icon] ? '<span class="pqi">' + words + '</span>' : '') + '</div></div>';
 }
 function renderStep(s, n, ctx, key){
   var t = s.type, h = "", ans = null, seed = ctx.slug + "|" + key + "|" + ctx.level;
@@ -190,7 +189,7 @@ function renderStep(s, n, ctx, key){
       var r = s.routes.filter(function(x){ return x.fig; })[0] || s.routes[0];
       body = r.html; f = r.fig || f;
     }
-    h = '<div class="plearn">' + '<div class="plh">' + ICON.look + '<span>Look first</span>' + (title ? '<b>' + paperWords(title) + '</b>' : '') + '</div>' +
+    h = '<div class="plearn">' + (title ? '<h3>' + paperWords(title) + '</h3>' : '') +
       side(f, '<div class="plb">' + paperWords(body || "") + '</div>') + '</div>';
     return { html: h };
   }
@@ -205,7 +204,7 @@ function renderStep(s, n, ctx, key){
   } else if(t === "multi"){
     var om = s.fixed ? s.options.map(function(x, i){ return i; }) : shuffled(s.options.length, seed);
     var need = (s.answers || []).length;
-    h = qHead(n, s, "tick", need ? "Tick " + need : "Tick all that fit") + side(s.fig,
+    h = qHead(n, s, "tick", need ? "Tick " + (need === 2 ? "two" : need === 3 ? "three" : need) + "." : "Tick all that fit.") + side(s.fig,
       '<div class="popts rows">' + om.map(function(oi, k){ return '<div class="popt"><span class="pbox"></span><span class="pot">' + paperWords(s.options[oi]) + '</span></div>'; }).join("") + '</div>');
     ans = (s.answers || []).map(function(a){ return strip(s.options[a]); }).join(" + ");
   } else if(t === "num"){
@@ -223,18 +222,18 @@ function renderStep(s, n, ctx, key){
     var cards = s.cards || [], co = shuffled(cards.length, seed, true), bk = s.buckets || [];
     /* a mixed order: not all the A cards first */
     for(var tr = 1; tr < 8 && co.every(function(ci, k){ return k === 0 || cards[co[k - 1]][1] <= cards[ci][1]; }); tr++) co = shuffled(cards.length, seed + tr, true);
-    h = qHead(n, s, "sort", "Write A" + (bk.length > 1 ? " or " + LET[1] : "") + (bk.length > 2 ? " or " + LET[2] : "")) + fig(s.fig) +
+    h = qHead(n, s, "sort", "Write " + (bk.length > 2 ? "A, B or C" : "A or B") + " in each box.") + fig(s.fig) +
       '<div class="pbins">' + bk.map(function(b, k){ return '<div class="pbin b' + k + '"><span class="pbl">' + LET[k] + '</span><span>' + paperWords(b) + '</span></div>'; }).join("") + '</div>' +
       '<div class="pcards">' + co.map(function(ci, k){ return '<div class="pcard"><span class="pbox let"></span><span class="pot">' + paperWords(cards[ci][0]) + '</span></div>'; }).join("") + '</div>';
     ans = co.map(function(ci, k){ return (k + 1) + " " + LET[cards[ci][1]]; }).join(", ").replace(/^/, "Top to bottom: ");
   } else if(t === "order"){
     var it = s.items || [], oo = shuffled(it.length, seed, true);
-    h = qHead(n, s, "number", "Number them 1 to " + it.length) + side(s.fig,
+    h = qHead(n, s, "number", "Number them 1 to " + it.length + ".") + side(s.fig,
       '<div class="pcards">' + oo.map(function(ii){ return '<div class="pcard"><span class="pbox num"></span><span class="pot">' + paperWords(it[ii]) + '</span></div>'; }).join("") + '</div>');
     ans = "Top to bottom: " + oo.map(function(ii){ return ii + 1; }).join(", ");
   } else if(t === "match"){
     var pr = s.pairs || [], ro = shuffled(pr.length, seed, true);
-    h = qHead(n, s, "join", "Join each pair") + fig(s.fig) +
+    h = qHead(n, s, "join", "Join each pair with a line.") + fig(s.fig) +
       '<div class="pmatch">' + pr.map(function(p, k){
         var rr = pr[ro[k]];
         return '<div class="pml"><span class="pmn">' + (k + 1) + '</span><span class="pot">' + paperWords(p[0]) + '</span><i></i></div>' +
@@ -251,11 +250,11 @@ function renderStep(s, n, ctx, key){
     return { html: '<div class="pq pwrite">' + h + '</div>' };
   } else if(t === "task" || t === "widget"){
     if(t === "widget" && !s.fromPaper){
-      h = '<div class="ptask"><div class="pth">' + ICON.look + '<b>' + esc(strip(s.title || "On screen")) + '</b></div>' +
+      h = '<div class="ptask"><h3>' + esc(strip(s.title || "On screen")) + '</h3>' +
         '<p>This bit is a screen toy. Skip it, or ask Jay to show you if you are curious.</p></div>';
       return { html: h };
     }
-    h = '<div class="ptask"><div class="pth">' + ICON[s.icon || "write"] + '<b>' + paperWords(s.title || "Have a go") + '</b>' + (s.how ? '<span class="phow2">' + s.how + '</span>' : '') + '</div>' +
+    h = '<div class="ptask">' + (n ? '<span class="pqn">' + n + '</span>' : '') + '<h3>' + paperWords(s.title || "Have a go") + '</h3>' +
       (s.html ? '<div class="ptb">' + paperWords(s.html) + '</div>' : '') + fig(s.fig) +
       (s.chips ? '<div class="pchips">' + s.chips.map(function(x){ return '<span>' + paperWords(x) + '</span>'; }).join("") + '</div>' : '') +
       (s.ticks ? '<div class="pticks' + (s.ticks.length > 6 ? " two" : "") + '">' + s.ticks.map(function(x){ return '<div><i class="pbox"></i><span>' + paperWords(x) + '</span></div>'; }).join("") + '</div>' : '') +
@@ -268,8 +267,8 @@ function renderStep(s, n, ctx, key){
   } else {
     h = qHead(n, s) + fig(s.fig) + lines(3);
   }
-  h = '<div class="pq">' + h + (s.explain ? explainBox() : '') +
-    '<div class="pqf">' + hintFlip(s.hint) + (ctx.sure && ctx.pack.sure !== false ? sureStrip() : '') + '</div></div>';
+  if(s.hint && n) ctx.hints.push({ n: n, h: paperWords(s.hint) });
+  h = '<div class="pq">' + h + (ctx.sure && ctx.pack.sure !== false ? '<div class="pqf">' + sureStrip() + '</div>' : '') + '</div>';
   return { html: h, ans: ans ? { n: n, a: ans } : null, numbered: true };
 }
 function table(tb){
@@ -295,13 +294,6 @@ function chunks(steps){
   });
   return out;
 }
-function eggsIn(html){
-  var m, out = [], re = /data-egg="([^"]+)"/g;
-  while((m = re.exec(html))) out.push(m[1]);
-  return out;
-}
-function mirror(t){ return '<span class="pmirror">' + t + '</span>'; }
-
 function activity(pack, opts){
   opts = opts || {};
   var ids = (pack.levels || []).map(function(l){ return l.id; });
@@ -309,10 +301,10 @@ function activity(pack, opts){
   var tids = pack.themes ? Object.keys(pack.themes) : [];
   var theme = [opts.theme, (pack.themeFor || {})[opts.who], tids[0]].filter(function(x){ return x && tids.indexOf(x) >= 0; })[0] || null;
   var ctx = { pack: pack, slug: (pack.id || "").replace(/^a2-/, ""), level: level, theme: theme, tok: makeTok(pack, theme),
-    easy: !!opts.easy, firstLevel: ids[0], sure: opts.sure !== false };
+    easy: !!opts.easy, firstLevel: ids[0], sure: opts.sure === true, hints: [] };
   var lvObj = (pack.levels || []).filter(function(l){ return l.id === level; })[0] || { name: level };
-  var steps = pack.steps.map(function(s){ return resolve(s, ctx); });
-  var ch = chunks(steps), n = 0, answers = [], allHtml = "";
+  var steps = pack.steps.map(function(s){ var r = resolve(s, ctx); return r && r.stretch && !opts.bonus ? null : r; });
+  var ch = chunks(steps), n = 0, answers = [];
   var hide = Math.floor(rng(ctx.slug + "bonnie")() * Math.max(1, ch.length));
 
   var sheets = ch.map(function(c, k){
@@ -323,15 +315,12 @@ function activity(pack, opts){
       body += r.html;
       if(r.ans) ansHere.push(r.ans);
     });
-    allHtml += body;
     answers.push({ sheet: k + 1, topic: c.topic, list: ansHere });
     var last = k === ch.length - 1;
     return '<section class="psheet' + (k === 0 ? " first" : "") + '">' +
-      '<header class="pshh"><span class="pshn">Sheet ' + (k + 1) + '<small> of ' + ch.length + '</small></span><span class="psht">' + paperWords(c.topic) + '</span>' +
-      '<span class="pshm">about 5 min</span></header>' +
+      '<header class="pshh"><span class="pshn">' + (k + 1) + '</span><span class="psht">' + paperWords(c.topic) + '</span></header>' +
       body +
-      '<div class="pstop">' + (last ? '<b>That is the last sheet.</b> The card to make is on the next page, if you fancy it.' :
-        '<b>Good place to stop.</b> Sheet ' + (k + 2) + ' whenever you are ready.') +
+      '<div class="pstop">' + (last ? 'That is the last sheet. There is a card to make, if you fancy it.' : 'Good place to stop.') +
       (k === hide ? '<span class="phide">' + bonnie(0.3, "stand") + '</span>' : '') + '</div></section>';
   }).join("");
 
@@ -339,68 +328,52 @@ function activity(pack, opts){
   var rw = pack.paperRealWorld ? ctx.tok(pack.paperRealWorld) : ctx.tok(pack.realWorld || null);
   var mk = pack.make ? ctx.tok(pack.make) : null;
   if(mk && pack.paperMake){ var pm = ctx.tok(pack.paperMake); Object.keys(pm).forEach(function(k){ mk[k] = pm[k]; }); }
-  var lvRow = (pack.levels || []).map(function(l){ return '<span class="plv' + (l.id === level ? " on" : "") + '">' + esc(l.name) + '</span>'; }).join("");
-  var band = '<div class="pband">' +
-    '<div class="pbandt"><div class="psub">' + esc(pack.subject || "") + '</div><h1>' + esc(ctx.tok(pack.title)) + '</h1>' +
-    '<p>' + paperWords(ctx.tok(pack.line || "")) + '</p>' +
-    '<div class="plvs"><span class="plvl">Level</span>' + lvRow + '<span class="plvn">This is ' + esc(lvObj.name) + '. Fancy a swap? Just say.</span></div>' +
-    '<div class="proute">' + ch.map(function(c, k){ return '<span><i>' + (k + 1) + '</i>' + paperWords(c.topic) + '</span>'; }).join("") +
-      (mk ? '<span class="mk"><i>&#9733;</i>' + esc(strip(mk.title || "Make it")) + '</span>' : '') + '</div>' +
-    '<p class="pseek">' + bonnie(0.28, "sit") + '<span>Bonnie is hiding on one of these sheets.</span></p></div>' +
-    (pack.startFig ? '<div class="pbandf">' + ctx.tok(pack.startFig) + '</div>' : '') +
-    '<div class="ptblock"><div><span>Drawn by</span><i></i></div><div><span>Date</span><i></i></div></div></div>';
+  var band = '<div class="pband"><h1>' + esc(ctx.tok(pack.title)) + '</h1>' +
+    (pack.line ? '<p>' + paperWords(ctx.tok(pack.line)) + '</p>' : '') +
+    '<p class="plvn">' + esc(lvObj.name) + ' level. Fancy a different one? Just say.</p></div>';
   sheets = sheets.replace('<section class="psheet first">', '<section class="psheet first">' + band);
 
   /* the last page: real world, the card, how was that */
-  var eggs = eggsIn(allHtml + (pack.startFig || "") + (rw && rw.fig || "")).filter(function(e, i, a){ return a.indexOf(e) === i; }).slice(0, 2);
   var end = '<section class="psheet pend">';
   if(rw){
-    end += '<div class="prw"><div class="plh">' + ICON.look + '<span>Where you would use this</span>' + (rw.title ? '<b>' + paperWords(rw.title) + '</b>' : '') + '</div>' +
-      (rw.fig ? fig(rw.fig, "pfs") : '') + '<div class="plb">' + paperWords(rw.html || "") + '</div></div>';
+    end += '<div class="prw"><h3>' + paperWords(rw.title || "Where you would use this") + '</h3>' +
+      side(rw.fig, '<div class="plb">' + paperWords(rw.html || "") + '</div>') + '</div>';
   }
   if(mk){
     end += '<div class="pmake"><div class="pcut">' + ICON.scissors + '<span>cut it out, if you like</span></div>' +
       '<div class="pcardout"><div class="pmkh"><b>' + paperWords(mk.title || "Make it") + '</b>' + jay(0.42, "smile") + '</div>' +
-      (mk.intro ? '<p class="pmki">' + paperWords(mk.intro) + '</p>' : '') +
       (mk.fields || []).map(function(f){
         var big = (f.max || 60) > 90;
-        return '<div class="pmkf"><b>' + paperWords(f.label || "") + '</b>' + (f.ph ? '<span class="pph">' + esc(strip(f.ph)) + '</span>' : '') + lines(big ? 3 : 1) + '</div>';
-      }).join("") +
-      '<div class="pdoodle"><span>Doodle space</span></div></div>' +
-      '<p class="pmkn">Stick it on the wall, keep it, or hand it to Jay. Your call.</p></div>';
+        return '<div class="pmkf"><b>' + paperWords(f.label || "") + '</b>' + lines(big ? 2 : 1) + '</div>';
+      }).join("") + '</div></div>';
   }
-  end += '<div class="pdone"><div class="pfeel"><b>How was that?</b>' +
-    ['too easy', 'about right', 'too tricky'].map(function(x){ return '<span><i class="pbox sm"></i>' + x + '</span>'; }).join("") + '</div>' +
-    '<div class="pfeel"><b>Did you find Bonnie?</b><span><i class="pbox sm"></i>yes</span><span><i class="pbox sm"></i>not yet</span></div>' +
-    '<div class="pteach"><b>Teach it back, if you like:</b> write your own question for someone else to try.' + lines(2) + '</div>' +
-    (eggs.length ? '<div class="pegg"><b>Something hidden in a picture?</b> Its secret is below, backwards. Hold it up to a mirror. ' + eggs.map(function(e){ return mirror(e); }).join(" ") + '</div>' : '') +
-    '<div class="pjay"><b>For Jay</b><span>Sheets done: ' + ch.map(function(c, k){ return '<i class="pbox sm"></i>' + (k + 1); }).join(" ") + '</span><span>Note:</span><i class="pjl"></i></div></div></section>';
+  end += '<div class="pfeel"><b>How was that?</b>' +
+    ['too easy', 'about right', 'too tricky'].map(function(x){ return '<span><i class="pbox sm"></i>' + x + '</span>'; }).join("") + '</div></section>';
+
+  /* hints, kept off the question pages so they do not crowd them */
+  var hints = (opts.hints !== false && ctx.hints.length) ? '<section class="psheet phints"><header class="pshh"><span class="psht">Stuck? A little hint</span></header>' +
+    '<p class="pansn">Only if you want one. The number matches the question.</p><ol>' +
+    ctx.hints.map(function(x){ return '<li value="' + x.n + '">' + x.h + '</li>'; }).join("") + '</ol></section>' : '';
 
   /* answers */
-  var check = '<section class="psheet pans' + (opts.answers === "back" ? "" : " loose") + '"><header class="pshh"><span class="pshn">Check it</span><span class="psht">' + esc(ctx.tok(pack.title)) + ' (' + esc(lvObj.name) + ')</span></header>' +
+  var check = '<section class="psheet pans' + (opts.answers === "back" ? "" : " loose") + '"><header class="pshh"><span class="psht">Check it: ' + esc(ctx.tok(pack.title)) + ' (' + esc(lvObj.name) + ')</span></header>' +
     '<p class="pansn">Answers for checking your own, or for Jay. No crosses needed: a dot by anything to come back to is plenty.</p>' +
+    '<p class="pjay">For Jay. Sheets done: ' + ch.map(function(c, k){ return '<i class="pbox sm"></i>' + (k + 1); }).join(" ") + ' &nbsp; Note: <i class="pjl"></i></p>' +
     answers.filter(function(a){ return a.list.length; }).map(function(a){
       return '<div class="pansg"><b>Sheet ' + a.sheet + ': ' + paperWords(a.topic) + '</b><ol>' + a.list.map(function(x){ return '<li value="' + x.n + '">' + esc(x.a) + '</li>'; }).join("") + '</ol></div>';
     }).join("") + '</section>';
 
-  var html = '<article class="pact ' + esc(pack.bodyClass || "") + '" data-slug="' + esc(ctx.slug) + '" data-level="' + esc(level) + '">' + sheets + end +
+  var html = '<article class="pact ' + esc(pack.bodyClass || "") + '" data-slug="' + esc(ctx.slug) + '" data-level="' + esc(level) + '">' + sheets + end + hints +
     (opts.answers === "back" ? check : '') + '</article>';
   return { html: html, answers: check, level: level, theme: theme, levelName: lvObj.name, sheets: ch.length, title: ctx.tok(pack.title), questions: n };
 }
 
 /* ---------------------------------------------------------- a pack: cover plus activities */
 function cover(list, opts){
-  return '<section class="psheet pcover">' +
-    '<div class="pcv"><div class="psub">' + esc(opts.hq || "Base 5") + '</div><h1>' + esc(opts.packTitle || "Paper pack") + '</h1>' +
-    (opts.packLine ? '<p>' + esc(opts.packLine) + '</p>' : '') + '</div>' +
-    '<div class="pcvbody"><div class="pcvlist"><h2>In this pack</h2>' +
-      list.map(function(r, k){ return '<div class="pcvi"><i class="pbox"></i><span><b>' + esc(r.title) + '</b><small>' + esc(r.subject || "") + ' &middot; ' + r.sheets + ' sheets &middot; ' + esc(r.levelName) + '</small></span></div>'; }).join("") +
-      '<p class="pcvn">Any order. One sheet is about five minutes, and every sheet ends at a good place to stop.</p></div>' +
-      '<div class="pcvkey"><h2>Pen moves</h2>' +
-        '<div>' + ICON.circle + '<span>circle one</span></div><div>' + ICON.tick + '<span>tick</span></div>' +
-        '<div>' + ICON.write + '<span>write</span></div><div>' + ICON.sort + '<span>sort with letters</span></div>' +
-        '<div>' + ICON.number + '<span>number them</span></div><div>' + ICON.join + '<span>join with a line</span></div>' +
-        '<div class="pcvb">' + bonnie(0.5, "sit") + '<span>Hints are upside down, for whenever you want one.</span></div></div></div></section>';
+  return '<section class="psheet pcover"><h1>' + esc(opts.packTitle || "Paper pack") + '</h1>' +
+    (opts.packLine ? '<p>' + esc(opts.packLine) + '</p>' : '') +
+    '<div class="pcvlist">' + list.map(function(r){ return '<div class="pcvi"><i class="pbox"></i><b>' + esc(r.title) + '</b></div>'; }).join("") + '</div>' +
+    '<div class="pcvb">' + bonnie(0.6, "sit") + '<span>Any order, any pace. Tick them off if you like.</span></div></section>';
 }
 function pack(items, opts){
   opts = opts || {};
