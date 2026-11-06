@@ -3554,7 +3554,8 @@ function tryDoors() {
   if (P.z < -RH / 2 - 0.1) side = 'n'; else if (P.z > RH / 2 + 0.1) side = 's'; else if (P.x < -RW / 2 - 0.1) side = 'w'; else if (P.x > RW / 2 + 0.1) side = 'e';
   if (!side || !G.room.doors[side]) return;
   var next = G.run.map.rooms[G.room.doors[side]], opp = { n: 's', s: 'n', e: 'w', w: 'e' }[side];
-  UI.fade(function () { enterRoom(next, opp); });
+  var map0 = G.run.map;
+  UI.fade(function () { if (G.run && G.run.map === map0) enterRoom(next, opp); }); // a level change mid fade must not walk into the old map
   G.transit = 0.3;
 }
 
@@ -20139,7 +20140,16 @@ fadeSides = function (dt) {
     var v = grp.userData.cut ? (grp.userData.o === undefined ? 1 : grp.userData.o) : (list[0] ? list[0].opacity : 1);
     var near = (N[side][0] * vx + N[side][1] * vz) > 0.35;
     var show = v > 0.3 && !near;
-    if (grp.visible !== show) grp.visible = show;
+    // a door on the near side keeps its sign, lamps, floor stripe and locked barrier: only the buildings go
+    var door = !!(G.room && G.room.doors && G.room.doors[side]) && !G.doom;
+    var vis = show || door;
+    if (grp.visible !== vis) grp.visible = vis;
+    if (door) grp.children.forEach(function (ch) {
+      if (ch === (G.gates && G.gates[side])) return; // the barrier shows itself when the room is locked
+      if (ch.userData.door44 === undefined) ch.userData.door44 = !!ch.isSprite || Math.abs(ch.position.x) < DOOR / 2 + 1.0;
+      var want = show || ch.userData.door44;
+      if (ch.visible !== want) ch.visible = want;
+    });
   });
 };
 
@@ -20745,6 +20755,40 @@ hurtPlayer = function (n, src, o) {
   if (r !== false && P && !G.doom && P.hero === 'gingerbeard' && P.hp > 0 && Math.random() < 0.25 && G.t - (G.hurtLine49 || -99) > 15) { G.hurtLine49 = G.t; UI.say(P, pick(['Ouch! That hurt!', 'Ugh.']), 1.3); }
   return r;
 };
+
+/* ===================== V51: FIXES FROM THE BUG SWEEP ===================== */
+/* 1. The "Sorry we missed you" stamp sits beside the tracking card instead of on top of it,
+      so the Delivery attempted badge and the level stops stay readable.
+   2. On short or narrow screens (a 1024 x 600 laptop, a phone) the defeat, level clear and
+      ending screens keep their buttons in view instead of below the fold.
+   (The near wall door markings and the door transition guard live in near44.js and core.js.) */
+(function () {
+  var st = document.createElement('style');
+  st.textContent =
+    '#dead .dx-wrap { display: flex; align-items: center; gap: 18px; max-width: 900px; }' +
+    '#dead .dx-wrap .dx-track { flex: 1 1 auto; min-width: 0; }' +
+    '#dead .dx-stamp { position: relative; left: auto; top: auto; flex: 0 0 auto; transform: rotate(-6deg); padding: 4px 16px 6px; border-width: 5px; }' +
+    '#dead .dx-stamp b { font-size: clamp(22px, 2.9vw, 36px); }' +
+    '#dead .dx-stamp small { font-size: clamp(9px, 1vw, 12px); }' +
+    '#dead .dx-stamp.in { animation: dxStamp51 .32s cubic-bezier(.3,1.6,.5,1) forwards; }' +
+    '@keyframes dxStamp51 { 0% { opacity: 0; transform: rotate(-16deg) scale(2); } 55% { opacity: 1; } 100% { opacity: .95; transform: rotate(-6deg) scale(1); } }' +
+    '@media (max-width: 720px) { #dead .dx-wrap { flex-direction: column; gap: 10px; } }' +
+    '@media (prefers-reduced-motion: reduce) { #dead .dx-stamp.in { animation-duration: .01s; } }' +
+    '#dead .dx-btns, #levelup .dx-btns, #win .dx-btns { position: sticky; bottom: 0; z-index: 2; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 12px; margin: 10px 0 0; padding: 12px 0 2px; background: linear-gradient(180deg, rgba(30,26,52,0), rgba(30,26,52,.96) 30%); }' +
+    '.dx-btns .btn { margin: 0; }' +
+    '@media (max-height: 700px) { #dead .dmggraph .dgb { max-height: 44px; } }';
+  document.head.appendChild(st);
+})();
+/* the defeat, level clear and ending buttons ride in one bar that stays at the bottom of the card */
+(function () {
+  [['dead', ['x-retry', 'x-again', 'x-title']], ['levelup', ['lv-go']], ['win', ['w-loop', 'w-title']]].forEach(function (d) {
+    var panel = document.querySelector('#' + d[0] + ' .panel'); if (!panel || panel.querySelector('.dx-btns')) return;
+    var bar = document.createElement('div'), last = null; bar.className = 'dx-btns';
+    d[1].forEach(function (id) { var b = document.getElementById(id); if (b && b.parentNode === panel) { last = b; bar.appendChild(b); } });
+    var skip = panel.querySelector('.vx-skip');
+    if (skip) panel.insertBefore(bar, skip); else panel.appendChild(bar);
+  });
+})();
 
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
