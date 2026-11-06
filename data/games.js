@@ -54,6 +54,12 @@ window.B5GAMES = {
 
   games: [
     {
+      id:"boxman", title:"Box-man: Unboxed!", href:"/games/boxman/",
+      blurb:"LW's film, now a game. Pick a hero, fight your way through the City, the Mansion and Dream Land, and deliver justice to Box-man in his lair. Then see what is inside the sealed box.",
+      meta:"Four levels &middot; nine heroes &middot; Box-man mode &middot; leaderboard &middot; saves on this computer",
+      tags:["fun"], added:"2026-11-06", art:"/games/art/boxman/box.webp", fill:"ink", motif:"blocks", year:"The night of the delivery"
+    },
+    {
       id:"its-time", title:"It's Time", href:"/projects/its-time.html",
       blurb:"Catapult yourself through nine eras of invention and smash every gate on the way. A warm up for this half term's question: if we could time travel, should we?",
       meta:"Nine eras &middot; play a round or play all afternoon",

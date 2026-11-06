@@ -99,7 +99,7 @@ var B5ICON_MAP = [
   ["/practice/last-stand.html", "last-stand"], ["/practice/tiny-legends.html", "tiny-legends"],
   ["/practice/cue-the-sequence.html", "cue-the-sequence"], ["/practice/paragraphs.html", "paragraph-dash"],
   ["/practice/chip-run.html", "chip-run"], ["/practice/chess.html", "chess"],
-  ["/jt/", "dugout"], ["/lw/boxman/", "boxman"],
+  ["/jt/", "dugout"], ["/lw/boxman/", "boxman"], ["/games/boxman/", "boxman"],
   ["/games/", "vault"], ["/practice/", "practice"], ["/projects/", "projects"], ["/teacher/", "staff"], ["/paper/", "paper"],
   ["/cc/", "cc"], ["/parents/", "parents"], ["/guest/", "parents"], ["/baselines/", "baselines"],
   ["/trips/", "trips"], ["/tools/", "tools"], ["/wall/", "wall"], ["/ideas/", "ideas"],

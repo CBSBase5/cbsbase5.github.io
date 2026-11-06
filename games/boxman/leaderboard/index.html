@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Box-man leaderboard - Base 5</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/boxman.svg" type="image/svg+xml">
+<style>
+/* fonts: SIL Open Font License 1.1, kept here so the page works without Google Fonts */
+@font-face{font-family:Bangers;src:url(/games/boxman/fonts/bangers-latin-400-normal.woff2) format("woff2");font-display:swap}
+@font-face{font-family:'Pixelify Sans';font-weight:400 500;src:url(/games/boxman/fonts/pixelify-sans-latin-400-normal.woff2) format("woff2");font-display:swap}
+@font-face{font-family:'Pixelify Sans';font-weight:600 700;src:url(/games/boxman/fonts/pixelify-sans-latin-700-normal.woff2) format("woff2");font-display:swap}
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:400;src:url(/games/boxman/fonts/atkinson-hyperlegible-latin-400-normal.woff2) format("woff2");font-display:swap}
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:700;src:url(/games/boxman/fonts/atkinson-hyperlegible-latin-700-normal.woff2) format("woff2");font-display:swap}
+</style>
+<link rel="preload" as="font" type="font/woff2" href="/games/boxman/fonts/bangers-latin-400-normal.woff2" crossorigin>
+<script src="/data/b5site.js?v=8"></script>
+<style>
+/* ==========================================================
+   Box-man: Unboxed! - the leaderboard.
+   Your bests are read from this computer's save (lw.boxman.v1)
+   and only leave it when you press "Put my bests up". They go to
+   the Scores tab of the Base 5 sheet through the score action,
+   under your school sign in (or the HQ last opened here). The
+   boards show the top three of everyone who turned on "Show my
+   initials", through the fame action: initials only, never a
+   name. Showing is off until a student turns it on, and the
+   same switch covers the other vault games' halls of fame.
+   Works without the sheet: your bests still show. ASCII only.
+   ========================================================== */
+:root{
+  --night:#12101f;--panel:#221d40;--panel2:#2b2550;
+  --card:#c99a63;--card-hi:#e6c08a;--card-lo:#8a6238;--card-ink:#3a2614;
+  --tape:#e6cf8e;--red:#e2402f;--gold:#d8b45c;--gold-hi:#f6dc94;--silver:#cfd3dc;--bronze:#c98a52;
+  --paper:#f4ead4;--text:#f1e9d6;--muted:#b9b1cf;--ink:#1b1520;--green:#3cc47a;
+  --pix:'Pixelify Sans','Courier New',monospace;--comic:Bangers,Impact,sans-serif;--body:'Atkinson Hyperlegible',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{background:var(--night)}
+body{margin:0;background:var(--night);color:var(--text);font-family:var(--body);overflow-x:hidden;
+  background-image:radial-gradient(900px 500px at 85% -10%,rgba(216,180,92,.16),transparent 60%),radial-gradient(700px 500px at -10% 20%,rgba(120,90,220,.18),transparent 60%)}
+.wrap{width:min(1100px,100% - 32px);margin:0 auto}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold-hi);outline-offset:4px}
+
+header{padding:34px 0 10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.back{font-family:var(--pix);font-weight:700;letter-spacing:.06em;color:var(--muted);text-decoration:none;border-bottom:2px solid currentColor;padding-bottom:2px}
+.back:hover{color:var(--gold-hi)}
+h1{margin:26px 0 0;line-height:.9;font-family:var(--comic);font-weight:400}
+h1 .small{display:block;font-size:clamp(1.4rem,3vw,2rem);letter-spacing:.06em;color:var(--card-hi);-webkit-text-stroke:2px var(--card-ink);paint-order:stroke fill;text-shadow:3px 3px 0 var(--card-lo)}
+h1 .big{display:inline-block;font-size:clamp(3.6rem,10vw,6.6rem);letter-spacing:.04em;color:var(--gold-hi);-webkit-text-stroke:3px #3a2a10;paint-order:stroke fill;
+  text-shadow:2px 2px 0 #8a6a24,4px 4px 0 #8a6a24,6px 6px 0 #8a6a24,8px 8px 0 #8a6a24,14px 14px 0 rgba(0,0,0,.5)}
+.lede{font-family:var(--pix);color:var(--muted);letter-spacing:.04em;margin:14px 0 0;max-width:640px}
+
+h2{font-family:var(--comic);font-weight:400;font-size:clamp(1.9rem,4vw,2.5rem);letter-spacing:.05em;margin:44px 0 16px;color:var(--paper)}
+h2 em{font-style:normal;color:var(--gold)}
+
+/* ---------- your bests: four parcels ---------- */
+.mine{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{position:relative;background:linear-gradient(170deg,var(--card-hi),var(--card) 65%,#b9864f);color:var(--card-ink);border:3px solid var(--card-ink);border-radius:6px 10px 6px 12px;padding:16px 16px 14px;box-shadow:6px 6px 0 #000}
+.stat::before{content:'';position:absolute;top:-10px;left:50%;width:54px;height:18px;margin-left:-27px;background:var(--tape);opacity:.9;transform:rotate(-3deg)}
+.stat svg{width:34px;height:34px}
+.stat .n{display:block;font-family:var(--comic);font-size:2.8rem;line-height:1;margin-top:6px}
+.stat .l{display:block;font-family:var(--pix);font-weight:700;font-size:.86rem;letter-spacing:.04em;margin-top:4px}
+.stat.zero .n{opacity:.45}
+
+.send{margin-top:22px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;background:var(--panel);border:2px solid rgba(216,180,92,.45);border-radius:14px;padding:16px 18px}
+.btn{font:inherit;font-family:var(--pix);font-weight:700;font-size:1.05rem;letter-spacing:.06em;cursor:pointer;border:3px solid var(--gold);border-radius:10px;padding:12px 20px;background:var(--gold);color:var(--ink);box-shadow:4px 4px 0 #000;transition:transform .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn[disabled]{opacity:.45;cursor:default;transform:none}
+.btn.ghost{background:transparent;color:var(--gold-hi)}
+.switch{display:inline-flex;align-items:center;gap:10px;font-family:var(--pix);font-weight:700;letter-spacing:.03em;cursor:pointer}
+.switch input{appearance:none;-webkit-appearance:none;width:52px;height:30px;border-radius:999px;background:#3b3460;border:2px solid var(--gold);position:relative;cursor:pointer;margin:0;flex:none;transition:background .15s ease}
+.switch input::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--paper);transition:transform .15s ease}
+.switch input:checked{background:var(--green)}
+.switch input:checked::after{transform:translateX(22px)}
+.switch input[disabled]{opacity:.45;cursor:default}
+.msg{flex-basis:100%;font-family:var(--pix);color:var(--gold-hi);min-height:1.3em;margin:0}
+
+/* ---------- the boards: a podium of boxes each ---------- */
+.boards{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+.bd{background:var(--panel);border:2px solid rgba(216,180,92,.35);border-radius:16px;padding:18px 18px 0;overflow:hidden}
+.bd h3{display:flex;align-items:center;gap:10px;margin:0;font-family:var(--pix);font-weight:700;letter-spacing:.05em;font-size:1.05rem;text-transform:uppercase;color:var(--gold-hi)}
+.bd h3 svg{width:28px;height:28px;flex:none}
+.pod{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:end;gap:10px;margin-top:16px;min-height:200px}
+.slot{text-align:center}
+.slot .who{font-family:var(--comic);font-size:2rem;letter-spacing:.06em;color:var(--paper);line-height:1}
+.slot .val{font-family:var(--pix);font-weight:700;font-size:.9rem;color:var(--muted);margin:4px 0 8px}
+.slot .box{position:relative;border:3px solid var(--card-ink);border-bottom:none;border-radius:6px 6px 0 0;background:linear-gradient(170deg,var(--card-hi),var(--card) 70%);display:grid;place-items:center;font-family:var(--comic);font-size:2.2rem;color:var(--card-ink)}
+.slot .box::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:16px;margin-left:-8px;background:rgba(230,207,142,.7)}
+.slot .box span{position:relative;z-index:1;background:var(--paper);border:2px solid var(--card-ink);border-radius:50%;width:44px;height:44px;display:grid;place-items:center;font-size:1.5rem}
+.s1 .box{height:120px}.s1 .box span{background:var(--gold-hi)}
+.s2 .box{height:86px}.s2 .box span{background:var(--silver)}
+.s3 .box{height:62px}.s3 .box span{background:var(--bronze)}
+.slot.empty .box{background:transparent;border:3px dashed rgba(216,180,92,.4);border-bottom:none}
+.slot.empty .box::after{display:none}
+.slot.empty .box span{background:transparent;border-color:rgba(216,180,92,.4);color:rgba(216,180,92,.6)}
+.slot.empty .who{color:rgba(241,233,214,.25)}
+.slot.me .who{color:var(--gold-hi)}
+@media (prefers-reduced-motion:no-preference){.slot .box{animation:rise .6s cubic-bezier(.2,1.3,.4,1) both}.s2 .box{animation-delay:.08s}.s3 .box{animation-delay:.16s}}
+@keyframes rise{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.note{font-family:var(--pix);color:var(--muted);letter-spacing:.03em;margin:16px 0 0}
+
+.play{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-family:var(--comic);font-size:2rem;letter-spacing:.06em;color:var(--card-ink);padding:10px 26px 6px 20px;border:4px solid var(--card-ink);border-radius:6px 10px 6px 12px;background:linear-gradient(170deg,var(--card-hi),var(--card) 60%,#b9864f);box-shadow:6px 6px 0 #000}
+.play svg{width:30px;height:30px}
+.play:hover{transform:translate(-1px,-2px)}
+.foot{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin:50px 0 0;padding:26px 0 36px;border-top:2px dashed rgba(216,180,92,.35)}
+footer{font-family:var(--pix);color:#7d7696;font-size:.82rem;letter-spacing:.05em}
+
+@media (max-width:860px){.mine{grid-template-columns:repeat(2,1fr)}.boards{grid-template-columns:1fr}}
+@media (max-width:420px){.stat .n{font-size:2.2rem}.slot .who{font-size:1.6rem}}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="top">
+    <a class="back" href="/games/boxman/">Box-man</a>
+    <a class="back" href="/games/">The vault</a>
+  </div>
+  <h1><span class="small">BOX-MAN: UNBOXED!</span><span class="big">THE BOARD</span></h1>
+  <p class="lede">Initials only. You are on it only if you switch it on.</p>
+</header>
+
+<main class="wrap">
+  <h2>Your <em>bests</em></h2>
+  <div class="mine" id="mine"></div>
+
+  <div class="send" id="send">
+    <button class="btn" id="put" type="button" disabled>Put my bests up</button>
+    <label class="switch"><input type="checkbox" id="show" disabled> Show my initials</label>
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </div>
+
+  <h2>The <em>boards</em></h2>
+  <div class="boards" id="boards"></div>
+  <p class="note" id="note"></p>
+
+  <div class="foot">
+    <a class="play" href="/games/boxman/play/"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M12 7 L34 20 L12 33 Z" fill="#3a2614"/></svg>PLAY</a>
+    <footer>Designed by LW &middot; Built by Jay @CBS</footer>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+var S = window.B5Site;
+/* the four boards: id on the sheet, picture, label, how to read the number from this computer's save */
+var ICON = {
+  wave: '<svg viewBox="0 0 28 28"><rect x="3" y="7" width="22" height="17" fill="#c99a63" stroke="#3a2614" stroke-width="2"/><path d="M3 7 L14 2 L25 7" fill="#e6c08a" stroke="#3a2614" stroke-width="2"/><rect x="12" y="7" width="4" height="17" fill="#e6cf8e"/></svg>',
+  kills: '<svg viewBox="0 0 28 28"><rect x="2" y="12" width="11" height="11" fill="#c99a63" stroke="#3a2614" stroke-width="2"/><rect x="15" y="12" width="11" height="11" fill="#c99a63" stroke="#3a2614" stroke-width="2"/><rect x="8" y="2" width="12" height="10" fill="#e6c08a" stroke="#3a2614" stroke-width="2"/></svg>',
+  heroes: '<svg viewBox="0 0 28 28"><circle cx="14" cy="9" r="6" fill="#f1cfb8" stroke="#3a2614" stroke-width="2"/><path d="M4 26 C4 17 24 17 24 26 Z" fill="#2f6b3a" stroke="#3a2614" stroke-width="2"/><path d="M9 4 L14 1 L19 4" fill="none" stroke="#f6dc94" stroke-width="2"/></svg>',
+  cases: '<svg viewBox="0 0 28 28"><path d="M3 7 H11 L13 9 H25 V24 H3 Z" fill="#e6c08a" stroke="#3a2614" stroke-width="2"/><circle cx="17" cy="16" r="4" fill="none" stroke="#3a2614" stroke-width="2"/><path d="M20 19 L23 22" stroke="#3a2614" stroke-width="2"/></svg>'
+};
+var BOARDS = [
+  { id: "boxman-wave", k: "wave", label: "Box-man mode: furthest wave", unit: function(n){ return "Wave " + n; },
+    get: function(s){ return (s.boxBest && +s.boxBest.wave) || 0; } },
+  { id: "boxman-kills", k: "kills", label: "Most boxed in one run", unit: function(n){ return n + " boxed"; },
+    get: function(s){ return (s.records && +s.records.kills) || 0; } },
+  { id: "boxman-heroes", k: "heroes", label: "Heroes who beat Box-man", unit: function(n){ return n + " of 9"; },
+    get: function(s){ return Object.keys(s.wins4 || {}).filter(function(h){ return s.wins4[h]; }).length; } },
+  { id: "boxman-cases", k: "cases", label: "Case files found", unit: function(n){ return n + " files"; },
+    get: function(s){ return Object.keys(s.cases || {}).length; } }
+];
+
+function save(){ try{ return JSON.parse(localStorage.getItem("lw.boxman.v1") || "null") || {}; }catch(e){ return {}; } }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+var $ = function(id){ return document.getElementById(id); };
+var mine = {}, who = null, fame = null, sheetOk = !!(S && S.call && S.syncUrl && !S.guest);
+
+/* ---------- your bests, straight from this computer ---------- */
+function drawMine(){
+  var s = save(), any = false;
+  $("mine").innerHTML = BOARDS.map(function(b){
+    var n = Math.max(0, Math.round(b.get(s) || 0)); mine[b.id] = n; if(n) any = true;
+    return '<div class="stat' + (n ? "" : " zero") + '">' + ICON[b.k] + '<span class="n">' + (n ? esc(b.unit(n)) : "-") + '</span><span class="l">' + esc(b.label) + '</span></div>';
+  }).join("");
+  return any;
+}
+
+/* ---------- the boards ---------- */
+function drawBoards(){
+  var g = (fame && fame.games) || {};
+  $("boards").innerHTML = BOARDS.map(function(b){
+    var top = (g[b.id] || []).slice(0, 3), order = [1, 0, 2];
+    return '<div class="bd"><h3>' + ICON[b.k] + esc(b.label) + '</h3><div class="pod">' + order.map(function(i){
+      var x = top[i], cls = "slot s" + (i + 1) + (x ? "" : " empty") + (x && who && x.who === who ? " me" : "");
+      return '<div class="' + cls + '"><div class="who">' + (x ? esc(x.who) : "?") + '</div><div class="val">' + (x ? esc(b.unit(x.best)) : "&nbsp;") + '</div><div class="box"><span>' + (i + 1) + '</span></div></div>';
+    }).join("") + '</div></div>';
+  }).join("");
+}
+
+function setMsg(t){ $("msg").textContent = t || ""; }
+
+function loadFame(){
+  if(!sheetOk) return Promise.resolve();
+  return S.call("fame", { who: who || "" }).then(function(o){
+    if(o && o.ok){ fame = o; drawBoards(); $("show").checked = !!o.on; $("note").textContent = (o.games && BOARDS.some(function(b){ return (o.games[b.id] || []).length; })) ? "" : "Nobody is up yet. Be the first?"; }
+  }, function(){ $("note").textContent = "The boards open on school computers when you are signed in. Your bests above still count."; });
+}
+
+/* who is playing: the school sign in first, then the HQ last opened on this computer */
+function findWho(){
+  if(!sheetOk) return Promise.resolve(null);
+  return S.call("whoami", {}).then(function(o){
+    if(o && o.who && !o.staff) return String(o.who).toUpperCase();
+    if(o && o.staff) return "STAFF";
+    return null;
+  }, function(){ return null; }).then(function(w){
+    if(!w){ try{ w = localStorage.getItem("b5.myhq.v1"); }catch(e){} }
+    return w ? String(w).toUpperCase() : null;
+  });
+}
+
+function wire(){
+  var put = $("put"), show = $("show");
+  if(!sheetOk){
+    put.disabled = true; show.disabled = true;
+    setMsg(S && S.guest ? "Boards are switched off in guest mode." : "Putting bests up works on the Base 5 site.");
+    return;
+  }
+  if(!who || who === "STAFF"){
+    put.disabled = true; show.disabled = true;
+    setMsg(who === "STAFF" ? "Staff accounts are not on the board." : "Open your own HQ once on this computer, then come back.");
+    return;
+  }
+  put.disabled = false; show.disabled = false;
+  put.onclick = function(){
+    var ids = BOARDS.filter(function(b){ return mine[b.id] > 0; });
+    if(!ids.length){ setMsg("Nothing to put up yet. Have a go first."); return; }
+    put.disabled = true; setMsg("Sending...");
+    var chain = Promise.resolve();
+    ids.forEach(function(b){ chain = chain.then(function(){ return S.call("score", { who: who, game: b.id, best: mine[b.id] }); }); });
+    chain.then(function(){
+      setMsg(show.checked ? "Done. You are on the board." : "Done. Switch on Show my initials to appear.");
+      return loadFame();
+    }, function(){ setMsg("Could not reach the sheet just now. Try again in a bit."); }).then(function(){ put.disabled = false; });
+  };
+  show.onchange = function(){
+    show.disabled = true;
+    S.call("optin", { who: who, on: show.checked }).then(function(){
+      setMsg(show.checked ? "Your initials show. Switch off any time." : "Hidden. Your bests are kept, just not shown.");
+      return loadFame();
+    }, function(){ show.checked = !show.checked; setMsg("Could not reach the sheet just now."); }).then(function(){ show.disabled = false; });
+  };
+}
+
+var any = drawMine();
+drawBoards();
+if(!any) setMsg("Nothing yet on this computer. Have a go first.");
+$("note").textContent = sheetOk ? "Loading the boards..." : "The boards open on the Base 5 site, on school computers.";
+findWho().then(function(w){ who = w; wire(); if(!any && sheetOk && who && who !== "STAFF") setMsg("Nothing yet on this computer. Have a go first."); return loadFame(); });
+})();
+</script>
+</body>
+</html>

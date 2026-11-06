@@ -40,6 +40,7 @@ ICON_MAP = [
     ("/practice/chess.html", "/icons/chess.svg"),
     ("/jt/", "/icons/dugout.svg"),
     ("/lw/boxman/", "/icons/boxman.svg"),
+    ("/games/boxman/", "/icons/boxman.svg"),
     # student HQs: each wears its own (the HQ builds copy these across)
     ("/egw/", "/egw/favicon.svg"),
     ("/lp/", "/lp/favicon.svg"),

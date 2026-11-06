@@ -136,5 +136,19 @@ var COVERS = {
     small:"Three squads, three eras and one very bad day for history.",
     players:"1 OR 2<br>PLAYERS",
     spine:T("TIMELINE TANTRUM","font:900 italic 50px/1 Archivo;color:#5fe0f0;"+ext("#ef7724",4,"#000"))
+  },
+  "boxman": {
+    vars:{base:"#1c1838",base2:"#0f0c20",accent:"#d8b45c",sub:"#f6dc94",rule:"#d8b45c",ribbon:"#e2402f",ribbonInk:"#fff8e6",burst:"#e6cf8e",burstInk:"#1b1520",ink:"#1b1520",s1:"#b98a55",s2:"#e6cf8e",s3:"#e2402f"},
+    chip:"ROGUELIKE", shotStyle:"transform:scale(1.14);transform-origin:52% 46%",
+    title:'<span style="display:inline-flex;align-items:center;gap:18px">'+
+      T("BOX-MAN","font:400 126px/1 Bangers;letter-spacing:.02em;color:#d9ae74;-webkit-text-stroke:3px #3a2614;paint-order:stroke fill;"+ext("#7a5530",9,"#000"))+
+      T("UNBOXED!","font:400 50px/1 Bangers;letter-spacing:.04em;color:#fff8e6;background:#e2402f;padding:8px 14px 4px;border:4px solid #1b1520;transform:rotate(-6deg);box-shadow:6px 6px 0 #000")+'</span>',
+    sub:"DESIGNED BY LW",
+    ribbon:"BOX &middot; DODGE &middot; DELIVER",
+    burst:["9","HEROES!"],
+    tag:"A DELIVERY OF JUSTICE",
+    small:"Four levels, a secret mode and one very cross man.",
+    players:"1<br>PLAYER",
+    spine:T("BOX-MAN","font:400 64px/1 Bangers;letter-spacing:.03em;color:#d9ae74;"+ext("#7a5530",4,"#000"))
   }
 };
