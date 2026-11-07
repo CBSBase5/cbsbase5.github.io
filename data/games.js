@@ -60,6 +60,12 @@ window.B5GAMES = {
       tags:["fun"], added:"2026-11-06", art:"/games/art/boxman/box.webp", fill:"ink", motif:"blocks", year:"The night of the delivery"
     },
     {
+      id:"chilton-trail", title:"The Chilton Trail", href:"/projects/chilton-trail.html",
+      blurb:"Your time wagon has broken down at Skara Brae, 4500 years and 800 miles from Base 5. Pick a crew, stock up, cross real rivers and get as many of you home as you can. Bonnie and Bambi are coming too.",
+      meta:"Ten eras &middot; about two hours, in as many sittings as you like &middot; class vote mode for the board &middot; saves on this computer",
+      tags:["project","learning","fun"], added:"2026-11-07", art:"/games/art/chilton-trail/box.webp", fill:"teal", motif:"leaf", year:"2500 BC to today"
+    },
+    {
       id:"its-time", title:"It's Time", href:"/projects/its-time.html",
       blurb:"Catapult yourself through nine eras of invention and smash every gate on the way. A warm up for this half term's question: if we could time travel, should we?",
       meta:"Nine eras &middot; play a round or play all afternoon",

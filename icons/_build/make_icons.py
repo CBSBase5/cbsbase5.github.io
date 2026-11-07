@@ -213,6 +213,17 @@ ICONS = {
         '<circle cx="36" cy="28" r="9.5" fill="%s"/>' % O +
         '<circle cx="37" cy="27" r="3.8" fill="%s"/>' % P +
         '<path d="M2 20h7M1 30h8M3 40h6" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % K),
+    "icons/chilton-trail": (P,
+        '<path d="M6 54Q32 48 58 54" fill="none" stroke="%s" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4"/>' % K +
+        '<rect x="5" y="24" width="9" height="14" rx="2" fill="%s"/>' % K +
+        '<rect x="8" y="28" width="4" height="4" rx="1" fill="%s"/>' % O +
+        '<path d="M14 39Q14 15 34 15Q54 15 54 39Z" fill="%s" stroke="%s" stroke-width="2.5" stroke-linejoin="round"/>' % (T, K) +
+        '<path d="M27 16Q25 27 26 39M41 16Q43 27 42 39" fill="none" stroke="%s" stroke-width="2"/>' % C +
+        '<rect x="12" y="38" width="44" height="6" rx="2" fill="%s"/>' % K +
+        '<circle cx="22" cy="47" r="7" fill="%s" stroke="%s" stroke-width="3.5"/>' % (P, O) +
+        '<circle cx="46" cy="47" r="7" fill="%s" stroke="%s" stroke-width="3.5"/>' % (P, O) +
+        '<circle cx="22" cy="47" r="1.8" fill="%s"/><circle cx="46" cy="47" r="1.8" fill="%s"/>' % (K, K) +
+        eyes(30, 39, 28)),
     "icons/timeline-tantrum": (P,
         '<circle cx="29" cy="39" r="17" fill="%s"/>' % K +
         '<rect x="33" y="18" width="10" height="9" rx="2" transform="rotate(35 38 22.5)" fill="%s"/>' % K +
