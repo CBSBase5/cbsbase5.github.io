@@ -62,7 +62,7 @@ window.B5GAMES = {
     {
       id:"chilton-trail", title:"The Chilton Trail", href:"/projects/chilton-trail.html",
       blurb:"Your time wagon has broken down at Skara Brae, 4500 years and 800 miles from Base 5. Pick a crew, stock up, cross real rivers and get as many of you home as you can. Bonnie and Bambi are coming too.",
-      meta:"Ten eras &middot; about two hours, in as many sittings as you like &middot; class vote mode for the board &middot; saves on this computer",
+      meta:"Ten eras &middot; about two hours, in as many sittings as you like &middot; class leaderboard &middot; class vote mode for the board &middot; saves on this computer",
       tags:["project","learning","fun"], added:"2026-11-07", art:"/games/art/chilton-trail/box.webp", fill:"teal", motif:"leaf", year:"2500 BC to today"
     },
     {
