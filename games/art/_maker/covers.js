@@ -19,6 +19,18 @@ var COVERS = {
     players:"1<br>PLAYER",
     spine:T("DEEP DIYA","font:700 46px/1 Silk;color:#ffd27a;"+ext("#c2551f",4,"#000"))
   },
+  "chilton-trail": {
+    vars:{base:"#0f3442",base2:"#082029",accent:"#ef7724",sub:"#9fe2ef",ribbon:"#ef7724",ribbonInk:"#0a2f38",s1:"#ef7724",s2:"#ffc247",s3:"#20adca"},
+    chip:"SURVIVAL", shotStyle:"image-rendering:pixelated",
+    title:T("The Chilton Trail","font:900 104px/1 Archivo;color:#ffc247;-webkit-text-stroke:5px #0a2f38;paint-order:stroke fill;"+ext("#007291",8,"#000")),
+    sub:"THE LONG WAY HOME",
+    ribbon:"SHOP &middot; CROSS &middot; SURVIVE",
+    burst:["10","ERAS!"],
+    tag:"SKARA BRAE TO BASE 5",
+    small:"800 miles, two dogs and a lot of tombstones.",
+    players:"1 OR<br>THE BASE",
+    spine:T("The Chilton Trail","font:900 46px/1 Archivo;color:#ffc247;"+ext("#007291",4,"#000"))
+  },
   "its-time": {
     vars:{base:"#1d1a4a",base2:"#120f33",accent:"#ff9a3c",sub:"#ffd27a",ribbon:"#ff9a3c",ribbonInk:"#1a1238",s1:"#ff9a3c",s2:"#ffd27a",s3:"#7fd6ff"},
     chip:"ARCADE", shot:"its-time-alt-gatesmash", shotStyle:"object-position:12% 50%",

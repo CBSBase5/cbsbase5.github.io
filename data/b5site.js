@@ -92,7 +92,7 @@ Object.keys(HQS).forEach(function(b){ if(path.indexOf(b) === 0){ base = b; hq = 
    page that forgot its icon gets the right one from its address. Keep
    B5ICON_MAP in step with ICON_MAP in /icons/_build/add_icon_links.py. */
 var B5ICON_MAP = [
-  ["/projects/its-time.html", "its-time"], ["/projects/ideas.html", "idea-lab"], ["/projects/time-travel-tv.html", "time-travel-tv"], ["/games/timeline-tantrum/", "timeline-tantrum"],
+  ["/projects/its-time.html", "its-time"], ["/projects/chilton-trail.html", "chilton-trail"], ["/projects/ideas.html", "idea-lab"], ["/projects/time-travel-tv.html", "time-travel-tv"], ["/games/timeline-tantrum/", "timeline-tantrum"],
   ["/practice/build-a-life.html", "build-a-life"], ["/practice/hooked.html", "hooked"],
   ["/practice/endorphin-house.html", "endorphin-house"], ["/practice/jump-lab.html", "jump-lab"],
   ["/practice/deep-diya.html", "deep-diya"], ["/practice/sankofa.html", "sankofa"], ["/sankofa.html", "sankofa"],
