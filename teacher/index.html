@@ -66,6 +66,7 @@
   <div class="today" id="today" hidden></div>
   <div class="staff">
     <a class="st" style="--edge:var(--teal)" href="https://script.google.com/a/macros/chiltonbridgeschool.co.uk/s/AKfycbxGEShaMR5FoyBgShh9J5FzNJIJSA_IPPfJQ8c0JxDb5vWPqGCgSBGSUGC44_O9CZ7Tfg/exec"><b>BridgeLink Buddy</b><span>Base 5's daily notes, targets, evidence, BridgeLink and Wrap up, shared with HB.</span><em>School Google sign-in</em></a>
+    <a class="st" style="--edge:var(--orange)" href="/lessons/"><b>Lessons</b><span id="lessonsLine">Whole group lessons for the pillar targets, on the board. Each session opens the next one not yet taught.</span><em>Open from the board</em></a>
     <a class="st" style="--edge:var(--orange)" href="/teacher/live.html"><b>Live view</b><span>Each HQ's progress, check-ins, folders and sends. Reply, shout-outs, timelines, postcards home and approvals.</span><em>Opens by itself when signed in</em></a>
     <a class="st" style="--edge:var(--teal)" href="/teacher/sync.html"><b>Shared memory</b><span>Setting up and checking the Google Sheet the site saves to.</span><em>Step by step</em></a>
     <a class="st" style="--edge:var(--plum)" href="/teacher/targets.html"><b>Autumn 2 targets</b><span>From the Targets tab: every student's ticks, your notes, and evidence linked from the live view.</span><em>Opens by itself when signed in</em></a>
@@ -103,6 +104,24 @@
     </div>
   </section>
 </div>
+<script src="/data/term.js?v=10"></script>
+<script src="/lessons/plan.js?v=1"></script>
+<script>
+/* today's lessons, from this device's record of what has been taught */
+(function(){
+  var L = window.B5LESSONS, T = window.B5TERM, el = document.getElementById("lessonsLine");
+  if(!L || !T || !el) return;
+  var now = new Date(), key = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()], tt = T.timetable[key];
+  var w = T.currentWeek(), iso = L.iso(now);
+  if(!tt || !w || iso < w.start || iso > w.end || T.schoolDays(w).indexOf(key) < 0 || w.n < 2) return;
+  var bits = [];
+  tt.forEach(function(s){
+    var slot = L.slotFor(key, s[2]); if(!slot) return;
+    var x = L.nextFor(slot.id); if(x && x.lesson) bits.push(s[0] + " " + L.label(x));
+  });
+  if(bits.length) el.textContent = "Today: " + bits.join(", ") + ".";
+})();
+</script>
 <footer>
   <div class="wrap">
     <span>Base 5 &middot; Chilton Bridge School</span>

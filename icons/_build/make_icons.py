@@ -130,6 +130,13 @@ ICONS = {
         '<path d="M17 32H44" stroke="%s" stroke-width="2" stroke-opacity=".5"/>' % C +
         '<path d="M44 25L57 32L44 39Z" fill="#f3d9b8"/>'
         '<path d="M52.5 29.6L57 32L52.5 34.4Z" fill="%s"/></g>' % K),
+    "icons/lessons": (P,
+        '<path d="M20 44L13 58M44 44L51 58M32 44V55" stroke="%s" stroke-width="4" stroke-linecap="round"/>' % K +
+        '<rect x="9" y="12" width="46" height="33" rx="5" fill="%s"/>' % T +
+        '<path d="M16 22H38M16 30H30" stroke="%s" stroke-width="3.6" stroke-linecap="round"/>' % P +
+        '<path d="M16 37H24" stroke="%s" stroke-width="3.6" stroke-linecap="round" stroke-opacity=".6"/>' % C +
+        '<path d="M37 39L57 24" stroke="%s" stroke-width="5" stroke-linecap="round"/>' % O +
+        '<circle cx="57" cy="24" r="3.2" fill="%s"/>' % K),
     "icons/projects": (P,
         '<path d="M22 15H42V18Q42 26 34.5 32Q42 38 42 46V49H22V46Q22 38 29.5 32Q22 26 22 18Z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % (TINT, T) +
         '<path d="M25.5 21H38.5Q37 27 32 30.5Q27 27 25.5 21Z" fill="%s"/>' % O +

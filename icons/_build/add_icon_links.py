@@ -53,6 +53,7 @@ ICON_MAP = [
     ("/games/", "/icons/vault.svg"),
     ("/practice/", "/icons/practice.svg"),
     ("/projects/", "/icons/projects.svg"),
+    ("/lessons/", "/icons/lessons.svg"),
     ("/teacher/", "/icons/staff.svg"),
     ("/paper/", "/icons/paper.svg"),
     ("/cc/", "/icons/cc.svg"),

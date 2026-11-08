@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-no-home>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson - Base 5</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/lessons.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/lessons/engine.css?v=1">
+<script src="/data/b5site.js?v=8"></script>
+</head>
+<body>
+<!--
+  Base 5 - a lesson on the board. The engine is /lessons/engine.js,
+  the lesson itself is /lessons/l/<id>.js. ASCII only.
+-->
+<div id="wrap">
+  <div id="stage">
+    <div class="bg"></div><div class="grain"></div>
+    <div class="top">
+      <span class="pchip" id="pchip"></span>
+      <span class="ltitle" id="ltitle"></span>
+      <span class="grow"></span>
+      <span class="era" id="era"></span>
+      <span class="dots" id="dots"></span>
+      <span class="secpill" id="secpill"></span>
+      <span class="timer" id="timer" role="button" tabindex="0"></span>
+    </div>
+    <div class="frames"></div>
+    <canvas id="ink" width="1600" height="900"></canvas>
+  </div>
+</div>
+
+<div id="pens" hidden>
+  <button data-pen="0" class="on" style="background:#0a2f38" aria-label="Ink pen"></button>
+  <button data-pen="1" style="background:#ef7724" aria-label="Orange pen"></button>
+  <button data-pen="2" style="background:#007291" aria-label="Teal pen"></button>
+  <button data-pen="3" style="background:#ffc247" aria-label="Highlighter"></button>
+  <button class="clr" type="button">Clear</button>
+</div>
+
+<div id="dock" class="idle" aria-label="Lesson tools">
+  <button id="bPrev" title="Back (left arrow)" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="#0a2f38" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button id="bNext" title="Next (right arrow, space, clicker)" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="#0a2f38" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <span class="sep"></span>
+  <button id="bMenu" title="Menu (M)" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+  <button id="bDraw" title="Draw (D)" aria-label="Draw"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z" fill="#ffc247" stroke="#0a2f38" stroke-width="2" stroke-linejoin="round"/></svg></button>
+  <button id="bPick" title="Random picker (R)" aria-label="Random picker"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#0a2f38" stroke-width="2.4"/><path d="M12 12l5-3" stroke="#ef7724" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="#0a2f38"/></svg></button>
+  <button id="bPause" title="Calm pause (P)" aria-label="Calm pause"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="#0a2f38"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="#0a2f38"/></svg></button>
+  <button id="bSay" title="Prompt line (N)" aria-label="Prompt line"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H10l-5 4v-4H4z" fill="none" stroke="#0a2f38" stroke-width="2.2" stroke-linejoin="round"/></svg></button>
+  <button id="bSnap" title="Snap the board for evidence (S)" aria-label="Snap"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3" fill="none" stroke="#0a2f38" stroke-width="2.2"/><circle cx="12" cy="13.5" r="3.6" fill="#007291"/><path d="M8 7l2-3h4l2 3" fill="none" stroke="#0a2f38" stroke-width="2.2"/></svg></button>
+  <button id="bFull" title="Full screen (F)" aria-label="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="#0a2f38" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  <button id="bEdit" title="Edit (E, staff only)" aria-label="Edit"><svg viewBox="0 0 24 24"><path d="M5 19h14" stroke="#0a2f38" stroke-width="2.2" stroke-linecap="round"/><path d="M7 15l1-3 7-7 2 2-7 7z" fill="none" stroke="#0a2f38" stroke-width="2.2" stroke-linejoin="round"/></svg></button>
+</div>
+
+<div id="say" hidden></div>
+
+<div id="editbar" hidden>
+  <span>Edit mode: tap any dashed text to change it. Changes stay on this board until you copy them into the lesson file.</span>
+  <button id="eCopy" type="button">Copy edits</button>
+  <button id="eSave" type="button">Save edits as a file</button>
+  <button id="eClear" type="button">Clear my edits</button>
+  <button id="eDone" type="button">Done</button>
+</div>
+
+<div class="ov" id="menu" hidden><div class="ovbox"><button class="x" type="button">Close</button><h2>Jump to</h2><div class="menu"></div></div></div>
+<div class="ov" id="picker" hidden><div class="ovbox" style="text-align:center"><button class="x" type="button">Close</button><h2>Random picker</h2>
+  <p id="pickmsg"></p><div class="pk"></div><button class="sbtn go" id="spin" type="button" style="font-size:24px">Spin</button></div></div>
+<div class="ov" id="pause" hidden></div>
+<div class="ov" id="passov" hidden><div class="ovbox"><h2>Edit mode is for staff</h2>
+  <p>Sign in to your school account, or type the staff passphrase.</p>
+  <p><input id="pass" type="password" autocomplete="off" style="font:inherit;font-size:20px;padding:8px 12px;border:3px solid #0a2f38;border-radius:10px;width:100%"></p>
+  <p id="passmsg" style="min-height:1.4em"></p>
+  <p><button class="sbtn go" id="passgo" type="button">Open edit mode</button> <button class="sbtn" id="passno" type="button">Not now</button></p></div></div>
+
+<script src="/data/term.js?v=10"></script>
+<script src="/data/b5keys.js"></script>
+<script src="/data/b5lock.js?v=1"></script>
+<script src="/data/a2/library.js"></script>
+<script src="/lessons/plan.js?v=1"></script>
+<script src="/lessons/art.js?v=1"></script>
+<script src="/lessons/engine.js?v=1"></script>
+</body>
+</html>
