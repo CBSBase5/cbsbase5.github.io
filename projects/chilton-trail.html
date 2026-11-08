@@ -267,6 +267,49 @@ body.chaptering .cap{display:none}
 .sup b{font-weight:400;font-size:25px;margin-left:auto}
 .wj{font-size:25px;margin:0}
 
+
+/* scaffolding */
+.planner{background:#fff;padding:10px 12px;margin:6px 0 10px;box-shadow:0 0 0 3px var(--black);text-align:left}
+.eats{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:24px;line-height:1}
+.eats .fc{display:inline-flex;gap:2px}
+.eats .fc img{width:24px;height:24px;image-rendering:pixelated}
+.eats .pl{color:#c45a14}
+.eats b{font-weight:400;background:var(--slab);color:#fff;padding:4px 8px 2px}
+.mini-dog{height:20px;width:auto;image-rendering:pixelated;vertical-align:middle}
+.meter{margin-top:12px}
+.mcells{position:relative;display:flex;gap:3px;padding-top:24px}
+.dc{position:relative;flex:1;height:22px;background:#eadfcd;box-shadow:0 0 0 2px var(--black)}
+.dc i{position:absolute;left:0;top:0;bottom:0;background:var(--gold)}
+.meter.ok .dc i{background:var(--good)}
+.dc em{position:absolute;right:2px;bottom:-20px;font-style:normal;font-size:16px;color:#5d6f74}
+.mflag{position:absolute;top:0;bottom:-4px;width:0;border-left:3px solid #c8364a}
+.mflag b{position:absolute;left:-2px;top:-2px;transform:translateX(-50%);white-space:nowrap;font-family:var(--disp);font-size:8px;font-weight:400;color:#fff;background:#c8364a;padding:3px 5px 2px}
+.mtext{margin:24px 0 0;font-size:23px;line-height:1.1}
+.mtext span:first-child{color:#8a5a12}
+.meter.ok .mtext span:first-child{color:#1f7a3a}
+.mtext small{font-size:18px;opacity:.75}
+.hint{display:inline-block;font-size:18px;color:#8a5a12;margin-left:6px;white-space:nowrap}
+.hint::before{content:"";display:inline-block;width:9px;height:9px;margin-right:6px;background:var(--gold);box-shadow:0 0 0 2px var(--black);vertical-align:1px}
+.hint.ok{color:#1f7a3a}
+.hint.ok::before{background:var(--good)}
+.est{display:grid;gap:6px;max-width:460px;margin:6px auto 10px;text-align:left}
+.el{display:flex;align-items:center;gap:10px;background:#fff;padding:5px 10px;font-size:24px;box-shadow:0 0 0 2px var(--black)}
+.el canvas{width:28px;height:28px;image-rendering:pixelated;flex:none}
+.el .ab{color:var(--teal)}
+.el .lt{margin-left:auto;color:#c45a14;visibility:hidden}
+.est.open .lt{visibility:visible}
+.xh{display:none !important;color:var(--teal);font-size:18px !important}
+.xcard.open .xh{display:block !important}
+.ruler{display:block;width:100%;max-width:560px;margin:4px auto 6px}
+.tickets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+.tk{font-size:24px;background:#fff6e0;padding:6px 12px 4px;box-shadow:0 0 0 3px var(--black);border-left:6px dotted var(--orange)}
+.tk small{display:block;font-size:16px;min-height:16px}
+.tkdog{display:flex;align-items:center;gap:4px;font-size:21px;color:#1f7a3a}
+.dezp{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;align-items:center;font-size:21px;background:#fff;padding:6px 8px;margin:4px 0 6px;box-shadow:0 0 0 2px var(--black)}
+.dezp span{font-family:var(--disp);font-size:8px;color:#c45a14;width:100%}
+.dezp b{font-weight:400;display:inline-flex;align-items:center;gap:4px}
+.dezp img{width:20px;height:20px;image-rendering:pixelated}
+
 @media (max-width:760px){
   .cap{position:static;max-width:none;border:none;border-top:4px solid var(--black);box-shadow:none;font-size:22px;padding:8px 10px}
   .cbar{font-size:9px}
@@ -285,6 +328,8 @@ body.chaptering .cap{display:none}
   .stagewrap{grid-column:1;grid-row:2;min-height:0;display:flex;flex-direction:column;align-items:center}
   .frame,#dashslot{width:min(100%, calc((100vh - 190px) * 16 / 9))}
   #dashslot .dash{margin:12px 0 0}
+  #dashslot .planner{margin:12px 0 0}
+  body.slotbig .frame,body.slotbig #dashslot{width:min(100%, calc((100vh - 300px) * 16 / 9))}
   .panel{grid-column:2;grid-row:2;margin:0;min-height:0;overflow-y:auto;overflow-x:hidden;padding:6px 8px 12px 6px;scrollbar-width:thin}
   .panel > div{min-height:100%;display:flex;flex-direction:column;justify-content:safe center}
   .ibrow{margin:12px 2px 10px;gap:10px}
@@ -2043,13 +2088,12 @@ var panel = document.getElementById('panel'), capEl = document.getElementById('c
 function cap(t){ capEl.textContent = t || ''; }
 var dashSlot = document.getElementById('dashslot'), wideMQ = window.matchMedia ? window.matchMedia('(min-width:900px) and (min-aspect-ratio:4/3)') : { matches:false };
 function placeDash(fromShow){
-  var wrap = panel.firstChild, d = panel.querySelector('.dash');
-  if(fromShow && !d){ dashSlot.innerHTML = ''; }
-  if(!d) d = dashSlot.querySelector('.dash');
-  if(d){
-    if(wideMQ.matches){ if(d.parentNode !== dashSlot){ dashSlot.innerHTML = ''; dashSlot.appendChild(d); } }
-    else if(wrap && d.parentNode !== wrap){ wrap.insertBefore(d, wrap.firstChild); dashSlot.innerHTML = ''; }
-  }
+  var wrap = panel.firstChild, inPanel = [].slice.call(panel.querySelectorAll('.dash, .leftable'));
+  if(fromShow && !inPanel.length) dashSlot.innerHTML = '';
+  var els = inPanel.length ? inPanel : [].slice.call(dashSlot.children);
+  if(wideMQ.matches){ if(inPanel.length){ dashSlot.innerHTML = ''; els.forEach(function(e){ dashSlot.appendChild(e); }); } }
+  else if(wrap){ for(var i = els.length - 1; i >= 0; i--) if(els[i].parentNode !== wrap) wrap.insertBefore(els[i], wrap.firstChild); dashSlot.innerHTML = ''; }
+  document.body.classList.toggle('slotbig', !!(wideMQ.matches && dashSlot.querySelector('.planner')));
   fitPanel(); requestAnimationFrame(fitPanel);
 }
 /* on a laptop the controls never push the page into scrolling: a long screen shrinks a little to fit */
@@ -2375,6 +2419,81 @@ ACT.board = function(){
   lbWho().then(function(){ lbDraw(); return lbLoad(); }).then(function(){ return lbPush(); }).then(function(){ return lbLoad(); }).then(lbDraw);
 };
 
+/* ---------- scaffolding for the estimate questions ----------
+   Pictures first, then the numbers broken into small steps, and an
+   optional "Show me how" that reveals one more step (never the answer
+   tile itself). Nothing here says it is maths. */
+function eatsPerDay(){ return alive().length * RATION[S.rations].kg * (S.job === 'cook' ? 0.8 : 1) + 0.5; }
+function eachEats(){ return Math.round(RATION[S.rations].kg * (S.job === 'cook' ? 0.8 : 1) * 10) / 10; }
+function milesPerDay(){ return TROT * PACE[S.pace].m; }
+function daysWord(d){ if(d < 0.75) return 'less than a day'; var w = Math.round(d * 2) / 2; return 'about ' + (w % 1 ? Math.floor(w) + ' and a half' : w) + ' day' + (w === 1 ? '' : 's'); }
+function dogImg(){ return '<img class="mini-dog" src="' + dogURL() + '" alt="dogs">'; }
+var DOGURL = null;
+function dogURL(){ if(!DOGURL){ var s = dogSprite('bon', 0), c = document.createElement('canvas'); c.width = s.width; c.height = s.height; c.getContext('2d').drawImage(s, 0, 0); DOGURL = c.toDataURL(); } return DOGURL; }
+function eatsLine(){
+  var faces = alive().map(function(p){ return '<img src="' + faceURL(p) + '" alt="">'; }).join('');
+  return '<div class="eats"><span class="fc">' + faces + '</span><span>' + alive().length + ' x ' + eachEats() + ' kg</span><span class="pl">+</span>' + dogImg() + '<span>0.5 kg</span><span class="pl">=</span><b>' + (Math.round(eatsPerDay() * 10) / 10) + ' kg a day</b></div>';
+}
+/* a row of day boxes: food fills them, a flag marks where you are going */
+function dayMeter(foodKg, needDays, place){
+  var have = foodKg / eatsPerDay(), top = Math.max(have, needDays), unit = top > 13 ? 2 : 1, n = clamp(Math.ceil(top / unit) + 1, 6, 15), cells = '';
+  for(var i = 0; i < n; i++){
+    var f = clamp(have / unit - i, 0, 1);
+    cells += '<span class="dc"><i style="width:' + Math.round(f * 100) + '%"></i><em>' + ((i + 1) * unit) + '</em></span>';
+  }
+  var ok = have + 0.01 >= needDays, at = clamp(needDays / unit / n * 100, 2, 98);
+  return '<div class="meter' + (ok ? ' ok' : '') + '"><div class="mcells">' + cells + '<span class="mflag" style="left:' + at.toFixed(1) + '%"><b>' + esc(place) + '</b></span></div>' +
+    '<p class="mtext"><span>Food lasts ' + daysWord(have) + '.</span> <span>' + esc(place) + ' is ' + daysWord(needDays) + ' away.</span>' + (unit > 1 ? ' <small>Each box is 2 days.</small>' : '') + '</p></div>';
+}
+function plannerHtml(){
+  var tgt = ROUTE[shopTarget()], need = Math.max(0, tgt.at - S.miles) / milesPerDay();
+  return '<div class="planner leftable" id="planner">' + eatsLine() + dayMeter(S.inv.food + S.basket.food * UNIT, need, tgt.name) + '</div>';
+}
+function itemHint(id){
+  var have = (id === 'food' ? 0 : S.inv[id]) + S.basket[id], crew = alive().length;
+  if(id === 'food') return '';
+  if(id === 'blankets') return '<span class="hint' + (have >= crew ? ' ok' : '') + '">' + have + ' for ' + crew + ' people</span>';
+  if(id === 'wheels') return '<span class="hint' + (have >= 1 ? ' ok' : '') + '">' + (have ? have + ' spare' : 'No spare yet') + '</span>';
+  if(id === 'parts') return '<span class="hint' + (have >= 1 ? ' ok' : '') + '">' + (have ? have + ' spare' : 'No spare yet') + '</span>';
+  return '<span class="hint' + (have >= 1 ? ' ok' : '') + '">' + (have ? have + ' for rivers' : 'Helps at rivers') + '</span>';
+}
+function refreshPlanner(){
+  var p = document.getElementById('planner'); if(p) p.outerHTML = plannerHtml();
+  ITEMS.forEach(function(it){ var h = document.getElementById('h_' + it.id); if(h) h.innerHTML = itemHint(it.id); });
+}
+/* the price question: each line rounded to whole money first */
+function roughUnit(p){ if(isMarket()) return p; return Math.max(1, Math.round(p)); }
+function estimateLines(){
+  var out = '';
+  ITEMS.forEach(function(it){
+    var q = S.basket[it.id]; if(!q) return;
+    var p = price(it.id), r = roughUnit(p), exact = (r === p);
+    out += '<div class="el"><canvas width="24" height="24" data-icon="' + it.id + '"></canvas><span class="q">' + q + ' x ' + pay$(p) + '</span>' +
+      (exact ? '' : '<span class="ab">&asymp; ' + q + ' x ' + pay$(r) + '</span>') + '<span class="lt">&asymp; ' + pay$(q * r) + '</span></div>';
+  });
+  return '<div class="est" id="est">' + out + '</div>';
+}
+ACT.esthelp = function(b){ var e = document.getElementById('est'); if(e) e.classList.add('open'); if(b) b.style.visibility = 'hidden'; fitPanel(); };
+/* days on the road: the route cut into one day chunks */
+function dayRuler(miles, perDay){
+  var W2 = 480, x0 = 20, n = Math.ceil(miles / perDay - 1e-9), svg = '<svg class="ruler" viewBox="0 0 520 96" aria-hidden="true">';
+  svg += '<rect x="' + x0 + '" y="44" width="' + W2 + '" height="14" fill="#c9a26a" stroke="#06141a" stroke-width="3"/>';
+  for(var i = 0; i < n; i++){
+    var a = x0 + W2 * (i * perDay) / miles, b = x0 + W2 * Math.min(miles, (i + 1) * perDay) / miles, full = (i + 1) * perDay <= miles + 1e-9;
+    svg += '<rect x="' + (a + 2).toFixed(1) + '" y="47" width="' + Math.max(2, b - a - 4).toFixed(1) + '" height="8" fill="' + (i % 2 ? '#ef7724' : '#20adca') + '"' + (full ? '' : ' opacity=".55"') + '/>';
+    svg += '<text x="' + ((a + b) / 2).toFixed(1) + '" y="36" text-anchor="middle" font-family="Trail Pixel, monospace" font-size="11" fill="#0a2f38">' + (full ? 'day ' + (i + 1) : 'bit') + '</text>';
+    if(full) svg += '<text x="' + b.toFixed(1) + '" y="80" text-anchor="middle" font-family="Trail VT, monospace" font-size="17" fill="#3d5a63">' + Math.round((i + 1) * perDay) + '</text>';
+  }
+  svg += '<text x="' + x0 + '" y="80" text-anchor="middle" font-family="Trail VT, monospace" font-size="17" fill="#3d5a63">0</text>';
+  svg += '<text x="' + (x0 + W2) + '" y="94" text-anchor="end" font-family="Trail Pixel, monospace" font-size="11" fill="#c45a14">' + miles + ' miles</text></svg>';
+  return svg;
+}
+/* tickets: one ticket per person, priced */
+function ticketRow(n, each){
+  var t = ''; for(var i = 0; i < n; i++) t += '<span class="tk">' + rideFmt(each) + '<small class="xh">' + (i ? 'so far ' + rideFmt(each * (i + 1)) : '') + '</small></span>';
+  return '<div class="tickets">' + t + '<span class="tkdog">' + dogImg() + ' free</span></div><div class="row"><button class="chip" data-act="xhelp">Show me how</button></div>';
+}
+
 /* ---------- screens ---------- */
 function render(){
   V.bubble = null; V.titleScreen = false; clearInterval(V.introIv);
@@ -2456,10 +2575,10 @@ function screenShop(){
   mode('shop');
   cap(DEZ_LINES[S.shopAt] || 'Dez again. His prices have gone up again.');
   var tgt = ROUTE[shopTarget()], html = '<div class="card tealwash"><div class="h center">' + (isMarket() ? here().name + ' market' : 'Dez\'s Time Supplies') + '</div>' +
-    '<div class="hud"><div class="s"><span>Each person eats</span><b>1.5 kg a day</b></div><div class="s"><span>' + esc(tgt.name) + '</span><b>' + Math.round(tgt.at - S.miles) + ' miles</b></div></div><div class="shop">';
+    plannerHtml() + '<div class="shop">';
   ITEMS.forEach(function(it){
     html += '<div class="item"><canvas width="24" height="24" data-icon="' + it.id + '"></canvas><div><div class="nm">' + it.name + '</div>' +
-      '<div class="pr">' + pay$(price(it.id)) + ' ' + it.unit + '</div>' +
+      '<div class="pr">' + pay$(price(it.id)) + ' ' + it.unit + ' <span class="hn" id="h_' + it.id + '">' + itemHint(it.id) + '</span></div>' +
       '<div class="step"><button data-act="less" data-v="' + it.id + '" aria-label="One less">-</button><span id="q_' + it.id + '">' + S.basket[it.id] + '</span><button data-act="more" data-v="' + it.id + '" aria-label="One more">+</button></div></div></div>';
   });
   html += '</div><div class="pocket">In your pocket: ' + pay$(wallet()) + '</div>' + bigBtn(isMarket() ? 'Pay ' + here().local : 'Pay Dez', 'pay') + '</div>';
@@ -2471,6 +2590,7 @@ function paintIcons(){
 }
 ACT.more = function(b){ var id = b.getAttribute('data-v'); if(id === 'food' && ROUTE[S.shopAt].ration && S.basket.food >= alive().length){ cap('Rationing. One bag each, and the dogs do not count.'); return; } if(S.basket[id] < 30){ S.basket[id]++; document.getElementById('q_' + id).textContent = S.basket[id]; save(); } };
 ACT.less = function(b){ var id = b.getAttribute('data-v'); if(S.basket[id] > 0){ S.basket[id]--; document.getElementById('q_' + id).textContent = S.basket[id]; save(); } };
+(function(){ var m = ACT.more, l = ACT.less; ACT.more = function(b){ m(b); refreshPlanner(); }; ACT.less = function(b){ l(b); refreshPlanner(); }; })();
 function friendly(n){ if(n < 20) return Math.max(1, Math.round(n)); if(n < 100) return Math.round(n / 5) * 5; return Math.round(n / 10) * 10; }
 ACT.pay = function(){ sfx('coin');
   var t = basketTotal();
@@ -2480,8 +2600,9 @@ ACT.pay = function(){ sfx('coin');
   if(b2 === c || b2 === a) b2 = Math.max(1, c - (c < 20 ? 3 : 10));
   S.shopOpts = shuffle([c, a, b2]); S.shopC = c; save();
   cap('Before the till rings it up...');
-  show('<div class="card wash center"><div class="h">Roughly what\'s the damage?</div><p class="sub">' + (isMarket() ? here().local : 'Dez') + ' reckons you can\'t guess. Prove ' + (isMarket() ? 'him' : 'him') + ' wrong.</p>' +
-    tiles(S.shopOpts.map(function(o){ return { act:'shopguess', v:o, label:'About ' + pay$(o) }; })) + passBtn('No idea, just ring it up', 'shopguess') + '</div>');
+  show('<div class="card wash center"><div class="h">Roughly what\'s the damage?</div><p class="sub">' + (isMarket() ? here().local : 'Dez') + ' reckons you can\'t guess. Round it, add it up, prove him wrong.</p>' + estimateLines() +
+    '<div class="row"><button class="chip" data-act="esthelp">Show me how</button></div>' +
+    tiles(S.shopOpts.map(function(o){ return { act:'shopguess', v:o, label:'About ' + pay$(o) }; })) + passBtn('No idea, just ring it up', 'shopguess') + '</div>'); paintIcons();
 };
 ACT.shopguess = function(b){
   var g = b.getAttribute('data-v'); S.shopGuess = g === null ? null : +g;
@@ -2518,7 +2639,7 @@ function screenFoodGuess(){
   var tgt = ROUTE[shopTarget()];
   cap('One last thing.');
   show('<div class="card wash center"><div class="h">Will the food last to ' + esc(tgt.name) + '?</div>' +
-    '<div class="hud" style="margin-top:8px"><div class="s"><span>Food</span><b>' + kg(S.inv.food) + '</b></div><div class="s"><span>Mouths</span><b>' + alive().length + ' + 2 dogs</b></div><div class="s"><span>Distance</span><b>' + Math.round(tgt.at - S.miles) + ' miles</b></div></div>' +
+    '<div class="planner leftable">' + eatsLine() + dayMeter(S.inv.food, Math.max(0, tgt.at - S.miles) / milesPerDay(), tgt.name) + '</div>' +
     tiles([{ act:'foodguess', v:'easily', label:'Easily' }, { act:'foodguess', v:'just', label:'Just about' }, { act:'foodguess', v:'nope', label:'Nope' }]) +
     passBtn('Let\'s just find out', 'foodguess') + '</div>');
 }
@@ -2668,10 +2789,8 @@ function screenDaysGuess(){
   var c = S.leg.c, d1 = c * 2, d2 = c >= 4 ? c / 2 : c + 1.5;
   var opts = shuffle([c, d1, d2]), nx = ROUTE[S.leg.to];
   cap('Next stop: ' + nx.name + '.');
-  var map = '<svg class="mapsvg" viewBox="0 0 520 90" aria-hidden="true"><path d="M40 55 C150 20 300 80 470 45" fill="none" stroke="#0a2f38" stroke-width="4" stroke-dasharray="10 9" stroke-linecap="round"/>' +
-    '<circle cx="40" cy="55" r="12" fill="#007291" stroke="#0a2f38" stroke-width="3"/><circle cx="470" cy="45" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/>' +
-    '<text x="255" y="30" text-anchor="middle" font-family="Trail Pixel, monospace" font-size="15" fill="#ef7724">' + S.leg.miles + ' miles</text></svg>';
-  show('<div class="card wash center">' + map + '<div class="h">' + legSpeed() + ' miles a day' + (S.leg.road ? ' on the Roman road' : '') + '. How many days?</div>' +
+  var map = dayRuler(S.leg.miles, legSpeed());
+  show('<div class="card wash center">' + map + '<div class="h">How many days to ' + esc(nx.name) + '?</div><p class="sub">The wagon does about ' + legSpeed() + ' miles a day' + (S.leg.road ? ' on the Roman road' : '') + '. Each coloured chunk is one day.</p>' +
     tiles(opts.map(function(o){ return { act:'daysguess', v:o, label:fmtDays(o) }; })) + passBtn('Not sure, let\'s see', 'daysguess') + '</div>');
 }
 ACT.daysguess = function(b){ var v = b.getAttribute('data-v'); S.leg.g = v === null ? null : +v; S.stage = 'trail'; save(); render(); };
@@ -3000,17 +3119,18 @@ function screenTrade(){
   mode('local');
   var who = here().local;
   cap(who + ' has a few swaps going. No money, just stuff.');
-  var html = '<div class="card wash center"><div class="h">Fancy a swap?</div><p class="sub">Dez\'s prices might help you spot a good one.</p><div class="tiles">';
+  var html = '<div class="card wash center xcard"><div class="h">Fancy a swap?</div><p class="sub">Is it worth more than you give? Dez\'s prices help.</p>' + dezPrices() + '<div class="tiles">';
   S.offers.forEach(function(o, i){
     if(o.done){ html += '<div class="tile t' + ((i % 4) + 1) + '" style="opacity:.6;cursor:default">Swapped!<small>' + esc(o.react) + '</small></div>'; return; }
     var canDo = o.free || (o.g === 'food' ? S.inv.food >= o.gq : S.inv[o.g] >= o.gq);
     html += '<button class="tile t' + ((i % 4) + 1) + '" data-act="swap" data-v="' + i + '"' + (canDo ? '' : ' disabled style="opacity:.5"') + '>' +
-      (o.free ? 'A gift' : 'Give ' + qtyText(o.g, o.gq)) + '<small>Get ' + qtyText(o.r, o.rq) + '</small></button>';
+      (o.free ? 'A gift' : 'Give ' + qtyText(o.g, o.gq)) + '<small>Get ' + qtyText(o.r, o.rq) + '</small>' + (o.free ? '' : '<small class="xh">give about ' + money(Math.round(o.gq * WORTH[o.g])) + ', get about ' + money(Math.round(o.rq * WORTH[o.r])) + '</small>') + '</button>';
   });
-  html += '</div><div class="hud" style="margin-top:6px"><div class="s"><span>Food</span><b>' + kg(S.inv.food) + '</b></div><div class="s"><span>Blankets</span><b>' + S.inv.blankets + '</b></div><div class="s"><span>Wheels</span><b>' + S.inv.wheels + '</b></div><div class="s"><span>Engine bits</span><b>' + S.inv.parts + '</b></div><div class="s"><span>Rope</span><b>' + S.inv.rope + '</b></div></div>' +
+  html += '</div><div class="row"><button class="chip" data-act="xhelp">Show me how</button></div><div class="hud" style="margin-top:6px"><div class="s"><span>Food</span><b>' + kg(S.inv.food) + '</b></div><div class="s"><span>Blankets</span><b>' + S.inv.blankets + '</b></div><div class="s"><span>Wheels</span><b>' + S.inv.wheels + '</b></div><div class="s"><span>Engine bits</span><b>' + S.inv.parts + '</b></div><div class="s"><span>Rope</span><b>' + S.inv.rope + '</b></div></div>' +
     bigBtn('That\'s me done', 'tradedone', 'teal') + '</div>';
   show(html);
 }
+function dezPrices(){ return '<div class="dezp"><span>DEZ\'S PRICES</span>' + [['food', '10 kg ' + money(PRICES.food)], ['blankets', money(PRICES.blankets)], ['wheels', money(PRICES.wheels)], ['parts', money(PRICES.parts)], ['rope', money(PRICES.rope)]].map(function(x){ return '<b><img src="' + supIcon(x[0]) + '" alt="">' + x[1] + '</b>'; }).join('') + '</div>'; }
 ACT.swap = function(b){
   var o = S.offers[+b.getAttribute('data-v')], who = here().local;
   if(!o || o.done) return;
@@ -3042,14 +3162,14 @@ function screenExchange(){
   var lines = { coins:who + ' swaps pounds for Iron Age coins. Dez is furious about it.', denarii:who + ' changes money. He bites every coin. Twice.', silver:who + ' weighs silver on tiny scales. Very carefully.', pennies:who + ' counts out silver pennies. Slowly.', oldmoney:who + ' changes money into pounds, shillings and pence. Good luck.' };
   cap(lines[c]);
   var cname = c === 'oldmoney' ? 'old money' : CUR[c][1];
-  var html = '<div class="card wash center"><div class="h">Pounds for ' + cname + '?</div><p class="sub">' + (c === 'oldmoney' ? '12 pence (d) in a shilling (s). 20 shillings in a pound.' : 'The markets round here want ' + cname + '.') + '</p><div class="tiles">';
+  var html = '<div class="card wash center xcard"><div class="h">Pounds for ' + cname + '?</div><p class="sub">' + (c === 'oldmoney' ? '12 pence (d) in a shilling (s). 20 shillings in a pound.' : 'The markets round here want ' + cname + '.') + '</p><div class="tiles">';
   S.bundles.forEach(function(b, i){
     if(b.done){ html += '<div class="tile t' + ((i % 4) + 1) + '" style="opacity:.6;cursor:default">Swapped!<small>' + esc(b.react) + '</small></div>'; return; }
     if(b.from){ html += '<button class="tile t' + ((i % 4) + 1) + '" data-act="buycoins" data-v="' + i + '"' + ((S[b.from] || 0) >= b.fromAmt ? '' : ' disabled style="opacity:.5"') + '>' + curText(c, b.n) + '<small>for your ' + curText(b.from, b.fromAmt) + ' (' + CURLABEL[b.from].toLowerCase() + ')</small></button>'; return; }
     var can = S.money >= b.cost;
-    html += '<button class="tile t' + ((i % 4) + 1) + '" data-act="buycoins" data-v="' + i + '"' + (can ? '' : ' disabled style="opacity:.5"') + '>' + curText(c, b.n) + '<small>for ' + money(b.cost) + '</small></button>';
+    html += '<button class="tile t' + ((i % 4) + 1) + '" data-act="buycoins" data-v="' + i + '"' + (can ? '' : ' disabled style="opacity:.5"') + '>' + curText(c, b.n) + '<small>for ' + money(b.cost) + '</small><small class="xh">each one costs about ' + money(b.rate) + '</small></button>';
   });
-  html += '</div><div class="hud" style="margin-top:6px"><div class="s"><span>Cash</span><b>' + money(S.money) + '</b></div><div class="s"><span>' + CURLABEL[c] + '</span><b>' + curText(c, S[c] || 0) + '</b></div></div>' + bigBtn('That\'s me done', 'exchangedone', 'teal') + '</div>';
+  html += '</div><div class="row"><button class="chip" data-act="xhelp">Show me how</button></div><div class="hud" style="margin-top:6px"><div class="s"><span>Cash</span><b>' + money(S.money) + '</b></div><div class="s"><span>' + CURLABEL[c] + '</span><b>' + curText(c, S[c] || 0) + '</b></div></div>' + bigBtn('That\'s me done', 'exchangedone', 'teal') + '</div>';
   show(html);
 }
 ACT.buycoins = function(b){
@@ -3064,6 +3184,7 @@ ACT.buycoins = function(b){
   logIt({ k:'exchange', cur:c, n:o.n, cost:o.cost, rate:o.rate, best:o.rate === best });
   save(); screenExchange(); cap(o.react);
 };
+ACT.xhelp = function(b){ var c = b.closest('.card'); if(c) c.classList.add('open'); b.style.visibility = 'hidden'; fitPanel(); };
 ACT.exchangedone = function(){ S.exchanged = true; S.stage = 'landmark'; save(); render(); };
 ACT.ride = function(){
   var st = here().station, n = alive().length, each = st === 'train' ? 30 : 3;
@@ -3076,7 +3197,7 @@ function screenRideQuote(){
   if(r.g === undefined){
     cap(r.kind === 'train' ? 'The train to Yeovil. The wagon rides on a flat truck.' : 'The bus to Base 5. The wagon gets folded up somehow. Do not ask.');
     var opts = shuffle([r.total, r.each * (r.n + 2), r.each * Math.max(1, r.n - 2) + (r.n <= 2 ? r.each * 3 : 0)]);
-    return show('<div class="card wash center"><div class="h">' + r.n + ' tickets at ' + rideFmt(r.each) + ' each. Dogs go free.</div><p class="sub">Roughly how much for all of you?</p>' +
+    return show('<div class="card wash center xcard"><div class="h">' + r.n + ' tickets at ' + rideFmt(r.each) + ' each. Dogs go free.</div>' + ticketRow(r.n, r.each) + '<p class="sub">How much for all of you?</p>' +
       tiles(opts.map(function(o){ return { act:'rideguess', v:o, label:'About ' + rideFmt(o) }; })) + passBtn('No idea, just tell me', 'rideguess') + '</div>');
   }
   var ok = rideWallet() >= r.total, html = '<div class="card wash center">';
