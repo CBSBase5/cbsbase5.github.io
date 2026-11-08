@@ -183,7 +183,7 @@ function scene(w, h, o){
   if(o.sun !== false){ var sx = (o.sun || [w * 0.82, h * 0.18])[0], sy = (o.sun || [w * 0.82, h * 0.18])[1];
     g += t === "night" ? '<circle cx="' + sx + '" cy="' + sy + '" r="34" fill="#fff6d6"/>' : '<circle cx="' + sx + '" cy="' + sy + '" r="58" fill="#fff3b0" opacity=".55"/><circle cx="' + sx + '" cy="' + sy + '" r="38" fill="' + YELLOW + '"/>'; }
   if(t === "night"){ for(var i = 0; i < 14; i++) g += '<circle cx="' + ((i * 137) % w) + '" cy="' + (20 + (i * 53) % (gy * 0.6)) + '" r="2.5" fill="#fff6d6" opacity=".8"/>'; }
-  else { g += '<g class="drift" opacity=".95">' + icon("cloud", w * 0.22, h * 0.24, 1.1) + icon("cloud", w * 0.55, h * 0.14, 0.8) + '</g>'; }
+  else if(o.clouds !== false){ g += '<g class="drift" opacity=".95">' + icon("cloud", w * 0.22, h * 0.24, 1.1) + icon("cloud", w * 0.55, h * 0.14, 0.8) + '</g>'; }
   if(o.hills !== false) g += '<path d="M-20 ' + (gy - 10) + 'Q' + (w * 0.2) + ' ' + (gy - 90) + ' ' + (w * 0.45) + ' ' + (gy - 30) + 'T' + (w + 20) + ' ' + (gy - 50) + 'V' + (gy + 5) + 'H-20Z" fill="' + (t === "night" ? "#2d4a2f" : "#a9cf8a") + '"/>';
   g += '<rect x="-20" y="' + gy + '" width="' + (w + 40) + '" height="' + (h - gy + 20) + '" fill="' + (t === "night" ? "#24402a" : "#7fb069") + '"/>' +
     '<path d="M-20 ' + gy + 'H' + (w + 20) + '" stroke="' + INK + '" stroke-width="4"/>';
