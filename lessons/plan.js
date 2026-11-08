@@ -85,11 +85,17 @@ var SERIES = [
 ];
 
 /* day keys as data/term.js; session as its timetable keys */
+/* order: for a slot shared by two targets, the teaching order. It
+   swaps between them in step with the HQ activity drops (8 Nov 2026),
+   so each lesson lands close to its activity. Without it, a slot
+   teaches its series one after the other. */
 var SLOTS = [
   { id: "mon-aesthetic", days: ["mon"], session: "aesthetic", series: ["ac-arch"], mins: 45, label: "Monday, Aesthetic and Creative" },
-  { id: "wed-physical",  days: ["wed"], session: "physical",  series: ["pw-adventure", "pw-balance"], mins: 45, label: "Wednesday, Physical World" },
+  { id: "wed-physical",  days: ["wed"], session: "physical",  series: ["pw-adventure", "pw-balance"], mins: 45, label: "Wednesday, Physical World",
+    order: ["pw-adventure-1", "pw-balance-1", "pw-adventure-2", "pw-adventure-3", "pw-balance-2", "pw-balance-3"] },
   { id: "thu-project",   days: ["thu"], session: "project",   series: ["hs-myths", "se-earth"], mins: 45, label: "Thursday, first half of the project slot" },
-  { id: "fri-pfa",       days: ["fri"], session: "pfa",       series: ["pfa-transport", "pfa-careers"], mins: 30, label: "Friday, PFA" },
+  { id: "fri-pfa",       days: ["fri"], session: "pfa",       series: ["pfa-transport", "pfa-careers"], mins: 30, label: "Friday, PFA",
+    order: ["pfa-transport-1", "pfa-careers-1", "pfa-transport-2", "pfa-careers-2", "pfa-transport-3", "pfa-careers-3"] },
   { id: "phse",          days: ["mon", "thu", "fri"], session: "phse", series: ["rel-assert"], mins: 15, split: true, label: "PHSE, Monday, Thursday and Friday" }
 ];
 
@@ -128,12 +134,13 @@ function nextFor(slotId, s){
   var slot = SLOTS.filter(function(x){ return x.id === slotId; })[0];
   if(!slot) return null;
   var today = iso(), list = [];
-  slot.series.forEach(function(t){
-    (bySeries[t] ? bySeries[t].lessons : []).forEach(function(l){
-      if(l.split) [1, 2, 3].forEach(function(p){ list.push({ lesson: l, part: p }); });
-      else list.push({ lesson: l, part: 0 });
-    });
-  });
+  function add(l){
+    if(!l) return;
+    if(l.split) [1, 2, 3].forEach(function(p){ list.push({ lesson: l, part: p }); });
+    else list.push({ lesson: l, part: 0 });
+  }
+  if(slot.order) slot.order.forEach(function(id){ add(byLesson[id]); });
+  else slot.series.forEach(function(t){ (bySeries[t] ? bySeries[t].lessons : []).forEach(add); });
   var hit = list.filter(function(x){ return s.taught[partKey(x.lesson.id, x.part)] === today; });
   if(hit.length) return { slot: slot, lesson: hit[hit.length - 1].lesson, part: hit[hit.length - 1].part, again: true };
   var nx = list.filter(function(x){ return !s.taught[partKey(x.lesson.id, x.part)]; })[0];
