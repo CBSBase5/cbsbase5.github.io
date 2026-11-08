@@ -269,6 +269,7 @@ body.chaptering .cap{display:none}
 
 
 /* scaffolding */
+.fgbig{font-family:var(--disp);font-size:26px;color:#c45a14;margin-top:8px}
 .planner{background:#fff;padding:10px 12px;margin:6px 0 10px;box-shadow:0 0 0 3px var(--black);text-align:left}
 .eats{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:24px;line-height:1}
 .eats .fc{display:inline-flex;gap:2px}
@@ -824,7 +825,7 @@ function mistOver(a){ screenSpace(); cx.globalAlpha = a; R(0, 0, W, H, '#e7ecee'
 function roundhouse(x, y){ R(x - 7, y - 6, 14, 6, '#9c6a3c'); R(x - 1, y - 4, 3, 4, '#0a2f38'); for(var i = 0; i < 7; i++){ R(x - 8 + i, y - 7 - i, 16 - i * 2, 1, i % 2 ? '#b98a3e' : '#c79a4a'); } var k = (V.t * 0.6 + x) % 3; R(x, y - 16 - k * 3, 2, 2, 'rgba(238,240,234,0.6)'); }
 function birch(x, y){ R(x, y - 10, 2, 10, '#eeeee6'); R(x, y - 7, 2, 1, '#3b3b36'); R(x, y - 3, 2, 1, '#3b3b36'); R(x - 5, y - 17, 12, 8, '#7fb35a'); R(x - 3, y - 20, 8, 4, '#93c46a'); }
 function field(x, y){ for(var i = 0; i < 4; i++){ R(x - 14 + i, y - 1 - i, 28 - i * 2, 1, i % 2 ? '#c8a46a' : '#a8875a'); } }
-function biome(){ return S && here().biome ? here().biome : 'orkney'; }
+function biome(){ if(V.forceBiome) return V.forceBiome; return S && here().biome ? here().biome : 'orkney'; }
 
 /* ---------- pixel kit: dithering, outlined sprites ---------- */
 var BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
@@ -1775,8 +1776,125 @@ function stall(){
   icon(cx, 'food', 203, 129, 0.55); icon(cx, 'wheels', 222, 129, 0.55); icon(cx, 'blankets', 241, 129, 0.55);
 }
 
+/* ---------- the live view ----------
+   The crew, wagon and dogs keep the same place on screen on the road
+   and at stops. A new place slides in from the right as if the camera
+   rolls on; only real changes of scene (title, graves, minigames) fade.
+   Scenery and actors are drawn separately so the two can overlap. */
+var LAYOUT = {
+  lm:    { w:60,  p:104, b:168, m:182 },
+  trail: { w:52,  p:96,  b:160, m:174 },
+  river: { w:108, p:null, b:150, m:160 },
+  sea:   { w:96,  p:null, b:136, m:148 },
+  pass:  { w:96,  p:140, b:208, m:222 },
+  border:{ w:96,  p:140, b:196, m:208 },
+  grave: { w:null, p:70, b:176, m:194 }
+};
+var LMG = { lm:1, shop:1, local:1, eraend:1, exchange:1 };
+function sceneGroup(m){
+  if(LMG[m]) return 'lm';
+  if(m === 'trail' || m === 'event' || m === 'forage' || !m) return 'trail';
+  if(m === 'cross') return 'river'; if(m === 'seacross') return 'sea'; if(m === 'passcross') return 'pass'; if(m === 'bordercross') return 'border';
+  return m;
+}
+function sceneKey(m){ var g = sceneGroup(m); return (g === 'lm' || g === 'river' || g === 'sea' || g === 'pass' || g === 'border') ? g + ':' + (S ? here().id : '') : g; }
+var PUSHABLE = { lm:1, trail:1, river:1, sea:1, pass:1, border:1, ride:1, home:1 };
+function layoutFor(m){
+  var g = sceneGroup(m);
+  if(m === 'cross' || m === 'seacross' || m === 'passcross' || m === 'bordercross' || m === 'ride') return null;
+  if(g === 'home') return LAYOUT.lm;
+  return LAYOUT[g] || null;
+}
+function camOx(m){ return CAMS[m] !== undefined ? CAMS[m] : 46; }
+function drawScenery(m){
+  var g = sceneGroup(m), id = S ? here().id : 'skara';
+  if(g === 'lm'){
+    drawLandmark(id, false);
+    if(m === 'shop'){ if(here().market) drawLocal(here().local, 222, 156); else stall(); }
+    else if(m === 'exchange') drawLocal(here().local, 222, 156);
+    else if(m !== 'eraend' && here().local && (m === 'local' || !S.chatted)) drawLocal(here().local, 222, 156);
+  }
+  else if(g === 'river') drawRiver();
+  else if(g === 'sea') drawSea();
+  else if(g === 'pass') drawPassScene();
+  else if(g === 'border') drawBorder();
+  else if(g === 'ride'){ drawTrail(); if(S && S.ride && S.ride.kind === 'train'){ R(0, 150, W, 2, '#4e2e18'); trainV(70, 152); } else busV(110, 152); }
+  else if(g === 'home'){ drawHome(); drawLocal('Dez', 226, 156); R(225 + Math.round(Math.sin(V.t * 6)), 140, 1, 3, '#f0c39b'); }
+  else if(g === 'grave') drawGrave();
+  else drawTrail();
+}
+function drawActors(L, mv, alpha){
+  if(!L) return;
+  if(L.w !== null && L.w !== undefined){ cx.globalAlpha = alpha.w; wagon(L.w, 152, mv); }
+  if(L.p !== null && L.p !== undefined){ cx.globalAlpha = alpha.p; partyLine(L.p, 156, mv); }
+  cx.globalAlpha = alpha.b; bonnie(L.b, 156, mv); bambi(L.m, 155, mv);
+  cx.globalAlpha = 1;
+}
+var OFFA = document.createElement('canvas'), OFFB = document.createElement('canvas');
+OFFA.width = OFFB.width = 640; OFFA.height = OFFB.height = 360;
+var gA = OFFA.getContext('2d'), gB = OFFB.getContext('2d'); gA.imageSmoothingEnabled = gB.imageSmoothingEnabled = false;
+function sceneTo(g, m){
+  var keep = cx; cx = g; cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, 640, 360);
+  setCam(m); world(); maskStart(); drawScenery(m); ink();
+  cx = keep;
+}
+function ease(p){ return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+var LEGACY = { title:1, film:1, steer:1 };
 function draw(dt){
-  var m = V.mode, id = S ? here().id : 'skara';
+  var m = V.mode, k = sceneKey(m);
+  if(V.lastKey === undefined){ V.lastKey = k; V.lastMode = m; }
+  if(k !== V.lastKey){
+    var push = !!(PUSHABLE[sceneGroup(V.lastMode)] && PUSHABLE[sceneGroup(m)]);
+    V.tr = { from:V.lastMode, fromLay:layoutFor(V.lastMode), fromOx:camOx(V.lastMode), t0:V.t, dur:push ? 1.7 : 0.7, push:push, biome:V.lastBiome };
+    if(!push){ gA.setTransform(1, 0, 0, 1, 0, 0); gA.clearRect(0, 0, 640, 360); gA.drawImage(cv, 0, 0); }
+    V.lastKey = k; V.lastMode = m;
+  } else V.lastMode = m;
+  if(V.tr && V.t - V.tr.t0 > V.tr.dur) V.tr = null;
+  var tr = V.tr, e = tr ? ease(clamp((V.t - tr.t0) / tr.dur, 0, 1)) : 1;
+
+  if(LEGACY[m]) drawLegacy(m, dt);
+  else {
+    if(tr && tr.push){
+      V.forceBiome = tr.biome; sceneTo(gA, tr.from); V.forceBiome = null; sceneTo(gB, m);
+      var bx = Math.round((1 - e) * 640 / 3) * 3, ax = bx - 640 + 66;
+      cx.setTransform(1, 0, 0, 1, 0, 0); cx.drawImage(OFFA, ax, 0);
+      for(var sc = 0; sc < 11; sc++){ cx.globalAlpha = Math.max((sc + 1) / 12, clamp((e - 0.85) / 0.15, 0, 1)); cx.drawImage(OFFB, sc * 6, 0, 6, 360, bx + sc * 6, 0, 6, 360); }
+      cx.globalAlpha = 1; cx.drawImage(OFFB, 66, 0, 574, 360, bx + 66, 0, 574, 360);
+      setCam(m); world();
+    } else {
+      setCam(m); world(); maskStart(); drawScenery(m); ink();
+    }
+    if(!tr) V.lastBiome = biome();
+    var L = layoutFor(m), mv = sceneGroup(m) === 'trail' ? V.spd > 4 : false;
+    if(tr && L){
+      var F = tr.fromLay || L, ox0 = tr.fromOx, ox1 = camOx(m), I = {}, al = { w:1, p:1, b:1 };
+      ['w', 'p', 'b', 'm'].forEach(function(key){
+        var a = F[key], b = L[key];
+        if(a === null || a === undefined){ I[key] = b; if(key !== 'm') al[key] = e; return; }
+        if(b === null || b === undefined){ I[key] = a - ox0 + ox1; if(key !== 'm') al[key] = 1 - e; return; }
+        I[key] = (a - ox0) + ((b - ox1) - (a - ox0)) * e + ox1;
+      });
+      if(!(tr.fromLay)){ al.w = al.p = al.b = e; }
+      drawActors(I, tr.push ? e < 0.94 : mv, al);
+    } else drawActors(L, mv, { w:1, p:1, b:1 });
+    if(m === 'cross' && V.cross) crossAnim(dt, 176, 268, function(){ return (S.crossRes && /^toll/.test(S.crossRes.how)) ? -4 : Math.min(S.water.depth * 7, 9); });
+    if(m === 'seacross' && V.cross) crossAnim(dt, 150, 330, function(){ return 6 + Math.sin(V.t * 2.4) * S.water.swell * 2; });
+    if(m === 'passcross' && V.cross) crossAnim(dt, 0, 400, function(){ return Math.round(S.water.snow * 3); });
+    if(m === 'bordercross' && V.cross) crossAnim(dt, 0, 0, function(){ return 0; });
+    if(m === 'forage') forageTick(dt);
+    if(m === 'ride'){ var rp = clamp((V.t - (V.rideT || 0)) / 4.5, 0, 1); if(rp >= 1 && !V.rideDone){ V.rideDone = true; setTimeout(finishRide, 200); } }
+    if(m === 'eraend') portal(78, 138, V.t, true);
+    if(m === 'home'){ for(var cf = 0; cf < 40; cf++){ var fx = (cf * 53 + V.t * 6) % W, fy = (cf * 37 + V.t * 18) % 120; screenSpace(); R(fx, fy, 2, 2, ['#ef7724', '#007291', '#e9b23b', '#20adca'][cf % 4]); world(); } }
+    if(sceneGroup(m) === 'trail' && S && S.weather === 'drizzle') rain();
+  }
+  if(tr && !tr.push){ cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1 - e; cx.drawImage(OFFA, 0, 0); cx.globalAlpha = 1; setCam(m); world(); }
+  ink(); puffs(dt);
+  if(m === 'event' || m === 'trail' || m === 'local') bubble();
+  chapterCard(); document.body.classList.toggle('chaptering', !!V.chapter);
+  if(V.spin > 0){ V.spin -= dt * 1.2; if(V.spin < 0) V.spin = 0; }
+  cx.setTransform(1, 0, 0, 1, 0, 0);
+}
+function drawLegacy(m, dt){
   setCam(m); world(); if(m !== 'steer') maskStart();
   if(m === 'title'){
     drawSkara(true); ink();
@@ -1786,60 +1904,8 @@ function draw(dt){
     wagon(60, 152, false);
     if(it > 1.8){ bonnie(110, 156, false); bambi(124, 155, false); }
     cx.globalAlpha = 1;
-  } else if(m === 'lm' || m === 'shop' || m === 'local' || m === 'eraend' || m === 'exchange'){
-    drawLandmark(id, false); ink();
-    if(m === 'shop'){ if(here().market){ crew(); drawLocal(here().local, 222, 156); } else { stall(); crew(); } }
-    else if(m === 'eraend'){ crew(); portal(78, 138, V.t, true); }
-    else if(m === 'exchange'){ crew(); drawLocal(here().local, 222, 156); }
-    else {
-      crew();
-      if(here().local && (m === 'local' || !S.chatted)) drawLocal(here().local, 222, 156);
-    }
-  } else if(m === 'river' || m === 'cross'){
-    drawRiver(); ink();
-    if(m === 'cross' && V.cross) crossAnim(dt, 176, 268, function(){ return (S.crossRes && /^toll/.test(S.crossRes.how)) ? -4 : Math.min(S.water.depth * 7, 9); });
-    else { wagon(108, 152, false); bonnie(150, 156, false); bambi(160, 155, false); }
-  } else if(m === 'sea' || m === 'seacross'){
-    drawSea(); ink();
-    if(m === 'seacross' && V.cross) crossAnim(dt, 150, 330, function(){ return 6 + Math.sin(V.t * 2.4) * S.water.swell * 2; });
-    else { wagon(96, 152, false); bonnie(136, 156, false); bambi(148, 155, false); }
-  } else if(m === 'pass' || m === 'passcross'){
-    drawPassScene(); ink();
-    if(m === 'passcross' && V.cross) crossAnim(dt, 0, 400, function(){ return Math.round(S.water.snow * 3); });
-    else { wagon(96, 152, false); partyLine(140, 156, false); bonnie(208, 156, false); bambi(222, 155, false); }
-  } else if(m === 'border' || m === 'bordercross'){
-    drawBorder(); ink();
-    if(m === 'bordercross' && V.cross) crossAnim(dt, 0, 0, function(){ return 0; });
-    else { wagon(96, 152, false); partyLine(140, 156, false); bonnie(196, 156, false); bambi(208, 155, false); }
-  } else if(m === 'steer'){
-    screenSpace(); drawSteer(dt); world();
-  } else if(m === 'forage'){
-    drawTrail(); ink(); wagon(140, 152, false); partyLine(68, 156, false); bonnie(186, 156, false); bambi(204, 155, false);
-    forageTick(dt);
-  } else if(m === 'ride'){
-    drawTrail(); V.wx += dt * 140;
-    if(S && S.ride && S.ride.kind === 'train'){ R(0, 150, W, 2, '#4e2e18'); trainV(70, 152); } else busV(110, 152);
-    ink();
-    var rp = clamp((V.t - (V.rideT || 0)) / 4.5, 0, 1);
-    if(rp >= 1 && !V.rideDone){ V.rideDone = true; setTimeout(finishRide, 200); }
-  } else if(m === 'home'){
-    drawHome(); ink(); crew(); drawLocal('Dez', 226, 156); R(225 + Math.round(Math.sin(V.t * 6)), 140, 1, 3, '#f0c39b');
-    for(var cf = 0; cf < 40; cf++){ var fx = (cf * 53 + V.t * 6) % W, fy = (cf * 37 + V.t * 18) % 120; screenSpace(); R(fx, fy, 2, 2, ['#ef7724', '#007291', '#e9b23b', '#20adca'][cf % 4]); world(); }
-  } else if(m === 'film'){
-    drawFilm();
-  } else if(m === 'grave'){
-    drawGrave(); ink(); partyLine(70, 156, false); bonnie(176, 156, false); bambi(194, 155, false);
-  } else {
-    drawTrail(); ink();
-    var mv = V.moving;
-    wagon(140, 152, mv); partyLine(68, 156, mv); bonnie(186, 156, mv); bambi(204, 155, mv);
-    if(S && S.weather === 'drizzle') rain();
-  }
-  ink(); puffs(dt);
-  if(m === 'event' || m === 'trail' || m === 'local') bubble();
-  chapterCard(); document.body.classList.toggle('chaptering', !!V.chapter);
-  if(V.spin > 0){ V.spin -= dt * 1.2; if(V.spin < 0) V.spin = 0; }
-  cx.setTransform(1, 0, 0, 1, 0, 0);
+  } else if(m === 'film') drawFilm();
+  else if(m === 'steer'){ screenSpace(); drawSteer(dt); world(); }
 }
 function crossAnim(dt, w0, w1, sinkFn){
   var c = V.cross, p = clamp((V.t - c.t0) / c.dur, 0, 1);
@@ -1854,7 +1920,10 @@ function crossAnim(dt, w0, w1, sinkFn){
 }
 function frame(ts){
   var now = ts / 1000, dt = V.last ? Math.min(0.05, now - V.last) : 0.016; V.last = now;
-  V.t += dt; if(V.moving) V.wx += dt * 34;
+  V.t += dt;
+  var target = V.moving ? 34 : 0; V.spd = (V.spd || 0) + (target - (V.spd || 0)) * Math.min(1, dt * 2.2);
+  if(V.spd < 0.3 && !V.moving) V.spd = 0;
+  V.wx += dt * (V.mode === 'ride' ? 140 : V.spd);
   draw(dt); requestAnimationFrame(frame);
 }
 
@@ -2738,34 +2807,77 @@ ACT.oddjob = function(){
 /* foraging */
 var FORAGE = { 0:['berries', 'fish', 'shellfish'], 1:['berries', 'fish', 'apple'], 2:['berries', 'apple', 'fish'], 3:['apple', 'berries', 'carrot'], 4:['fish', 'berries', 'apple'], 5:['apple', 'carrot', 'berries'], 6:['apple', 'carrot', 'berries'], 7:['carrot', 'apple', 'berries'], 8:['carrot', 'apple', 'berries'], 9:['sandwich', 'apple', 'berries'] };
 ACT.forage = function(){ halt(); upkeep(1, false); if(S.leg) S.leg.stop++; save(); if(afterDeaths('trail')) return; S.stage = 'forage'; save(); render(); };
+var FORAGE_KG = { berries:1, shellfish:1, apple:2, carrot:2, bread:2, fish:3, pie:6 };
+var BASKET = null;
+function basketSprite(){ if(!BASKET) BASKET = rowsSprite(['....HHHHHH....', '...H......H...', '..H........H..', '.WWWWWWWWWWWW.', 'WBWBWBWBWBWBWB', 'BWBWBWBWBWBWBW', 'WBWBWBWBWBWBWB', '.BWBWBWBWBWBW.', '..BBBBBBBBBB..'], { H:'#7a4a2a', W:'#e2b371', B:'#a8743c' }, OUT); return BASKET; }
 function screenForage(){
   mode('forage');
-  V.forage = { t0:V.t, items:[], got:0, next:0, done:false };
-  cap('Grab the food! Tap it before it disappears.');
-  show('<div class="card wash center"><div class="say">Foraging... <span id="fgot">0</span> found</div><p class="mini">About 12 seconds.</p></div>');
+  V.forage = { t0:V.t + 2.6, items:[], kg:0, next:0, done:false, bx:CAM.ox + 150, tx:CAM.ox + 150, pops:[], streak:0, keys:0, caught:0 };
+  cap('');
+  show('<div class="card wash center"><div class="say">Slide the basket under the food. Dodge the rotten stuff.</div><p class="mini">Mouse, finger or the arrow keys.</p><div class="fgbig"><span id="fgot">0</span> kg</div></div>');
+}
+function drawBad(k, x, y){
+  if(k === 'rotten'){ R(x, y, 6, 5, '#6b5a2a'); R(x + 1, y - 1, 4, 1, '#6b5a2a'); R(x + 1, y + 1, 2, 2, '#4f7a3a'); R(x + 4, y + 2, 1, 1, '#4f7a3a'); R(x + 3, y - 3, 1, 2, '#3b2a1a'); var f = Math.floor(V.t * 10) % 2; R(x + 7, y - 3 + f, 1, 1, '#14242c'); R(x - 2, y - 2 - f, 1, 1, '#14242c'); }
+  else { R(x, y + 1, 7, 4, '#8d8d84'); R(x + 1, y, 5, 1, '#a8a89e'); R(x + 1, y + 1, 2, 1, '#b8b8ae'); R(x + 5, y + 3, 2, 2, '#6d6d66'); }
 }
 function forageTick(dt){
   var F = V.forage; if(!F) return;
-  var el = V.t - F.t0, kinds = FORAGE[here().era] || FORAGE[0];
-  if(!F.done && el < 12 && V.t > F.next){
-    F.next = V.t + rnd(0.45, 0.85);
-    F.items.push({ x:rnd(CAM.ox + 12, CAM.ox + 200), y:rnd(118, 168), kind:pick(kinds), born:V.t, life:rnd(1.6, 2.6), taken:false });
+  var el = V.t - F.t0, DUR = 20, kinds = (FORAGE[here().era] || FORAGE[0]).concat(['bread']);
+  screenSpace();
+  for(var cx0 = 0; cx0 < W; cx0 += 4){ var hh = 10 + Math.round(hash(Math.floor(cx0 / 4) * 3.3) * 8); R(cx0, 0, 4, hh, '#2f5a26'); R(cx0, hh - 2, 4, 2, '#3f7a30'); if(hash(cx0 * 1.7) > 0.7) R(cx0 + 1, hh - 6, 2, 2, '#5f9a3e'); }
+  for(var fr = 0; fr < 14; fr++){ var fx0 = (fr * 23 + 7) % W, fy0 = 8 + (fr % 4) * 3; R(fx0, fy0, 3, 3, fr % 3 ? '#c8342b' : '#8c3a6e'); }
+  var left = clamp((DUR - Math.max(0, el)) / DUR, 0, 1);
+  R(80, 22, 160, 6, '#06141a'); R(81, 23, Math.round(158 * left), 4, left < 0.25 ? '#ef7724' : '#46d16a');
+  cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  if(el < 0){ var n = Math.ceil(-el); cx.font = '24px "Trail Pixel", monospace'; cx.fillStyle = '#06141a'; cx.fillText(n > 2 ? '3' : (n > 1 ? '2' : '1'), W / 2 + 2, H / 2 + 2); cx.fillStyle = '#ffc247'; cx.fillText(n > 2 ? '3' : (n > 1 ? '2' : '1'), W / 2, H / 2); }
+  else if(el < 0.7){ cx.font = '24px "Trail Pixel", monospace'; cx.fillStyle = '#06141a'; cx.fillText('GO!', W / 2 + 2, H / 2 + 2); cx.fillStyle = '#46d16a'; cx.fillText('GO!', W / 2, H / 2); }
+  cx.font = '16px "Trail VT", monospace'; cx.textAlign = 'left'; cx.fillStyle = '#06141a'; cx.fillText(F.kg + ' kg', 11, 41); cx.fillStyle = '#fffdf8'; cx.fillText(F.kg + ' kg', 10, 40);
+  if(F.streak >= 3){ cx.fillStyle = '#ffc247'; cx.fillText('streak x' + F.streak, 10, 54); }
+  cx.textAlign = 'start'; cx.textBaseline = 'alphabetic';
+  world();
+  if(!F.done && el >= 0 && el < DUR && V.t > F.next){
+    F.next = V.t + rnd(0.45, 0.8) * (1 - el / DUR * 0.35);
+    var bad = Math.random() < 0.22, gold = !bad && Math.random() < 0.05;
+    F.items.push({ x:rnd(CAM.ox + 22, CAM.ox + 192), y:CAM.oy + 16, vy:rnd(22, 32) * (1 + el / DUR * 0.7), kind:gold ? 'pie' : (bad ? pick(['rotten', 'stone']) : pick(kinds)), bad:bad, gone:false });
   }
+  if(F.keys && !F.done) F.tx = clamp(F.tx + F.keys * 170 * dt, CAM.ox + 14, CAM.ox + 200);
+  F.bx += (F.tx - F.bx) * Math.min(1, dt * 14);
+  var by = 151;
   F.items.forEach(function(it){
-    var age = V.t - it.born; if(it.taken || age > it.life) return;
-    var bob = Math.round(Math.sin(age * 6) * 1.5), s = age < 0.2 ? age / 0.2 : 1;
-    if(s < 1) cx.globalAlpha = s;
-    cx.save(); cx.translate(Math.round(it.x), Math.round(it.y + bob)); cx.scale(2, 2); drawFood(it.kind, 0, 0); cx.restore();
-    cx.globalAlpha = 1;
+    if(it.gone) return;
+    if(!F.done){ it.y += it.vy * dt; it.vy += 26 * dt; }
+    var cxm = it.x + 3;
+    if(!F.done && it.y >= by - 10 && it.y <= by - 1 && Math.abs(cxm - F.bx) < 15){
+      it.gone = true;
+      if(it.bad){ F.kg = Math.max(0, F.kg - 2); F.streak = 0; F.pops.push({ x:F.bx, y:by - 16, t:V.t, txt:'-2 kg', c:'#ff6b6b' }); sfx('thud'); }
+      else { var k = FORAGE_KG[it.kind] || 2; F.streak++; if(F.streak >= 3) k += 1; F.kg += k; F.caught++; F.pops.push({ x:F.bx, y:by - 16, t:V.t, txt:'+' + k + ' kg', c:it.kind === 'pie' ? '#ffc247' : '#fffdf8' }); if(it.kind === 'pie') sfx('fanfare'); else ding(); }
+      var fg = document.getElementById('fgot'); if(fg) fg.textContent = F.kg;
+      return;
+    }
+    if(it.y > 172){ it.gone = true; if(!it.bad) F.streak = 0; return; }
+    var hgt = clamp((160 - it.y) / 90, 0, 1), sw = Math.round(8 - hgt * 4);
+    R(cxm - sw / 2, 159, sw, 1, 'rgba(10,30,20,0.3)');
+    cx.save(); cx.translate(Math.round(it.x), Math.round(it.y)); cx.scale(2, 2);
+    if(it.bad) drawBad(it.kind, 0, 0); else if(it.kind === 'pie'){ R(0, 1, 7, 3, '#e9b23b'); R(1, 0, 5, 1, '#ffd36e'); R(2, 1, 1, 1, '#c45a14'); R(4, 1, 1, 1, '#c45a14'); } else drawFood(it.kind, 0, 0);
+    cx.restore();
   });
-  if(!F.done && el >= 12){
-    F.done = true;
-    var kgs = F.got * 2; S.inv.food += kgs; logIt({ k:'forage', got:F.got });
+  var bs = basketSprite(); cx.drawImage(bs, Math.round(F.bx - bs.width), Math.round(by - bs.height * 2 + 6), bs.width * 2, bs.height * 2);
+  screenSpace(); cx.font = '14px "Trail VT", monospace'; cx.textAlign = 'center';
+  F.pops = F.pops.filter(function(p){ var a = V.t - p.t; if(a > 1) return false; var sx = (p.x - CAM.ox) * CAM.s, sy = (p.y - CAM.oy) * CAM.s - a * 18; cx.globalAlpha = 1 - a; cx.fillStyle = '#06141a'; cx.fillText(p.txt, sx + 1, sy + 1); cx.fillStyle = p.c; cx.fillText(p.txt, sx, sy); cx.globalAlpha = 1; return true; });
+  cx.textAlign = 'start'; world();
+  if(!F.done && el >= DUR){
+    F.done = true; F.keys = 0; F.items = [];
+    S.inv.food += F.kg; logIt({ k:'forage', got:F.caught, kg:F.kg });
     S.stage = 'trail'; save();
-    show('<div class="card wash center"><div class="say">You found ' + F.got + ' bits of food. That is ' + kg(kgs) + '.</div>' + bigBtn('Back to the trail', 'foragedone') + '</div>');
-    cap(F.got >= 10 ? 'A feast! Bonnie is very impressed.' : (F.got >= 5 ? 'Not bad at all.' : 'Slim pickings. Bambi found a stick.'));
+    show('<div class="card wash center"><div class="say">' + (F.kg ? 'You caught ' + F.kg + ' kg of food.' : 'Nothing in the basket.') + '</div>' + bigBtn('Back to the trail', 'foragedone') + '</div>');
+    cap(F.kg >= 24 ? 'A feast! Bonnie is very impressed.' : (F.kg >= 12 ? 'Not bad at all.' : 'Slim pickings. Bambi found a stick.'));
   }
 }
+function forageX(e){ var r = cv.getBoundingClientRect(); return (e.clientX - r.left) / r.width * W / CAM.s + CAM.ox; }
+cv.addEventListener('pointermove', function(e){ if(V.mode === 'forage' && V.forage && !V.forage.done) V.forage.tx = clamp(forageX(e), CAM.ox + 14, CAM.ox + 200); });
+cv.addEventListener('pointerdown', function(e){ if(V.mode === 'forage' && V.forage && !V.forage.done) V.forage.tx = clamp(forageX(e), CAM.ox + 14, CAM.ox + 200); });
+document.addEventListener('keydown', function(e){ if(V.mode !== 'forage' || !V.forage || V.forage.done) return; if(e.key === 'ArrowLeft'){ V.forage.keys = -1; e.preventDefault(); } if(e.key === 'ArrowRight'){ V.forage.keys = 1; e.preventDefault(); } });
+document.addEventListener('keyup', function(e){ if(V.forage && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) V.forage.keys = 0; });
 ACT.foragedone = function(){ V.forage = null; render(); };
 function drawFood(k, x, y){
   if(k === 'berries'){ R(x, y, 3, 3, '#8c3a6e'); R(x + 3, y + 1, 3, 3, '#6b2a5a'); R(x + 1, y + 3, 3, 3, '#8c3a6e'); R(x + 2, y - 2, 1, 2, '#3d6e35'); }
@@ -3750,11 +3862,7 @@ cv.addEventListener('click', function(e){
   if(V.mode === 'film'){ ACT.filmnext(); return; }
   if(V.chapter){ V.chapter.t0 = Math.min(V.chapter.t0, V.t - 4.7); return; }
   if(V.mode === 'steer' && V.steer && !V.steer.done){ V.steer.ty = clamp((e.clientY - r.top) / r.height * H, 20, 160); return; }
-  if(V.mode === 'forage' && V.forage && !V.forage.done){
-    var hit = null; V.forage.items.forEach(function(it){ if(!it.taken && V.t - it.born <= it.life && Math.abs(x - it.x - 6) < 13 && Math.abs(y - it.y - 4) < 13) hit = it; });
-    if(hit){ hit.taken = true; V.forage.got++; var fg = document.getElementById('fgot'); if(fg) fg.textContent = V.forage.got; ding(); }
-    return;
-  }
+  if(V.mode === 'forage'){ if(V.forage && !V.forage.done) V.forage.tx = clamp(x, CAM.ox + 14, CAM.ox + 200); return; }
   if(b && x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3]){
     V.spin = 1; V.taps++; sfx('yip');
     if(V.taps >= 3 && S && !S.walkman && S.stage !== 'title' && S.stage !== 'name' && S.stage !== 'job'){ S.walkman = true; save(); cap('Bonnie found Dez\'s lost Walkman. She refuses to give it back.'); }
