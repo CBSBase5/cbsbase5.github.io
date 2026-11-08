@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Physical World and Exploration
    Adventure activities, lesson 2 of 3: Plan it safe
-   45 minutes (Wednesday 1:15). Leads into "Design an expedition".
+   45 minutes (Tuesday 1:15). Leads into "Design an expedition".
    Shape as /lessons/l/ac-arch-1.js. ASCII only.
    ========================================================== */
 (function(){
@@ -40,7 +40,7 @@ window.B5LESSON = {
       { q: "Where do good adventures happen?", a: "In the stretch zone. And you choose where yours is." },
       { q: "Halfway up a climbing wall and want to come down?", a: "Say so. Coming down is always allowed." }
     ],
-    say: "From last Wednesday."
+    say: "From last Tuesday."
   },
 
   objective: {

@@ -560,8 +560,8 @@ html[data-tod="evening"] body{background:
   </div>
 </footer>
 
-<script src="/data/term.js?v=10"></script>
-<script src="/lessons/plan.js?v=7"></script>
+<script src="/data/term.js?v=11"></script>
+<script src="/lessons/plan.js?v=8"></script>
 <script src="/data/games.js?v=2"></script>
 <script src="/data/clockhelp.js?v=3"></script>
 <script src="/data/onthisday.js?v=1"></script>
@@ -586,14 +586,15 @@ html[data-tod="evening"] body{background:
   function autoSub(w){
     var days = T.schoolDays(w);
     var n = ["No days","One day","Two days","Three days","Four days","Five days"][days.length];
-    return n + (days.indexOf('tue')>-1 ? ", and a trip on Tuesday." : ".");
+    var td = T.tripDay ? T.tripDay(w) : '';
+    return n + (td && days.indexOf(td)>-1 ? ", and a trip on " + T.dayNames[td] + "." : ".");
   }
 
   /* Day ticket: which colour and width, in day order */
   var LOOK = {
     mon:{w:"w7 tall", fill:"fill-orange"},
-    tue:{w:"w5 tall", fill:"fill-ink"},
-    wed:{w:"w4", fill:"fill-plum"},
+    tue:{w:"w5 tall", fill:"fill-plum"},
+    wed:{w:"w4", fill:"fill-ink"},
     thu:{w:"w4", fill:"fill-teal"},
     fri:{w:"w4", fill:"fill-bright"}
   };
@@ -602,7 +603,7 @@ html[data-tod="evening"] body{background:
     var dd = (w.days && w.days[k]) || {};
     var date = T.dateOf(w, k);
     var look = LOOK[k];
-    var slots = T.timetable[k];
+    var slots = T.slotsOn ? T.slotsOn(w, k) : T.timetable[k];
     if(dd.off){
       return '<div class="card ticket off '+look.w+'">'+
         '<span class="kicker">'+T.niceDate(date)+'</span>'+
@@ -610,6 +611,8 @@ html[data-tod="evening"] body{background:
         '<div class="stub"><span>No departures</span><span>Back tomorrow</span></div></div>';
     }
     var isTrip = slots.some(function(s){return s[2]==='trip'});
+    /* trip days are always the ink ticket, whichever day they fall on */
+    var fill = isTrip ? 'fill-ink' : (look.fill === 'fill-ink' ? 'fill-plum' : look.fill);
     var title = dd.title || (isTrip ? "Trip day" : T.dayNames[k]);
     var line = dd.line || T.dayLines[k];
     var stubL = isTrip ? "Out 10:30 to 2:00" : "Departs 9:30";
@@ -621,7 +624,7 @@ html[data-tod="evening"] body{background:
     }).join('');
     var stubR = T.tripPlace(dd) || "Back 2:30";
     var isToday = T.iso(date) === today;
-    return '<a class="card ticket '+look.w+' '+look.fill+(isToday?' today':'')+'" href="/day/?w='+w.n+'&amp;d='+k+'">'+
+    return '<a class="card ticket '+look.w+' '+fill+(isToday?' today':'')+'" href="/day/?w='+w.n+'&amp;d='+k+'">'+
       (isToday ? '<span class="sticker">Today</span>' : '')+
       '<span class="kicker">'+T.niceDate(date)+'</span>'+
       '<h3>'+title+'</h3><p>'+line+'</p>'+along+
@@ -672,7 +675,7 @@ html[data-tod="evening"] body{background:
                 school.filter(function(k){ return T.iso(T.dateOf(w,k)) > today; })[0] || school[0] || keys[0];
     function big(k){ return ticket(w,k).replace(/class="card ticket (off )?[^"]*?(fill-\w+)?( today)?"/, function(m, off, fill, td){ return 'class="card ticket ' + (off||'') + 'w12' + (fill ? ' ' + fill : '') + (td||'') + '"'; }); }
     var strip = keys.map(function(k){
-      var dd = (w.days||{})[k] || {}, date = T.dateOf(w,k), slots = T.timetable[k];
+      var dd = (w.days||{})[k] || {}, date = T.dateOf(w,k), slots = T.slotsOn ? T.slotsOn(w, k) : T.timetable[k];
       var isTrip = slots && slots.some(function(s){ return s[2]==='trip'; });
       var name = dd.off ? 'No school' : (dd.title || (isTrip ? 'Trip day' : T.dayNames[k]));
       return '<button type="button" class="dchip' + (dd.off ? ' off' : '') + (T.iso(date) === today ? ' istoday' : '') + '" data-k="' + k + '" aria-pressed="' + (k === focus) + '">' +

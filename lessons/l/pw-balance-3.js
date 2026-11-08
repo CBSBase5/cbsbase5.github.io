@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Physical World and Exploration
    Balance and control, lesson 3 of 3: Three points of contact
-   45 minutes (Wednesday 1:15). Leads into "What helps me move".
+   45 minutes (Tuesday 1:15). Leads into "What helps me move".
    Shape as /lessons/l/ac-arch-1.js. ASCII only.
    ========================================================== */
 (function(){
@@ -42,7 +42,7 @@ window.B5LESSON = {
       { q: "What's your core?", a: "The muscles round your middle that keep you steady." },
       { q: "On a climbing wall, what does 'Take!' mean?", a: "Hold me on the rope so I can rest." }
     ],
-    say: "From the last few Wednesdays."
+    say: "From the last few Tuesdays."
   },
 
   objective: {

@@ -20,6 +20,9 @@ window.B5TERM = {
   /* --------------------------------------------------------
      THE TIMETABLE. The same every week.
      Each slot: start, end, and the session key it uses.
+     Trips moved from Tuesday to Wednesday from Week 2 (Nov 2026),
+     and Wednesday's old day moved to Tuesday. Week 1 keeps its
+     own Tuesday trip (timetable, in the weeks list below).
      -------------------------------------------------------- */
   timetable: {
     mon: [
@@ -30,13 +33,13 @@ window.B5TERM = {
     ],
     tue: [
       ["9:30","9:45","breathein"], ["9:45","10:00","brain"], ["10:00","10:30","cc"],
-      ["10:30","2:00","trip"],
+      ["10:30","11:15","digital"], ["11:15","11:45","core"],
+      ["11:45","12:30","lunch"], ["12:30","1:15","project"], ["1:15","2:00","physical"],
       ["2:00","2:30","breatheout"]
     ],
     wed: [
       ["9:30","9:45","breathein"], ["9:45","10:00","brain"], ["10:00","10:30","cc"],
-      ["10:30","11:15","digital"], ["11:15","11:45","core"],
-      ["11:45","12:30","lunch"], ["12:30","1:15","project"], ["1:15","2:00","physical"],
+      ["10:30","2:00","trip"],
       ["2:00","2:30","breatheout"]
     ],
     thu: [
@@ -69,8 +72,8 @@ window.B5TERM = {
      and at the top of each day page. A week can override it. */
   dayLines: {
     mon: "Forest school with Vernon before lunch, then your project and something creative to finish.",
-    tue: "Brain games and CC first, then out on the trip from half ten.",
-    wed: "Digital media with Andy, then your project and the physical world after lunch.",
+    tue: "Digital media with Andy, then your project and the physical world after lunch.",
+    wed: "Brain games and CC first, then out on the trip from half ten.",
     thu: "Horticulture with Kara in the morning, then an hour and a half on your project or GCSE.",
     fri: "The longest maths and english slot of the week, then PE and PFA."
   },
@@ -227,6 +230,8 @@ window.B5TERM = {
      era:     the year this week "jumps" to. Decoration only.
      theme:   heading on the index. Leave "" for a plain one.
      sub:     the line under it. Leave "" and it writes one.
+     timetable: optional, a day's slots for this week only, e.g.
+              { tue:[...], wed:[...] }. Left out = the timetable above.
      days:    anything special about a day:
                 off:true  no school that day
                 title / line   replace the card title and line
@@ -245,6 +250,20 @@ window.B5TERM = {
   weeks: [
     {
       n:1, start:"2026-11-03", end:"2026-11-06",
+      /* Week 1 still had its trip on the Tuesday */
+      timetable:{
+        tue: [
+          ["9:30","9:45","breathein"], ["9:45","10:00","brain"], ["10:00","10:30","cc"],
+          ["10:30","2:00","trip"],
+          ["2:00","2:30","breatheout"]
+        ],
+        wed: [
+          ["9:30","9:45","breathein"], ["9:45","10:00","brain"], ["10:00","10:30","cc"],
+          ["10:30","11:15","digital"], ["11:15","11:45","core"],
+          ["11:45","12:30","lunch"], ["12:30","1:15","project"], ["1:15","2:00","physical"],
+          ["2:00","2:30","breatheout"]
+        ]
+      },
       cc:"Festivals of Light",
       era:{ year:"2026", label:"Now" },
       theme:"Through the door",
@@ -322,7 +341,7 @@ window.B5TERM = {
       cc:"",
       era:{ year:"3026", label:"A thousand years from now" },
       theme:"The last jump before Christmas",
-      sub:"Five days, a trip on Tuesday, and home for Christmas on Friday.",
+      sub:"Five days, a trip on Wednesday, and home for Christmas on Friday.",
       days:{
         fri:{ title:"Last day of term", line:"The longest maths and english slot of the week, PE and PFA, then home for Christmas at half two." }
       },
@@ -403,6 +422,18 @@ window.B5TERM = {
     return s;
   };
 
+  /* A day's slots in a given week: that week's own timetable if it
+     has one for the day, otherwise the usual one */
+  T.slotsOn = function(week, key){
+    return (week && week.timetable && week.timetable[key]) || T.timetable[key];
+  };
+  /* The day of the week the trip is on ("wed"), or "" */
+  T.tripDay = function(week){
+    return T.dayKeys.filter(function(k){
+      return (T.slotsOn(week, k) || []).some(function(s){ return s[2] === "trip"; });
+    })[0] || "";
+  };
+
   /* ---------- sessions only some students go to ---------- */
   function hm(m){ var h = Math.floor(m / 60), mm = m % 60; if(h > 12) h -= 12; return h + ":" + ("0" + mm).slice(-2); }
   /* what runs alongside on a day, optionally only for one student */
@@ -419,10 +450,10 @@ window.B5TERM = {
       return /^(EGW|LP|LW|LC|HK|JT)$/.test(w) ? w : "";
     }catch(e){ return ""; }
   };
-  /* one student's day: the timetable with their alongside sessions dropped in,
+  /* one student's day (in a given week, if passed): the timetable with their alongside sessions dropped in,
      and anything they overlap trimmed or taken out */
-  T.slotsFor = function(key, who){
-    var base = T.timetable[key] || [], add = who ? T.alongsideOn(key, who) : [];
+  T.slotsFor = function(key, who, week){
+    var base = (week ? T.slotsOn(week, key) : T.timetable[key]) || [], add = who ? T.alongsideOn(key, who) : [];
     if(!add.length) return base;
     var out = [];
     base.forEach(function(s){

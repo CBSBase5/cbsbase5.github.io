@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Physical World and Exploration
    Adventure activities, lesson 3 of 3: On the rope
-   45 minutes (Wednesday 1:15). Leads into "Adventure day".
+   45 minutes (Tuesday 1:15). Leads into "Adventure day".
    Shape as /lessons/l/ac-arch-1.js. ASCII only.
    ========================================================== */
 (function(){
@@ -38,7 +38,7 @@ window.B5LESSON = {
       { q: "Why leave brand new boots at home?", a: "They give blisters. Wear them in first." },
       { q: "Halfway up a climbing wall and want down?", a: "Say so. Coming down is always allowed." }
     ],
-    say: "From the last two Wednesdays."
+    say: "From the last two Tuesdays."
   },
 
   objective: {

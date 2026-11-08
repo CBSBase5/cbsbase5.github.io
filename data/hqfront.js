@@ -209,7 +209,7 @@ function arrange(){
 }
 /* the term file holds the alongside sessions; HQ pages do not load it themselves */
 if(!window.B5TERM && /^(EGW|LP|LW|LC|HK|JT)$/.test(WHO)){
-  var ts = d.createElement("script"); ts.src = "/data/term.js?v=10";
+  var ts = d.createElement("script"); ts.src = "/data/term.js?v=11";
   ts.onload = function(){ drawFront(); };
   d.head.appendChild(ts);
 }

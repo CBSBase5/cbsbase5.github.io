@@ -8,7 +8,7 @@
    Each room: id, name (what students and staff see), sel (what it
    is on the HQ home page), from (the day it opens; "" = always
    open), only (which students have it; left out = everyone).
-   Nothing new opens on a Tuesday (trip day).
+   Nothing new opens on a trip day (Wednesdays from Week 2).
 
    Jay can open a room early or hold one back for one student on
    /teacher/hq-drops.html. That writes <prefix>rooms.v1 for the
@@ -38,12 +38,12 @@ var ROOMS = [
   { id: "swipe",  name: "Swipe deck",            from: "2026-11-05", sel: ['a.fold[href$="/swipe.html"]'] },
   { id: "flip",   name: "Flip a card",           from: "2026-11-06", sel: ["#secDice"] },
   { id: "sky",    name: "Your sky",              from: "2026-11-09", sel: ['a.fold[href$="/sky.html"]'] },
-  { id: "catch",  name: "Catch Jay out",         from: "2026-11-11", sel: [".hqx-cj"] },
+  { id: "catch",  name: "Catch Jay out",         from: "2026-11-10", sel: [".hqx-cj"] },
   { id: "look",   name: "Change the look",       from: "2026-11-12", sel: ['a.fold[href$="/looks.html"]'] },
   { id: "papers", name: "Skills map",            from: "2026-11-13", sel: ['a.fold[href$="/papers.html"]', '.hqnav a[href$="/papers.html"]', "#exams"],
     names: { EGW: "Papers and exam dates", LP: "Papers", LW: "Papers" } },
   { id: "feels",  name: "How it feels",          from: "2026-11-16", sel: ["#map"], names: { EGW: "Revision map", LP: "Revision map" } },
-  { id: "plan",   name: "Plan a session",        from: "2026-11-18", sel: ["#plan"] },
+  { id: "plan",   name: "Plan a session",        from: "2026-11-17", sel: ["#plan"] },
   { id: "log",    name: "One thing to remember", from: "2026-11-19", sel: ["#logFold"] },
   { id: "also",   name: "Also on Base 5",        from: "2026-11-20", sel: ["details.fold.more"] }
 ];

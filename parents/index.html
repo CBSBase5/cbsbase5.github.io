@@ -286,8 +286,8 @@
   </div>
 </footer>
 
-<script src="/data/term.js?v=10"></script>
-<script src="/data/parents.js?v=19"></script>
+<script src="/data/term.js?v=11"></script>
+<script src="/data/parents.js?v=20"></script>
 <script src="/data/cc.js?v=7"></script>
 <script src="/cc/cc-art.js?v=8"></script>
 <script src="/cc/cc-scenes.js?v=8"></script>
@@ -337,7 +337,7 @@ if(T.question) $("bigq").textContent = T.question;
 var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 function parse(iso){ var p = iso.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
 function longDate(iso){ var d = parse(iso); return T.dayNames[T.dayKeys[(d.getDay() + 6) % 7]] + " " + d.getDate() + " " + MONTHS[d.getMonth()]; }
-function isTripDay(k){ return T.timetable[k].some(function(s){ return s[2] === "trip"; }); }
+function isTripDay(k, wk){ return (T.slotsOn ? T.slotsOn(wk, k) : T.timetable[k]).some(function(s){ return s[2] === "trip"; }); }
 
 /* ---------- this week (never a trip's place or times) ---------- */
 var today = T.todayIso(), w = T.currentWeek(), before = today < T.firstDay, after = today > T.lastDay;
@@ -348,7 +348,7 @@ $("twLead").textContent = before ? T.name + " runs from " + longDate(T.firstDay)
 var school = T.schoolDays(w);
 $("twDays").innerHTML = T.dayKeys.map(function(k){
   var dd = (w.days || {})[k] || {}, date = T.dateOf(w, k), iso = T.iso(date), inWeek = iso >= w.start && iso <= w.end;
-  var off = dd.off || !inWeek, trip = !off && isTripDay(k);
+  var off = dd.off || !inWeek, trip = !off && isTripDay(k, w);
   var line = off ? (/INSET/i.test(dd.line || "") ? "INSET day." : "No school.") : trip ? "Trip day." : (dd.line || P.week && P.week[k] || T.dayLines[k]);
   return '<div class="twd' + (off ? " off" : "") + (trip ? " trip" : "") + '"><b>' + esc(dd.title && !trip ? dd.title : T.dayNames[k]) + '</b><small>' + date.getDate() + " " + MONTHS[date.getMonth()] + '</small><p>' + esc(line) + '</p></div>';
 }).join("");

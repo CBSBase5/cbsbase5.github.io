@@ -110,7 +110,7 @@ var SERIES = [
    teaches its series one after the other. */
 var SLOTS = [
   { id: "mon-aesthetic", days: ["mon"], session: "aesthetic", series: ["ac-arch"], mins: 45, label: "Monday, Aesthetic and Creative" },
-  { id: "wed-physical",  days: ["wed"], session: "physical",  series: ["pw-adventure", "pw-balance"], mins: 45, label: "Wednesday, Physical World",
+  { id: "tue-physical",  days: ["tue"], session: "physical",  series: ["pw-adventure", "pw-balance"], mins: 45, label: "Tuesday, Physical World",
     order: ["pw-adventure-1", "pw-balance-1", "pw-adventure-2", "pw-adventure-3", "pw-balance-2", "pw-balance-3"] },
   { id: "thu-project",   days: ["thu"], session: "project",   series: ["hs-myths", "se-earth"], mins: 45, label: "Thursday, first half of the project slot" },
   { id: "fri-pfa",       days: ["fri"], session: "pfa",       series: ["pfa-transport", "pfa-careers"], mins: 30, label: "Friday, PFA",
@@ -302,7 +302,7 @@ function label(x){
 }
 
 /* bump when lesson files change, so boards fetch the new ones */
-window.B5LESSONS_V = 7;
+window.B5LESSONS_V = 8;
 
 window.B5LESSONS = {
   pillars: P, series: SERIES, slots: SLOTS, hqs: HQS, parts: PARTS,

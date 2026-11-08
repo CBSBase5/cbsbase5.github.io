@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Physical World and Exploration
    Balance and control, lesson 1 of 3: Finding your balance
-   45 minutes (Wednesday 1:15). Leads into "Move, balance, control".
+   45 minutes (Tuesday 1:15). Leads into "Move, balance, control".
    Shape as /lessons/l/ac-arch-1.js. ASCII only.
    ========================================================== */
 (function(){

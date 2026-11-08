@@ -9,8 +9,9 @@ the milestone wording (that stays private in the Targets tab and
 BridgeLink Buddy).
 
 Release: a daily trickle, one or two things a day per student, from
-Wed 4 Nov to Mon 14 Dec 2026. Tuesdays are trip days, so nothing new
-lands then, and the last week of term is left for catching up.
+Wed 4 Nov to Mon 14 Dec 2026. Nothing new lands on a trip day
+(Tuesday in Week 1, Wednesday from Week 2), and the last week of term
+is left for catching up.
 
 ASCII only.
 """
@@ -176,26 +177,28 @@ ACTS = [
 ]
 
 # Shared pillar activities land on the same day for everyone, on the
-# weekday their session runs (Aesthetic Mon, Physical Wed, PFA Fri),
+# weekday their session runs (Aesthetic Mon, Physical Tue, PFA Fri),
 # so the activity can lead into the real session.
 PILLAR_DAYS = {
     "getting-around":         "2026-11-06",
     "what-makes-it-stand":    "2026-11-09",
-    "design-an-expedition":   "2026-11-11",
+    "design-an-expedition":   "2026-11-10",
     "myths-then-and-now":     "2026-11-12",
     "careers-fair-scout":     "2026-11-13",
-    "move-balance-control":   "2026-11-18",
+    "move-balance-control":   "2026-11-17",
     "read-the-signs":         "2026-11-20",
     "draw-like-an-architect": "2026-11-23",
-    "adventure-day":          "2026-11-25",
+    "adventure-day":          "2026-11-24",
     "career-explorer":        "2026-11-27",
-    "what-helps-me-move":     "2026-12-02",
+    "what-helps-me-move":     "2026-12-01",
     "hidden-messages":        "2026-12-03",
     "what-is-it-made-of":     "2026-12-10",
     "my-yes-my-no":           "2026-11-12",   # on a day that already has a shared activity, so no other drop moves
 }
 
 FIRST_DROP = "2026-11-04"
+# Trips were on Tuesdays in Week 1 and are on Wednesdays from Week 2
+TRIP_WED_FROM = "2026-11-09"
 LAST_DROP = "2026-12-14"
 
 

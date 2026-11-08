@@ -29,7 +29,7 @@ ENGINE_V = "22"
 A2CSS_V = "3"
 ART_V = "1"
 # pillar activities say which whole group lesson leads into them (/lessons/tie.js)
-LESSON_TIE = '<script src="/lessons/plan.js?v=7"></script>\n<script src="/lessons/tie.js?v=2"></script>\n'
+LESSON_TIE = '<script src="/lessons/plan.js?v=8"></script>\n<script src="/lessons/tie.js?v=2"></script>\n'
 
 
 HQS = {
@@ -149,7 +149,8 @@ def school_days():
     end = datetime.date.fromisoformat(plan.LAST_DROP)
     out = []
     while d <= end:
-        if d.weekday() < 5 and d.weekday() != 1:   # no Tuesdays: trip day
+        trip = 2 if d.isoformat() >= plan.TRIP_WED_FROM else 1   # trip day: Tue in Week 1, Wed after
+        if d.weekday() < 5 and d.weekday() != trip:
             out.append(d.isoformat())
         d += datetime.timedelta(days=1)
     return out

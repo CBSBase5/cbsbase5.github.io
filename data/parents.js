@@ -69,8 +69,8 @@ window.B5PARENTS = {
   /* What each day of the week is like. */
   week: {
     mon: "Forest school with Vernon in the morning, then project time and something creative to finish.",
-    tue: "Trip day. Details come to you directly from school.",
-    wed: "Digital media with Andy, then project time, and the physical world after lunch.",
+    tue: "Digital media with Andy, then project time, and the physical world after lunch.",
+    wed: "Trip day. Details come to you directly from school.",
     thu: "Horticulture with Kara in the morning, then a long slot for projects or GCSE work.",
     fri: "The longest maths and English slot of the week, then PE, and preparation for adulthood to round off the week."
   },

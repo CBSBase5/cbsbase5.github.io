@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Physical World and Exploration
    Adventure activities, lesson 1 of 3: What makes it an adventure?
-   45 minutes (Wednesday 1:15). Leads into "Design an expedition".
+   45 minutes (Tuesday 1:15). Leads into "Design an expedition".
    Shape as /lessons/l/ac-arch-1.js. ASCII only.
    ========================================================== */
 (function(){

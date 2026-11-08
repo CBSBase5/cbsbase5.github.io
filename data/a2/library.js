@@ -74,7 +74,7 @@ window.B5LIB = {
    "line": "One clue can mean anything. Several clues together build a case. Then you weigh up which reading wins.",
    "mins": 25,
    "chunks": 4,
-   "first": "2026-12-02",
+   "first": "2026-12-01",
    "ready": true
   },
   {
@@ -146,7 +146,7 @@ window.B5LIB = {
    "line": "Sentences about the same idea belong together, like a pair of socks. A group of them is a paragraph.",
    "mins": 20,
    "chunks": 4,
-   "first": "2026-11-11",
+   "first": "2026-11-10",
    "ready": true
   },
   {
@@ -170,7 +170,7 @@ window.B5LIB = {
    "line": "The little words that hold ideas together: and, but, because, then, however, and more.",
    "mins": 20,
    "chunks": 4,
-   "first": "2026-11-25",
+   "first": "2026-11-24",
    "ready": true
   },
   {
@@ -194,7 +194,7 @@ window.B5LIB = {
    "line": "Headings, topic sentences, openings and endings: the bones that hold a text up, and what they do to the reader.",
    "mins": 25,
    "chunks": 4,
-   "first": "2026-11-11",
+   "first": "2026-11-10",
    "ready": true
   },
   {
@@ -278,7 +278,7 @@ window.B5LIB = {
    "line": "Asking gets a question mark. A strong feeling gets an exclamation mark. Calm telling gets a full stop.",
    "mins": 20,
    "chunks": 4,
-   "first": "2026-12-02",
+   "first": "2026-12-01",
    "ready": true
   },
   {
@@ -482,7 +482,7 @@ window.B5LIB = {
    "line": "Split it into rectangles, find any missing lengths, then add up the areas.",
    "mins": 25,
    "chunks": 4,
-   "first": "2026-11-18",
+   "first": "2026-11-17",
    "ready": true
   },
   {
@@ -542,7 +542,7 @@ window.B5LIB = {
    "line": "Speed is how far you go in each hour. Know two of speed, distance and time, and you can find the third.",
    "mins": 25,
    "chunks": 4,
-   "first": "2026-12-09",
+   "first": "2026-12-08",
    "ready": true
   },
   {
@@ -614,7 +614,7 @@ window.B5LIB = {
    "line": "Where you are going, how long it takes, what to pack, and who knows.",
    "mins": 25,
    "chunks": 4,
-   "first": "2026-11-11",
+   "first": "2026-11-10",
    "ready": true
   },
   {
@@ -626,7 +626,7 @@ window.B5LIB = {
    "line": "Get ready for an adventure activity, have a go your way, then look back on it.",
    "mins": 20,
    "chunks": 4,
-   "first": "2026-11-25",
+   "first": "2026-11-24",
    "ready": true
   },
   {
@@ -638,7 +638,7 @@ window.B5LIB = {
    "line": "Big moves like balancing, jumping and throwing. Small moves like laces, zips, cutlery and pens.",
    "mins": 20,
    "chunks": 4,
-   "first": "2026-11-18",
+   "first": "2026-11-17",
    "ready": true
   },
   {
@@ -650,7 +650,7 @@ window.B5LIB = {
    "line": "Warm ups, tools, small steps and practice: finding the helpers that work for you.",
    "mins": 20,
    "chunks": 4,
-   "first": "2026-12-02",
+   "first": "2026-12-01",
    "ready": true
   },
   {

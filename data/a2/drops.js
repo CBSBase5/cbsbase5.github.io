@@ -576,7 +576,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "design-an-expedition",
    "title": "Design an expedition",
    "subject": "Physical World",
@@ -592,7 +592,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "text-skeleton",
    "title": "Text skeleton",
    "subject": "English",
@@ -612,7 +612,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "belong-together",
    "title": "Belong together",
    "subject": "English",
@@ -628,7 +628,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "design-an-expedition",
    "title": "Design an expedition",
    "subject": "Physical World",
@@ -644,7 +644,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "belong-together",
    "title": "Belong together",
    "subject": "English",
@@ -660,7 +660,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "design-an-expedition",
    "title": "Design an expedition",
    "subject": "Physical World",
@@ -676,7 +676,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "belong-together",
    "title": "Belong together",
    "subject": "English",
@@ -692,7 +692,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "design-an-expedition",
    "title": "Design an expedition",
    "subject": "Physical World",
@@ -708,7 +708,7 @@ window.B5DROPS = {
   },
   {
    "who": "LP",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "design-an-expedition",
    "title": "Design an expedition",
    "subject": "Physical World",
@@ -724,7 +724,7 @@ window.B5DROPS = {
   },
   {
    "who": "LW",
-   "date": "2026-11-11",
+   "date": "2026-11-10",
    "slug": "design-an-expedition",
    "title": "Design an expedition",
    "subject": "Physical World",
@@ -1316,7 +1316,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "l-shaped-floors",
    "title": "L shaped floors",
    "subject": "Maths",
@@ -1332,7 +1332,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "move-balance-control",
    "title": "Move, balance, control",
    "subject": "Physical World",
@@ -1348,7 +1348,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "capitals-stops",
    "title": "Capitals and full stops",
    "subject": "English",
@@ -1364,7 +1364,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "move-balance-control",
    "title": "Move, balance, control",
    "subject": "Physical World",
@@ -1380,7 +1380,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "capitals-stops",
    "title": "Capitals and full stops",
    "subject": "English",
@@ -1396,7 +1396,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "move-balance-control",
    "title": "Move, balance, control",
    "subject": "Physical World",
@@ -1412,7 +1412,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "capitals-stops",
    "title": "Capitals and full stops",
    "subject": "English",
@@ -1428,7 +1428,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "move-balance-control",
    "title": "Move, balance, control",
    "subject": "Physical World",
@@ -1444,7 +1444,7 @@ window.B5DROPS = {
   },
   {
    "who": "LP",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "capitals-stops",
    "title": "Capitals and full stops",
    "subject": "English",
@@ -1460,7 +1460,7 @@ window.B5DROPS = {
   },
   {
    "who": "LP",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "move-balance-control",
    "title": "Move, balance, control",
    "subject": "Physical World",
@@ -1476,7 +1476,7 @@ window.B5DROPS = {
   },
   {
    "who": "LW",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "detail-hunt",
    "title": "Detail detectives",
    "subject": "English",
@@ -1492,7 +1492,7 @@ window.B5DROPS = {
   },
   {
    "who": "LW",
-   "date": "2026-11-18",
+   "date": "2026-11-17",
    "slug": "move-balance-control",
    "title": "Move, balance, control",
    "subject": "Physical World",
@@ -1960,7 +1960,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "adventure-day",
    "title": "Adventure day",
    "subject": "Physical World",
@@ -1976,7 +1976,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "link-words",
    "title": "Link words",
    "subject": "English",
@@ -1992,7 +1992,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "adventure-day",
    "title": "Adventure day",
    "subject": "Physical World",
@@ -2008,7 +2008,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "adventure-day",
    "title": "Adventure day",
    "subject": "Physical World",
@@ -2024,7 +2024,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "adventure-day",
    "title": "Adventure day",
    "subject": "Physical World",
@@ -2040,7 +2040,7 @@ window.B5DROPS = {
   },
   {
    "who": "LP",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "adventure-day",
    "title": "Adventure day",
    "subject": "Physical World",
@@ -2056,7 +2056,7 @@ window.B5DROPS = {
   },
   {
    "who": "LP",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "says-who",
    "title": "Says who?",
    "subject": "English",
@@ -2072,7 +2072,7 @@ window.B5DROPS = {
   },
   {
    "who": "LW",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "adventure-day",
    "title": "Adventure day",
    "subject": "Physical World",
@@ -2088,7 +2088,7 @@ window.B5DROPS = {
   },
   {
    "who": "LW",
-   "date": "2026-11-25",
+   "date": "2026-11-24",
    "slug": "link-words",
    "title": "Link words",
    "subject": "English",
@@ -2512,7 +2512,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "case-file",
    "title": "Case file",
    "subject": "English",
@@ -2528,7 +2528,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "what-helps-me-move",
    "title": "What helps me move",
    "subject": "Physical World",
@@ -2544,7 +2544,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "end-marks",
    "title": "Question or exclamation?",
    "subject": "English",
@@ -2560,7 +2560,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "what-helps-me-move",
    "title": "What helps me move",
    "subject": "Physical World",
@@ -2576,7 +2576,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "end-marks",
    "title": "Question or exclamation?",
    "subject": "English",
@@ -2592,7 +2592,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "what-helps-me-move",
    "title": "What helps me move",
    "subject": "Physical World",
@@ -2608,7 +2608,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "end-marks",
    "title": "Question or exclamation?",
    "subject": "English",
@@ -2624,7 +2624,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "what-helps-me-move",
    "title": "What helps me move",
    "subject": "Physical World",
@@ -2640,7 +2640,7 @@ window.B5DROPS = {
   },
   {
    "who": "LP",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "what-helps-me-move",
    "title": "What helps me move",
    "subject": "Physical World",
@@ -2656,7 +2656,7 @@ window.B5DROPS = {
   },
   {
    "who": "LW",
-   "date": "2026-12-02",
+   "date": "2026-12-01",
    "slug": "what-helps-me-move",
    "title": "What helps me move",
    "subject": "Physical World",
@@ -3020,7 +3020,7 @@ window.B5DROPS = {
   },
   {
    "who": "EGW",
-   "date": "2026-12-09",
+   "date": "2026-12-08",
    "slug": "speed-distance-time",
    "title": "Speed, distance, time",
    "subject": "Maths",
@@ -3036,7 +3036,7 @@ window.B5DROPS = {
   },
   {
    "who": "HK",
-   "date": "2026-12-09",
+   "date": "2026-12-08",
    "slug": "paragraph-focus",
    "title": "What is it about?",
    "subject": "English",
@@ -3052,7 +3052,7 @@ window.B5DROPS = {
   },
   {
    "who": "JT",
-   "date": "2026-12-09",
+   "date": "2026-12-08",
    "slug": "paragraph-focus",
    "title": "What is it about?",
    "subject": "English",
@@ -3068,7 +3068,7 @@ window.B5DROPS = {
   },
   {
    "who": "LC",
-   "date": "2026-12-09",
+   "date": "2026-12-08",
    "slug": "paragraph-focus",
    "title": "What is it about?",
    "subject": "English",
@@ -3084,7 +3084,7 @@ window.B5DROPS = {
   },
   {
    "who": "LP",
-   "date": "2026-12-09",
+   "date": "2026-12-08",
    "slug": "between-lines",
    "title": "Between the lines",
    "subject": "English",
@@ -3100,7 +3100,7 @@ window.B5DROPS = {
   },
   {
    "who": "LW",
-   "date": "2026-12-09",
+   "date": "2026-12-08",
    "slug": "glue-words",
    "title": "Glue words",
    "subject": "English",
