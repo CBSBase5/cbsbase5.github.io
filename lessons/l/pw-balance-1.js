@@ -7,22 +7,35 @@
 (function(){
 var A = window.LART, S = A.svg, T = A.T, I = A.icon, INK = "#0a2f38", TEAL = "#007291", ORANGE = "#ef7724", YELLOW = "#ffc247", PINK = "#e2557a";
 
-function person(x, y, feet, arms, lean, step){
-  var r = lean || 0;
-  return '<g' + (step ? ' data-s="' + step + '"' : "") + ' transform="translate(' + x + ' ' + y + ')">' +
-    '<path d="M' + (-feet - 14) + ' 0H' + (feet + 14) + '" stroke="' + TEAL + '" stroke-width="10" stroke-linecap="round" opacity=".45"/>' +
-    '<g transform="rotate(' + r + ' 0 0)"><path d="M0 -70L' + (-feet) + ' 0M0 -70L' + feet + ' 0" stroke="' + INK + '" stroke-width="8" stroke-linecap="round"/>' +
-    '<path d="M0 -70V-140" stroke="' + INK + '" stroke-width="9" stroke-linecap="round"/>' +
-    '<path d="M0 -125L' + (-arms) + ' ' + (arms > 40 ? -128 : -95) + 'M0 -125L' + arms + ' ' + (arms > 40 ? -128 : -95) + '" stroke="' + INK + '" stroke-width="7" stroke-linecap="round"/>' +
-    '<circle cx="0" cy="-160" r="18" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/>' +
-    '<circle cx="0" cy="-88" r="9" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="3"/></g></g>';
+function kid(x, y, o){
+  o = o || {};
+  var f = o.feet || 18, k = o.knee || 0, col = o.col || TEAL, hip = -70 + k * 0.5;
+  var g = '<g transform="translate(' + x + ' ' + y + ')">' +
+    '<ellipse cx="0" cy="4" rx="' + (f + 30) + '" ry="7" fill="' + INK + '" opacity=".12"/>' +
+    '<path d="M-8 ' + hip + 'L' + (-f - k * 0.3) + ' ' + (-36 + k * 0.2) + 'L' + (-f) + ' -4M8 ' + hip + 'L' + (f + k * 0.3) + ' ' + (-36 + k * 0.2) + 'L' + f + ' -4" stroke="#2c4a6b" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '<path d="M' + (-f - 12) + ' 0h20M' + (f - 8) + ' 0h20" stroke="' + INK + '" stroke-width="10" stroke-linecap="round"/>' +
+    '<rect x="-24" y="' + (hip - 70) + '" width="48" height="80" rx="22" fill="' + col + '" stroke="' + INK + '" stroke-width="3.5"/>';
+  if(o.core) g += '<ellipse class="pulse" cx="0" cy="' + (hip - 22) + '" rx="30" ry="24" fill="' + YELLOW + '" opacity=".55"/>';
+  var ay = hip - 58;
+  g += o.arms === "out" ? '<path d="M-20 ' + ay + 'L-78 ' + (ay + 4) + 'M20 ' + ay + 'L78 ' + (ay + 4) + '" stroke="#f1c7a1" stroke-width="12" stroke-linecap="round"/>'
+    : o.arms === "up" ? '<path d="M-18 ' + ay + 'L-40 ' + (ay - 50) + 'M18 ' + ay + 'L40 ' + (ay - 50) + '" stroke="#f1c7a1" stroke-width="12" stroke-linecap="round"/>'
+    : '<path d="M-22 ' + ay + 'L-30 ' + (ay + 50) + 'M22 ' + ay + 'L30 ' + (ay + 50) + '" stroke="#f1c7a1" stroke-width="12" stroke-linecap="round"/>';
+  g += '<circle cx="0" cy="' + (hip - 96) + '" r="24" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3.5"/>' +
+    '<path d="M-24 ' + (hip - 100) + 'q4 -26 24 -26t24 26q-10 -10 -24 -8t-24 8z" fill="#6b4423"/>' +
+    '<circle cx="-8" cy="' + (hip - 94) + '" r="3.2" fill="' + INK + '"/><circle cx="8" cy="' + (hip - 94) + '" r="3.2" fill="' + INK + '"/>' +
+    '<path d="M-7 ' + (hip - 84) + 'q7 6 14 0" stroke="' + INK + '" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>';
+  return g;
+}
+function person(x, y, feet, arms, lean, step, knee){
+  return '<g' + (step ? ' data-s="' + step + '"' : "") + ' transform="translate(' + x + ' ' + y + ')"><g transform="rotate(' + (lean || 0) + ' 0 0)">' +
+    kid(0, 0, { feet: Math.max(feet, 6), arms: arms > 40 ? "out" : "", knee: knee || 0, col: TEAL }) + '</g></g>';
 }
 
 window.B5LESSON = {
   id: "pw-balance-1",
   title: "Finding your balance",
   mins: 45,
-  cover: { line: "Remember the dot that decides whether a tower falls? You have one too.", art: S("0 0 700 420", '<path d="M20 380H680" stroke="' + INK + '" stroke-width="4"/>' + person(200, 378, 20, 26) + person(440, 378, 50, 70) + A.bambi(600, 300, 0.7)) },
+  cover: { line: "Remember the dot that decides whether a tower falls? You have one too.", art: S("0 0 700 420", A.scene(700, 420, { ground: 380, sun: [620, 70] }) + '<g class="wobble">' + person(200, 378, 20, 26) + '</g>' + person(440, 378, 50, 70) + A.bambi(600, 300, 0.7)) },
 
   warm: {
     wordle: { word: "STEADY", hint: "Not wobbly. Calm and still.", say: "Six letters." },
@@ -75,7 +88,7 @@ window.B5LESSON = {
           stack: true, artWidth: 1250,
           art: S("0 0 1000 300", '<path d="M20 280H980" stroke="' + INK + '" stroke-width="4"/>' +
             person(170, 270, 50, 30, 0, 1) + T(170, 60, "Wider base", 26, { a: "middle", f: 1 }) +
-            '<g data-s="2">' + person(500, 270, 40, 30).replace('M0 -70L-40 0M0 -70L40 0', 'M0 -70L-40 0M0 -70L40 0') + T(500, 60, "Lower dot", 26, { a: "middle", f: 1 }) + T(500, 90, "bend your knees", 20, { a: "middle" }) + '</g>' +
+            '<g data-s="2">' + person(500, 270, 40, 30, 0, 0, 34) + T(500, 60, "Lower dot", 26, { a: "middle", f: 1 }) + T(500, 90, "bend your knees", 20, { a: "middle" }) + '</g>' +
             person(830, 270, 20, 80, 0, 3) + T(830, 60, "Arms out", 26, { a: "middle", f: 1 })),
           say: "Try each one standing up, if anyone fancies it."
         },

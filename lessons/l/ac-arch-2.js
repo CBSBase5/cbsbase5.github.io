@@ -33,7 +33,7 @@ function sky(x, y, s){
   return g + '</g>';
 }
 function timeline(){
-  return S("0 0 1000 380", '<path d="M20 330H980" stroke="' + INK + '" stroke-width="5" stroke-linecap="round"/>' +
+  return S("0 0 1000 380", A.scene(1000, 380, { ground: 330, sun: [930, 60] }) +
     '<g data-s="1">' + hut(110, 328, 1) + T(110, 368, "3000 BC", 22, { a: "middle", f: 1 }) + '</g>' +
     '<g data-s="2">' + dome(300, 328, 0.9) + T(300, 368, "AD 125", 22, { a: "middle", f: 1 }) + '</g>' +
     '<g data-s="3">' + keep(490, 328, 0.95) + T(490, 368, "1100s", 22, { a: "middle", f: 1 }) + '</g>' +
@@ -79,6 +79,8 @@ window.B5LESSON = {
       slides: [
         { title: "5,000 years of building", text: "Same job every time: keep the weather out and stay up.", stack: true, artWidth: 1300, art: timeline(),
           say: "Click through each stop. Ask what each one is made of." },
+        { type: "media", kicker: "The first stop, for real", title: "Skara Brae, Orkney: 5,000 years old", img: "https://commons.wikimedia.org/wiki/Special:FilePath/Skara_Brae_house_1_5.jpg?width=1200", alt: "Inside a stone house at Skara Brae, with stone beds and a stone dresser", caption: "Stone beds, a stone dresser, a hearth in the middle. Older than the pyramids.", credit: "Photo: Wknight94, CC BY-SA 3.0, Wikimedia Commons",
+          say: "Ask: what's the dresser for? What would you keep on it?" },
         {
           type: "predict", title: "The Roman dome",
           q: "The Pantheon in Rome has a huge concrete dome that is still standing. How old is it?",
@@ -107,7 +109,7 @@ window.B5LESSON = {
           title: "Why did building change?",
           pts: ["<b>New materials</b>: iron, then steel, then huge sheets of glass", "<b>New machines</b>: cranes, lifts, power tools", "<b>More people</b> in cities, so buildings went up instead of out", "<b>New worries</b>: fire, heat, energy bills"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", '<path d="M10 400H510" stroke="' + INK + '" stroke-width="4"/>' + sky(160, 400, 1.3) + sky(300, 400, 0.9) + '<g transform="translate(420 400) scale(.95)"><path d="M-12 0V-300M12 0V-300M-60 -300H160" stroke="' + YELLOW + '" stroke-width="6"/></g>' + A.bird(470, 60, 0.8)),
+          art: S("0 0 520 420", A.scene(520, 420, { ground: 400, sun: [80, 70] }) + sky(160, 400, 1.3) + sky(300, 400, 0.9) + '<g class="sway"><g transform="translate(420 400) scale(.95)"><path d="M-12 0V-300M12 0V-300M-60 -300H160" stroke="' + YELLOW + '" stroke-width="6"/></g></g>' + A.bird(470, 60, 0.8)),
           say: "Ask: which of these is most important?"
         },
         {
@@ -128,7 +130,7 @@ window.B5LESSON = {
           title: "What lasts?",
           pts: ["<b>Tough material</b>: stone shrugs off weather", "<b>Looking after it</b>: fixing roofs, gutters, cracks", "<b>Being loved or useful</b>: people repair what they need", "<b>Luck</b>: fire, floods and wars destroy a lot"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", '<path d="M10 400H510" stroke="' + INK + '" stroke-width="4"/>' + keep(260, 400, 1.6) + A.bonnie(420, 362, 0.5)),
+          art: S("0 0 520 420", A.scene(520, 420, { ground: 400, time: "dusk", sun: [420, 80] }) + keep(260, 400, 1.6) + A.bonnie(420, 362, 0.5)), photo: { src: "https://commons.wikimedia.org/wiki/Special:FilePath/Orkney_Skara_Brae.jpg?width=800", alt: "The stone houses of Skara Brae beside the sea in Orkney", caption: "Skara Brae, Orkney: still here", credit: "Photo: John Burka, CC BY-SA 3.0, Wikimedia Commons" },
           say: "Ask: what is the oldest thing in your house?"
         },
         {
@@ -150,7 +152,7 @@ window.B5LESSON = {
   realworld: {
     title: "Every street is a timeline",
     text: "Look at the buildings near you: old brick terraces, newer glass offices, a church that might be hundreds of years old. You can often guess a building's age from what it is made of.",
-    art: S("0 0 560 420", '<path d="M10 400H550" stroke="' + INK + '" stroke-width="4"/>' + keep(120, 400, 1.1) + palace(300, 400, 0.9) + sky(470, 400, 1.1) + A.bird(300, 120, 0.9)),
+    art: S("0 0 560 420", A.scene(560, 420, { ground: 400, time: "dusk", sun: [300, 80] }) + keep(120, 400, 1.1) + palace(300, 400, 0.9) + sky(470, 400, 1.1) + '<g class="float">' + A.bird(300, 160, 0.9) + '</g>'),
     say: "Ask: what's the oldest building on the way to school?"
   },
 

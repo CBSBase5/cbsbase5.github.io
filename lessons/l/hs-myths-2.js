@@ -9,9 +9,9 @@
 var A = window.LART, S = A.svg, T = A.T, I = A.icon, INK = "#0a2f38", PLUM = "#7b4b8f", TEAL = "#007291", ORANGE = "#ef7724", YELLOW = "#ffc247", PINK = "#e2557a";
 
 function nessie(x, y, s){
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')"><path d="M-90 0q10 -30 30 0M-40 0q12 -40 34 0" fill="#3fae6a" stroke="' + INK + '" stroke-width="3"/>' +
+  return '<g class="float"><g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')"><path d="M-90 0q10 -30 30 0M-40 0q12 -40 34 0" fill="#3fae6a" stroke="' + INK + '" stroke-width="3"/>' +
     '<path d="M10 0q-6 -70 30 -90q24 -8 30 10q-16 0 -22 8q-10 20 -8 72z" fill="#3fae6a" stroke="' + INK + '" stroke-width="3"/><circle cx="56" cy="-82" r="3.4" fill="' + INK + '"/>' +
-    '<path d="M-110 4q15 -8 30 0t30 0t30 0t30 0t30 0t30 0t30 0" stroke="#7fbfd0" stroke-width="4" fill="none"/></g>';
+    '<path d="M-110 4q15 -8 30 0t30 0t30 0t30 0t30 0t30 0t30 0" stroke="#7fbfd0" stroke-width="4" fill="none"/></g></g>';
 }
 function cat(x, y, s){
   return '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')"><ellipse cx="0" cy="-20" rx="26" ry="22" fill="#ef7724" stroke="' + INK + '" stroke-width="3"/>' +
@@ -32,7 +32,7 @@ window.B5LESSON = {
   id: "hs-myths-2",
   title: "Legends of Britain",
   mins: 45,
-  cover: { line: "King Arthur, Robin Hood, Nessie and a very lucky cat. How much of it actually happened?", art: S("0 0 700 420", nessie(330, 330, 1.6) + I("sword", 120, 380, 1.4) + cat(600, 380, 1.3) + A.bird(560, 80, 0.8)) },
+  cover: { line: "King Arthur, Robin Hood, Nessie and a very lucky cat. How much of it actually happened?", art: S("0 0 700 420", A.scene(700, 420, { ground: 340, time: "dusk", sun: [560, 90] }) + '<rect x="-20" y="300" width="740" height="140" fill="#3a7fb5"/>' + nessie(330, 330, 1.6) + I("sword", 120, 380, 1.4) + cat(600, 380, 1.3) + A.bird(560, 80, 0.8)) },
 
   warm: {
     wordle: { word: "ARTHUR", hint: "A legendary king with a round table.", say: "Six letters." },
@@ -123,7 +123,7 @@ window.B5LESSON = {
           title: "Why keep them?",
           pts: ["<b>Pride</b>: this is our place, our hero", "<b>Good beats bad</b>: Robin helps the poor, Arthur protects the land", "<b>Hope</b>: Arthur is meant to come back when Britain needs him", "<b>Visitors</b>: legends bring tourists, and their money"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", I("sword", 260, 330, 2.6) + A.bambi(430, 320, 0.6)),
+          art: S("0 0 520 420", A.scene(520, 420, { ground: 380, time: "dusk", sun: [420, 80] }) + '<g class="pulse">' + I("sword", 260, 370, 2.6) + '</g>' + A.bambi(430, 340, 0.6)),
           say: "Ask: does our town have a legend?"
         },
         {
@@ -139,7 +139,7 @@ window.B5LESSON = {
   realworld: {
     title: "Legends still sell",
     text: "Nottingham has a Robin Hood statue outside the castle. Loch Ness has gift shops full of Nessies. There is a new King Arthur or Robin Hood film every few years. Legends are good for business.",
-    art: S("0 0 560 420", nessie(280, 330, 1.8) + A.bird(450, 90, 0.9)),
+    photo: { src: "https://commons.wikimedia.org/wiki/Special:FilePath/LochNessUrquhart.jpg?width=900", alt: "Loch Ness with the ruins of Urquhart Castle in front", caption: "Loch Ness, with Urquhart Castle. Spot the monster?", credit: "Photo: Sam Fentress, CC BY-SA 2.0, Wikimedia Commons" },
     say: "Ask: what would a Base 5 legend be?"
   },
 

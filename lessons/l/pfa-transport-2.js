@@ -32,7 +32,7 @@ window.B5LESSON = {
   mins: 30,
   startMins: 4,
   finishMins: 5,
-  cover: { line: "Crack the timetable code, pick the right ticket, and stop chasing buses down the road.", art: S("0 0 700 420", I("ticket", 220, 260, 2.2) + I("bus", 500, 380, 2) + A.bonnie(620, 260, 0.45)) },
+  cover: { line: "Crack the timetable code, pick the right ticket, and stop chasing buses down the road.", art: S("0 0 700 420", A.scene(700, 420, { ground: 362, sun: [600, 70] }) + '<rect x="-20" y="362" width="740" height="70" fill="#8a8f96"/><path d="M0 395h700" stroke="#fffdf8" stroke-width="5" stroke-dasharray="30 22"/>' + '<g class="float">' + I("ticket", 220, 240, 2.2) + '</g><g class="drive">' + I("bus", 480, 380, 2) + '</g>' + A.bonnie(640, 345, 0.45)) },
 
   warm: {
     wordle: { word: "TICKET", hint: "You buy one before you get on, or show it to the driver.", say: "Six letters." },
@@ -118,7 +118,7 @@ window.B5LESSON = {
   realworld: {
     title: "Apps use the same skills",
     text: "Bus and train apps show live times, but they still use stops, routes, the 24 hour clock and ticket types. Learn it once, use it everywhere: college, work, days out.",
-    art: S("0 0 560 420", I("phone", 200, 340, 2.6) + I("ticket", 410, 230, 1.4)),
+    art: S("0 0 560 420", A.scene(560, 420, { ground: 380, time: "dusk", sun: [460, 80] }) + '<g class="float">' + I("phone", 200, 360, 2.6) + '</g>' + I("ticket", 410, 250, 1.4)),
     say: "Ask: who already uses a travel app?"
   },
 
