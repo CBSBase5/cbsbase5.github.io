@@ -348,10 +348,10 @@ R.end = function(f){
       '<div class="row" style="margin-top:12px"><button class="sbtn' + (done ? "" : " go") + '" data-act="taught">' + (done ? "Marked as taught today. Undo?" : "Mark as taught") + '</button></div>' +
       (nextInSeries ? '<p class="small" style="margin-top:10px">' + esc(nextInSeries) + '</p>' : "") +
     '</div><div class="panel"><h2>Who was here?</h2>' +
-      '<p class="small">Tap anyone who missed it. They get the matching HQ activity as a folder drop.</p>' +
+      '<p class="small">Tap anyone who wasn\'t here.</p>' +
       '<div class="chips">' + PLAN.hqs.map(function(h){ var out = here.indexOf(h[0]) < 0; return '<button class="chip' + (out ? " out" : " on") + '" data-here="' + h[0] + '">' + h[0] + '</button>'; }).join("") + '</div>' +
-      '<div class="row"><button class="sbtn" data-act="folder">Copy folder rows</button><button class="sbtn" data-act="evidence">Save the board' + (snaps ? " (" + snaps + " snaps)" : "") + '</button></div>' +
-      '<p class="small" style="margin-top:10px">Folder rows paste into the Folders tab of the Base 5 shared memory sheet. The board picture is for evidence decks.</p>' +
+      '<div class="row"><button class="sbtn go" data-act="buddy">Send to Buddy</button><button class="sbtn" data-act="evidence">Save the board' + (snaps ? " (" + snaps + " snaps)" : "") + '</button><button class="sbtn" data-act="folder">Copy folder rows</button></div>' +
+      '<p class="small" id="sendmsg" style="margin-top:10px">' + (S.sent ? esc(S.sent) : 'Send to Buddy writes a Learning note for everyone here, linked to step ' + (meta.step || "?") + ' of ' + esc(series.title) + ', with the board picture. Anyone who missed it gets the matching HQ activity in their folder.') + '</p>' +
     '</div></div>';
 };
 
@@ -594,6 +594,7 @@ function act(a){
     PLAN.mark(meta.id, part, !st.taught[k]); redraw();
   }
   else if(a === "folder") folderRows();
+  else if(a === "buddy") sendBuddy();
   else if(a === "evidence") evidence();
 }
 function autoTaught(){
@@ -685,15 +686,27 @@ function pause(on){
   var p = $("#pause");
   p.hidden = on == null ? !p.hidden : !on;
 }
+/* who was here for this lesson (or this part): tapped on the last slide, kept for today.
+   Until tapped, everyone except anyone at a session running alongside this slot (Horizon). */
+function hereKey(){ return PLAN.partKey(meta.id, part); }
 function hereList(){
-  var st = PLAN.load(), t = PLAN.iso();
-  if(st.here && st.here.date === t && st.here.who) return st.here.who.slice();
-  return PLAN.hqs.map(function(h){ return h[0]; });
+  var st = PLAN.load(), t = PLAN.iso(), h = (st.here2 || {})[hereKey()];
+  if(h && h.date === t && h.who) return h.who.slice();
+  var all = PLAN.hqs.map(function(x){ return x[0]; }), T = window.B5TERM;
+  try{
+    var dk = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][new Date().getDay()];
+    var slot = PLAN.slots.filter(function(x){ return x.series.indexOf(meta.target) > -1 && x.days.indexOf(dk) > -1; })[0];
+    var row = slot && (T.timetable[dk] || []).filter(function(r){ return r[2] === slot.session; })[0];
+    if(row) (T.alongsideOn(dk) || []).forEach(function(a){
+      if(T.mins(a.start) < T.mins(row[1]) && T.mins(a.end) > T.mins(row[0])) a.who.forEach(function(w){ var i = all.indexOf(w); if(i > -1) all.splice(i, 1); });
+    });
+  }catch(e){}
+  return all;
 }
 function toggleHere(w){
   var st = PLAN.load(), list = hereList(), i = list.indexOf(w);
   if(i > -1) list.splice(i, 1); else list.push(w);
-  st.here = { date: PLAN.iso(), who: list }; PLAN.save(st);
+  st.here2 = st.here2 || {}; st.here2[hereKey()] = { date: PLAN.iso(), who: list }; PLAN.save(st);
 }
 function picker(){
   var ov = $("#picker"), pk = $(".pk", ov);
@@ -784,21 +797,26 @@ function editToggle(){
     editing = true; d.body.classList.add("editing"); $("#editbar").hidden = false; redraw();
   });
 }
-function staffOk(){
+/* the staff passphrase: from school sign in if this is a staff account, otherwise typed once */
+var PASS = null;
+function staffPass(){
+  if(PASS) return Promise.resolve(PASS);
   var ask = function(){
     return new Promise(function(res){
       var ov = $("#passov"); ov.hidden = false; var inp = $("#pass"); inp.value = ""; inp.focus();
       $("#passmsg").textContent = "";
       $("#passgo").onclick = function(){
-        if(!window.B5Lock){ $("#passmsg").textContent = "The lock did not load, so edit mode cannot open here."; return; }
-        B5Lock.checkStaff(inp.value).then(function(ok){ if(ok){ ov.hidden = true; res(true); } else $("#passmsg").textContent = "Not that one."; });
+        if(!window.B5Lock){ $("#passmsg").textContent = "The lock did not load here."; return; }
+        var v = inp.value;
+        B5Lock.checkStaff(v).then(function(ok){ if(ok){ ov.hidden = true; PASS = v; res(v); } else $("#passmsg").textContent = "Not that one."; });
       };
-      $("#passno").onclick = function(){ ov.hidden = true; res(false); };
+      $("#passno").onclick = function(){ ov.hidden = true; res(null); };
     });
   };
-  if(window.B5Lock && B5Lock.whoami) return B5Lock.whoami().then(function(w){ return w && w.staff ? true : ask(); }, ask);
+  if(window.B5Lock && B5Lock.whoami) return B5Lock.whoami().then(function(w){ if(w && w.staff){ PASS = w.pass; return PASS; } return ask(); }, ask);
   return ask();
 }
+function staffOk(){ return staffPass().then(function(p){ return !!p; }); }
 function bindEdit(el){
   $$("[data-e]", el).forEach(function(x){
     x.setAttribute("contenteditable", "true");
@@ -863,6 +881,15 @@ function snap(i, quiet){
 }
 function loadImg(src){ return new Promise(function(res){ var im = new Image(); im.onload = function(){ res(im); }; im.onerror = function(){ res(null); }; im.src = src; }); }
 function evidence(){
+  composeBoard().then(function(cv){
+    var url;
+    try{ url = cv.toDataURL("image/png"); }catch(e){ url = null; }
+    if(!url){ toast("The browser would not save the picture. Try S on each slide and a screenshot."); return; }
+    download("base5-lesson-" + meta.id + (part ? "-part" + part : "") + "-" + PLAN.iso() + ".png", url);
+    toast("Board picture saved.");
+  });
+}
+function composeBoard(){
   var pr = function(k){ var f = frames[k]; return (S.strokes[k] && S.strokes[k].length ? 0 : 10) + (f.k === "sort" ? 0 : f.k === "wordle" ? 2 : f.exit ? 3 : f.k === "driving" ? 4 : f.k === "confidence" ? 5 : 6); };
   var keys = Object.keys(S.snaps).map(Number).sort(function(a, b){ return pr(a) - pr(b) || a - b; }).slice(0, 6).sort(function(a, b){ return a - b; });
   var cols = 2, tw = 760, th = 428, gap = 26, top = 170, rows = Math.max(1, Math.ceil(keys.length / cols));
@@ -888,17 +915,13 @@ function evidence(){
       cx.fillText(sn.name.slice(0, 60), x, y + th + 30);
     });
   });
-  Promise.all(jobs).then(function(){
+  return Promise.all(jobs).then(function(){
     var y = top + rows * (th + gap + 40) + 30;
     cx.fillStyle = "#0a2f38"; cx.font = "900 28px Archivo, Arial Black, Arial, sans-serif";
     cx.fillText(keys.length ? "What the group said" : "No board snaps yet: this is the group's summary", 40, y);
     cx.font = "400 24px Verdana, Arial, sans-serif";
     res.forEach(function(line, i){ cx.fillText(line.slice(0, 120), 40, y + 40 + i * 36); });
-    var url;
-    try{ url = cv.toDataURL("image/png"); }catch(e){ url = null; }
-    if(!url){ toast("The browser would not save the picture. Try S on each slide and a screenshot."); return; }
-    download("base5-lesson-" + meta.id + (part ? "-part" + part : "") + "-" + PLAN.iso() + ".png", url);
-    toast("Board picture saved.");
+    return cv;
   });
 }
 function results(){
@@ -915,6 +938,81 @@ function results(){
     out.push(frameName(f).slice(0, 40) + " - " + parts.join(", "));
   });
   return out;
+}
+
+/* ---------- evidence to the shared memory sheet and BridgeLink Buddy ----------
+   One Evidence row and one Buddy Learning note per student here, linked to
+   meta.step (see /lessons/plan.js), the board picture saved to Drive, and a
+   folder drop for anyone who missed it. Needs the lesson action in the sheet
+   script (teacher/sync/base5-sheet.gs.txt). Sending again updates, never doubles. */
+function plainText(h){ return String(h || "").replace(/<[^>]+>/g, "").replace(/&[a-z]+;/g, " ").replace(/\s+/g, " ").trim(); }
+function summaryLine(){
+  var bits = [], ex = 0, exRight = 0, voted = false;
+  frames.forEach(function(f, i){
+    var t = S.tally[i];
+    if(f.exit){ ex++; if(t && t.some(function(v){ return v > 0; })){ voted = true; var mx = Math.max.apply(null, t); if(f.d.a != null && t[f.d.a] === mx) exRight++; } }
+  });
+  bits.push("Joined in with the whole group lesson on the board" + (part ? " (part " + part + " of 3: " + PLAN.parts[part].toLowerCase() + ")" : "") + ".");
+  if(voted) bits.push("Group exit vote: most picked the right answer on " + exRight + " of " + ex + " questions.");
+  frames.forEach(function(f, i){
+    var t = S.tally[i];
+    if(f.k === "confidence" && t && t.some(function(v){ return v > 0; })){
+      var n = 0, sum = 0; t.forEach(function(v, j){ n += v; sum += v * j; });
+      bits.push("Fist to five, group average " + (Math.round(sum / n * 10) / 10) + " out of 5.");
+    }
+    if(f.k === "sort" && S.sort[i] && S.sort[i].checked) bits.push(plainText(frameName(f)) + ": " + sortLine(S.sort[i], f.d));
+  });
+  if(lesson.objective && lesson.objective.formal) bits.push("We were learning to " + plainText(lesson.objective.formal));
+  return bits.join(" ").slice(0, 400);
+}
+function sendMsg(t){ S.sent = t; var el = $("#sendmsg"); if(el) el.textContent = t; }
+function sendBuddy(){
+  var Site = window.B5Site;
+  if(!Site || !Site.call || !Site.syncUrl || Site.guest){ sendMsg("The shared memory is not reachable from this page (guest mode, or switched off). Save the board and copy folder rows instead."); return; }
+  var here = hereList(), missed = PLAN.hqs.map(function(h){ return h[0]; }).filter(function(w){ return here.indexOf(w) < 0; });
+  if(!here.length){ sendMsg("Nobody is ticked as here, so there is nothing to send."); return; }
+  var dropTitleNow = meta.drop;
+  if(window.B5LIB && B5LIB.items) B5LIB.items.forEach(function(it){ if(it.slug === meta.drop) dropTitleNow = it.title; });
+  S.already = [];
+  sendMsg("Checking it's you...");
+  staffPass().then(function(pass){
+    if(!pass){ sendMsg("Not sent: Send to Buddy is for staff."); return null; }
+    sendMsg("Making the board picture...");
+    return composeBoard().then(function(cv){
+      var png = "";
+      try{ png = cv.toDataURL("image/jpeg", 0.82); }catch(e){ png = ""; }
+      var lib = window.B5LIB, dropTitle = meta.drop;
+      if(lib && lib.items) lib.items.forEach(function(it){ if(it.slug === meta.drop) dropTitle = it.title; });
+      /* the matching HQ activity is already planned into everyone's folder (/data/a2/drops.js):
+         only bring it forward for anyone it hasn't reached yet */
+      var drops = {}, today = PLAN.iso(), DR = window.B5DROPS;
+      missed.forEach(function(w){
+        var plan = DR && DR.items ? DR.items.filter(function(it){ return it.who === w && it.slug === meta.drop; })[0] : null;
+        if(plan && plan.date <= today){ S.already = (S.already || []).concat(w); return; }
+        var hq = PLAN.hqs.filter(function(h){ return h[0] === w; })[0];
+        drops[w] = plan && plan.href ? plan.href : hq[1] + "a2-" + meta.drop + ".html";
+      });
+      sendMsg("Sending to the shared memory and Buddy...");
+      return Site.call("lesson", {
+        key: pass, id: meta.id + (part ? "-p" + part : ""), title: meta.title + (part ? " (" + PLAN.parts[part].toLowerCase() + ")" : ""),
+        subject: pillar.name, target: meta.target, targetName: series.title, step: meta.step || 0,
+        mins: part ? 15 : (lesson.mins || 45), line: summaryLine(), here: here, png: png,
+        dropTitle: dropTitle, drops: drops, missed: Object.keys(drops), dropNote: "This goes with the lesson on " + meta.title.replace(/\?$/, "") + ", whenever you fancy it. No rush."
+      });
+    });
+  }).then(function(o){
+    if(o === null || o === undefined) return;
+    if(!o.ok){ sendMsg("Not sent: " + (o.error || "no answer from the sheet") + (o.error === "unknown action" ? ". The sheet script needs the new version: see Shared memory in the staff room." : ".")); return; }
+    var notes = o.notes || [], linked = notes.filter(function(n){ return n.linked; }).length;
+    var line = "Sent for " + notes.map(function(n){ return n.who; }).join(", ") + ".";
+    line += o.toBuddy ? " Buddy notes " + (linked ? "linked to step " + meta.step + (linked < notes.length ? " for " + linked + " of them" : "") : "sent, but no matching step was found in Buddy") + "." : " Evidence rows written (Evidence to Buddy is off in Settings).";
+    if(o.picture) line += " Board picture saved to Drive.";
+    if(o.dropped && o.dropped.length) line += " " + dropTitleNow + " brought forward into the folder for " + o.dropped.join(", ") + ".";
+    var al = (S.already || []).filter(function(w, i, a){ return a.indexOf(w) === i; });
+    if(al.length) line += " " + al.join(", ") + " already " + (al.length > 1 ? "have" : "has") + " " + dropTitleNow + " in their folder.";
+    sendMsg(line);
+    toast("Sent to Buddy.");
+  }, function(e){ sendMsg("Not sent: " + (e && e.message ? e.message : "the sheet did not answer") + ". Try again in a minute."); });
 }
 
 /* ---------- keys, scale, dock ---------- */
