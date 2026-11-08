@@ -9,9 +9,9 @@
 var A = window.LART, S = A.svg, T = A.T, I = A.icon, INK = "#0a2f38", PURPLE = "#6a5acd", TEAL = "#007291", ORANGE = "#ef7724", YELLOW = "#ffc247";
 
 function owl(x, y, s){
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')"><ellipse cx="0" cy="22" rx="42" ry="48" fill="#9a6b45"/><ellipse cx="0" cy="36" rx="26" ry="30" fill="#e9d2b4"/>' +
+  return '<g class="float" style="animation-delay:-' + ((x % 7) / 2) + 's"><g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')"><ellipse cx="0" cy="22" rx="42" ry="48" fill="#9a6b45"/><ellipse cx="0" cy="36" rx="26" ry="30" fill="#e9d2b4"/>' +
     '<path d="M-34 -18l-6 -22l20 14zM34 -18l6 -22l-20 14z" fill="#9a6b45"/><circle cx="-15" cy="-6" r="15" fill="#fff" stroke="' + INK + '" stroke-width="2.5"/><circle cx="15" cy="-6" r="15" fill="#fff" stroke="' + INK + '" stroke-width="2.5"/>' +
-    '<circle cx="-15" cy="-6" r="6" fill="' + INK + '"/><circle cx="15" cy="-6" r="6" fill="' + INK + '"/><path d="M-6 8l6 10l6 -10z" fill="' + ORANGE + '"/></g>';
+    '<circle cx="-15" cy="-6" r="6" fill="' + INK + '"/><circle cx="15" cy="-6" r="6" fill="' + INK + '"/><path d="M-6 8l6 10l6 -10z" fill="' + ORANGE + '"/></g></g>';
 }
 function circleArt(){
   return S("0 0 560 420", '<circle cx="280" cy="215" r="140" fill="#e8e5fa" stroke="' + PURPLE + '" stroke-width="5" stroke-dasharray="16 12"/>' +
@@ -26,7 +26,7 @@ window.B5LESSON = {
   mins: 15,
   startMins: 5,
   finishMins: 5,
-  cover: { line: "Saying no without being a dragon. Hearing no without turning into one.", art: S("0 0 560 380", owl(160, 190, 1.6) + A.bubble(250, 70, 260, 70, "No thanks.", 34)) },
+  cover: { line: "Saying no without being a dragon. Hearing no without turning into one.", art: S("0 0 560 380", A.scene(560, 380, { ground: 340, time: "dusk", sun: false }) + owl(160, 190, 1.6) + A.bubble(250, 70, 260, 70, "No thanks.", 34)) },
 
   warm: {
     wordle: { word: "SPACE", hint: "Personal ___: the bubble around you.", say: "Quick one." },

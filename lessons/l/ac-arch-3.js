@@ -139,7 +139,7 @@ window.B5LESSON = {
           title: "Why draw it first?",
           pts: ["<b>Mistakes are cheap on paper</b>, and very expensive in concrete", "<b>Builders need exact sizes</b>", "<b>Everyone agrees</b> before work starts", "<b>The council checks</b> plans before big building work"],
           build: true, ptsFrom: 1,
-          art: S("0 0 480 400", planView(60, 60, 1.2) + A.jay(420, 340, 1.1)),
+          art: S("0 0 480 400", planView(60, 60, 1.2) + '<g class="sway">' + A.jay(420, 340, 1.1) + '</g>'),
           say: "Ask: what's the most expensive mistake you could make building a house?"
         },
         {
@@ -155,7 +155,7 @@ window.B5LESSON = {
   realworld: {
     title: "Plans are everywhere",
     text: "Floor plans when people look at houses to rent or buy. Flat pack furniture instructions. The fire escape map on the back of a door. All plans, all using the same tricks.",
-    art: S("0 0 560 420", planView(110, 80, 1.1) + A.bird(470, 60, 0.9)),
+    art: S("0 0 560 420", planView(110, 80, 1.1) + '<g class="float">' + A.bird(470, 60, 0.9) + '</g>'),
     say: "Ask: where's the nearest fire escape plan to this room?"
   },
 

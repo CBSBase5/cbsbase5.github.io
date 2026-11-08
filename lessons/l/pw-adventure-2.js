@@ -11,7 +11,7 @@ function four(build){
   return A.iconRow([["map", "Where?", "the route"], ["helmet", "What?", "the kit"], ["cloud", "Weather?", "check the forecast"], ["phone", "Who knows?", "where and when back"]], { build: build, s: 1, h: 250 });
 }
 function hill(){
-  return S("0 0 560 420", '<path d="M0 400L180 120L300 260L380 180L560 400Z" fill="#9aa86a" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>' +
+  return S("0 0 560 420", A.scene(560, 420, { ground: 400, hills: false, sun: [500, 60] }) + '<path d="M0 400L180 120L300 260L380 180L560 400Z" fill="#9aa86a" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>' +
     '<path d="M150 170L180 120L210 165Z" fill="#fff"/>' +
     '<g data-s="1"><rect x="20" y="300" width="150" height="84" rx="12" fill="#fffdf8" stroke="' + INK + '" stroke-width="3"/>' + T(95, 334, "Car park", 22, { a: "middle" }) + T(95, 368, "20&#176;C", 30, { a: "middle", f: 1, c: ORANGE }) + '</g>' +
     '<g data-s="2">' + T(250, 110, "Top: 12&#176;C", 30, { a: "middle", f: 1, c: TEAL }) + T(250, 80, "1,200 m up", 22, { a: "middle" }) + I("cloud", 380, 100, 0.8) + '</g>' +
@@ -22,7 +22,7 @@ window.B5LESSON = {
   id: "pw-adventure-2",
   title: "Plan it safe",
   mins: 45,
-  cover: { line: "The best adventures look spontaneous and are secretly very well planned.", art: S("0 0 700 420", I("map", 200, 300, 2.4) + I("helmet", 470, 300, 1.8) + A.bonnie(600, 362, 0.5)) },
+  cover: { line: "The best adventures look spontaneous and are secretly very well planned.", art: S("0 0 700 420", A.scene(700, 420, { ground: 380, sun: [600, 70] }) + '<g class="float">' + I("map", 200, 320, 2.4) + '</g>' + I("helmet", 470, 360, 1.8) + A.bonnie(610, 345, 0.5)) },
 
   warm: {
     wordle: { word: "ROUTE", hint: "The way you plan to go, from start to finish.", say: "Five letters." },
@@ -107,7 +107,7 @@ window.B5LESSON = {
           text: "Before any adventure, someone at home should know:",
           pts: ["Where you're going, and your route", "When you're setting off", "When you'll be back", "What to do if you're not"],
           build: true, ptsFrom: 1,
-          art: S("0 0 480 420", I("phone", 240, 330, 2.6) + A.bubble(60, 40, 360, 60, "Back by 4!", 30)),
+          art: S("0 0 480 420", A.scene(480, 420, { ground: 390, hills: false }) + '<g class="float">' + I("phone", 240, 350, 2.6) + '</g>' + A.bubble(60, 40, 360, 60, "Back by 4!", 30)),
           say: "Ask: who would you tell?"
         },
         {

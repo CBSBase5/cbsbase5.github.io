@@ -10,7 +10,7 @@ var A = window.LART, S = A.svg, T = A.T, I = A.icon, INK = "#0a2f38", TEAL = "#0
 function board(){
   return S("0 0 560 300", '<rect x="20" y="20" width="520" height="220" rx="12" fill="' + INK + '"/>' +
     T(50, 70, "10:12  College", 30, { f: 1, c: YELLOW }) + T(510, 70, "On time", 26, { a: "end", c: "#9fe0b4" }) +
-    T(50, 130, "10:20  Town Centre", 30, { f: 1, c: YELLOW }) + T(510, 130, "Delayed", 26, { a: "end", c: YELLOW }) +
+    T(50, 130, "10:20  Town Centre", 30, { f: 1, c: YELLOW }) + '<g class="twinkle">' + T(510, 130, "Delayed", 26, { a: "end", c: YELLOW }) + '</g>' +
     T(50, 190, "10:35  Hospital", 30, { f: 1, c: YELLOW }) + T(510, 190, "Cancelled", 26, { a: "end", c: "#ffb38a" }) +
     '<path d="M150 240v40M410 240v40" stroke="' + INK + '" stroke-width="10"/>');
 }

@@ -7,6 +7,7 @@
 (function(){
 var A = window.LART, S = A.svg, T = A.T, I = A.icon, INK = "#0a2f38", PURPLE = "#6a5acd", TEAL = "#007291", ORANGE = "#ef7724";
 
+function fcard(x, y, w, text, col, d){ return '<g class="float" style="animation-delay:-' + d + 's">' + card(x, y, w, text, col) + '</g>'; }
 function card(x, y, w, text, col){ return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="64" rx="16" fill="#fffdf8" stroke="' + (col || INK) + '" stroke-width="3.5"/>' + T(x + w / 2, y + 41, text, 24, { a: "middle", b: 1 }); }
 
 window.B5LESSON = {
@@ -15,7 +16,7 @@ window.B5LESSON = {
   mins: 15,
   startMins: 5,
   finishMins: 5,
-  cover: { line: "A break, some help, a bit of quiet. Asking is a skill, and it gets easier.", art: S("0 0 560 380", card(40, 40, 240, "Can I have a break?", PURPLE) + card(280, 140, 240, "Can you help me?", TEAL) + card(60, 240, 260, "Can it be quieter?", ORANGE) + A.bonnie(440, 320, 0.6)) },
+  cover: { line: "A break, some help, a bit of quiet. Asking is a skill, and it gets easier.", art: S("0 0 560 380", fcard(40, 40, 240, "Can I have a break?", PURPLE, 0) + fcard(280, 140, 240, "Can you help me?", TEAL, 1.2) + fcard(60, 240, 260, "Can it be quieter?", ORANGE, 2.1) + A.bonnie(440, 320, 0.6)) },
 
   warm: {
     wordle: { word: "HELP", hint: "Four letters. Asking for it is a skill.", say: "Only four letters today." },

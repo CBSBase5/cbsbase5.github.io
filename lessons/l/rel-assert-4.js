@@ -11,7 +11,7 @@ function crowd(x, y, n, cols){
   var g = "";
   for(var i = 0; i < n; i++){
     var dx = (i - (n - 1) / 2) * 70;
-    g += '<g transform="translate(' + (x + dx) + ' ' + y + ')"><path d="M-24 0q0 -46 24 -46t24 46z" fill="' + cols[i % cols.length] + '" stroke="' + INK + '" stroke-width="3"/><circle cx="0" cy="-58" r="15" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><circle cx="-5" cy="-60" r="2.4" fill="' + INK + '"/><circle cx="5" cy="-60" r="2.4" fill="' + INK + '"/></g>';
+    g += '<g transform="translate(' + (x + dx) + ' ' + y + ')"><g class="sway" style="animation-delay:-' + (i * 0.6) + 's"><path d="M-24 0q0 -46 24 -46t24 46z" fill="' + cols[i % cols.length] + '" stroke="' + INK + '" stroke-width="3"/><circle cx="0" cy="-58" r="15" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><circle cx="-5" cy="-60" r="2.4" fill="' + INK + '"/><circle cx="5" cy="-60" r="2.4" fill="' + INK + '"/></g></g>';
   }
   return g;
 }
@@ -106,7 +106,7 @@ window.B5LESSON = {
   realworld: {
     title: "Pressure doesn't stop at school",
     text: "Workmates pushing to cut corners, friends pushing to spend money, online groups pushing to share things. The owl moves work at 15 and at 50.",
-    art: S("0 0 560 400", crowd(280, 360, 4, ["#e2557a", "#7a7f1e", "#ef7724", PURPLE]) + A.bird(460, 90, 0.9)),
+    art: S("0 0 560 400", A.scene(560, 400, { ground: 362, sun: [80, 70] }) + crowd(280, 360, 4, ["#e2557a", "#7a7f1e", "#ef7724", PURPLE]) + A.bird(460, 90, 0.9)),
     say: "Ask: who would you go to if you needed back up?"
   },
 

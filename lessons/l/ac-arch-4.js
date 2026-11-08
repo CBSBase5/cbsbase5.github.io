@@ -13,7 +13,7 @@ function eco(x, y, s){
   g += '<rect x="-80" y="-120" width="50" height="50" fill="' + GLASS + '" stroke="' + INK + '" stroke-width="3"/><rect x="30" y="-120" width="50" height="50" fill="' + GLASS + '" stroke="' + INK + '" stroke-width="3"/>' +
     '<rect x="-20" y="-60" width="40" height="60" fill="' + PINK + '" stroke="' + INK + '" stroke-width="3"/>' +
     '<g data-s="1"><path d="M-120 -150Q0 -190 120 -150Z" fill="' + GREEN + '" stroke="' + INK + '" stroke-width="4"/><circle cx="-60" cy="-172" r="12" fill="' + GREEN + '" stroke="' + INK + '" stroke-width="3"/><circle cx="50" cy="-176" r="14" fill="' + GREEN + '" stroke="' + INK + '" stroke-width="3"/></g>' +
-    '<g data-s="2"><rect x="70" y="-230" width="80" height="44" fill="' + TEAL + '" stroke="' + INK + '" stroke-width="3" transform="rotate(-15 110 -208)"/><path d="M84 -214l56 -14M90 -200l56 -14" stroke="#7fd0e6" stroke-width="2"/></g>' +
+    '<g data-s="2"><rect class="pulse" x="70" y="-230" width="80" height="44" fill="' + TEAL + '" stroke="' + INK + '" stroke-width="3" transform="rotate(-15 110 -208)"/><path d="M84 -214l56 -14M90 -200l56 -14" stroke="#7fd0e6" stroke-width="2"/></g>' +
     '<g data-s="3"><path d="M-150 0q20 -40 40 0" fill="#7fbfd0" stroke="' + INK + '" stroke-width="3"/><rect x="-160" y="-46" width="40" height="46" rx="6" fill="#7fbfd0" stroke="' + INK + '" stroke-width="3"/>' + T(-140, -54, "rain", 18, { a: "middle" }) + '</g>' +
     '</g>';
   return g;
@@ -23,7 +23,7 @@ window.B5LESSON = {
   id: "ac-arch-4",
   title: "Buildings of 3026",
   mins: 45,
-  cover: { line: "You've learned what makes a building stand, last and get drawn. Now: what should we build next?", art: S("0 0 700 440", '<path d="M10 410H690" stroke="' + INK + '" stroke-width="4"/>' + eco(350, 408, 1.3) + A.bonnie(580, 372, 0.5) + A.bird(150, 120, 0.9)) },
+  cover: { line: "You've learned what makes a building stand, last and get drawn. Now: what should we build next?", art: S("0 0 700 440", A.scene(700, 440, { ground: 410, sun: [600, 80] }) + eco(350, 408, 1.3) + A.bonnie(580, 372, 0.5) + A.bird(150, 120, 0.9)) },
 
   warm: {
     wordle: { word: "FUTURE", hint: "The time that hasn't happened yet. 3026 is in it.", say: "Six letters." },
@@ -58,7 +58,7 @@ window.B5LESSON = {
           title: "Form and function",
           pts: ["<b>Function</b>: what the building has to do (keep people dry, hold 300 pupils, store trains)", "<b>Form</b>: what it looks like", "Architects argue about which matters most. Have done for centuries."],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 400", '<path d="M10 380H510" stroke="' + INK + '" stroke-width="4"/>' + eco(170, 378, 0.9) + '<path d="M330 378V200Q410 120 490 200V378Z" fill="' + GLASS + '" stroke="' + INK + '" stroke-width="4"/>'),
+          art: S("0 0 520 400", A.scene(520, 400, { ground: 380, sun: [440, 60] }) + eco(170, 378, 0.9) + '<path d="M330 378V200Q410 120 490 200V378Z" fill="' + GLASS + '" stroke="' + INK + '" stroke-width="4"/>'),
           say: "Ask: which matters more, how it looks or what it does?"
         },
         {
@@ -72,7 +72,7 @@ window.B5LESSON = {
     {
       kind: "explore", title: "Building for a hotter, busier planet.", mins: 15,
       slides: [
-        { title: "Kinder to the planet", text: "Buildings use loads of energy. Future ones will need to use less:", art: S("0 0 560 440", '<path d="M10 420H550" stroke="' + INK + '" stroke-width="4"/>' + eco(300, 418, 1.3)),
+        { title: "Kinder to the planet", text: "Buildings use loads of energy. Future ones will need to use less:", art: S("0 0 560 440", A.scene(560, 440, { ground: 420, sun: [80, 70] }) + eco(300, 418, 1.3)),
           pts: ["A green roof soaks up rain and keeps it cool", "Solar panels make electricity", "Rain is collected and used again"], build: true, ptsFrom: 1,
           say: "Click through the three. Ask which they'd want on their house." },
         {
@@ -109,7 +109,7 @@ window.B5LESSON = {
           title: "Every design is a choice",
           pts: ["Who is it for?", "What does it need to do?", "What should it be made of?", "How will it stay up, and how will it last?"],
           build: true, ptsFrom: 1,
-          art: S("0 0 480 400", eco(240, 380, 1.1) + A.jay(410, 330, 1.2)),
+          art: S("0 0 480 400", A.scene(480, 400, { ground: 380, hills: false }) + eco(240, 380, 1.1) + A.jay(410, 330, 1.2)),
           say: "The last question pulls in all four lessons."
         }
       ],
@@ -120,7 +120,7 @@ window.B5LESSON = {
   realworld: {
     title: "Someone designs every building",
     text: "Every school, house, shop and station was somebody's design choice. Architects, engineers, builders, surveyors and planners all have a say, and some of those jobs could be yours.",
-    art: S("0 0 560 420", '<path d="M10 400H550" stroke="' + INK + '" stroke-width="4"/>' + eco(280, 398, 1.2) + A.bird(470, 80, 0.9)),
+    art: S("0 0 560 420", A.scene(560, 420, { ground: 400, time: "dusk", sun: [90, 90] }) + eco(280, 398, 1.2) + '<g class="float">' + A.bird(470, 80, 0.9) + '</g>'),
     say: "Ask: which of those jobs sounds most interesting?"
   },
 

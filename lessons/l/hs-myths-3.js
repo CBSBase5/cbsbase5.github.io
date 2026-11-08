@@ -9,7 +9,7 @@
 var A = window.LART, S = A.svg, T = A.T, I = A.icon, INK = "#0a2f38", PLUM = "#7b4b8f", TEAL = "#007291", ORANGE = "#ef7724", YELLOW = "#ffc247", PINK = "#e2557a";
 
 function icarus(){
-  return S("0 0 560 420", '<circle cx="440" cy="90" r="60" fill="' + YELLOW + '" stroke="' + ORANGE + '" stroke-width="6"/>' +
+  return S("0 0 560 420", A.scene(560, 420, { ground: 400, sun: false, hills: false }) + '<circle class="pulse" cx="440" cy="90" r="60" fill="' + YELLOW + '" stroke="' + ORANGE + '" stroke-width="6"/>' +
     '<g data-s="1" transform="translate(250 200) rotate(-10)"><path d="M-10 0l-90 -40l20 30l-30 10l100 10zM10 0l90 -40l-20 30l30 10l-100 10z" fill="#fffdf8" stroke="' + INK + '" stroke-width="3"/><circle cx="0" cy="-12" r="12" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><path d="M0 0v30" stroke="' + INK + '" stroke-width="7" stroke-linecap="round"/></g>' +
     '<g data-s="2"><path d="M330 160q4 12 0 20M350 170q4 12 0 20M370 150q4 12 0 20" stroke="' + ORANGE + '" stroke-width="4" fill="none"/>' + T(360, 230, "wax melting...", 22, { a: "middle", b: 1, c: ORANGE }) + '</g>' +
     '<g data-s="3"><path d="M0 380q30 -12 60 0t60 0t60 0t60 0t60 0t60 0t60 0t60 0t60 0t60 0" stroke="#7fbfd0" stroke-width="8" fill="none"/>' + T(150, 350, "splash", 26, { a: "middle", f: 1, c: TEAL }) + '</g>');
@@ -17,7 +17,7 @@ function icarus(){
 function phones(){
   var g = "";
   [[90, "My mate said..."], [300, "Did you know..."], [510, "SHARE THIS!!"]].forEach(function(p, i){
-    g += '<g data-s="' + (i + 1) + '">' + I("phone", p[0], 330, 1.8) + A.bubble(p[0] - 90, 60 + i * 30, 180, 50, p[1], 18) + '</g>';
+    g += '<g data-s="' + (i + 1) + '"><g class="float" style="animation-delay:' + (i * 0.5) + 's">' + I("phone", p[0], 330, 1.8) + '</g>' + A.bubble(p[0] - 90, 60 + i * 30, 180, 50, p[1], 18) + '</g>';
   });
   return S("0 0 600 380", g);
 }
@@ -26,7 +26,7 @@ window.B5LESSON = {
   id: "hs-myths-3",
   title: "Myths are still being made",
   mins: 45,
-  cover: { line: "Old myths carry hidden messages. New myths spread on phones. Time to spot both.", art: S("0 0 700 420", I("phone", 500, 380, 2.4) + I("bolt", 200, 320, 2.2) + A.bambi(370, 330, 0.7)) },
+  cover: { line: "Old myths carry hidden messages. New myths spread on phones. Time to spot both.", art: S("0 0 700 420", A.scene(700, 420, { ground: 390, time: "night", sun: [600, 70] }) + '<g class="float">' + I("phone", 500, 380, 2.4) + '</g><g class="pulse">' + I("bolt", 200, 320, 2.2) + '</g>' + A.bambi(370, 350, 0.7)) },
 
   warm: {
     wordle: { word: "MIDAS", hint: "A king who turned everything he touched into gold.", say: "Five letters." },
