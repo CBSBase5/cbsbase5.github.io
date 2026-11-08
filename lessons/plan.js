@@ -10,6 +10,10 @@
             with ready:true has a file at /lessons/l/<id>.js.
             drop is the HQ activity (a2-<drop>.html in each HQ)
             that goes in the folder of anyone who missed it.
+            step is the milestone step the lesson counts towards in
+            BridgeLink Buddy. These are shared pillar targets, so every
+            student has the same step: each lesson takes the step of the
+            HQ activity it leads into (data/a2/_build/plan.py).
    slots:   which timetable session teaches which series. Each
             slot opens the next lesson not yet taught, so a
             missed session simply rolls on to the next one.
@@ -37,46 +41,46 @@ var P = {
 
 var SERIES = [
   { target: "ac-arch", pillar: "ac", title: "Architecture and construction", lessons: [
-    { id: "ac-arch-1", title: "What makes it stand?", line: "Forces, triangles, wide bases and arches.", ready: true, drop: "what-makes-it-stand" },
-    { id: "ac-arch-2", title: "Built to last", line: "Mud, stone, iron, glass: building through time.", ready: true, drop: "what-makes-it-stand" },
-    { id: "ac-arch-3", title: "Draw like an architect", line: "Plans, elevations and the symbols on them.", ready: true, drop: "draw-like-an-architect" },
-    { id: "ac-arch-4", title: "Buildings of 3026", line: "Form, function and building for the future.", ready: true, drop: "draw-like-an-architect" }
+    { id: "ac-arch-1", step: 1, title: "What makes it stand?", line: "Forces, triangles, wide bases and arches.", ready: true, drop: "what-makes-it-stand" },
+    { id: "ac-arch-2", step: 1, title: "Built to last", line: "Mud, stone, iron, glass: building through time.", ready: true, drop: "what-makes-it-stand" },
+    { id: "ac-arch-3", step: 2, title: "Draw like an architect", line: "Plans, elevations and the symbols on them.", ready: true, drop: "draw-like-an-architect" },
+    { id: "ac-arch-4", step: 2, title: "Buildings of 3026", line: "Form, function and building for the future.", ready: true, drop: "draw-like-an-architect" }
   ]},
   { target: "pw-adventure", pillar: "pw", title: "Adventure activities", lessons: [
-    { id: "pw-adventure-1", title: "What makes it an adventure?", line: "Challenge, risk and the good kind of scared.", ready: true, drop: "design-an-expedition" },
-    { id: "pw-adventure-2", title: "Plan it safe", line: "Route, kit, weather and who to tell.", ready: true, drop: "design-an-expedition" },
-    { id: "pw-adventure-3", title: "On the rope", line: "Climbing kit, belaying and the calls.", ready: true, drop: "adventure-day" }
+    { id: "pw-adventure-1", step: 1, title: "What makes it an adventure?", line: "Challenge, risk and the good kind of scared.", ready: true, drop: "design-an-expedition" },
+    { id: "pw-adventure-2", step: 1, title: "Plan it safe", line: "Route, kit, weather and who to tell.", ready: true, drop: "design-an-expedition" },
+    { id: "pw-adventure-3", step: 2, title: "On the rope", line: "Climbing kit, belaying and the calls.", ready: true, drop: "adventure-day" }
   ]},
   { target: "pw-balance", pillar: "pw", title: "Balance and control", lessons: [
-    { id: "pw-balance-1", title: "Finding your balance", line: "Base of support and centre of mass, in people.", ready: true, drop: "move-balance-control" },
-    { id: "pw-balance-2", title: "Slow is smooth", line: "Control, core and practising a move.", drop: "what-helps-me-move" },
-    { id: "pw-balance-3", title: "Three points of contact", line: "How climbers stay on the wall.", drop: "what-helps-me-move" }
+    { id: "pw-balance-1", step: 1, title: "Finding your balance", line: "Base of support and centre of mass, in people.", ready: true, drop: "move-balance-control" },
+    { id: "pw-balance-2", step: 2, title: "Slow is smooth", line: "Control, core and practising a move.", drop: "what-helps-me-move" },
+    { id: "pw-balance-3", step: 2, title: "Three points of contact", line: "How climbers stay on the wall.", drop: "what-helps-me-move" }
   ]},
   { target: "hs-myths", pillar: "hs", title: "Myths and legends", lessons: [
-    { id: "hs-myths-1", title: "Myth, legend or folk tale?", line: "What makes a story a myth, and why people told them.", ready: true, drop: "myths-then-and-now" },
-    { id: "hs-myths-2", title: "Legends of Britain", line: "Arthur, Robin Hood and the grain of truth.", ready: true, drop: "myths-then-and-now" },
-    { id: "hs-myths-3", title: "Myths are still being made", line: "Hidden messages, urban legends and today's myths.", ready: true, drop: "hidden-messages" }
+    { id: "hs-myths-1", step: 1, title: "Myth, legend or folk tale?", line: "What makes a story a myth, and why people told them.", ready: true, drop: "myths-then-and-now" },
+    { id: "hs-myths-2", step: 1, title: "Legends of Britain", line: "Arthur, Robin Hood and the grain of truth.", ready: true, drop: "myths-then-and-now" },
+    { id: "hs-myths-3", step: 2, title: "Myths are still being made", line: "Hidden messages, urban legends and today's myths.", ready: true, drop: "hidden-messages" }
   ]},
   { target: "se-earth", pillar: "se", title: "Earth and atmosphere", lessons: [
-    { id: "se-earth-1", title: "Inside the Earth", line: "Crust, mantle, core, and how we know.", drop: "what-is-it-made-of" },
-    { id: "se-earth-2", title: "The air up there", line: "What air is made of and the layers above us.", drop: "what-is-it-made-of" },
-    { id: "se-earth-3", title: "A changing planet", line: "Weather, climate and the air over time.", drop: "what-is-it-made-of" }
+    { id: "se-earth-1", step: 1, title: "Inside the Earth", line: "Crust, mantle, core, and how we know.", drop: "what-is-it-made-of" },
+    { id: "se-earth-2", step: 2, title: "The air up there", line: "What air is made of and the layers above us.", drop: "what-is-it-made-of" },
+    { id: "se-earth-3", step: 3, title: "A changing planet", line: "Weather, climate and the air over time.", drop: "what-is-it-made-of" }
   ]},
   { target: "pfa-transport", pillar: "pfa", title: "Transport and travel", lessons: [
-    { id: "pfa-transport-1", title: "Ways to get about", line: "Bus, train, tram, taxi, bike, feet.", ready: true, drop: "getting-around" },
-    { id: "pfa-transport-2", title: "Tickets and timetables", line: "Reading times, routes and what it costs.", ready: true, drop: "read-the-signs" },
-    { id: "pfa-transport-3", title: "When it goes wrong", line: "Delays, missed stops and staying sorted.", ready: true, drop: "read-the-signs" }
+    { id: "pfa-transport-1", step: 1, title: "Ways to get about", line: "Bus, train, tram, taxi, bike, feet.", ready: true, drop: "getting-around" },
+    { id: "pfa-transport-2", step: 2, title: "Tickets and timetables", line: "Reading times, routes and what it costs.", ready: true, drop: "read-the-signs" },
+    { id: "pfa-transport-3", step: 2, title: "When it goes wrong", line: "Delays, missed stops and staying sorted.", ready: true, drop: "read-the-signs" }
   ]},
   { target: "pfa-careers", pillar: "pfa", title: "Careers for the future", lessons: [
-    { id: "pfa-careers-1", title: "What even is a career?", line: "Jobs, careers, and the paths between them.", drop: "careers-fair-scout" },
-    { id: "pfa-careers-2", title: "Jobs that vanished, jobs that appeared", line: "Lamplighters to drone pilots.", drop: "career-explorer" },
-    { id: "pfa-careers-3", title: "What suits me?", line: "Interests, strengths and where they lead.", drop: "career-explorer" }
+    { id: "pfa-careers-1", step: 1, title: "What even is a career?", line: "Jobs, careers, and the paths between them.", drop: "careers-fair-scout" },
+    { id: "pfa-careers-2", step: 2, title: "Jobs that vanished, jobs that appeared", line: "Lamplighters to drone pilots.", drop: "career-explorer" },
+    { id: "pfa-careers-3", step: 2, title: "What suits me?", line: "Interests, strengths and where they lead.", drop: "career-explorer" }
   ]},
   { target: "rel-assert", pillar: "rel", title: "Assertiveness in relationships", split: true, lessons: [
-    { id: "rel-assert-1", title: "Mouse, dragon or owl?", line: "Passive, aggressive and assertive.", ready: true, drop: "my-yes-my-no" },
-    { id: "rel-assert-2", title: "My yes, my no", line: "Saying no, and hearing it.", ready: true, drop: "my-yes-my-no" },
-    { id: "rel-assert-3", title: "Asking for what I need", line: "I statements and picking the moment.", ready: true, drop: "my-yes-my-no" },
-    { id: "rel-assert-4", title: "Under pressure", line: "Group pressure, and backing someone else up.", ready: true, drop: "my-yes-my-no" }
+    { id: "rel-assert-1", step: 1, title: "Mouse, dragon or owl?", line: "Passive, aggressive and assertive.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-assert-2", step: 2, title: "My yes, my no", line: "Saying no, and hearing it.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-assert-3", step: 3, title: "Asking for what I need", line: "I statements and picking the moment.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-assert-4", step: 3, title: "Under pressure", line: "Group pressure, and backing someone else up.", ready: true, drop: "my-yes-my-no" }
   ]}
 ];
 

@@ -1398,7 +1398,7 @@ function evToRow_(e){
 }
 function evidenceNote_(e){
   var bits = [];
-  var kindWord = e.kind === "game" ? "project game" : e.kind === "practice" ? "practice" : "";
+  var kindWord = e.kind === "game" ? "project game" : e.kind === "practice" ? "practice" : e.kind === "lesson" ? "whole group lesson" : "";
   var bracket = [e.subject || kindWord, e.level ? e.level.replace(/^(.+?)(?: \((.*)\))?$/, function(m, a, b){ return a + " level" + (b ? ", " + b : ""); }) : "", e.theme ? e.theme + " theme" : ""].filter(String);
   bits.push(e.activity + (bracket.length ? " (" + bracket.join(", ") + ")" : "") + ".");
   var did = [];
@@ -1632,6 +1632,63 @@ function evidence_send_(r){
   return { ok: true, buddy: e.buddy };
 }
 READ3.evidence = evidence_list_;
+
+/* ---------- whole group lessons on the board (/lessons/) ----------
+   Staff only, sent from the last slide of a lesson. For each student who
+   was there: one Evidence row and one Buddy Learning note, linked to the
+   milestone step the lesson was built for (on the shared pillar targets
+   every student has the same step, see /lessons/plan.js). The board
+   picture is saved once to a Lessons folder in "Made things folder" and
+   put on every note as a photo. Anyone who missed it gets the matching
+   HQ activity in their folder. Sending again the same day updates the same
+   rows and notes rather than adding more. */
+function lesson_(r){
+  staff_(r.key);
+  var id = String(r.id || "").toLowerCase();
+  if(!/^[a-z]+-[a-z]+-\d(-p[123])?$/.test(id)) return { ok: false, error: "bad lesson" };
+  var key = String(r.target || "").replace(/[^a-z\-]/g, ""), step = +r.step || 0, today = day_();
+  var here = (r.here || []).map(String).filter(function(w){ return WHO.indexOf(w) >= 0; });
+  var missed = (r.missed || []).map(String).filter(function(w){ return WHO.indexOf(w) >= 0 && here.indexOf(w) < 0; });
+  var map = {}; try{ map = a2map_(); }catch(e0){}
+  var tname = (map.names && map.names[key]) || clean_(r.targetName || key, 120);
+  var pic = "", png = String(r.png || ""), m = png.match(/^data:(image\/(?:png|jpeg));base64,([A-Za-z0-9+\/=]+)$/);
+  if(m && m[2].length <= 4000000){
+    try{
+      var folder = madeFolder_(), it = folder.getFoldersByName("Lessons"), sub = it.hasNext() ? it.next() : folder.createFolder("Lessons");
+      var name = today + " " + id + (m[1] === "image/png" ? ".png" : ".jpg");
+      var old0 = sub.getFilesByName(name); while(old0.hasNext()) old0.next().setTrashed(true);
+      var file = sub.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name));
+      file.setDescription(clean_(r.title || id, 200));
+      pic = "https://drive.google.com/file/d/" + file.getId() + "/view";
+    }catch(e1){ pic = ""; }
+  }
+  var notes = [];
+  here.forEach(function(who){
+    var R = evRow_(who, "lesson-" + id, today); if(!R) return;
+    var e = R.e, old = JSON.parse(JSON.stringify(e));
+    e.kind = "lesson"; e.activity = "Whole group lesson: " + clean_(r.title || id, 110); e.subject = clean_(r.subject || "", 60);
+    e.target = tname; e.step = step; e.minutes = Math.max(0, Math.min(120, Math.round(+r.mins || 0))); e.finished = true;
+    e.line = clean_(r.line || "", 400); e.with = "Jay";
+    if(pic) e.picture = pic;
+    if(!e.msId && key && step){ try{ var ms = buddyStep_(who, key, step); if(ms && ms.id) e.msId = String(ms.id); }catch(e2){} }
+    old.line = R.row ? (old.note.indexOf(e.line) >= 0 ? e.line : "~") : "";
+    evWrite_(R, e, old);
+    notes.push({ who: who, buddy: e.buddy, linked: !!e.msId });
+  });
+  var dropped = [], drops = r.drops || {}, title = clean_(r.dropTitle || "", 120);
+  if(missed.length && title){
+    var fo = sheet_("Folders"), fv = fo ? fo.getDataRange().getValues() : [];
+    missed.forEach(function(who){
+      var href = String(drops[who] || "");
+      if(!fo || !/^\/[a-z0-9\-\/]+\.html(\?lv=(mild|medium|spicy))?$/.test(href)) return;
+      var have = fv.some(function(x){ return String(x[0]) === who && String(x[4]) === href; });
+      if(!have) fo.appendRow([who, "Something to try", new Date(), title, href, clean_(r.dropNote || "", 300), false]);
+      dropped.push(who);
+    });
+  }
+  return { ok: true, picture: pic, notes: notes, dropped: dropped, toBuddy: ticked_(setting_("Evidence to Buddy")) };
+}
+WRITE3.lesson = lesson_;
 /* ---------- who has been quiet on the site ----------
    School days (Monday to Friday) since each student last saved anything,
    from the Progress tab. Only for staff pages; students never see it. */
