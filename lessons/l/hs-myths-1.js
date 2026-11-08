@@ -165,7 +165,7 @@ window.B5LESSON = {
   realworld: {
     title: "You say a myth every week",
     text: "Wednesday is Woden's day. Thursday is Thor's day. Friday is named after the goddess Frigg. Planets are named after Roman gods, and a big sports brand is named after the Greek goddess of victory.",
-    art: S("0 0 560 420", I("bolt", 150, 230, 1.6) + I("star", 380, 200, 1.4) + I("globe", 420, 380, 1.1) + A.T(150, 290, "Thursday", 30, { a: "middle", f: 1 }) + A.bird(80, 90, 0.9)),
+    art: S("0 0 560 420", A.scene(560, 420, { ground: 380, time: "night" }) + I("bolt", 150, 230, 1.6) + I("star", 380, 200, 1.4) + I("globe", 420, 380, 1.1) + A.T(150, 290, "Thursday", 30, { a: "middle", f: 1 }) + A.bird(80, 90, 0.9)),
     say: "Ask: which day would you rename, and after which god?"
   },
 

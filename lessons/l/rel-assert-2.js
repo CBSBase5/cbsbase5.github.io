@@ -126,7 +126,7 @@ window.B5LESSON = {
   realworld: {
     title: "No protects you",
     text: "Turning down the extended warranty in a shop. Saying no to a scam phone call. Not doing a shift you can't manage. Leaving a group chat that makes you feel rubbish. A clear no protects your time, your money and you.",
-    art: S("0 0 560 420", I("phone", 200, 300, 2) + I("coin", 400, 260, 2)),
+    art: S("0 0 560 420", A.scene(560, 420, { ground: 330, time: "dusk", sun: [470, 80] }) + I("phone", 200, 300, 2) + I("coin", 400, 260, 2)),
     say: "Ask: which one would be hardest to say no to?"
   },
 
