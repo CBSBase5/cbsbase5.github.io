@@ -29,7 +29,7 @@ ENGINE_V = "22"
 A2CSS_V = "3"
 ART_V = "1"
 # pillar activities say which whole group lesson leads into them (/lessons/tie.js)
-LESSON_TIE = '<script src="/lessons/plan.js?v=4"></script>\n<script src="/lessons/tie.js?v=2"></script>\n'
+LESSON_TIE = '<script src="/lessons/plan.js?v=5"></script>\n<script src="/lessons/tie.js?v=2"></script>\n'
 
 
 HQS = {

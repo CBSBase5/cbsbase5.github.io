@@ -47,6 +47,9 @@ var meta = null, part = 0, slotId = q("slot");
    goes with it. Works like preview (nothing counts or gets sent), with
    a plain ending and no staff bits. */
 var LOOK = q("look") === "1";
+/* school: another base teaching a Cultural Calendar lesson from /cc/. Nothing is
+   marked or sent, and the Base 5 bits (era, picker, who was here, Buddy) stay off. */
+var SCHOOL = q("school") === "1";
 var PREVIEW = q("preview") === "1" || LOOK;
 (function(){
   var id = q("l"), p = parseInt(q("p"), 10) || 0;
@@ -55,9 +58,12 @@ var PREVIEW = q("preview") === "1" || LOOK;
     if(nx && nx.lesson){ id = nx.lesson.id; p = nx.part; }
   }
   meta = PLAN.byLesson[id] || null;
-  part = meta && meta.split ? (p >= 1 && p <= 3 ? p : 1) : 0;
+  part = meta && meta.split ? (p >= 1 && p <= PLAN.nParts(meta) ? p : 1) : 0;
 })();
-var pillar = meta ? PLAN.pillars[meta.pillar] : PLAN.pillars.ac;
+var pillar = meta ? PLAN.looks(meta) : PLAN.pillars.ac;
+var NP = meta ? PLAN.nParts(meta) : 0;
+function pname(p){ return PLAN.partName(meta, p); }
+if(SCHOOL) d.documentElement.classList.add("school");
 var series = meta ? PLAN.bySeries[meta.target] : null;
 var root = d.documentElement;
 root.style.setProperty("--pc", pillar.colour); root.style.setProperty("--pd", pillar.deep); root.style.setProperty("--pw", pillar.wash);
@@ -119,8 +125,12 @@ function build(){
     if(L.objective) F.push({ k: "objective", sec: "start", d: L.objective, path: "objective" });
     secMins.start = L.startMins || (short ? 4 : 7);
   } else {
+    /* a later part: its own warm up if the lesson has one (L.warms[part]), then where we got to */
+    var wp = (L.warms || {})[part];
+    if(wp && wp.wordle) F.push({ k: "wordle", sec: "start", d: wp.wordle, path: "warms." + part + ".wordle" });
+    else if(wp && wp.wyr) F.push({ k: "wyr", sec: "start", d: wp.wyr, path: "warms." + part + ".wyr" });
     if(L.objective) F.push({ k: "objective", sec: "start", d: L.objective, path: "objective", again: true });
-    secMins.start = 1;
+    secMins.start = wp ? 4 : 1;
   }
   (L.sections || []).forEach(function(s, si){
     if(part && s.part !== part) return;
@@ -130,7 +140,7 @@ function build(){
     (s.slides || []).forEach(function(sl, j){ F.push({ k: sl.type || "show", sec: s.kind, d: sl, path: p + ".slides." + j }); });
     if(s.check) F.push({ k: "predict", sec: s.kind, d: s.check, path: p + ".check", check: true });
   });
-  if(!part || part === 3){
+  if(!part || part === NP){
     if(L.realworld) F.push({ k: "realworld", sec: "finish", d: L.realworld, path: "realworld" });
     (L.exit || []).forEach(function(x, i){ F.push({ k: "predict", sec: "finish", d: x, path: "exit." + i, exit: i + 1, of: L.exit.length }); });
     F.push({ k: "confidence", sec: "finish" });
@@ -160,10 +170,10 @@ function ccNow(){
 }
 R.cover = function(f){
   var c = lesson.cover || {};
-  var pb = part ? '<span class="partbadge">Part ' + part + ' of 3: ' + PLAN.parts[part] + '</span>' : "";
+  var pb = part ? '<span class="partbadge">Part ' + part + ' of ' + NP + ': ' + pname(part) + '</span>' : "";
   var era = eraNow();
   return '<div class="cover"><div>' +
-    '<p class="kicker">' + esc(series.title) + ' &middot; lesson ' + meta.n + ' of ' + meta.of + '</p>' +
+    '<p class="kicker">' + esc(series.title) + (meta.byWeek ? ' &middot; this week' : ' &middot; lesson ' + meta.n + ' of ' + meta.of) + '</p>' +
     E("title", "h1", "", meta.title) +
     E("cover.line", "p", "sline", meta.line) + pb +
     (ccNow() ? '<p class="cctag">This week: ' + esc(ccNow().week) + '</p>' : "") +
@@ -196,7 +206,7 @@ R.wordle = function(f){
     '<h1 class="ft small" style="margin:0 0 6px">Wordle</h1><div class="wmsg">' + msg + '</div>' +
     '<div class="kb">' + keys + '</div>' +
     '<div class="wside"><button class="sbtn" data-act="clue">Give us a clue</button><button class="sbtn" data-act="showword">Show the word</button>' +
-    (w.done && w.won ? '<svg viewBox="-40 -50 200 110" style="width:250px">' + A.jay(0, 10, 1.2) + A.bubble(42, -40, 120, 50, "Outrageous.", 18) + '</svg>' : "") + '</div></div></div>';
+    (w.done && w.won ? '<svg viewBox="-40 -50 200 110" style="width:250px">' + (SCHOOL ? A.bird(10, 20, 1.3) + A.bubble(42, -40, 120, 50, "Nailed it.", 18) : A.jay(0, 10, 1.2) + A.bubble(42, -40, 120, 50, "Outrageous.", 18)) + '</svg>' : "") + '</div></div></div>';
 };
 
 R.wyr = function(f){
@@ -227,7 +237,7 @@ R.objective = function(f){
     return '<p class="kicker">Where we got to</p><h1 class="ft small">' + esc(meta.title) + '</h1>' +
       '<div class="obj"><div class="card"><h2>We are learning to</h2>' + E(f.path + ".formal", "p", "") + '</div>' +
       '<div class="card m"><h2>Today\'s mission</h2>' + E(f.path + ".mission", "p", "") + '</div></div>' +
-      '<p class="succ"><span class="partbadge">Today: ' + PLAN.parts[part] + '</span></p>';
+      '<p class="succ"><span class="partbadge">Today: ' + pname(part) + '</span></p>';
   }
   var sc = f.d.success || [];
   return '<p class="kicker">Today</p><h1 class="ft small">' + esc(meta.title) + '</h1>' +
@@ -242,7 +252,7 @@ var SECART = {
   explain: '<g class="bob"><path d="M200 30a120 120 0 0 0 -72 216q22 18 22 46v30h100v-30q0 -28 22 -46a120 120 0 0 0 -72 -216z" fill="#ffc247" stroke="#0a2f38" stroke-width="14"/><path d="M160 150q40 -40 80 0M180 220v-60M220 220v-60" stroke="#ef7724" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M150 340h100M160 372h80" stroke="#0a2f38" stroke-width="18" stroke-linecap="round"/><path d="M130 80q-30 30 -20 70" stroke="#fff" stroke-width="12" fill="none" stroke-linecap="round" opacity=".8"/></g><g stroke="#fffdf8" stroke-width="12" stroke-linecap="round"><path d="M40 60l-30 -24M360 60l30 -24M20 170h-40M380 170h40"/></g>'
 };
 R.sech = function(f){
-  return '<div class="sech"><span class="kicker">' + (part ? "Part " + part + " of 3" : "Next up") + '</span>' +
+  return '<div class="sech"><span class="kicker">' + (part ? "Part " + part + " of " + NP : "Next up") + '</span>' +
     '<div class="big">' + SECNAME[f.d.kind] + '</div>' +
     E(f.path + ".title", "div", "sub", "") +
     '<div class="mins">About ' + (f.d.mins || 10) + ' minutes</div>' +
@@ -358,28 +368,42 @@ function dropTitle(){
 
 /* the ending for a student looking back */
 function lookEnd(){
-  var t = dropTitle(), nextPart = part && part < 3;
+  var t = dropTitle(), nextPart = part && part < NP;
   var href = location.pathname + "?l=" + meta.id + "&p=" + (part + 1) + "&look=1";
   return '<p class="kicker">That\'s the lesson</p><h1 class="ft small">Thanks for looking back.</h1>' +
     '<div class="endgrid"><div class="panel"><h2>' + (nextPart ? "There's more" : "Goes with") + '</h2>' +
-      (nextPart ? '<p>This lesson has three parts. <a href="' + esc(href) + '">Part ' + (part + 1) + ' (' + PLAN.parts[part + 1].toLowerCase() + ')</a> is next, if you fancy it.</p>' : "") +
+      (nextPart ? '<p>This lesson has ' + NP + ' parts. <a href="' + esc(href) + '">Part ' + (part + 1) + ' (' + pname(part + 1).toLowerCase() + ')</a> is next, if you fancy it.</p>' : "") +
       (t ? '<p>The HQ activity <b>' + esc(t) + '</b> goes with this lesson. It\'s in your folder whenever you want it.</p>' : "") +
       '<div class="row" style="margin-top:12px"><button class="sbtn go" data-act="lookback">Back to the activity</button></div>' +
     '</div><div class="panel" style="display:flex;align-items:center;justify-content:center">' + svgWrap(A.bonnie(120, 90, 0.9, "happy"), "0 0 240 160") + '</div></div>';
 }
 function svgWrap(inner, vb){ return '<svg viewBox="' + vb + '" style="width:100%;max-width:320px">' + inner + '</svg>'; }
 
+/* the ending for another base (from /cc/): save the board, and the next part */
+function schoolEnd(){
+  var nextPart = part && part < NP, snaps = Object.keys(S.snaps).length;
+  var href = location.pathname + "?l=" + meta.id + "&p=" + (part + 1) + "&school=1";
+  return '<p class="kicker">' + (nextPart ? "That's part " + part + " done" : "That's the lesson") + '</p>' +
+    '<h1 class="ft small">' + (nextPart ? "Good stopping point." : "Done. Nice one, everyone.") + '</h1>' +
+    '<div class="endgrid"><div class="panel"><h2>' + (nextPart ? "Next time" : "This week") + '</h2>' +
+      (nextPart ? '<p>Part ' + (part + 1) + ' (' + esc(pname(part + 1).toLowerCase()) + ') is ready for the next session.</p><div class="row" style="margin-top:12px"><a class="sbtn go" href="' + esc(href) + '">Open part ' + (part + 1) + '</a></div>'
+        : '<p>That is the whole week\'s lesson. The Cultural Calendar page has ideas and games for the rest of the week.</p><div class="row" style="margin-top:12px"><a class="sbtn go" href="/cc/">The Cultural Calendar page</a></div>') +
+    '</div><div class="panel"><h2>Keep a copy</h2><p class="small">A picture of today\'s board: the slides you snapped, the votes and the sorts.</p>' +
+      '<div class="row"><button class="sbtn" data-act="evidence">Save the board' + (snaps ? " (" + snaps + " snaps)" : "") + '</button></div></div></div>';
+}
+
 R.end = function(f){
   if(LOOK) return lookEnd();
+  if(SCHOOL) return schoolEnd();
   var st = PLAN.load(), k = PLAN.partKey(meta.id, part), done = !!st.taught[k];
   var n = PLAN.together(st), total = 0;
   PLAN.series.forEach(function(se){ total += se.lessons.length; });
   var here = hereList(), snaps = Object.keys(S.snaps).length;
   var nextInSeries = null;
-  if(part && part < 3) nextInSeries = "Part " + (part + 1) + " (" + PLAN.parts[part + 1].toLowerCase() + ") next PHSE slot.";
+  if(part && part < NP) nextInSeries = "Part " + (part + 1) + " (" + pname(part + 1).toLowerCase() + ") next " + (meta.byWeek ? "session." : "PHSE slot.");
   else if(meta.n < meta.of) nextInSeries = "Next in this series: " + series.lessons[meta.n].title + ".";
-  return '<p class="kicker">' + (part && part < 3 ? "That's part " + part + " done" : "That's the lesson") + '</p>' +
-    '<h1 class="ft small">' + (part && part < 3 ? "Good stopping point." : "Done. Nice one, Base 5.") + '</h1>' +
+  return '<p class="kicker">' + (part && part < NP ? "That's part " + part + " done" : "That's the lesson") + '</p>' +
+    '<h1 class="ft small">' + (part && part < NP ? "Good stopping point." : "Done. Nice one, Base 5.") + '</h1>' +
     '<div class="endgrid"><div class="panel"><h2>Lessons together</h2>' +
       '<p><b style="font-size:48px;font-family:var(--display)">' + n + '</b> of ' + total + ' this half term. Every one adds a plank to the bridge.</p>' + bridge(n, total) +
       '<div class="row" style="margin-top:12px">' + (PREVIEW ? '<span class="partbadge" style="margin:0">Preview: not counted</span>' : '<button class="sbtn' + (done ? "" : " go") + '" data-act="taught">' + (done ? "Marked as taught today. Undo?" : "Mark as taught") + '</button>') +
@@ -389,8 +413,8 @@ R.end = function(f){
     '</div><div class="panel"><h2>Who was here?</h2>' +
       '<p class="small">Tap anyone who wasn\'t here.</p>' +
       '<div class="chips">' + PLAN.hqs.map(function(h){ var out = here.indexOf(h[0]) < 0; return '<button class="chip' + (out ? " out" : " on") + '" data-here="' + h[0] + '">' + h[0] + '</button>'; }).join("") + '</div>' +
-      '<div class="row"><button class="sbtn go" data-act="buddy">Send to Buddy</button><button class="sbtn" data-act="evidence">Save the board' + (snaps ? " (" + snaps + " snaps)" : "") + '</button><button class="sbtn" data-act="folder">Copy folder rows</button></div>' +
-      '<p class="small" id="sendmsg" style="margin-top:10px">' + (S.sent ? esc(S.sent) : 'Send to Buddy writes a Learning note for everyone here, linked to step ' + (meta.step || "?") + ' of ' + esc(series.title) + ', with the board picture. Anyone who missed it gets the matching HQ activity in their folder.') + '</p>' +
+      '<div class="row"><button class="sbtn go" data-act="buddy">Send to Buddy</button><button class="sbtn" data-act="evidence">Save the board' + (snaps ? " (" + snaps + " snaps)" : "") + '</button>' + (meta.drop ? '<button class="sbtn" data-act="folder">Copy folder rows</button>' : '') + '</div>' +
+      '<p class="small" id="sendmsg" style="margin-top:10px">' + (S.sent ? esc(S.sent) : (meta.step ? 'Send to Buddy writes a Learning note for everyone here, linked to step ' + meta.step + ' of ' + esc(series.title) + ', with the board picture. Anyone who missed it gets the matching HQ activity in their folder.' : 'Send to Buddy writes a Learning note for everyone here, with the board picture. ' + esc(series.title) + ' is not a milestone target, so the note is not linked to a step.')) + '</p>' +
     '</div></div>';
 };
 
@@ -656,6 +680,7 @@ function resetLesson(){
   toast(PREVIEW ? "Preview reset." : "Lesson reset. Not counted as taught.");
 }
 function autoTaught(){
+  if(SCHOOL) return;
   if(PREVIEW) return;
   var st = PLAN.load(), k = PLAN.partKey(meta.id, part);
   if(!st.taught[k]){ PLAN.mark(meta.id, part, true); redraw(); toast("Marked as taught today."); }
@@ -674,6 +699,7 @@ function topStrip(){
   $("#era").innerHTML = era ? "Time machine: <b>" + esc(era.year) + "</b>" : "";
 }
 function eraNow(){
+  if(SCHOOL) return null;
   try{ var w = window.B5TERM && B5TERM.currentWeek(); return w && w.era ? w.era : null; }catch(e){ return null; }
 }
 
@@ -1015,7 +1041,7 @@ function summaryLine(){
     var t = S.tally[i];
     if(f.exit){ ex++; if(t && t.some(function(v){ return v > 0; })){ voted = true; var mx = Math.max.apply(null, t); if(f.d.a != null && t[f.d.a] === mx) exRight++; } }
   });
-  bits.push("Joined in with the whole group lesson on the board" + (part ? " (part " + part + " of 3: " + PLAN.parts[part].toLowerCase() + ")" : "") + ".");
+  bits.push("Joined in with the whole group lesson on the board" + (part ? " (part " + part + " of " + NP + ": " + pname(part).toLowerCase() + ")" : "") + ".");
   if(voted) bits.push("Group exit vote: most picked the right answer on " + exRight + " of " + ex + " questions.");
   frames.forEach(function(f, i){
     var t = S.tally[i];
@@ -1053,7 +1079,7 @@ function sendBuddy(){
       /* the matching HQ activity is already planned into everyone's folder (/data/a2/drops.js):
          only bring it forward for anyone it hasn't reached yet */
       var drops = {}, today = PLAN.iso(), DR = window.B5DROPS;
-      missed.forEach(function(w){
+      if(meta.drop) missed.forEach(function(w){
         var plan = DR && DR.items ? DR.items.filter(function(it){ return it.who === w && it.slug === meta.drop; })[0] : null;
         if(plan && plan.date <= today){ S.already = (S.already || []).concat(w); return; }
         var hq = PLAN.hqs.filter(function(h){ return h[0] === w; })[0];
@@ -1061,7 +1087,7 @@ function sendBuddy(){
       });
       sendMsg("Sending to the shared memory and Buddy...");
       return Site.call("lesson", {
-        key: pass, day: S.day, id: meta.id + (part ? "-p" + part : ""), title: meta.title + (part ? " (" + PLAN.parts[part].toLowerCase() + ")" : ""),
+        key: pass, day: S.day, id: meta.id + (part ? "-p" + part : ""), title: (meta.byWeek ? "Cultural Calendar: " : "") + meta.title + (part ? " (" + pname(part).toLowerCase() + ")" : ""),
         subject: pillar.name, target: meta.target, targetName: series.title, step: meta.step || 0,
         mins: part ? 15 : (lesson.mins || 45), line: summaryLine(), here: here, png: png,
         dropTitle: dropTitle, drops: drops, missed: Object.keys(drops), dropNote: "This goes with the lesson on " + meta.title.replace(/\?$/, "") + ", whenever you fancy it. No rush."
@@ -1072,7 +1098,7 @@ function sendBuddy(){
     if(!o.ok){ sendMsg("Not sent: " + (o.error || "no answer from the sheet") + (o.error === "unknown action" ? ". The sheet script needs the new version: see Shared memory in the staff room." : ".")); return; }
     var notes = o.notes || [], linked = notes.filter(function(n){ return n.linked; }).length;
     var line = "Sent for " + notes.map(function(n){ return n.who; }).join(", ") + ".";
-    line += o.toBuddy ? " Buddy notes " + (linked ? "linked to step " + meta.step + (linked < notes.length ? " for " + linked + " of them" : "") : "sent, but no matching step was found in Buddy") + "." : " Evidence rows written (Evidence to Buddy is off in Settings).";
+    line += o.toBuddy && !meta.step ? " Buddy notes written." : o.toBuddy ? " Buddy notes " + (linked ? "linked to step " + meta.step + (linked < notes.length ? " for " + linked + " of them" : "") : "sent, but no matching step was found in Buddy") + "." : " Evidence rows written (Evidence to Buddy is off in Settings).";
     if(o.picture) line += " Board picture saved to Drive.";
     if(o.dropped && o.dropped.length) line += " " + dropTitleNow + " brought forward into the folder for " + o.dropped.join(", ") + ".";
     var al = (S.already || []).filter(function(w, i, a){ return a.indexOf(w) === i; });
@@ -1105,7 +1131,7 @@ d.addEventListener("keydown", function(e){
   if(kk === "b" || kk === "." || kk === "p"){ pause(true); return; }
   if(kk === "d") inkMode();
   else if(kk === "t") timerToggle();
-  else if(kk === "r") picker();
+  else if(kk === "r" && !SCHOOL) picker();
   else if(kk === "m") menu();
   else if(kk === "n") $("#say").hidden = !$("#say").hidden;
   else if(kk === "s") snap(fi);
@@ -1148,7 +1174,7 @@ start();
 /* the shared copy of what has been taught: if it knows of lessons this
    board does not, and the slot would now open a different one, move on
    to that one before anything has happened */
-if(!PREVIEW && PLAN.sync){
+if(!PREVIEW && !SCHOOL && PLAN.sync){
   var t0 = Date.now();
   PLAN.sync().then(function(r){
     if(!r || !r.ok || !r.added.length || !slotId || q("l") || fi !== 0 || Date.now() - t0 > 15000) return;
@@ -1159,5 +1185,5 @@ if(!PREVIEW && PLAN.sync){
     }
   });
 }
-window.B5Present = { go: go, next: next, prev: prev, frames: function(){ return frames; }, state: S, snap: snap, evidence: evidence, results: results };
+window.B5Present = { go: go, next: next, prev: prev, pending: function(){ return !!pending(); }, doPending: function(){ doPending(); }, frames: function(){ return frames; }, state: S, snap: snap, evidence: evidence, results: results };
 })();
