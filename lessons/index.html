@@ -79,7 +79,7 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
 
 <script src="/data/term.js?v=10"></script>
 <script src="/data/a2/library.js"></script>
-<script src="/lessons/plan.js?v=4"></script>
+<script src="/lessons/plan.js?v=5"></script>
 <script>
 (function(){
 var L = window.B5LESSONS, T = window.B5TERM;
@@ -100,7 +100,8 @@ function today(){
   if(tt && inTerm){
     tt.forEach(function(s){
       var slot = L.slotFor(key, s[2]); if(!slot) return;
-      var x = L.nextFor(slot.id, st), p = x.lesson ? L.pillars[x.lesson.pillar] : null;
+      var x = L.nextFor(slot.id, st), p = x.lesson ? L.looks(x.lesson) : null;
+      if(x.none) return;
       if(x.done){ html += '<div class="tcard quiet"><small>' + s[0] + ' &middot; ' + esc(slot.label) + '</small><b>All taught</b><span>Nothing left in this slot.</span></div>'; return; }
       html += '<a class="tcard" style="--pc:' + p.colour + '" href="' + L.presentHref(x) + '"><small>' + s[0] + ' &middot; ' + esc(p.name) + '</small><b>' + esc(L.label(x)) + '</b><span>' +
         (x.again ? "Taught today. Opens it again." : x.lesson.ready ? esc(x.lesson.line) : "Still being made.") + '</span></a>';
@@ -120,17 +121,17 @@ function list(){
       var se = L.bySeries[t], p = L.pillars[se.pillar];
       html += '<section class="series" style="--pc:' + p.colour + ';--pw:' + p.wash + '"><header><h2>' + esc(se.title) + '</h2><span>' + esc(p.name) + '</span></header><ol>';
       se.lessons.forEach(function(l){
-        var parts = l.split ? [1, 2, 3] : [0];
+        var parts = L.partNums(l);
         var done = L.isTaught(st, l.id);
         var isNext = nx.lesson && nx.lesson.id === l.id;
         var when = parts.map(function(pp){ return st.taught[L.partKey(l.id, pp)]; }).filter(Boolean);
         var tag = done ? '<span class="tag done">Taught ' + esc(nice(when[when.length - 1])) + '</span>'
-          : isNext ? '<span class="tag next">Next' + (nx.part ? ': ' + L.parts[nx.part].toLowerCase() : '') + '</span>'
+          : isNext ? '<span class="tag next">Next' + (nx.part ? ': ' + L.partName(nx.lesson, nx.part).toLowerCase() : '') + '</span>'
           : !l.ready ? '<span class="tag soon">Being made</span>' : '';
         var acts = "";
         if(l.ready){
           acts += '<a class="mini" href="/lessons/present.html?l=' + l.id + (l.split ? '&amp;p=1' : '') + '&amp;preview=1" title="Look through it without it counting">Preview</a>';
-          if(l.split) parts.forEach(function(pp){ acts += '<a class="mini' + (isNext && nx.part === pp ? ' go' : '') + '" href="/lessons/present.html?l=' + l.id + '&amp;p=' + pp + '">' + L.parts[pp] + '</a>'; });
+          if(l.split) parts.forEach(function(pp){ acts += '<a class="mini' + (isNext && nx.part === pp ? ' go' : '') + '" href="/lessons/present.html?l=' + l.id + '&amp;p=' + pp + '">' + L.partName(l, pp) + '</a>'; });
           else acts += '<a class="mini' + (isNext ? ' go' : '') + '" href="/lessons/present.html?l=' + l.id + '">Open</a>';
         }
         parts.forEach(function(pp){
@@ -139,7 +140,7 @@ function list(){
         });
         var act = actTitle(l.drop);
         var notSent = unsent.filter(function(x){ return x.lesson.id === l.id; });
-        if(notSent.length) tag += notSent.map(function(x){ return '<a class="tag unsent" href="/lessons/present.html?l=' + l.id + (x.part ? '&amp;p=' + x.part : '') + '&amp;f=end" title="Open the last slide to send it">Not sent' + (x.part ? ' (' + L.parts[x.part].toLowerCase() + ')' : '') + '</a>'; }).join("");
+        if(notSent.length) tag += notSent.map(function(x){ return '<a class="tag unsent" href="/lessons/present.html?l=' + l.id + (x.part ? '&amp;p=' + x.part : '') + '&amp;f=end" title="Open the last slide to send it">Not sent' + (x.part ? ' (' + L.partName(l, x.part).toLowerCase() + ')' : '') + '</a>'; }).join("");
         html += '<li class="' + (done ? 'done' : '') + '"><span class="n">' + l.n + '</span><div><h3>' + esc(l.title) + '</h3><p>' + esc(l.line) + (L.planned(l.id) ? ' <span class="plan">Planned ' + esc(nice(L.planned(l.id))) + '</span>' : '') + '</p>' +
           (act ? '<p class="goes">Goes with the HQ activity <b>' + esc(act) + '</b> &middot; <a href="/paper/?list=' + encodeURIComponent(l.drop) + '.medium" target="_blank" rel="noopener">on paper</a></p>' : '') + '</div><div class="acts">' + tag + acts + '</div></li>';
       });

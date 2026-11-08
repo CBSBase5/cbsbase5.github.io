@@ -36,7 +36,8 @@ var P = {
   pw:  { name: "Physical World and Exploration",  colour: "#7a7f1e", deep: "#555a0c", wash: "#eef0d4" },
   pfa: { name: "Preparation for Adulthood",       colour: "#3f6f8f", deep: "#284c66", wash: "#e1edf5" },
   se:  { name: "Scientific and Environmental",    colour: "#1e9e5a", deep: "#11713e", wash: "#dcf3e6" },
-  rel: { name: "Relational (PSHE and RSE)",       colour: "#6a5acd", deep: "#4636a3", wash: "#e8e5fa" }
+  rel: { name: "Relational (PSHE and RSE)",       colour: "#6a5acd", deep: "#4636a3", wash: "#e8e5fa" },
+  cc:  { name: "Cultural Calendar",               colour: "#c98a12", deep: "#8a5c06", wash: "#fbf0d6" }
 };
 
 var SERIES = [
@@ -81,6 +82,24 @@ var SERIES = [
     { id: "rel-assert-2", step: 2, title: "My yes, my no", line: "Saying no, and hearing it.", ready: true, drop: "my-yes-my-no" },
     { id: "rel-assert-3", step: 3, title: "Asking for what I need", line: "I statements and picking the moment.", ready: true, drop: "my-yes-my-no" },
     { id: "rel-assert-4", step: 3, title: "Under pressure", line: "Group pressure, and backing someone else up.", ready: true, drop: "my-yes-my-no" }
+  ]},
+  /* Cultural Calendar: one lesson a week, the week's theme from /data/cc.js, in five
+     30 minute parts (10:00 each day). Whole school: any base can open it from /cc/
+     with &school=1 (no Base 5 bits). Not a pillar target, so no step and no drop:
+     Send to Buddy writes a Learning note without a milestone link.
+     from/to: the week it belongs to. colour/deep/wash: the week's own look. */
+  { target: "cc", pillar: "cc", title: "Cultural Calendar", split: true, parts: 5, byWeek: true,
+    partNames: ["", "Hook", "Explore", "Dig deeper", "Make", "Share"], lessons: [
+    { id: "cc-remembrance-1", cc: "remembrance", from: "2026-11-09", to: "2026-11-13", step: 0, title: "Remembrance", line: "How do you say thank you to people you never met?", ready: true,
+      colour: "#b5171c", deep: "#7d0f12", wash: "#fbe4e2" },
+    { id: "cc-antibullying-1", cc: "anti-bullying", from: "2026-11-16", to: "2026-11-20", step: 0, title: "Anti-Bullying Week", line: "What could you say when something is not OK?", ready: true,
+      colour: "#0077b6", deep: "#00507c", wash: "#dcefff" },
+    { id: "cc-giving-1", cc: "giving-tuesday", from: "2026-11-23", to: "2026-11-27", step: 0, title: "Giving Tuesday", line: "What could you give that costs nothing?", ready: true,
+      colour: "#e2560b", deep: "#a33c05", wash: "#fff0dc" },
+    { id: "cc-christmas-1", cc: "christmas-around-the-world", from: "2026-11-30", to: "2026-12-04", step: 0, title: "Christmas Around the World", line: "How does the rest of the world do December?", ready: true,
+      colour: "#0b6e4f", deep: "#064a35", wash: "#dcf3ea" },
+    { id: "cc-steam-1", cc: "steam-for-good", from: "2026-12-07", to: "2026-12-11", step: 0, title: "STEAM for Good", line: "What is one problem round here you could actually fix?", ready: true,
+      colour: "#3a0ca3", deep: "#26066e", wash: "#e8e1fb" }
   ]}
 ];
 
@@ -96,7 +115,8 @@ var SLOTS = [
   { id: "thu-project",   days: ["thu"], session: "project",   series: ["hs-myths", "se-earth"], mins: 45, label: "Thursday, first half of the project slot" },
   { id: "fri-pfa",       days: ["fri"], session: "pfa",       series: ["pfa-transport", "pfa-careers"], mins: 30, label: "Friday, PFA",
     order: ["pfa-transport-1", "pfa-careers-1", "pfa-transport-2", "pfa-careers-2", "pfa-transport-3", "pfa-careers-3"] },
-  { id: "phse",          days: ["mon", "thu", "fri"], session: "phse", series: ["rel-assert"], mins: 15, split: true, label: "PHSE, Monday, Thursday and Friday" }
+  { id: "phse",          days: ["mon", "thu", "fri"], session: "phse", series: ["rel-assert"], mins: 15, split: true, label: "PHSE, Monday, Thursday and Friday" },
+  { id: "cc",            days: ["mon", "tue", "wed", "thu", "fri"], session: "cc", series: ["cc"], mins: 30, split: true, byWeek: true, label: "Cultural Calendar, every day at 10:00" }
 ];
 
 var HQS = [["EGW", "/egw/"], ["LP", "/lp/"], ["LW", "/lw/"], ["LC", "/lc/"], ["HK", "/hk/"], ["JT", "/jt-hq/"]];
@@ -118,14 +138,22 @@ function save(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){}
 var bySeries = {}, byLesson = {};
 SERIES.forEach(function(s){
   bySeries[s.target] = s;
-  s.lessons.forEach(function(l, i){ l.n = i + 1; l.of = s.lessons.length; l.target = s.target; l.pillar = s.pillar; l.split = !!s.split; byLesson[l.id] = l; });
+  s.lessons.forEach(function(l, i){ l.n = i + 1; l.of = s.lessons.length; l.target = s.target; l.pillar = s.pillar; l.split = !!s.split;
+    l.parts = s.split ? (s.parts || 3) : 0; l.partNames = s.partNames || PARTS; l.byWeek = !!s.byWeek; byLesson[l.id] = l; });
 });
+
+/* how many parts a lesson has, and their names */
+function nParts(l){ return l && l.split ? l.parts || 3 : 0; }
+function partNums(l){ var n = nParts(l), a = []; for(var i = 1; i <= n; i++) a.push(i); return a.length ? a : [0]; }
+function partName(l, p){ return p ? ((l && l.partNames) || PARTS)[p] || ("Part " + p) : ""; }
+/* the colours a lesson shows in: its own (a Cultural Calendar week) or its pillar's */
+function looks(l){ var p = P[l.pillar] || P.ac; return { name: p.name, colour: l.colour || p.colour, deep: l.deep || p.deep, wash: l.wash || p.wash }; }
 
 /* "rel-assert-1#2" is part 2 of a split lesson */
 function partKey(id, part){ return part ? id + "#" + part : id; }
 function isTaught(s, id, part){
   var l = byLesson[id]; if(!l) return false;
-  if(l.split && !part) return !!(s.taught[partKey(id, 1)] && s.taught[partKey(id, 2)] && s.taught[partKey(id, 3)]);
+  if(l.split && !part) return partNums(l).every(function(p){ return !!s.taught[partKey(id, p)]; });
   return !!s.taught[partKey(id, l.split ? part : 0)];
 }
 
@@ -138,10 +166,17 @@ function nextFor(slotId, s){
   var today = iso(), list = [];
   function add(l){
     if(!l) return;
-    if(l.split) [1, 2, 3].forEach(function(p){ list.push({ lesson: l, part: p }); });
+    if(l.split) partNums(l).forEach(function(p){ list.push({ lesson: l, part: p }); });
     else list.push({ lesson: l, part: 0 });
   }
-  if(slot.order) slot.order.forEach(function(id){ add(byLesson[id]); });
+  if(slot.byWeek){
+    /* the lesson for this week's theme only: a missed part rolls on within the week */
+    var wl = null;
+    slot.series.forEach(function(t){ (bySeries[t] ? bySeries[t].lessons : []).forEach(function(l){ if(l.from <= today && today <= l.to) wl = l; }); });
+    if(!wl) return { slot: slot, done: true, none: true };
+    add(wl);
+  }
+  else if(slot.order) slot.order.forEach(function(id){ add(byLesson[id]); });
   else slot.series.forEach(function(t){ (bySeries[t] ? bySeries[t].lessons : []).forEach(add); });
   var hit = list.filter(function(x){ return s.taught[partKey(x.lesson.id, x.part)] === today; });
   if(hit.length) return { slot: slot, lesson: hit[hit.length - 1].lesson, part: hit[hit.length - 1].part, again: true };
@@ -213,7 +248,7 @@ function sync(){
       var s = load(), sent = {}, added = [];
       (o.items || []).forEach(function(it){
         if(String(it.Kind || "") !== "lesson") return;
-        var m = String(it.Slug || "").match(/^lesson-([a-z]+-[a-z]+-\d)(?:-p([123]))?$/);
+        var m = String(it.Slug || "").match(/^lesson-([a-z]+-[a-z]+-\d)(?:-p([1-5]))?$/);
         if(!m || !byLesson[m[1]]) return;
         var key = partKey(m[1], m[2] ? +m[2] : 0), day = String(it.Day || "").slice(0, 10);
         if(!sent[key] || day < sent[key]) sent[key] = day;
@@ -252,6 +287,7 @@ var PLANNED = {};
 SLOTS.forEach(function(slot){
   var ids = slot.order ? slot.order.slice() : [];
   if(!ids.length) slot.series.forEach(function(t){ (bySeries[t] ? bySeries[t].lessons : []).forEach(function(l){ ids.push(l.id); }); });
+  if(slot.byWeek){ slot.series.forEach(function(t){ (bySeries[t] ? bySeries[t].lessons : []).forEach(function(l){ PLANNED[l.id] = l.from; }); }); return; }
   ids.forEach(function(id, i){ if(!PLANNED[id]) PLANNED[id] = addDays(WEEK1, i * 7 + DOFF[slot.days[0]]); });
 });
 function planned(id){ return PLANNED[id] || ""; }
@@ -262,18 +298,18 @@ function presentHref(x){
 }
 function label(x){
   if(!x || !x.lesson) return "";
-  return x.lesson.title + (x.part ? " (" + PARTS[x.part].toLowerCase() + ")" : "");
+  return x.lesson.title + (x.part ? " (" + partName(x.lesson, x.part).toLowerCase() + ")" : "");
 }
 
 /* bump when lesson files change, so boards fetch the new ones */
-window.B5LESSONS_V = 4;
+window.B5LESSONS_V = 5;
 
 window.B5LESSONS = {
   pillars: P, series: SERIES, slots: SLOTS, hqs: HQS, parts: PARTS,
   bySeries: bySeries, byLesson: byLesson,
   iso: iso, load: load, save: save, partKey: partKey, isTaught: isTaught,
   nextFor: nextFor, slotFor: slotFor, together: together, mark: mark,
-  presentHref: presentHref, forActivity: forActivity, sync: sync, unsent: unsent, sentMark: sentMark,
+  presentHref: presentHref, forActivity: forActivity, nParts: nParts, partNums: partNums, partName: partName, looks: looks, sync: sync, unsent: unsent, sentMark: sentMark,
   rememberPass: rememberPass, planned: planned, label: label
 };
 })();

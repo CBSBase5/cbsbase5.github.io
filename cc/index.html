@@ -16,6 +16,7 @@
 <script src="/cc/cc-art.js?v=8"></script>
 <script src="/cc/cc-scenes.js?v=8"></script>
 <script src="/cc/cc-face.js?v=1"></script>
+<script src="/lessons/plan.js?v=5"></script>
 <style>
 /* ==========================================================
    Chilton Bridge School - the Cultural Calendar page
@@ -188,6 +189,20 @@ h1.title{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 90
   border:3px solid currentColor;border-radius:999px;padding:8px 16px}
 .moreinfo:hover{background:var(--popbg);color:var(--popink);border-color:var(--cbs-ink)}
 .moreinfo svg{width:18px;height:18px}
+
+/* ---------- this week's lesson on the board (/lessons/) ---------- */
+.cclesson{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin:0 0 30px;background:var(--card);color:var(--cbs-ink);border:4px solid var(--cbs-ink);
+  border-radius:22px 18px 24px 16px;padding:16px 18px;box-shadow:6px 7px 0 rgba(0,0,0,.25)}
+.cclesson .lic{flex:none;width:64px;height:50px}
+.cclesson .lt{flex:1 1 260px}
+.cclesson .lt b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 900;text-transform:uppercase;letter-spacing:.04em;font-size:1.15rem}
+.cclesson .lt span{display:block;font-size:.92rem;margin-top:3px}
+.cclesson .days{display:flex;flex-wrap:wrap;gap:8px}
+.cclesson .days a{display:inline-flex;flex-direction:column;align-items:center;min-width:86px;text-decoration:none;color:var(--cbs-ink);background:var(--cbs-cream);
+  border:3px solid var(--cbs-ink);border-radius:14px;padding:6px 10px;font-weight:800;line-height:1.1}
+.cclesson .days a small{font-weight:600;font-size:.74rem;opacity:.8;margin-top:2px}
+.cclesson .days a.today{background:var(--cbs-ink);color:#fff}
+.cclesson .days a:hover,.cclesson .days a:focus-visible{transform:translateY(-2px)}
 
 /* ---------- the guide for one idea ---------- */
 dialog#guide{width:min(820px,calc(100% - 20px));max-height:calc(100% - 20px);padding:0;border:4px solid var(--cbs-ink);border-radius:22px;background:var(--cbs-cream);color:var(--cbs-ink);overflow:auto}
@@ -511,6 +526,7 @@ dialog#passport{perspective:2200px}
   </section>
 
   <section class="extras" aria-label="Ideas and jobs for this week">
+    <div id="cclesson"></div>
     <h2 class="sh">Try this <small>Tap one to see how.</small></h2>
     <div id="schoolcount"></div>
     <div class="tries" id="tries"></div>
@@ -729,6 +745,22 @@ function slot(w){
     '<button class="play" type="button" id="pitchBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l2-6L17 3l4 4L10 18zM14 6l4 4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/></svg>Pitch the game</button></div>';
 }
 
+/* the week's lesson for the board: five 30 minute parts, one a day. Opens without the Base 5 bits (school=1). */
+function lessonCard(w){
+  var box = $("cclesson"), L = window.B5LESSONS; if(!box) return;
+  var l = null;
+  if(L && L.bySeries && L.bySeries.cc) L.bySeries.cc.lessons.forEach(function(x){ if(x.cc === w.id && x.ready) l = x; });
+  if(!l){ box.innerHTML = ""; return; }
+  var DN = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], t = new Date(), dow = (t.getDay() + 6) % 7;
+  var inWeek = L.iso(t) >= l.from && L.iso(t) <= l.to;
+  box.innerHTML = '<div class="cclesson"><svg class="lic" viewBox="0 0 64 50" aria-hidden="true"><rect x="3" y="3" width="58" height="36" rx="6" fill="#fffdf8" stroke="#0a2f38" stroke-width="3.5"/>' +
+    '<rect x="11" y="11" width="22" height="6" rx="3" fill="#ef7724"/><rect x="11" y="22" width="34" height="4" rx="2" fill="#0a2f38" opacity=".35"/><path d="M23 39l-6 8M41 39l6 8" stroke="#0a2f38" stroke-width="3.5" stroke-linecap="round"/></svg>' +
+    '<div class="lt"><b>The lesson for the board</b><span>Half an hour a day, one part each morning. Votes, sorting and talking, with nothing to write down.</span></div>' +
+    '<div class="days">' + L.partNums(l).map(function(p, i){
+      return '<a class="' + (inWeek && i === dow ? "today" : "") + '" href="/lessons/present.html?l=' + l.id + '&amp;p=' + p + '&amp;school=1">' + DN[i] + '<small>' + esc(L.partName(l, p)) + '</small></a>';
+    }).join("") + '</div></div>';
+}
+
 function render(w){
   VIEW = w;
   setLook(w);
@@ -755,6 +787,7 @@ function render(w){
     cd.hidden = false;
   } else cd.hidden = true;
   $("slot").innerHTML = slot(w);
+  lessonCard(w);
   /* the stamp, if this device has one */
   $("hstamp").innerHTML = STAMPS[w.id] ? A.stamp(w, 84) : "";
   $("hstamp").classList.remove("slam");

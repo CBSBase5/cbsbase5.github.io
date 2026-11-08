@@ -190,5 +190,23 @@ function scene(w, h, o){
   return g;
 }
 
-window.LART = { svg: svg, T: T, bonnie: bonnie, bambi: bambi, jay: jay, bird: bird, hand: hand, bubble: bubble, icon: icon, iconRow: iconRow, scene: scene, INK: INK };
+/* ---------- Cultural Calendar art (/cc/cc-art.js and /cc/cc-scenes.js) ----------
+   cci: one of the Cultural Calendar's icons, size px wide, centred on x, y.
+   ccScene: a week's hand drawn scene, on its own background, for an art box.
+   ccWeek: that week's entry in /data/cc.js. */
+function ccWeek(id){ var C = window.B5CC; return C && C.weeks ? C.weeks.filter(function(w){ return w.id === id; })[0] || null : null; }
+function cci(name, x, y, size, f, d){
+  var C = window.B5CCArt; if(!C) return "";
+  var k = (size || 48) / 48;
+  return '<g transform="translate(' + (x - 24 * k).toFixed(1) + ' ' + (y - 24 * k).toFixed(1) + ') scale(' + k.toFixed(3) + ')">' + C.inner(name, f || INK, d || "#ffffff") + '</g>';
+}
+function ccScene(id){
+  var w = ccWeek(id), SC = window.B5CCScenes;
+  if(!w || !SC || !w.look || !SC.has(w.look.scene)) return "";
+  var L = w.look;
+  return '<div class="ccscene" style="background:linear-gradient(170deg,' + L.bg + ',' + L.bg2 + ')">' + SC.draw(L.scene, L) + '</div>';
+}
+
+window.LART = { svg: svg, T: T, bonnie: bonnie, bambi: bambi, jay: jay, bird: bird, hand: hand, bubble: bubble, icon: icon, iconRow: iconRow, scene: scene, INK: INK,
+  cci: cci, ccScene: ccScene, ccWeek: ccWeek };
 })();
