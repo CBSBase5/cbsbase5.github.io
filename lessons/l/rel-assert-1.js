@@ -12,7 +12,7 @@ var A = window.LART, S = A.svg, T = A.T, INK = "#0a2f38";
 var MOUSE = "#a9a39a", DRAGON = "#3fae6a", OWL = "#9a6b45", PURPLE = "#6a5acd", TEAL = "#007291", ORANGE = "#ef7724", YELLOW = "#ffc247";
 
 function mouse(x, y, s){
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">' +
+  return '<g class="sway"><g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">' +
     '<path d="M38 40q40 10 30 -20" stroke="' + MOUSE + '" stroke-width="5" fill="none" stroke-linecap="round"/>' +
     '<ellipse cx="0" cy="30" rx="44" ry="34" fill="' + MOUSE + '"/>' +
     '<circle cx="-26" cy="-26" r="20" fill="' + MOUSE + '"/><circle cx="-26" cy="-26" r="11" fill="#f3b6c4"/>' +
@@ -20,7 +20,7 @@ function mouse(x, y, s){
     '<ellipse cx="0" cy="0" rx="32" ry="28" fill="' + MOUSE + '"/>' +
     '<circle cx="-11" cy="2" r="3.4" fill="' + INK + '"/><circle cx="11" cy="2" r="3.4" fill="' + INK + '"/>' +
     '<circle cx="0" cy="14" r="5" fill="#e2557a"/><path d="M-6 22q6 -4 12 0" stroke="' + INK + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-    '<path d="M-30 14l-18 -4M-30 18l-18 4M30 14l18 -4M30 18l18 4" stroke="' + INK + '" stroke-width="1.6"/></g>';
+    '<path d="M-30 14l-18 -4M-30 18l-18 4M30 14l18 -4M30 18l18 4" stroke="' + INK + '" stroke-width="1.6"/></g></g>';
 }
 function dragon(x, y, s){
   return '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">' +
@@ -31,10 +31,10 @@ function dragon(x, y, s){
     '<path d="M-20 -8l12 5M20 -8l-12 5" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>' +
     '<circle cx="-12" cy="2" r="3.6" fill="' + INK + '"/><circle cx="12" cy="2" r="3.6" fill="' + INK + '"/>' +
     '<ellipse cx="0" cy="18" rx="14" ry="9" fill="' + INK + '"/><path d="M-8 12l3 5l3 -5l3 5l3 -5" fill="#fff"/>' +
-    '<path d="M14 18q22 -4 30 -18q-2 14 10 10q-10 14 -40 10z" fill="' + ORANGE + '" opacity=".9"/></g>';
+    '<path class="flicker" d="M14 18q22 -4 30 -18q-2 14 10 10q-10 14 -40 10z" fill="' + ORANGE + '" opacity=".9"/></g>';
 }
 function owl(x, y, s){
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">' +
+  return '<g class="float"><g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">' +
     '<ellipse cx="0" cy="22" rx="42" ry="48" fill="' + OWL + '"/>' +
     '<ellipse cx="0" cy="36" rx="26" ry="30" fill="#e9d2b4"/>' +
     '<path d="M-10 30q4 4 8 0M2 40q4 4 8 0M-10 50q4 4 8 0" stroke="' + OWL + '" stroke-width="2.4" fill="none"/>' +
@@ -43,7 +43,7 @@ function owl(x, y, s){
     '<circle cx="-15" cy="-6" r="6" fill="' + INK + '"/><circle cx="15" cy="-6" r="6" fill="' + INK + '"/>' +
     '<path d="M-6 8l6 10l6 -10z" fill="' + ORANGE + '"/>' +
     '<path d="M-42 20q-10 30 8 46M42 20q10 30 -8 46" stroke="#7a5233" stroke-width="10" fill="none" stroke-linecap="round"/>' +
-    '<path d="M-12 70v8M12 70v8" stroke="' + ORANGE + '" stroke-width="5" stroke-linecap="round"/></g>';
+    '<path d="M-12 70v8M12 70v8" stroke="' + ORANGE + '" stroke-width="5" stroke-linecap="round"/></g></g>';
 }
 /* a speech bubble with up to three lines */
 function say(x, y, w, lines, col){

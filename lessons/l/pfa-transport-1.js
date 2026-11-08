@@ -21,7 +21,8 @@ window.B5LESSON = {
   finishMins: 5,
   cover: {
     line: "Bus, train, tram, taxi, bike, feet. Picking the right one is half the journey.",
-    art: S("0 0 700 420", '<path d="M0 360h700" stroke="' + INK + '" stroke-width="4"/>' + I("bus", 150, 360, 1.6) + I("train", 470, 360, 1.7) + I("bike", 320, 230, 0.9) + I("walk", 640, 360, 1.1) + A.bird(600, 90, 0.9) + A.bonnie(70, 330, 0.45))
+    art: S("0 0 700 420", A.scene(700, 420, { ground: 362, sun: [110, 80] }) + '<rect x="-20" y="362" width="740" height="70" fill="#8a8f96"/><path d="M0 395h700" stroke="#fffdf8" stroke-width="5" stroke-dasharray="30 22"/>' +
+      '<g class="drive">' + I("bus", 150, 360, 1.6) + '</g><g class="drive" style="animation-duration:5s;animation-direction:alternate-reverse">' + I("train", 470, 360, 1.7) + '</g><g class="float">' + I("bike", 320, 230, 0.9) + '</g>' + I("walk", 640, 360, 1.1) + '<g class="float">' + A.bird(600, 90, 0.9) + '</g>' + A.bonnie(70, 330, 0.45))
   },
 
   warm: {
@@ -139,7 +140,7 @@ window.B5LESSON = {
   realworld: {
     title: "Your ticket to everything",
     text: "College, a job, seeing friends, a day at the coast: getting about on your own opens up most of adult life. Every journey you plan now is practice.",
-    art: S("0 0 560 400", '<path d="M0 360h560" stroke="' + INK + '" stroke-width="4"/>' + I("train", 280, 360, 2.2) + I("ticket", 280, 160, 1.3)),
+    art: S("0 0 560 400", A.scene(560, 400, { ground: 362, time: "dusk", sun: [460, 80] }) + '<g class="drive">' + I("train", 280, 360, 2.2) + '</g><g class="float">' + I("ticket", 280, 160, 1.3) + '</g>'),
     say: "Ask: where would you go first if you could get there on your own?"
   },
 

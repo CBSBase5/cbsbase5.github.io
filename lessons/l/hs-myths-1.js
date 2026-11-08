@@ -15,7 +15,7 @@ function people(x, y){
   });
   return g;
 }
-function sky(){ var g = "", pts = [[80, 60], [190, 30], [300, 80], [430, 40], [560, 70], [650, 30], [720, 90]]; pts.forEach(function(p){ g += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4" fill="#ffc247"/>'; }); return g; }
+function sky(){ var g = "", pts = [[80, 60], [190, 30], [300, 80], [430, 40], [560, 70], [650, 30], [720, 90]]; pts.forEach(function(p, i){ g += '<circle class="twinkle" style="animation-delay:' + (i * 0.35) + 's" cx="' + p[0] + '" cy="' + p[1] + '" r="4" fill="#ffc247"/>'; }); return g; }
 
 window.B5LESSON = {
   id: "hs-myths-1",
@@ -24,7 +24,7 @@ window.B5LESSON = {
   cover: {
     line: "Before science, before books, people explained the world with stories. Some of them are still going.",
     art: S("0 0 760 440", '<rect width="760" height="440" fill="#1d3d47"/>' + sky() + '<path d="M0 360h760v80H0z" fill="#2d4a2f"/>' +
-      I("fire", 380, 380, 1.3) + people(380, 380) + A.bonnie(560, 362, 0.55) + '<circle cx="640" cy="90" r="38" fill="#fff6d6"/>')
+      '<g class="flicker">' + I("fire", 380, 380, 1.3) + '</g>' + people(380, 380) + A.bonnie(560, 362, 0.55) + '<circle cx="640" cy="90" r="38" fill="#fff6d6"/>')
   },
 
   warm: {
@@ -63,8 +63,8 @@ window.B5LESSON = {
           text: "Thousands of years ago, nobody knew why the sun moved, why it thundered, or why winter came.",
           pts: ["So people told stories to explain it", "Stories got passed on round fires, for hundreds of years"],
           build: true, ptsFrom: 1,
-          art: S("0 0 560 420", '<rect width="560" height="420" rx="16" fill="#1d3d47"/>' + I("cloud", 200, 130, 1.4) + I("cloud", 360, 110, 1.1) +
-            '<g data-s="1">' + I("bolt", 290, 260, 1.4) + '</g><path d="M0 360h560v60H0z" fill="#2d4a2f"/>' + '<g data-s="2">' + I("fire", 280, 380, 1) + people(280, 380) + '</g>'),
+          art: S("0 0 560 420", '<rect width="560" height="420" rx="16" fill="#1d3d47"/>' + '<g class="drift">' + I("cloud", 200, 130, 1.4) + I("cloud", 360, 110, 1.1) + '</g>' +
+            '<g data-s="1"><g class="pulse">' + I("bolt", 290, 260, 1.4) + '</g></g><path d="M0 360h560v60H0z" fill="#2d4a2f"/>' + '<g data-s="2"><g class="flicker">' + I("fire", 280, 380, 1) + '</g>' + people(280, 380) + '</g>'),
           say: "Ask: if you'd never heard of science, what would YOU guess thunder was?"
         },
         {
@@ -140,7 +140,7 @@ window.B5LESSON = {
           text: "Old stories were not just for fun. They did jobs:",
           pts: ["<b>Explain</b> the world before science could", "<b>Teach</b> a lesson: don't be greedy, be brave", "<b>Bring people together</b>: our heroes, our place", "<b>Pass the time</b> on long, dark nights"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", '<rect width="520" height="420" rx="16" fill="#1d3d47"/>' + sky() + '<path d="M0 340h520v80H0z" fill="#2d4a2f"/>' + I("fire", 260, 360, 1.2) + people(260, 360) + A.bambi(440, 300, 0.6)),
+          art: S("0 0 520 420", '<rect width="520" height="420" rx="16" fill="#1d3d47"/>' + sky() + '<path d="M0 340h520v80H0z" fill="#2d4a2f"/>' + '<g class="flicker">' + I("fire", 260, 360, 1.2) + '</g>' + people(260, 360) + A.bambi(440, 300, 0.6)),
           say: "Ask: which job do films and games do now?"
         },
         {
