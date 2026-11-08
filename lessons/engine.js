@@ -41,6 +41,9 @@ function q(name){ var m = location.search.match(new RegExp("[?&]" + name + "=([^
 
 /* ---------- which lesson ---------- */
 var meta = null, part = 0, slotId = q("slot");
+/* preview: look through a lesson without it counting. Nothing is marked
+   taught, nothing is sent, and the lesson does not move the slot on. */
+var PREVIEW = q("preview") === "1";
 (function(){
   var id = q("l"), p = parseInt(q("p"), 10) || 0;
   if(!id && slotId){
@@ -74,6 +77,7 @@ function start(){
     build();
     var at = parseInt(q("f"), 10);
     go(isNaN(at) ? 0 : Math.max(0, Math.min(frames.length - 1, at)), true);
+    if(PREVIEW) toast("Preview: nothing here counts or gets sent.");
   };
   sc.onerror = function(){ showMissing(meta.title, "The lesson file could not be found at /lessons/l/" + meta.id + ".js."); };
   d.head.appendChild(sc);
@@ -345,7 +349,8 @@ R.end = function(f){
     '<h1 class="ft small">' + (part && part < 3 ? "Good stopping point." : "Done. Nice one, Base 5.") + '</h1>' +
     '<div class="endgrid"><div class="panel"><h2>Lessons together</h2>' +
       '<p><b style="font-size:48px;font-family:var(--display)">' + n + '</b> of ' + total + ' this half term. Every one adds a plank to the bridge.</p>' + bridge(n, total) +
-      '<div class="row" style="margin-top:12px"><button class="sbtn' + (done ? "" : " go") + '" data-act="taught">' + (done ? "Marked as taught today. Undo?" : "Mark as taught") + '</button></div>' +
+      '<div class="row" style="margin-top:12px">' + (PREVIEW ? '<span class="partbadge" style="margin:0">Preview: not counted</span>' : '<button class="sbtn' + (done ? "" : " go") + '" data-act="taught">' + (done ? "Marked as taught today. Undo?" : "Mark as taught") + '</button>') +
+        '<button class="sbtn" data-act="reset">Reset this lesson</button></div>' +
       (nextInSeries ? '<p class="small" style="margin-top:10px">' + esc(nextInSeries) + '</p>' : "") +
     '</div><div class="panel"><h2>Who was here?</h2>' +
       '<p class="small">Tap anyone who wasn\'t here.</p>' +
@@ -589,6 +594,8 @@ function act(a){
   var f = frames[fi];
   if(a === "clue"){ wordState(f).clue = true; redraw(); }
   else if(a === "showword"){ var w = wordState(f); w.done = true; redraw(); }
+  else if(a === "taught" && PREVIEW){ toast("Preview: lessons are not marked as taught."); }
+  else if(a === "reset") resetLesson();
   else if(a === "taught"){
     var st = PLAN.load(), k = PLAN.partKey(meta.id, part);
     PLAN.mark(meta.id, part, !st.taught[k]); redraw();
@@ -597,7 +604,24 @@ function act(a){
   else if(a === "buddy") sendBuddy();
   else if(a === "evidence") evidence();
 }
+/* back to the start, as if it had never been opened today: untaught (if it was
+   marked today), who was here forgotten, every vote, sort, drawing and snap cleared */
+function resetLesson(){
+  if(!PREVIEW){
+    var st = PLAN.load(), k = PLAN.partKey(meta.id, part);
+    if(st.taught[k] === PLAN.iso()) delete st.taught[k];
+    if(st.here2) delete st.here2[k];
+    PLAN.save(st);
+  }
+  S = { step: {}, rev: {}, tally: {}, sort: {}, word: {}, recap: {}, strokes: {}, snaps: {}, surprise: {} };
+  window.B5Present.state = S;
+  TM.left = {}; TM.sec = "";
+  ["#menu", "#picker"].forEach(function(id){ var o = $(id); if(o) o.hidden = true; });
+  fi = 0; go(0, true);
+  toast(PREVIEW ? "Preview reset." : "Lesson reset. Not counted as taught.");
+}
 function autoTaught(){
+  if(PREVIEW) return;
   var st = PLAN.load(), k = PLAN.partKey(meta.id, part);
   if(!st.taught[k]){ PLAN.mark(meta.id, part, true); redraw(); toast("Marked as taught today."); }
 }
@@ -606,7 +630,7 @@ function autoTaught(){
 function topStrip(){
   var f = frames[fi];
   $("#pchip").textContent = pillar.name;
-  $("#ltitle").textContent = meta.title + (part ? " \u00b7 part " + part : "");
+  $("#ltitle").textContent = (PREVIEW ? "PREVIEW \u00b7 " : "") + meta.title + (part ? " \u00b7 part " + part : "");
   $("#secpill").textContent = SECNAME[f.sec] || "";
   var dots = "";
   for(var i = 0; i < frames.length; i++) dots += '<i class="' + (i < fi ? "done" : i === fi ? "on" : "") + '"></i>';
@@ -744,9 +768,13 @@ function menu(){
     if(f.sec !== last){ h += '<div class="sg">' + SECNAME[f.sec] + '</div>'; last = f.sec; }
     h += '<button class="mi' + (i === fi ? " cur" : "") + '" data-go="' + i + '">' + (i + 1) + ". " + esc(frameName(f)) + '</button>';
   });
+  var url = location.pathname + "?" + location.search.replace(/^\?/, "").split("&").filter(function(x){ return x && x.indexOf("f=") !== 0 && x.indexOf("preview=") !== 0; }).join("&");
+  h += '<div class="sg">This lesson</div><button class="mi" data-reset="1">Reset this lesson (start again, not counted)</button>' +
+    '<a href="' + esc(url + (PREVIEW ? "" : "&preview=1")) + '">' + (PREVIEW ? "Leave preview and teach it for real" : "Switch to preview (nothing counts)") + '</a>';
   h += '<div class="sg">Elsewhere</div><a href="/lessons/">The Lessons library</a><a href="/">Base 5 home</a>';
   box.innerHTML = h;
   $$("[data-go]", box).forEach(function(b){ b.addEventListener("click", function(){ ov.hidden = true; go(+b.dataset.go); }); });
+  $$("[data-reset]", box).forEach(function(b){ b.addEventListener("click", function(){ resetLesson(); }); });
   ov.hidden = false;
 }
 function frameName(f){
@@ -967,6 +995,7 @@ function summaryLine(){
 }
 function sendMsg(t){ S.sent = t; var el = $("#sendmsg"); if(el) el.textContent = t; }
 function sendBuddy(){
+  if(PREVIEW){ sendMsg("Preview: nothing is sent. Open the lesson from the timetable or Lessons page to send it for real."); return; }
   var Site = window.B5Site;
   if(!Site || !Site.call || !Site.syncUrl || Site.guest){ sendMsg("The shared memory is not reachable from this page (guest mode, or switched off). Save the board and copy folder rows instead."); return; }
   var here = hereList(), missed = PLAN.hqs.map(function(h){ return h[0]; }).filter(function(w){ return here.indexOf(w) < 0; });

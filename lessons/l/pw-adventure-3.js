@@ -52,7 +52,7 @@ window.B5LESSON = {
     {
       kind: "hook", title: "How a climbing wall works.", mins: 8,
       slides: [
-        { title: "Top rope climbing", text: "The rope runs from the climber, up through an anchor at the top, and down to a partner on the ground.", art: wall(), wideArt: true,
+        { title: "Top rope climbing", text: "The rope runs from the climber, up through an anchor at the top, and down to a partner on the ground.", art: wall(), wideArt: true, photo: { src: "https://commons.wikimedia.org/wiki/Special:FilePath/Belaying8.jpg?width=800", alt: "A climber on a rope with a belayer holding the rope below", caption: "Climber and belayer", credit: "Photo: Wikimedia Commons, CC BY-SA 3.0" },
           say: "Click through: anchor, belayer, climber. Ask: who is doing the most important job?" },
         {
           type: "predict", title: "Who holds the rope?",

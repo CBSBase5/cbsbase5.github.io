@@ -13,13 +13,13 @@ function wallArt(){
   holds.forEach(function(h){ g += '<ellipse cx="' + h[0] + '" cy="' + h[1] + '" rx="14" ry="10" fill="' + h[2] + '" stroke="' + INK + '" stroke-width="2.5"/>'; });
   g += '<path d="M380 30V200" stroke="#b5793f" stroke-width="4"/><circle cx="380" cy="30" r="8" fill="#6c7a80" stroke="' + INK + '" stroke-width="2"/>' +
     '<path d="M380 30Q560 120 560 390" stroke="#b5793f" stroke-width="4" fill="none"/>' +
-    '<g transform="translate(380 230)"><circle cx="0" cy="-34" r="13" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><path d="M-14 -44q14 -14 28 0z" fill="' + ORANGE + '"/><path d="M0 -20v32M0 12l-14 26M0 12l16 22M0 -12l-20 -18M0 -12l20 -26" stroke="' + INK + '" stroke-width="7" stroke-linecap="round" fill="none"/></g>' +
+    '<g class="float"><g transform="translate(380 230)"><circle cx="0" cy="-34" r="13" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><path d="M-14 -44q14 -14 28 0z" fill="' + ORANGE + '"/><path d="M0 -20v32M0 12l-14 26M0 12l16 22M0 -12l-20 -18M0 -12l20 -26" stroke="' + INK + '" stroke-width="7" stroke-linecap="round" fill="none"/></g></g>' +
     '<g transform="translate(560 390)"><circle cx="0" cy="-74" r="11" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><path d="M0 -62v30M0 -32l-12 30M0 -32l12 30M0 -54l-14 10" stroke="' + INK + '" stroke-width="7" stroke-linecap="round" fill="none"/></g>';
   return g;
 }
 function zones(){
   return '<g data-s="1"><circle cx="300" cy="220" r="190" fill="#f6c9c9" stroke="' + INK + '" stroke-width="4"/>' + T(300, 58, "Panic zone", 26, { a: "middle", f: 1 }) + '</g>' +
-    '<g data-s="2"><circle cx="300" cy="230" r="130" fill="#ffe3a1" stroke="' + INK + '" stroke-width="4"/>' + T(300, 132, "Stretch zone", 26, { a: "middle", f: 1 }) + '</g>' +
+    '<g data-s="2"><circle class="pulse" cx="300" cy="230" r="130" fill="#ffe3a1" stroke="' + INK + '" stroke-width="4"/>' + T(300, 132, "Stretch zone", 26, { a: "middle", f: 1 }) + '</g>' +
     '<g data-s="1"><circle cx="300" cy="250" r="70" fill="#cfeee0" stroke="' + INK + '" stroke-width="4"/>' + T(300, 258, "Comfort", 24, { a: "middle", f: 1 }) + '</g>' +
     '<g data-s="3">' + T(520, 160, "Adventure", 28, { f: 1, c: "#7a5a00" }) + T(520, 192, "lives here", 24) + '<path d="M512 176q-60 0 -84 20" stroke="' + INK + '" stroke-width="3" fill="none"/></g>';
 }
@@ -30,9 +30,9 @@ window.B5LESSON = {
   mins: 45,
   cover: {
     line: "Climbing, kayaking, caving, zip wires. What makes something scary in a good way?",
-    art: S("0 0 700 440", I("mountain", 200, 380, 2.4) + I("mountain", 470, 380, 1.6) + I("tree", 610, 400, 1.1) + I("tree", 90, 410, 0.9) +
+    art: S("0 0 700 440", A.scene(700, 440, { ground: 400, sun: [600, 70] }) + I("mountain", 200, 380, 2.4) + I("mountain", 470, 380, 1.6) + I("tree", 610, 400, 1.1) + I("tree", 90, 410, 0.9) +
       '<path d="M0 400h700" stroke="' + INK + '" stroke-width="4"/><path d="M60 120L640 260" stroke="' + INK + '" stroke-width="3"/>' +
-      '<g transform="translate(330 205)"><path d="M0 -8v30" stroke="' + INK + '" stroke-width="3"/><circle cx="0" cy="34" r="12" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><path d="M0 46v24M0 54l-16 10M0 54l16 -8M0 70l-10 20M0 70l12 18" stroke="' + INK + '" stroke-width="6" stroke-linecap="round"/></g>' +
+      '<g class="float" transform="translate(330 205)"><path d="M0 -8v30" stroke="' + INK + '" stroke-width="3"/><circle cx="0" cy="34" r="12" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3"/><path d="M0 46v24M0 54l-16 10M0 54l16 -8M0 70l-10 20M0 70l12 18" stroke="' + INK + '" stroke-width="6" stroke-linecap="round"/></g>' +
       A.bonnie(520, 362, 0.5))
   },
 
@@ -99,7 +99,8 @@ window.B5LESSON = {
           pts: ["A <b>hazard</b> is something that could hurt you: a cliff edge, a cold river", "A <b>risk</b> is how likely it is to happen, and how bad", "You cannot always remove the hazard, but you can shrink the risk"],
           build: true, ptsFrom: 1,
           art: S("0 0 700 440", wallArt()),
-          say: "The climbing wall: the height is the hazard. The rope, harness and belayer make the risk small."
+          photo: { src: "https://commons.wikimedia.org/wiki/Special:FilePath/Climbing_wall_at_Sand_Point,_Seattle.jpg?width=800", alt: "An outdoor climbing wall with coloured holds", caption: "A real climbing wall", credit: "Photo: Joe Mabel, CC BY-SA 3.0, Wikimedia Commons" },
+          say: "The climbing wall: the height is the hazard. The rope, harness and belayer make the risk small. Tap the photo to make it bigger."
         },
         {
           type: "sort",
@@ -166,7 +167,7 @@ window.B5LESSON = {
   realworld: {
     title: "Adventure is closer than you think",
     text: "Go Ape at Moors Valley was one. Climbing walls, forests, rivers and the coast all have adventures in them, most with an instructor and the right kit. Some are free: a walk somewhere new counts.",
-    art: S("0 0 560 420", I("mountain", 180, 390, 2) + I("tree", 420, 400, 1.6) + I("tree", 500, 410, 1.1) + A.bird(470, 110, 0.9) + '<path d="M0 400h560" stroke="' + INK + '" stroke-width="4"/>'),
+    art: S("0 0 560 420", A.scene(560, 420, { ground: 400, time: "dusk", sun: [460, 90] }) + I("mountain", 180, 390, 2) + '<g class="sway">' + I("tree", 420, 400, 1.6) + I("tree", 500, 410, 1.1) + '</g><g class="float">' + A.bird(470, 110, 0.9) + '</g>'),
     say: "Ask: what adventure would you want Base 5 to try next?"
   },
 
