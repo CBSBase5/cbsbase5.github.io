@@ -33,6 +33,11 @@ window.B5PARENTS = {
   lunchPdf: "/parents/lunch-menu.pdf",
   lunchPdfLabel: "The school lunch menu (PDF)",
 
+  /* The timetable as a PDF (made from /parents/_build/timetable.html, uploaded to
+     the parents folder as timetable.pdf). Leave "" and the portal offers to print the page. */
+  timetablePdf: "/parents/timetable.pdf",
+  timetablePdfLabel: "The timetable (PDF)",
+
   /* How lunch works for Base 5. [title, text] */
   lunch: [
     ["Ordered for them", "We order each student's lunch from the school kitchen ahead of time, so there is nothing to sort out from home."],

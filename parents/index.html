@@ -193,7 +193,7 @@
     <div class="tt" id="tt"></div>
     <p class="ttnote">Days run from 9:30 to 2:30. The times are a guide, and we adapt sessions whenever a student needs it.</p>
     <p class="ttnote" id="ttAlong" hidden></p>
-    <button class="btn btn-quiet print" type="button" id="printIt">Print or save as PDF</button>
+    <div class="print" id="ttCta"><button class="btn btn-quiet" type="button" id="printIt">Print or save as PDF</button></div>
   </section>
 
   <section class="sec" id="rhythms" aria-labelledby="rh-h">
@@ -287,7 +287,7 @@
 </footer>
 
 <script src="/data/term.js?v=10"></script>
-<script src="/data/parents.js?v=18"></script>
+<script src="/data/parents.js?v=19"></script>
 <script src="/data/cc.js?v=7"></script>
 <script src="/cc/cc-art.js?v=8"></script>
 <script src="/cc/cc-scenes.js?v=8"></script>
@@ -310,6 +310,12 @@ $("state").textContent = guest ? "You are in guest mode. Leave it here or from t
 $("leave").hidden = !guest;
 $("enter").textContent = guest ? "Carry on looking around" : "Look around as a guest";
 $("printIt").onclick = function(){ window.print(); };
+/* the timetable as a PDF to download or print (Parent portal settings) */
+(function(){
+  var TP = String(P.timetablePdf || "").trim();
+  if(!TP || !/^(https:\/\/|\/)/.test(TP)) return;
+  $("ttCta").innerHTML = '<a class="btn btn-orange" href="' + esc(TP) + '" target="_blank" rel="noopener" download>' + esc(P.timetablePdfLabel || "The timetable (PDF)") + '</a>';
+})();
 /* notice, contact and which sections show */
 var N = P.notice || {}, nb = $("notice");
 if(window.B5PARENTS_DRAFT){ nb.className = "notice draft"; nb.textContent = "Preview of your changes. Everyone else sees the live version until the new file is uploaded."; nb.hidden = false; }
@@ -422,7 +428,9 @@ $("menuCta").innerHTML = PDF && /^(https:\/\/|\/)/.test(PDF) ?
 (function(){
   var K = window.B5CCCard, box = document.getElementById("ccCard"), sec = document.getElementById("cultural");
   if(!K || !box || !sec || sec.hidden) return;
-  var w = K.week(), d = new Date(), iso = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  /* at the weekend the page is already on next week, so the card is too */
+  var tw = window.B5TERM && B5TERM.currentWeek && B5TERM.currentWeek(), d0 = new Date(), i0 = d0.getFullYear() + "-" + ("0" + (d0.getMonth() + 1)).slice(-2) + "-" + ("0" + d0.getDate()).slice(-2);
+  var w = K.week(tw && tw.start > i0 ? tw.start : undefined), d = new Date(), iso = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
   if(!w){ sec.hidden = true; var a = document.querySelector('.jump a[href="#cultural"]'); if(a) a.hidden = true; return; }
   var M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], p = w.start.split("-");
   var kick = w.ccMode === "now" ? "This week" : (w.ccMode === "next" ? "From " + (+p[2]) + " " + M[+p[1] - 1] : "Most recent");
