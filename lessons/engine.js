@@ -43,7 +43,11 @@ function q(name){ var m = location.search.match(new RegExp("[?&]" + name + "=([^
 var meta = null, part = 0, slotId = q("slot");
 /* preview: look through a lesson without it counting. Nothing is marked
    taught, nothing is sent, and the lesson does not move the slot on. */
-var PREVIEW = q("preview") === "1";
+/* look: a student looking back at a lesson from the HQ activity that
+   goes with it. Works like preview (nothing counts or gets sent), with
+   a plain ending and no staff bits. */
+var LOOK = q("look") === "1";
+var PREVIEW = q("preview") === "1" || LOOK;
 (function(){
   var id = q("l"), p = parseInt(q("p"), 10) || 0;
   if(!id && slotId){
@@ -77,7 +81,8 @@ function start(){
     build();
     var at = parseInt(q("f"), 10);
     go(isNaN(at) ? 0 : Math.max(0, Math.min(frames.length - 1, at)), true);
-    if(PREVIEW) toast("Preview: nothing here counts or gets sent.");
+    if(LOOK) toast("Looking back at the lesson. Arrow keys or tap the arrows to move.");
+    else if(PREVIEW) toast("Preview: nothing here counts or gets sent.");
   };
   sc.onerror = function(){ showMissing(meta.title, "The lesson file could not be found at /lessons/l/" + meta.id + ".js."); };
   d.head.appendChild(sc);
@@ -337,7 +342,27 @@ R.driving = function(f){
     }).join("") + '</div>' + bar(t) + '<p class="hint">Passing is a fine answer too.</p>';
 };
 
+function dropTitle(){
+  var t = "";
+  if(window.B5LIB && B5LIB.items) B5LIB.items.forEach(function(it){ if(it.slug === meta.drop) t = it.title; });
+  return t;
+}
+
+/* the ending for a student looking back */
+function lookEnd(){
+  var t = dropTitle(), nextPart = part && part < 3;
+  var href = location.pathname + "?l=" + meta.id + "&p=" + (part + 1) + "&look=1";
+  return '<p class="kicker">That\'s the lesson</p><h1 class="ft small">Thanks for looking back.</h1>' +
+    '<div class="endgrid"><div class="panel"><h2>' + (nextPart ? "There's more" : "Goes with") + '</h2>' +
+      (nextPart ? '<p>This lesson has three parts. <a href="' + esc(href) + '">Part ' + (part + 1) + ' (' + PLAN.parts[part + 1].toLowerCase() + ')</a> is next, if you fancy it.</p>' : "") +
+      (t ? '<p>The HQ activity <b>' + esc(t) + '</b> goes with this lesson. It\'s in your folder whenever you want it.</p>' : "") +
+      '<div class="row" style="margin-top:12px"><button class="sbtn go" data-act="lookback">Back to the activity</button></div>' +
+    '</div><div class="panel" style="display:flex;align-items:center;justify-content:center">' + svgWrap(A.bonnie(120, 90, 0.9, "happy"), "0 0 240 160") + '</div></div>';
+}
+function svgWrap(inner, vb){ return '<svg viewBox="' + vb + '" style="width:100%;max-width:320px">' + inner + '</svg>'; }
+
 R.end = function(f){
+  if(LOOK) return lookEnd();
   var st = PLAN.load(), k = PLAN.partKey(meta.id, part), done = !!st.taught[k];
   var n = PLAN.together(st), total = 0;
   PLAN.series.forEach(function(se){ total += se.lessons.length; });
@@ -352,6 +377,7 @@ R.end = function(f){
       '<div class="row" style="margin-top:12px">' + (PREVIEW ? '<span class="partbadge" style="margin:0">Preview: not counted</span>' : '<button class="sbtn' + (done ? "" : " go") + '" data-act="taught">' + (done ? "Marked as taught today. Undo?" : "Mark as taught") + '</button>') +
         '<button class="sbtn" data-act="reset">Reset this lesson</button></div>' +
       (nextInSeries ? '<p class="small" style="margin-top:10px">' + esc(nextInSeries) + '</p>' : "") +
+      (dropTitle() ? '<p class="small" style="margin-top:6px">Goes with the HQ activity <b>' + esc(dropTitle()) + '</b>, on screen or on paper.</p>' : "") +
     '</div><div class="panel"><h2>Who was here?</h2>' +
       '<p class="small">Tap anyone who wasn\'t here.</p>' +
       '<div class="chips">' + PLAN.hqs.map(function(h){ var out = here.indexOf(h[0]) < 0; return '<button class="chip' + (out ? " out" : " on") + '" data-here="' + h[0] + '">' + h[0] + '</button>'; }).join("") + '</div>' +
@@ -594,6 +620,7 @@ function act(a){
   var f = frames[fi];
   if(a === "clue"){ wordState(f).clue = true; redraw(); }
   else if(a === "showword"){ var w = wordState(f); w.done = true; redraw(); }
+  else if(a === "lookback"){ if(history.length > 1) history.back(); else location.href = "/"; }
   else if(a === "taught" && PREVIEW){ toast("Preview: lessons are not marked as taught."); }
   else if(a === "reset") resetLesson();
   else if(a === "taught"){
@@ -630,7 +657,7 @@ function autoTaught(){
 function topStrip(){
   var f = frames[fi];
   $("#pchip").textContent = pillar.name;
-  $("#ltitle").textContent = (PREVIEW ? "PREVIEW \u00b7 " : "") + meta.title + (part ? " \u00b7 part " + part : "");
+  $("#ltitle").textContent = (LOOK ? "LOOKING BACK \u00b7 " : PREVIEW ? "PREVIEW \u00b7 " : "") + meta.title + (part ? " \u00b7 part " + part : "");
   $("#secpill").textContent = SECNAME[f.sec] || "";
   var dots = "";
   for(var i = 0; i < frames.length; i++) dots += '<i class="' + (i < fi ? "done" : i === fi ? "on" : "") + '"></i>';
@@ -769,9 +796,9 @@ function menu(){
     h += '<button class="mi' + (i === fi ? " cur" : "") + '" data-go="' + i + '">' + (i + 1) + ". " + esc(frameName(f)) + '</button>';
   });
   var url = location.pathname + "?" + location.search.replace(/^\?/, "").split("&").filter(function(x){ return x && x.indexOf("f=") !== 0 && x.indexOf("preview=") !== 0; }).join("&");
-  h += '<div class="sg">This lesson</div><button class="mi" data-reset="1">Reset this lesson (start again, not counted)</button>' +
+  if(!LOOK) h += '<div class="sg">This lesson</div><button class="mi" data-reset="1">Reset this lesson (start again, not counted)</button>' +
     '<a href="' + esc(url + (PREVIEW ? "" : "&preview=1")) + '">' + (PREVIEW ? "Leave preview and teach it for real" : "Switch to preview (nothing counts)") + '</a>';
-  h += '<div class="sg">Elsewhere</div><a href="/lessons/">The Lessons library</a><a href="/">Base 5 home</a>';
+  h += LOOK ? '<div class="sg">Elsewhere</div><a href="/">Base 5 home</a>' : '<div class="sg">Elsewhere</div><a href="/lessons/">The Lessons library</a><a href="/">Base 5 home</a>';
   box.innerHTML = h;
   $$("[data-go]", box).forEach(function(b){ b.addEventListener("click", function(){ ov.hidden = true; go(+b.dataset.go); }); });
   $$("[data-reset]", box).forEach(function(b){ b.addEventListener("click", function(){ resetLesson(); }); });

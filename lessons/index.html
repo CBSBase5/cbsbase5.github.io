@@ -26,6 +26,7 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
 .series ol{list-style:none;margin:0;padding:6px 0}
 .series li{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px 20px;border-top:1px dashed var(--line)}
 .series li:first-child{border-top:0}
+.series .goes{font-size:.88rem;opacity:.85;margin-top:4px}
 .series .n{width:36px;height:36px;border-radius:12px 9px 13px 8px;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:900;background:var(--pw,#fbe3ea)}
 .series li.done .n{background:var(--pc);color:#fff}
 .series h3{margin:0;font-family:var(--display);font-size:1.08rem;line-height:1.2}
@@ -74,10 +75,16 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
 </div>
 
 <script src="/data/term.js?v=10"></script>
-<script src="/lessons/plan.js?v=1"></script>
+<script src="/data/a2/library.js"></script>
+<script src="/lessons/plan.js?v=3"></script>
 <script>
 (function(){
 var L = window.B5LESSONS, T = window.B5TERM;
+function actTitle(slug){
+  var t = "";
+  if(window.B5LIB && B5LIB.items) B5LIB.items.forEach(function(it){ if(it.slug === slug) t = it.title; });
+  return t;
+}
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function nice(isoDate){ var p = isoDate.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); return T ? T.niceDate(d) : isoDate; }
 
@@ -126,7 +133,9 @@ function list(){
           var on = !!st.taught[L.partKey(l.id, pp)];
           acts += '<button class="mini" type="button" data-id="' + l.id + '" data-p="' + pp + '" data-on="' + (on ? 1 : 0) + '">' + (on ? 'Untick' : 'Mark taught') + (l.split ? ' ' + pp : '') + '</button>';
         });
-        html += '<li class="' + (done ? 'done' : '') + '"><span class="n">' + l.n + '</span><div><h3>' + esc(l.title) + '</h3><p>' + esc(l.line) + '</p></div><div class="acts">' + tag + acts + '</div></li>';
+        var act = actTitle(l.drop);
+        html += '<li class="' + (done ? 'done' : '') + '"><span class="n">' + l.n + '</span><div><h3>' + esc(l.title) + '</h3><p>' + esc(l.line) + '</p>' +
+          (act ? '<p class="goes">Goes with the HQ activity <b>' + esc(act) + '</b> &middot; <a href="/paper/?list=' + encodeURIComponent(l.drop) + '.medium" target="_blank" rel="noopener">on paper</a></p>' : '') + '</div><div class="acts">' + tag + acts + '</div></li>';
       });
       html += '</ol></section>';
     });

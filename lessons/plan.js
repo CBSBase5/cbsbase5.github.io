@@ -148,6 +148,13 @@ function nextFor(slotId, s){
   return { slot: slot, lesson: nx.lesson, part: nx.part };
 }
 
+/* the lessons that lead into an HQ activity (its slug), in teaching order */
+function forActivity(slug){
+  var out = [];
+  SERIES.forEach(function(se){ se.lessons.forEach(function(l){ if(l.drop === slug) out.push(l); }); });
+  return out;
+}
+
 function slotFor(dayKey, sessionKey){
   return SLOTS.filter(function(x){ return x.session === sessionKey && x.days.indexOf(dayKey) > -1; })[0] || null;
 }
@@ -182,6 +189,6 @@ window.B5LESSONS = {
   bySeries: bySeries, byLesson: byLesson,
   iso: iso, load: load, save: save, partKey: partKey, isTaught: isTaught,
   nextFor: nextFor, slotFor: slotFor, together: together, mark: mark,
-  presentHref: presentHref, label: label
+  presentHref: presentHref, forActivity: forActivity, label: label
 };
 })();
