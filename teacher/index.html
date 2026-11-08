@@ -64,6 +64,7 @@
 <div class="wrap">
   <p class="status" id="status"></p>
   <div class="today" id="today" hidden></div>
+  <div class="lnudge" id="lessonNudge" hidden></div>
   <div class="staff">
     <a class="st" style="--edge:var(--teal)" href="https://script.google.com/a/macros/chiltonbridgeschool.co.uk/s/AKfycbxGEShaMR5FoyBgShh9J5FzNJIJSA_IPPfJQ8c0JxDb5vWPqGCgSBGSUGC44_O9CZ7Tfg/exec"><b>BridgeLink Buddy</b><span>Base 5's daily notes, targets, evidence, BridgeLink and Wrap up, shared with HB.</span><em>School Google sign-in</em></a>
     <a class="st" style="--edge:var(--orange)" href="/lessons/"><b>Lessons</b><span id="lessonsLine">Whole group lessons for the pillar targets, on the board. Each session opens the next one not yet taught.</span><em>Open from the board</em></a>
@@ -105,21 +106,40 @@
   </section>
 </div>
 <script src="/data/term.js?v=10"></script>
-<script src="/lessons/plan.js?v=3"></script>
+<script src="/lessons/plan.js?v=4"></script>
 <script>
-/* today's lessons, from this device's record of what has been taught */
+/* today's lessons, from this device's record of what has been taught,
+   topped up from the shared copy (what Send to Buddy wrote), and a
+   nudge for any lesson taught here but not sent yet */
 (function(){
-  var L = window.B5LESSONS, T = window.B5TERM, el = document.getElementById("lessonsLine");
+  var L = window.B5LESSONS, T = window.B5TERM, el = document.getElementById("lessonsLine"), nb = document.getElementById("lessonNudge");
   if(!L || !T || !el) return;
-  var now = new Date(), key = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()], tt = T.timetable[key];
-  var w = T.currentWeek(), iso = L.iso(now);
-  if(!tt || !w || iso < w.start || iso > w.end || T.schoolDays(w).indexOf(key) < 0 || w.n < 2) return;
-  var bits = [];
-  tt.forEach(function(s){
-    var slot = L.slotFor(key, s[2]); if(!slot) return;
-    var x = L.nextFor(slot.id); if(x && x.lesson) bits.push(s[0] + " " + L.label(x));
-  });
-  if(bits.length) el.textContent = "Today: " + bits.join(", ") + ".";
+  function nice(d){ return new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }); }
+  function esc(x){ return String(x).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function today(){
+    var now = new Date(), key = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()], tt = T.timetable[key];
+    var w = T.currentWeek(), iso = L.iso(now);
+    if(!tt || !w || iso < w.start || iso > w.end || T.schoolDays(w).indexOf(key) < 0 || w.n < 2) return;
+    var bits = [];
+    tt.forEach(function(s){
+      var slot = L.slotFor(key, s[2]); if(!slot) return;
+      var x = L.nextFor(slot.id); if(x && x.lesson) bits.push(s[0] + " " + L.label(x));
+    });
+    if(bits.length) el.textContent = "Today: " + bits.join(", ") + ".";
+  }
+  function nudge(){
+    var list = L.unsent ? L.unsent() : [];
+    if(!nb || !list.length){ if(nb) nb.hidden = true; return; }
+    nb.innerHTML = '<style>.lnudge{margin:0 0 18px;padding:14px 18px;background:#fffdf8;border:3px solid #0a2f38;border-left:12px solid #ef7724;border-radius:16px 12px 17px 11px;box-shadow:5px 6px 0 #0a2f38}' +
+      '.lnudge h2{margin:0 0 6px;font-size:1.1rem}.lnudge ul{margin:6px 0 6px;padding-left:20px}.lnudge li{margin:3px 0}.lnudge p{margin:0;font-size:.9rem;opacity:.85}</style>' +
+      '<h2>Taught, not sent to Buddy yet</h2><ul>' + list.map(function(x){
+        var href = "/lessons/present.html?l=" + x.lesson.id + (x.part ? "&p=" + x.part : "") + "&f=end";
+        return '<li><b>' + esc(L.label({ lesson: x.lesson, part: x.part })) + '</b>, ' + esc(nice(x.day)) + ' &middot; <a href="' + href + '">Open the last slide to send it</a></li>';
+      }).join("") + '</ul><p>It goes in dated the day it was taught. Board snaps are not kept once a lesson is closed, so a late send has the lesson details without the pictures.</p>';
+    nb.hidden = false;
+  }
+  today(); nudge();
+  if(L.sync) L.sync().then(function(r){ if(r && r.ok){ today(); nudge(); } });
 })();
 </script>
 <footer>

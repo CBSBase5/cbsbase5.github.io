@@ -1647,6 +1647,9 @@ function lesson_(r){
   var id = String(r.id || "").toLowerCase();
   if(!/^[a-z]+-[a-z]+-\d(-p[123])?$/.test(id)) return { ok: false, error: "bad lesson" };
   var key = String(r.target || "").replace(/[^a-z\-]/g, ""), step = +r.step || 0, today = day_();
+  /* sent on a later day (the staff room's "not sent yet" list): date it the day it was taught, up to three weeks back */
+  var rd = String(r.day || "");
+  if(/^\d{4}-\d{2}-\d{2}$/.test(rd) && rd < today && rd >= day_(new Date(Date.now() - 21 * 86400000))) today = rd;
   var here = (r.here || []).map(String).filter(function(w){ return WHO.indexOf(w) >= 0; });
   var missed = (r.missed || []).map(String).filter(function(w){ return WHO.indexOf(w) >= 0 && here.indexOf(w) < 0; });
   var map = {}; try{ map = a2map_(); }catch(e0){}

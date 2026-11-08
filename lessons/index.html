@@ -26,6 +26,8 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
 .series ol{list-style:none;margin:0;padding:6px 0}
 .series li{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px 20px;border-top:1px dashed var(--line)}
 .series li:first-child{border-top:0}
+.series .plan{font-size:.82rem;opacity:.7;white-space:nowrap}
+.tag.unsent{background:#ffe7cf;border-color:#ef7724;text-decoration:none;color:inherit}
 .series .goes{font-size:.88rem;opacity:.85;margin-top:4px}
 .series .n{width:36px;height:36px;border-radius:12px 9px 13px 8px;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:900;background:var(--pw,#fbe3ea)}
 .series li.done .n{background:var(--pc);color:#fff}
@@ -61,6 +63,7 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
   <div class="today" id="today"></div>
 
   <h2 class="weektheme" style="margin-top:34px">Every series</h2>
+  <p id="syncline" style="margin:0 0 4px 4px;opacity:.8;font-size:.92rem"></p>
   <div id="list"></div>
 
   <div class="board" style="margin-top:10px">
@@ -69,14 +72,14 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
       <p class="howto">Next: <kbd>right arrow</kbd>, <kbd>space</kbd> or a clicker. Back: <kbd>left arrow</kbd>. Next builds a slide first, then reveals the answer, then moves on.
       <kbd>M</kbd> menu, <kbd>D</kbd> draw, <kbd>T</kbd> pause the timer, <kbd>R</kbd> random picker, <kbd>P</kbd> calm pause (a clicker's blank button works too), <kbd>N</kbd> prompt line, <kbd>S</kbd> snap the board for evidence, <kbd>F</kbd> full screen, <kbd>E</kbd> edit (staff).</p>
       <p class="howto"><b>Preview</b> opens a lesson without it counting: nothing is marked taught, nothing goes to Buddy, and the timetable still opens it next. You can switch any lesson into preview, or reset it back to the start, from its menu (<kbd>M</kbd>), and the last slide has a Reset button too.</p>
-      <p class="howto">What has been taught is kept on the device you teach from, so open lessons from the board each time. The last slide marks a lesson taught. Tick who was here, then <b>Send to Buddy</b>: everyone there gets an Evidence row and a BridgeLink Buddy Learning note linked to the milestone step the lesson was built for, with the board picture (saved to Drive) as a photo. Anyone who missed it gets the matching HQ activity brought forward into their folder, if it hasn't landed already.</p>
+      <p class="howto">What has been taught is kept on the device you teach from, and topped up from the sheet: any lesson sent to Buddy counts as taught on every board, so a wiped browser or a different laptop picks up where you left off. Anything taught but not sent shows as <b>Not sent</b> here and in the staff room. The last slide marks a lesson taught. Tick who was here, then <b>Send to Buddy</b>: everyone there gets an Evidence row and a BridgeLink Buddy Learning note linked to the milestone step the lesson was built for, with the board picture (saved to Drive) as a photo. Anyone who missed it gets the matching HQ activity brought forward into their folder, if it hasn't landed already.</p>
     </div>
   </div>
 </div>
 
 <script src="/data/term.js?v=10"></script>
 <script src="/data/a2/library.js"></script>
-<script src="/lessons/plan.js?v=3"></script>
+<script src="/lessons/plan.js?v=4"></script>
 <script>
 (function(){
 var L = window.B5LESSONS, T = window.B5TERM;
@@ -109,6 +112,7 @@ function today(){
 
 function list(){
   var st = L.load(), html = "";
+  var unsent = L.unsent(st);
   L.slots.forEach(function(slot){
     var nx = L.nextFor(slot.id, st);
     html += '<p class="slotline" style="margin:22px 0 10px 4px;opacity:.9"><b>' + esc(slot.label) + '</b>, ' + slot.mins + ' minutes' + (slot.split ? ', one lesson across the week in three parts' : '') + '</p>';
@@ -134,7 +138,9 @@ function list(){
           acts += '<button class="mini" type="button" data-id="' + l.id + '" data-p="' + pp + '" data-on="' + (on ? 1 : 0) + '">' + (on ? 'Untick' : 'Mark taught') + (l.split ? ' ' + pp : '') + '</button>';
         });
         var act = actTitle(l.drop);
-        html += '<li class="' + (done ? 'done' : '') + '"><span class="n">' + l.n + '</span><div><h3>' + esc(l.title) + '</h3><p>' + esc(l.line) + '</p>' +
+        var notSent = unsent.filter(function(x){ return x.lesson.id === l.id; });
+        if(notSent.length) tag += notSent.map(function(x){ return '<a class="tag unsent" href="/lessons/present.html?l=' + l.id + (x.part ? '&amp;p=' + x.part : '') + '&amp;f=end" title="Open the last slide to send it">Not sent' + (x.part ? ' (' + L.parts[x.part].toLowerCase() + ')' : '') + '</a>'; }).join("");
+        html += '<li class="' + (done ? 'done' : '') + '"><span class="n">' + l.n + '</span><div><h3>' + esc(l.title) + '</h3><p>' + esc(l.line) + (L.planned(l.id) ? ' <span class="plan">Planned ' + esc(nice(L.planned(l.id))) + '</span>' : '') + '</p>' +
           (act ? '<p class="goes">Goes with the HQ activity <b>' + esc(act) + '</b> &middot; <a href="/paper/?list=' + encodeURIComponent(l.drop) + '.medium" target="_blank" rel="noopener">on paper</a></p>' : '') + '</div><div class="acts">' + tag + acts + '</div></li>';
       });
       html += '</ol></section>';
@@ -147,6 +153,15 @@ function list(){
   });
 }
 today(); list();
+/* top up from the shared copy (what Send to Buddy wrote to the sheet) */
+var sl = document.getElementById("syncline");
+sl.textContent = "Checking the shared record...";
+L.sync().then(function(r){
+  if(r && r.ok){
+    sl.textContent = "Ticks come from this board and the shared record" + (r.added.length ? " (" + r.added.length + " added from it just now)" : "") + ".";
+    today(); list();
+  } else sl.textContent = r && r.why === "no key" ? "Ticks are this board's own. Open any staff page with the passphrase once to share them across boards." : "Ticks are this board's own for now (the shared record did not answer).";
+});
 })();
 </script>
 </body>

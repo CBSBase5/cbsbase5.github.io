@@ -20,6 +20,10 @@ window.B5LESSON = {
   id: "pfa-careers-2",
   title: "Jobs that vanished, jobs that appeared",
   mins: 30,
+  cc: [
+    { week: "Christmas Around the World", line: "Some jobs only appear at Christmas: tree farmers, market stall holders, the grotto Santa and thousands of extra delivery drivers." },
+    { week: "STEAM for Good", line: "Lots of brand new jobs use science and tech to help: wind turbine engineers, and drone pilots who check crops and search for missing walkers." }
+  ],
   startMins: 4,
   finishMins: 5,
   cover: { line: "Lamplighters, knocker uppers, drone pilots. Jobs come and go. What does that mean for you?", art: S("0 0 700 420", A.scene(700, 420, { ground: 380, time: "dusk", sun: [600, 90] }) + lamp(160, 380, true) + lamp(300, 380, false) + drone(520, 170) + A.bird(620, 260, 0.8)) },

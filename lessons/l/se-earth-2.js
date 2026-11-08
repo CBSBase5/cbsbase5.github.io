@@ -37,6 +37,9 @@ window.B5LESSON = {
   id: "se-earth-2",
   title: "The air up there",
   mins: 45,
+  cc: [
+    { week: "STEAM for Good", line: "Scientists measuring the air found a hole in the ozone layer. The world banned the gases causing it, and the ozone layer is slowly healing." }
+  ],
   cover: { line: "You breathe about 20,000 times a day. What's actually in it, and how far up does it go?", art: S("0 0 700 440", A.scene(700, 440, { ground: 400, sun: [580, 80] }) + '<g class="float">' + A.bird(220, 160, 1.2) + A.bird(320, 120, 0.8) + '</g>' + A.bonnie(150, 362, 0.55)) },
 
   warm: {

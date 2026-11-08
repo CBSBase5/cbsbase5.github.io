@@ -34,6 +34,9 @@ window.B5LESSON = {
   id: "se-earth-1",
   title: "Inside the Earth",
   mins: 45,
+  cc: [
+    { week: "Christmas Around the World", line: "In Australia, Christmas is in summer. The Earth is tilted, so in December the south leans towards the sun while we lean away." }
+  ],
   cover: { line: "We've been to the Moon, but nobody has ever dug more than 12 km down. So how do we know what's inside?", art: S("0 0 700 440", '<rect width="700" height="440" fill="#1d3d47"/>' + [[60, 50], [180, 400], [640, 60], [600, 380], [90, 300]].map(function(p, i){ return '<circle class="twinkle" style="animation-delay:' + i * 0.4 + 's" cx="' + p[0] + '" cy="' + p[1] + '" r="3" fill="#fff6d6"/>'; }).join("") + earth(300, 220, 180, false, false) + A.bird(560, 120, 0.9)) },
 
   warm: {

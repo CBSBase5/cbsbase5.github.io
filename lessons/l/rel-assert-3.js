@@ -14,6 +14,9 @@ window.B5LESSON = {
   id: "rel-assert-3",
   title: "Asking for what I need",
   mins: 15,
+  cc: [
+    { week: "Giving Tuesday", line: "Giving Tuesday is a day for giving time and help. When you ask for help, you give someone the chance to give it." }
+  ],
   startMins: 5,
   finishMins: 5,
   cover: { line: "A break, some help, a bit of quiet. Asking is a skill, and it gets easier.", art: S("0 0 560 380", fcard(40, 40, 240, "Can I have a break?", PURPLE, 0) + fcard(280, 140, 240, "Can you help me?", TEAL, 1.2) + fcard(60, 240, 260, "Can it be quieter?", ORANGE, 2.1) + A.bonnie(440, 320, 0.6)) },

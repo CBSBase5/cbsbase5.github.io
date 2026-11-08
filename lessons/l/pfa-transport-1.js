@@ -17,6 +17,9 @@ window.B5LESSON = {
   id: "pfa-transport-1",
   title: "Ways to get about",
   mins: 30,
+  cc: [
+    { week: "Remembrance", line: "In the First World War, homing pigeons carried messages when roads and phone lines could not get through." }
+  ],
   startMins: 4,
   finishMins: 5,
   cover: {
