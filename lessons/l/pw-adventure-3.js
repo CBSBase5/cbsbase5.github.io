@@ -72,7 +72,7 @@ window.B5LESSON = {
           title: "The buddy check", text: "Before every single climb, partners check each other:",
           pts: ["Helmet on and done up", "Harness on, buckles done up", "Knot tied properly (a figure of eight)", "Belay device set up and locked"],
           build: true, ptsFrom: 1,
-          art: S("0 0 480 400", I("helmet", 140, 160, 1.6) + I("rope", 340, 180, 1.7) + A.bonnie(240, 330, 0.7)),
+          art: S("0 0 480 400", A.scene(480, 400, { ground: 360, time: "day", sun: [400, 70] }) + I("helmet", 140, 160, 1.6) + I("rope", 340, 180, 1.7) + A.bonnie(240, 330, 0.7)),
           say: "Even world champions do this every time. It is not a sign of being new."
         },
         {

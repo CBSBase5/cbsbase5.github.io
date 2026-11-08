@@ -166,7 +166,13 @@ function iconRow(items, opts){
   var w = opts.w || 1000, gap = w / items.length, s = opts.s || 1, g = "";
   items.forEach(function(it, i){
     var cx = gap * i + gap / 2;
-    g += '<g' + (opts.build ? ' data-s="' + (i + 1) + '"' : "") + '>' + icon(it[0], cx, 150, s) + T(cx, 196, it[1], opts.size || 26, { a: "middle", f: 1 }) + (it[2] ? T(cx, 228, it[2], 20, { a: "middle" }) : "") + '</g>';
+    /* each icon on a round tile with a shadow, like the Cultural Calendar rows */
+    var ty = 150 - 40 * s, r = 60 * s;
+    g += '<g' + (opts.build ? ' data-s="' + (i + 1) + '"' : "") + '><g class="float" style="animation-delay:-' + (i * 0.45).toFixed(2) + 's">' +
+      '<circle cx="' + cx + '" cy="' + (ty + 7) + '" r="' + r.toFixed(1) + '" fill="' + INK + '"/>' +
+      '<circle cx="' + cx + '" cy="' + ty + '" r="' + r.toFixed(1) + '" fill="#fffdf8" stroke="' + INK + '" stroke-width="4"/>' +
+      '<circle cx="' + cx + '" cy="' + ty + '" r="' + (r * 0.84).toFixed(1) + '" style="fill:' + (opts.tint || "var(--pc,#007291)") + '" opacity=".14"/>' +
+      '<g transform="translate(' + cx + ' ' + ty + ') scale(.8) translate(' + (-cx) + ' ' + (-ty) + ')">' + icon(it[0], cx, 150, s) + '</g></g>' + T(cx, 196, it[1], opts.size || 26, { a: "middle", f: 1 }) + (it[2] ? T(cx, 228, it[2], 20, { a: "middle" }) : "") + '</g>';
   });
   return svg("0 0 " + w + " " + (opts.h || 240), g);
 }

@@ -135,7 +135,7 @@ window.B5LESSON = {
   realworld: {
     title: "Balance is everywhere",
     text: "Climbing, cycling, skating, surfing, standing on a moving bus, carrying shopping, stepping off a kerb. Your balance system works every second you're awake.",
-    art: S("0 0 560 400", I("bike", 180, 340, 2.4) + I("bus", 420, 360, 1.6)),
+    art: S("0 0 560 400", A.scene(560, 400, { ground: 360, time: "day", sun: [470, 70] }) + I("bike", 180, 340, 2.4) + I("bus", 420, 360, 1.6)),
     say: "Ask: where did you use balance today without noticing?"
   },
 

@@ -110,7 +110,7 @@ window.B5LESSON = {
   realworld: {
     title: "Adults ask all the time",
     text: "Asking for changes at work, a quieter room at college, a longer appointment at the doctor's, help at the bank. People who ask get more of what they need.",
-    art: S("0 0 560 400", I("briefcase", 180, 300, 2.2) + I("phone", 400, 320, 1.8)),
+    art: S("0 0 560 400", A.scene(560, 400, { ground: 330, time: "day", sun: [470, 70] }) + I("briefcase", 180, 300, 2.2) + I("phone", 400, 320, 1.8)),
     say: "Ask: who's the easiest person to ask for help, and why?"
   },
 

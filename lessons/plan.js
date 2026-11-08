@@ -302,7 +302,7 @@ function label(x){
 }
 
 /* bump when lesson files change, so boards fetch the new ones */
-window.B5LESSONS_V = 6;
+window.B5LESSONS_V = 7;
 
 window.B5LESSONS = {
   pillars: P, series: SERIES, slots: SLOTS, hqs: HQS, parts: PARTS,
