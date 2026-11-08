@@ -294,6 +294,16 @@ function chunks(steps){
   });
   return out;
 }
+/* the whole group lesson that leads into this activity, if any
+   (needs /lessons/plan.js on the page) */
+function lessonLine(pack){
+  var L = window.B5LESSONS, slug = String(pack.id || "").replace(/^a2-/, "");
+  if(!L || !L.forActivity || !slug) return "";
+  var t = L.forActivity(slug).filter(function(l){ return l.ready; }).map(function(l){ return esc(l.title); });
+  if(!t.length) return "";
+  return '<p class="plesson">Goes with the lesson' + (t.length > 1 ? "s " : " ") + (t.length > 1 ? t.slice(0, -1).join(", ") + " and " + t[t.length - 1] : t[0]) + '.</p>';
+}
+
 function activity(pack, opts){
   opts = opts || {};
   var ids = (pack.levels || []).map(function(l){ return l.id; });
@@ -330,6 +340,7 @@ function activity(pack, opts){
   if(mk && pack.paperMake){ var pm = ctx.tok(pack.paperMake); Object.keys(pm).forEach(function(k){ mk[k] = pm[k]; }); }
   var band = '<div class="pband"><h1>' + esc(ctx.tok(pack.title)) + '</h1>' +
     (pack.line ? '<p>' + paperWords(ctx.tok(pack.line)) + '</p>' : '') +
+    lessonLine(pack) +
     '<p class="plvn">' + esc(lvObj.name) + ' level. Fancy a different one? Just say.</p></div>';
   sheets = sheets.replace('<section class="psheet first">', '<section class="psheet first">' + band);
 

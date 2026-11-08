@@ -28,6 +28,9 @@ import plan
 ENGINE_V = "22"
 A2CSS_V = "3"
 ART_V = "1"
+# pillar activities say which whole group lesson leads into them (/lessons/tie.js)
+LESSON_TIE = '<script src="/lessons/plan.js?v=3"></script>\n<script src="/lessons/tie.js?v=1"></script>\n'
+
 
 HQS = {
     "EGW": {"base": "egw", "sample": "egw/maths-money.html", "after": '<script src="/egw/biscuits.js?v=1"></script>'},
@@ -132,6 +135,7 @@ def page(who, slug, info):
         '<script src="/data/a2/' + slug + '.js?v=' + str(info["_v"]) + '"></script>\n' +
         '<script src="/egw/engine.js?v=' + ENGINE_V + '"></script>\n' +
         '<script>EGW.run(window.A2PACKS["' + slug + '"]);</script>\n' +
+        (LESSON_TIE if info["subject"] not in ("English", "Maths") else "") +
         (HQS[who]["after"] + "\n" if HQS[who]["after"] else "") +
         "</body>\n</html>\n")
 
