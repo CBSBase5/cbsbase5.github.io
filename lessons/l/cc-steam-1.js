@@ -8,7 +8,7 @@
    Whole school: neutral words. Shape as /lessons/l/rel-assert-1.js. ASCII only.
    ========================================================== */
 (function(){
-var A = window.LART, S = A.svg, T = A.T, C = A.cci, INK = "#0a2f38";
+var A = window.LART, S = A.svg, T = A.T, C = A.cci, CT = A.ccTile, INK = "#0a2f38";
 var PURPLE = "#3a0ca3", BLUE = "#4361ee", CYAN = "#4cc9f0", PINK = "#f72585", YELLOW = "#ffc247", GREEN = "#1e9e5a", ORANGE = "#ef7724", GREY = "#9aa5ad";
 
 /* a road at night with cat's eyes glowing */
@@ -101,7 +101,7 @@ window.B5LESSON = {
           title: "STEAM is a toolbox",
           text: "Five tools for fixing things:",
           stack: true, artWidth: 1250,
-          art: S("0 0 1000 260", C("flask", 100, 100, 110, GREEN) + C("laptop", 300, 100, 110, BLUE) + C("gear", 500, 100, 110, ORANGE) + C("palette", 700, 100, 110, PINK) + C("ruler", 900, 100, 110, PURPLE) +
+          art: S("0 0 1000 260", CT("flask", 100, 100, 110, GREEN) + CT("laptop", 300, 100, 110, BLUE) + CT("gear", 500, 100, 110, ORANGE) + CT("palette", 700, 100, 110, PINK) + CT("ruler", 900, 100, 110, PURPLE) +
             T(100, 200, "Science", 26, { a: "middle", f: 1 }) + T(300, 200, "Technology", 26, { a: "middle", f: 1 }) + T(500, 200, "Engineering", 26, { a: "middle", f: 1 }) + T(700, 200, "Art", 26, { a: "middle", f: 1 }) + T(900, 200, "Maths", 26, { a: "middle", f: 1 })),
           say: "Art is in there because design matters: a fix people don't like using does not get used."
         },
@@ -128,7 +128,7 @@ window.B5LESSON = {
           text: "The best problems to fix are small, real and bug lots of people:",
           pts: ["A squeaky door", "A messy shelf nobody can find anything on", "Coats falling off pegs", "Not knowing what is on today"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", C("door", 140, 130, 120, "#8d6e3f") + C("book", 380, 130, 120, BLUE) + C("search", 260, 300, 140, PINK)),
+          art: S("0 0 520 420", CT("door", 140, 130, 120, "#8d6e3f") + CT("book", 380, 130, 120, BLUE) + CT("search", 260, 300, 140, PINK)),
           say: "Ask: what bugs you, around here? Collect a few on the board."
         },
         {
@@ -251,7 +251,7 @@ window.B5LESSON = {
           text: "Three bits, then stop:",
           pts: ["<b>The problem</b>: one sentence", "<b>The fix</b>: show it, or the sketch", "<b>Why it matters</b>: who it helps"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", C("mic", 150, 220, 160, PURPLE) + C("timer", 370, 160, 120, ORANGE) + '<g data-s="3">' + T(370, 290, "60 seconds", 30, { a: "middle", f: 1 }) + '</g>'),
+          art: S("0 0 520 420", CT("mic", 150, 220, 160, PURPLE) + CT("timer", 370, 160, 120, ORANGE) + '<g data-s="3">' + T(370, 290, "60 seconds", 30, { a: "middle", f: 1 }) + '</g>'),
           say: "Pitch to the group, to one person, or let your sketch do the talking. All count."
         },
         {

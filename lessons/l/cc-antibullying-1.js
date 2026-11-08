@@ -8,18 +8,27 @@
    anyone in the room. Shape as /lessons/l/rel-assert-1.js. ASCII only.
    ========================================================== */
 (function(){
-var A = window.LART, S = A.svg, T = A.T, C = A.cci, INK = "#0a2f38";
+var A = window.LART, S = A.svg, T = A.T, C = A.cci, CT = A.ccTile, INK = "#0a2f38";
 var BLUE = "#0077b6", SKY = "#00b4d8", PINK = "#ff006e", YELLOW = "#ffd60a", TEAL = "#007291", ORANGE = "#ef7724", GREEN = "#1e9e5a", GREY = "#9aa5ad";
 
 /* a simple round person, coloured, with a face that can be happy, flat or sad */
+var HAIR = ["#3b2a1e", "#6b4423", "#c98a3a", "#1d1d1d", "#8a3b1e"];
 function pal(x, y, col, face, s, cls){
   s = s || 1; face = face || "happy";
-  var mouth = face === "happy" ? 'M-9 8q9 8 18 0' : face === "sad" ? 'M-9 12q9 -7 18 0' : 'M-8 9h16';
+  var h = HAIR[Math.abs(Math.round(x * 3 + y)) % HAIR.length], k = Math.abs(Math.round(x)) % 3;
+  var mouth = face === "happy" ? 'M-9 0q9 8 18 0' : face === "sad" ? 'M-9 6q9 -7 18 0' : 'M-8 3h16';
+  var hair = k === 0 ? '<path d="M-29 -16q2 -30 29 -30t29 30q-12 -12 -29 -12t-29 12z" fill="' + h + '"/>'
+    : k === 1 ? '<path d="M-30 -10q-2 -36 30 -36t30 36q-4 -20 -16 -22q-10 10 -30 4q-8 4 -14 18z" fill="' + h + '"/><circle cx="24" cy="-34" r="9" fill="' + h + '"/>'
+    : '<path d="M-31 6q-6 -50 31 -52t31 52q-4 -24 -10 -30q-20 4 -42 -6q-8 10 -10 36z" fill="' + h + '"/>';
   return '<g' + (cls ? ' class="' + cls + '"' : "") + '><g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
-    '<path d="M-34 70q0 -52 34 -52t34 52z" fill="' + col + '" stroke="' + INK + '" stroke-width="3.5"/>' +
-    '<circle cx="0" cy="-12" r="28" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3.5"/>' +
-    '<circle cx="-9" cy="-14" r="3.4" fill="' + INK + '"/><circle cx="9" cy="-14" r="3.4" fill="' + INK + '"/>' +
-    '<path d="' + mouth + '" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round" transform="translate(0 -10)"/></g></g>';
+    '<ellipse cx="0" cy="74" rx="40" ry="7" fill="' + INK + '" opacity=".14"/>' +
+    '<path d="M-34 72q0 -50 34 -50t34 50z" fill="' + col + '" stroke="' + INK + '" stroke-width="3.5"/>' +
+    '<path d="M-26 38q-10 14 -8 30M26 38q10 14 8 30" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round" opacity=".5"/>' +
+    '<rect x="-8" y="10" width="16" height="12" fill="#f1c7a1"/>' +
+    '<circle cx="0" cy="-12" r="28" fill="#f1c7a1" stroke="' + INK + '" stroke-width="3.5"/>' + hair +
+    '<circle cx="-10" cy="-12" r="3.6" fill="' + INK + '"/><circle cx="10" cy="-12" r="3.6" fill="' + INK + '"/>' +
+    '<circle cx="-17" cy="-2" r="5" fill="#e2557a" opacity=".25"/><circle cx="17" cy="-2" r="5" fill="#e2557a" opacity=".25"/>' +
+    '<path d="' + mouth + '" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/></g></g>';
 }
 function group(x, y, cols, s){
   return cols.map(function(c, i){ return pal(x + (i - (cols.length - 1) / 2) * 76 * (s || 1), y, c, "happy", s || 1); }).join("");
@@ -83,8 +92,8 @@ window.B5LESSON = {
           text: "Not every falling out is bullying. Bullying usually has all of these:",
           pts: ["It is <b>on purpose</b>", "It <b>keeps happening</b>", "It is <b>hard to stop</b>: one side has more power", "It <b>hurts</b>: bodies, feelings or friendships"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", '<g data-s="1">' + C("search", 140, 110, 110, BLUE) + '</g><g data-s="2">' + C("timer", 380, 110, 110, ORANGE) + '</g>' +
-            '<g data-s="3">' + C("scales", 140, 290, 110, INK) + '</g><g data-s="4">' + C("heart", 380, 290, 110, PINK) + '</g>'),
+          art: S("0 0 520 420", '<g data-s="1">' + CT("search", 140, 110, 110, BLUE) + '</g><g data-s="2">' + CT("timer", 380, 110, 110, ORANGE) + '</g>' +
+            '<g data-s="3">' + CT("scales", 140, 290, 110, INK) + '</g><g data-s="4">' + CT("heart", 380, 290, 110, PINK) + '</g>'),
           say: "This is how the Anti-Bullying Alliance describes it. A one off argument still matters, it just is not usually called bullying."
         },
         {
@@ -119,7 +128,7 @@ window.B5LESSON = {
           title: "Four kinds",
           text: "It does not have to be loud to count.",
           stack: true, artWidth: 1250,
-          art: S("0 0 1000 270", C("hand", 125, 100, 120, ORANGE) + C("speech", 375, 100, 120, PINK) + C("people", 625, 100, 120, BLUE) + C("phone", 875, 100, 120, INK) +
+          art: S("0 0 1000 270", CT("hand", 125, 100, 120, ORANGE) + CT("speech", 375, 100, 120, PINK) + CT("people", 625, 100, 120, BLUE) + CT("phone", 875, 100, 120, INK) +
             T(125, 200, "Physical", 28, { a: "middle", f: 1 }) + T(375, 200, "Words", 28, { a: "middle", f: 1 }) + T(625, 200, "Leaving out", 28, { a: "middle", f: 1 }) + T(875, 200, "Online", 28, { a: "middle", f: 1 }) +
             T(125, 240, "pushing, taking things", 20, { a: "middle" }) + T(375, 240, "names, threats", 20, { a: "middle" }) + T(625, 240, "rumours, ignoring", 20, { a: "middle" }) + T(875, 240, "messages, posts", 20, { a: "middle" })),
           say: "Ask: which kind is hardest for adults to spot? (Usually leaving out and online.)"
@@ -144,7 +153,7 @@ window.B5LESSON = {
           text: "Online bullying can follow you home. The good news: every app has tools.",
           pts: ["<b>Screenshot</b> it, so there is proof", "<b>Block</b> and <b>report</b> it", "<b>Tell</b> an adult, even if it feels small"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", phoneMsg(260, 210, ["who even asked", "lol", "you alright?", "ignore them"], SKY) + '<g data-s="2">' + C("padlock", 420, 330, 80, BLUE) + '</g>'),
+          art: S("0 0 520 420", phoneMsg(260, 210, ["who even asked", "lol", "you alright?", "ignore them"], SKY) + '<g data-s="2">' + CT("padlock", 420, 330, 80, BLUE) + '</g>'),
           say: "Ask: does anyone know where the report button is on an app they use? No need to name the app."
         }
       ],
@@ -172,7 +181,7 @@ window.B5LESSON = {
           pts: ["<b>Say something</b>: \"Not cool. Leave it.\"", "<b>Check in</b>: \"You alright?\"", "<b>Include</b>: \"Come and sit with us.\"", "<b>Tell</b> an adult. That counts as speaking up."],
           build: true, ptsFrom: 1,
           art: S("0 0 520 420", '<g data-s="1">' + A.bubble(30, 30, 260, 56, "Not cool. Leave it.", 22) + '</g><g data-s="2">' + A.bubble(230, 120, 260, 56, "You alright?", 22) + '</g>' +
-            '<g data-s="3">' + A.bubble(30, 210, 300, 56, "Come and sit with us.", 22) + '</g><g data-s="4">' + C("people", 400, 330, 120, GREEN) + '</g>'),
+            '<g data-s="3">' + A.bubble(30, 210, 300, 56, "Come and sit with us.", 22) + '</g><g data-s="4">' + CT("people", 400, 330, 120, GREEN) + '</g>'),
           say: "Ask: which feels most doable? Telling an adult is always on the list."
         },
         {

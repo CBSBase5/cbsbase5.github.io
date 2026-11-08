@@ -9,7 +9,7 @@
    Whole school: neutral words. Shape as /lessons/l/rel-assert-1.js. ASCII only.
    ========================================================== */
 (function(){
-var A = window.LART, S = A.svg, T = A.T, C = A.cci, INK = "#0a2f38";
+var A = window.LART, S = A.svg, T = A.T, C = A.cci, CT = A.ccTile, INK = "#0a2f38";
 var ORANGE = "#fb5607", BLUE = "#3a86ff", PINK = "#ff006e", PURPLE = "#8338ec", YELLOW = "#ffbe0b", GREEN = "#1e9e5a", TEAL = "#007291";
 
 /* a gift box with a bow */
@@ -81,8 +81,8 @@ window.B5LESSON = {
           title: "Four things that cost nothing",
           text: "Each of these is a real gift:",
           stack: true, artWidth: 1250,
-          art: S("0 0 1000 270", '<g data-s="1">' + C("clock", 125, 100, 120, BLUE) + T(125, 200, "Time", 30, { a: "middle", f: 1 }) + T(125, 240, "helping out", 20, { a: "middle" }) + '</g>' +
-            '<g data-s="2">' + C("toolbox", 375, 100, 120, ORANGE) + T(375, 200, "Skills", 30, { a: "middle", f: 1 }) + T(375, 240, "fixing, teaching, making", 20, { a: "middle" }) + '</g>' +
+          art: S("0 0 1000 270", '<g data-s="1">' + CT("clock", 125, 100, 120, BLUE) + T(125, 200, "Time", 30, { a: "middle", f: 1 }) + T(125, 240, "helping out", 20, { a: "middle" }) + '</g>' +
+            '<g data-s="2">' + CT("toolbox", 375, 100, 120, ORANGE) + T(375, 200, "Skills", 30, { a: "middle", f: 1 }) + T(375, 240, "fixing, teaching, making", 20, { a: "middle" }) + '</g>' +
             '<g data-s="3">' + C("smile", 625, 100, 120, YELLOW) + T(625, 200, "Kindness", 30, { a: "middle", f: 1 }) + T(625, 240, "a word, a door held", 20, { a: "middle" }) + '</g>' +
             '<g data-s="4">' + C("bag", 875, 100, 120, PURPLE) + T(875, 200, "Stuff", 30, { a: "middle", f: 1 }) + T(875, 240, "things you no longer use", 20, { a: "middle" }) + '</g>'),
           say: "Click through. Ask: which one are you best at giving?"
@@ -128,7 +128,7 @@ window.B5LESSON = {
           title: "Causes people care about",
           text: "There is a charity for almost anything:",
           stack: true, artWidth: 1300,
-          art: S("0 0 1050 260", C("paw", 105, 100, 110, "#8d6e3f") + C("wave", 315, 100, 110, BLUE) + C("cross", 525, 100, 110, "#d63b2f") + C("people", 735, 100, 110, PURPLE) + C("ball", 945, 100, 110, GREEN) +
+          art: S("0 0 1050 260", CT("paw", 105, 100, 110, "#8d6e3f") + CT("wave", 315, 100, 110, BLUE) + CT("cross", 525, 100, 110, "#d63b2f") + CT("people", 735, 100, 110, PURPLE) + CT("ball", 945, 100, 110, GREEN) +
             T(105, 200, "Animals", 26, { a: "middle", f: 1 }) + T(315, 200, "The sea", 26, { a: "middle", f: 1 }) + T(525, 200, "Health", 26, { a: "middle", f: 1 }) + T(735, 200, "People", 26, { a: "middle", f: 1 }) + T(945, 200, "Sport", 26, { a: "middle", f: 1 })),
           say: "Ask: does anyone know a charity for one of these? Rescue centres, lifeboats and food banks are all charities."
         },
@@ -172,7 +172,7 @@ window.B5LESSON = {
           text: "Giving well means thinking about it:",
           pts: ["\"I gave the most to ... because ...\"", "\"I gave some to ... because ...\"", "Different answers are fine"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", C("coin", 160, 150, 120, YELLOW) + C("coin", 260, 120, 100, YELLOW) + C("coin", 350, 160, 110, YELLOW) + '<g data-s="1">' + A.bubble(90, 270, 340, 56, "Because it matters to me.", 24) + '</g>'),
+          art: S("0 0 520 420", CT("coin", 160, 150, 120, YELLOW) + CT("coin", 260, 120, 100, YELLOW) + CT("coin", 350, 160, 110, YELLOW) + '<g data-s="1">' + A.bubble(90, 270, 340, 56, "Because it matters to me.", 24) + '</g>'),
           say: "Anyone can say theirs out loud. Passing is fine."
         }
       ],
@@ -259,6 +259,7 @@ window.B5LESSON = {
   realworld: {
     title: "Giving at work",
     text: "Lots of jobs grow out of giving: volunteers, charity workers, fundraisers, wildlife rangers. Volunteering looks great on a CV or college application too.",
+    photo: { src: "https://commons.wikimedia.org/wiki/Special:FilePath/RNLI_and_771_NAS_Exercise_MOD_45153583.jpg?width=900", caption: "Lifeboat crews: mostly volunteers.", credit: "Photo: Royal Navy, MOD, Open Government Licence, Wikimedia Commons" },
     art: S("0 0 560 420", A.scene(560, 420, { ground: 370, time: "day", sun: [470, 80] }) + C("hands", 150, 270, 120, ORANGE) + C("paw", 290, 280, 100, "#8d6e3f") + C("clipboard", 430, 270, 110, BLUE)),
     say: "Ask: which of these jobs sounds good?"
   },

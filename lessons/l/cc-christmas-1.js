@@ -12,7 +12,7 @@
    Shape as /lessons/l/rel-assert-1.js. ASCII only.
    ========================================================== */
 (function(){
-var A = window.LART, S = A.svg, T = A.T, C = A.cci, INK = "#0a2f38";
+var A = window.LART, S = A.svg, T = A.T, C = A.cci, CT = A.ccTile, INK = "#0a2f38";
 var GREEN = "#0b6e4f", RED = "#e63946", GOLD = "#ffd166", BLUE = "#3a86ff", TEAL = "#007291", ORANGE = "#ef7724", PURPLE = "#7b4b8f";
 
 /* a star lantern (a parol, from the Philippines) */
@@ -43,18 +43,18 @@ function tree(x, y, s){
     '<g class="twinkle"><circle cx="-30" cy="-30" r="7" fill="' + RED + '"/><circle cx="24" cy="-70" r="7" fill="' + GOLD + '"/><circle cx="40" cy="10" r="7" fill="' + BLUE + '"/><circle cx="-50" cy="20" r="7" fill="' + GOLD + '"/></g>' +
     C("star", 0, -158, 46, GOLD) + '</g>';
 }
-/* a little country pin with a picture on a map */
-function pin(x, y, name, icon, col){
-  return '<g class="float"><g transform="translate(' + x + ' ' + y + ')"><path d="M0 0q-34 -40 -34 -64a34 34 0 0 1 68 0q0 24 -34 64z" fill="' + col + '" stroke="' + INK + '" stroke-width="3"/>' +
-    '<circle cy="-64" r="24" fill="#fffdf8"/>' + C(icon, 0, -64, 34, INK) + '</g></g>' + T(x, y + 26, name, 20, { a: "middle", f: 1 });
+/* a postcard from a country: a coloured picture panel, a stamp and the name */
+function postcard(x, y, name, icon, col, rot, step){
+  return '<g' + (step ? ' data-s="' + step + '"' : "") + '><g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ')"><g class="float" style="animation-delay:-' + (x % 7) / 2 + 's">' +
+    '<rect x="-82" y="-104" width="164" height="208" rx="10" fill="' + INK + '" transform="translate(6 8)"/>' +
+    '<rect x="-82" y="-104" width="164" height="208" rx="10" fill="#fffdf8" stroke="' + INK + '" stroke-width="4"/>' +
+    '<rect x="-68" y="-90" width="136" height="120" rx="6" fill="' + col + '"/>' +
+    '<circle cx="-36" cy="-62" r="10" fill="#fffdf8" opacity=".5"/><path d="M-68 10q34 -24 68 -6t68 -8v34h-136z" fill="#fffdf8" opacity=".25"/>' +
+    C(icon, 0, -32, 76, "#fffdf8", col) +
+    '<rect x="40" y="-98" width="34" height="40" fill="' + GOLD + '" stroke="' + INK + '" stroke-width="2" stroke-dasharray="4 3"/>' +
+    T(0, 70, name, 24, { a: "middle", f: 1 }) + '</g></g></g>';
 }
-function world(w, h){
-  return '<rect width="' + w + '" height="' + h + '" rx="20" fill="#cfe9f7"/>' +
-    '<path d="M60 120q40 -50 120 -40t90 60q-10 50 -60 60t-60 70q-30 30 -60 -10t-30 -140z" fill="#a9cf8a"/>' +
-    '<path d="M330 80q60 -30 140 -10t120 50q20 40 -20 60t-60 80q-40 40 -80 0t-60 -70q-40 -40 -40 -110z" fill="#a9cf8a"/>' +
-    '<path d="M620 120q60 -40 140 -20t110 70q0 50 -60 60t-90 40q-60 10 -80 -40t-20 -110z" fill="#a9cf8a"/>' +
-    '<path d="M760 300q50 -20 90 10t10 60q-40 20 -80 0t-20 -70z" fill="#a9cf8a"/>';
-}
+function world(){ return ""; }
 
 window.B5LESSON = {
   id: "cc-christmas-1",
@@ -106,9 +106,9 @@ window.B5LESSON = {
         {
           title: "Around the world",
           text: "A few traditions you might not know:",
-          stack: true, artWidth: 1250,
-          art: S("0 0 900 420", world(900, 420) +
-            pin(170, 190, "Mexico", "sun", RED) + pin(430, 140, "Iceland", "book", BLUE) + pin(540, 300, "Ethiopia", "calendar", GREEN) + pin(700, 180, "Philippines", "star", GOLD) + pin(810, 370, "Australia", "wave", ORANGE)),
+          stack: true, artWidth: 1300,
+          art: S("0 0 1000 300", postcard(110, 150, "Mexico", "sun", RED, -4, 1) + postcard(305, 150, "Iceland", "book", BLUE, 3, 2) + postcard(500, 150, "Ethiopia", "calendar", GREEN, -2, 3) +
+            postcard(695, 150, "Philippines", "star", "#d4a017", 4, 4) + postcard(890, 150, "Australia", "wave", ORANGE, -3, 5)),
           say: "Mexico: Las Posadas, nine nights of processions. Iceland: books on Christmas Eve. Ethiopia: Christmas on 7 January. Philippines: star lanterns from September. Australia: the beach."
         },
         {
@@ -154,8 +154,8 @@ window.B5LESSON = {
           text: "Almost everywhere, December traditions share a few things:",
           pts: ["<b>Light</b> in the darkest month", "<b>Food</b> shared with others", "<b>Giving</b> something", "<b>Music</b> and stories"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", '<g data-s="1">' + parol(130, 120, 0.9, "float") + '</g><g data-s="2">' + C("chefhat", 380, 120, 120, INK) + '</g>' +
-            '<g data-s="3">' + C("gift", 130, 310, 120, RED) + '</g><g data-s="4">' + C("music", 380, 310, 120, PURPLE) + '</g>'),
+          art: S("0 0 520 420", '<g data-s="1">' + parol(130, 120, 0.9, "float") + '</g><g data-s="2">' + CT("chefhat", 380, 120, 120, INK) + '</g>' +
+            '<g data-s="3">' + CT("gift", 130, 310, 120, RED) + '</g><g data-s="4">' + CT("music", 380, 310, 120, PURPLE) + '</g>'),
           say: "Ask: which of these four matters most to you in winter?"
         },
         {
@@ -163,7 +163,7 @@ window.B5LESSON = {
           text: "Christmas is not on the same day for everyone who celebrates it:",
           pts: ["Most churches: 25 December", "Many Orthodox Christians, like lots of people in Ethiopia and Egypt: 7 January", "In the Netherlands, many children get presents on 5 December, from Sinterklaas"],
           build: true, ptsFrom: 1,
-          art: S("0 0 520 420", C("calendar", 260, 200, 260, TEAL)),
+          art: S("0 0 520 420", CT("calendar", 260, 200, 260, TEAL)),
           say: "Different calendars, different days. Nobody is wrong."
         }
       ],
@@ -239,7 +239,7 @@ window.B5LESSON = {
         {
           title: "Or: a world winter playlist",
           text: "Pick three countries and find a winter song from each one. Rate each: dance, cry or skip?",
-          art: S("0 0 520 420", C("music", 160, 160, 140, PURPLE) + C("globe", 360, 160, 140, BLUE) + '<g class="pulse">' + C("headset", 260, 320, 110, INK) + '</g>'),
+          art: S("0 0 520 420", CT("music", 160, 160, 140, PURPLE) + CT("globe", 360, 160, 140, BLUE) + '<g class="pulse">' + CT("headset", 260, 320, 110, INK) + '</g>'),
           say: "Your teacher picks or checks the songs before playing them."
         }
       ],
