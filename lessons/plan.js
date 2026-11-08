@@ -53,8 +53,8 @@ var SERIES = [
   ]},
   { target: "pw-balance", pillar: "pw", title: "Balance and control", lessons: [
     { id: "pw-balance-1", step: 1, title: "Finding your balance", line: "Base of support and centre of mass, in people.", ready: true, drop: "move-balance-control" },
-    { id: "pw-balance-2", step: 2, title: "Slow is smooth", line: "Control, core and practising a move.", drop: "what-helps-me-move" },
-    { id: "pw-balance-3", step: 2, title: "Three points of contact", line: "How climbers stay on the wall.", drop: "what-helps-me-move" }
+    { id: "pw-balance-2", step: 2, title: "Slow is smooth", line: "Control, core and practising a move.", ready: true, drop: "what-helps-me-move" },
+    { id: "pw-balance-3", step: 2, title: "Three points of contact", line: "How climbers stay on the wall.", ready: true, drop: "what-helps-me-move" }
   ]},
   { target: "hs-myths", pillar: "hs", title: "Myths and legends", lessons: [
     { id: "hs-myths-1", step: 1, title: "Myth, legend or folk tale?", line: "What makes a story a myth, and why people told them.", ready: true, drop: "myths-then-and-now" },
@@ -62,9 +62,9 @@ var SERIES = [
     { id: "hs-myths-3", step: 2, title: "Myths are still being made", line: "Hidden messages, urban legends and today's myths.", ready: true, drop: "hidden-messages" }
   ]},
   { target: "se-earth", pillar: "se", title: "Earth and atmosphere", lessons: [
-    { id: "se-earth-1", step: 1, title: "Inside the Earth", line: "Crust, mantle, core, and how we know.", drop: "what-is-it-made-of" },
-    { id: "se-earth-2", step: 2, title: "The air up there", line: "What air is made of and the layers above us.", drop: "what-is-it-made-of" },
-    { id: "se-earth-3", step: 3, title: "A changing planet", line: "Weather, climate and the air over time.", drop: "what-is-it-made-of" }
+    { id: "se-earth-1", step: 1, title: "Inside the Earth", line: "Crust, mantle, core, and how we know.", ready: true, drop: "what-is-it-made-of" },
+    { id: "se-earth-2", step: 2, title: "The air up there", line: "What air is made of and the layers above us.", ready: true, drop: "what-is-it-made-of" },
+    { id: "se-earth-3", step: 3, title: "A changing planet", line: "Weather, climate and the air over time.", ready: true, drop: "what-is-it-made-of" }
   ]},
   { target: "pfa-transport", pillar: "pfa", title: "Transport and travel", lessons: [
     { id: "pfa-transport-1", step: 1, title: "Ways to get about", line: "Bus, train, tram, taxi, bike, feet.", ready: true, drop: "getting-around" },
@@ -72,9 +72,9 @@ var SERIES = [
     { id: "pfa-transport-3", step: 2, title: "When it goes wrong", line: "Delays, missed stops and staying sorted.", ready: true, drop: "read-the-signs" }
   ]},
   { target: "pfa-careers", pillar: "pfa", title: "Careers for the future", lessons: [
-    { id: "pfa-careers-1", step: 1, title: "What even is a career?", line: "Jobs, careers, and the paths between them.", drop: "careers-fair-scout" },
-    { id: "pfa-careers-2", step: 2, title: "Jobs that vanished, jobs that appeared", line: "Lamplighters to drone pilots.", drop: "career-explorer" },
-    { id: "pfa-careers-3", step: 2, title: "What suits me?", line: "Interests, strengths and where they lead.", drop: "career-explorer" }
+    { id: "pfa-careers-1", step: 1, title: "What even is a career?", line: "Jobs, careers, and the paths between them.", ready: true, drop: "careers-fair-scout" },
+    { id: "pfa-careers-2", step: 2, title: "Jobs that vanished, jobs that appeared", line: "Lamplighters to drone pilots.", ready: true, drop: "career-explorer" },
+    { id: "pfa-careers-3", step: 2, title: "What suits me?", line: "Interests, strengths and where they lead.", ready: true, drop: "career-explorer" }
   ]},
   { target: "rel-assert", pillar: "rel", title: "Assertiveness in relationships", split: true, lessons: [
     { id: "rel-assert-1", step: 1, title: "Mouse, dragon or owl?", line: "Passive, aggressive and assertive.", ready: true, drop: "my-yes-my-no" },
