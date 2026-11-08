@@ -129,7 +129,6 @@ function build(){
     var wp = (L.warms || {})[part];
     if(wp && wp.wordle) F.push({ k: "wordle", sec: "start", d: wp.wordle, path: "warms." + part + ".wordle" });
     else if(wp && wp.wyr) F.push({ k: "wyr", sec: "start", d: wp.wyr, path: "warms." + part + ".wyr" });
-    if(L.objective) F.push({ k: "objective", sec: "start", d: L.objective, path: "objective", again: true });
     secMins.start = wp ? 4 : 1;
   }
   (L.sections || []).forEach(function(s, si){
@@ -175,7 +174,7 @@ R.cover = function(f){
   return '<div class="cover"><div>' +
     '<p class="kicker">' + esc(series.title) + (meta.byWeek ? ' &middot; this week' : ' &middot; lesson ' + meta.n + ' of ' + meta.of) + '</p>' +
     E("title", "h1", "", meta.title) +
-    E("cover.line", "p", "sline", meta.line) + pb +
+    (part > 1 && lesson.objective && lesson.objective.mission ? '<p class="sline"><b>This week\'s mission:</b> ' + E("objective.mission", "span", "") + '</p>' : E("cover.line", "p", "sline", meta.line)) + pb +
     (ccNow() ? '<p class="cctag">This week: ' + esc(ccNow().week) + '</p>' : "") +
     (era ? '<p class="sn" style="margin-top:22px">Time machine set to ' + esc(era.year) + (era.label ? ': ' + esc(era.label) : "") + '</p>' : "") +
     '</div><div class="artbox' + (c.art ? "" : " plain") + '">' + (c.art || A.svg("-140 -110 300 220", A.bonnie(10, 10, 1.6, "happy"))) + '</div></div>';
@@ -251,17 +250,45 @@ var SECART = {
   explore: '<g class="bob"><rect x="20" y="120" width="250" height="200" rx="16" fill="#f3e7c9" stroke="#0a2f38" stroke-width="10" transform="rotate(-8 145 220)"/><path d="M60 250q60 -80 120 -30t80 -40" stroke="#e2557a" stroke-width="10" stroke-dasharray="20 14" fill="none"/><circle cx="250" cy="170" r="95" fill="#bfe6ef" fill-opacity=".85" stroke="#0a2f38" stroke-width="20"/><path d="M200 130q20 -24 50 -20" stroke="#fff" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M318 238L392 312" stroke="#0a2f38" stroke-width="40" stroke-linecap="round"/><path d="M318 238L392 312" stroke="#ef7724" stroke-width="22" stroke-linecap="round"/></g>',
   explain: '<g class="bob"><path d="M200 30a120 120 0 0 0 -72 216q22 18 22 46v30h100v-30q0 -28 22 -46a120 120 0 0 0 -72 -216z" fill="#ffc247" stroke="#0a2f38" stroke-width="14"/><path d="M160 150q40 -40 80 0M180 220v-60M220 220v-60" stroke="#ef7724" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M150 340h100M160 372h80" stroke="#0a2f38" stroke-width="18" stroke-linecap="round"/><path d="M130 80q-30 30 -20 70" stroke="#fff" stroke-width="12" fill="none" stroke-linecap="round" opacity=".8"/></g><g stroke="#fffdf8" stroke-width="12" stroke-linecap="round"><path d="M40 60l-30 -24M360 60l30 -24M20 170h-40M380 170h40"/></g>'
 };
+/* a part with its own name (Dig deeper, Make, Share) gets that name and its own picture */
+function secArt(f){
+  var n = part ? pname(part) : "";
+  var extra = { "Dig deeper": "search", "Make": "toolbox", "Share": "speech" }[n];
+  if(extra && A.cci) return '<g class="bob">' + A.cci(extra, 200, 170, 380, "#fffdf8", pillar.colour) + '</g>';
+  return SECART[f.d.kind] || "";
+}
 R.sech = function(f){
   return '<div class="sech"><span class="kicker">' + (part ? "Part " + part + " of " + NP : "Next up") + '</span>' +
-    '<div class="big">' + SECNAME[f.d.kind] + '</div>' +
+    '<div class="big">' + (part ? pname(part) : SECNAME[f.d.kind]) + '</div>' +
     E(f.path + ".title", "div", "sub", "") +
     '<div class="mins">About ' + (f.d.mins || 10) + ' minutes</div>' +
-    '<svg class="secart" viewBox="-30 -70 460 470">' + (SECART[f.d.kind] || "") + '</svg></div>';
+    '<svg class="secart" viewBox="-30 -70 460 470">' + secArt(f) + '</svg></div>';
 };
 
+/* words on the board: a show slide over CAP words keeps its points and moves the
+   lead in to the prompt line; text on its own keeps whole sentences up to CAP.
+   Edit mode shows everything. */
+var CAP = 25;
+function plainW(h){ return String(h || "").replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/g, " ").split(/\s+/).filter(Boolean).length; }
+function trim(f, d, textKey){
+  f.more = "";
+  if(editing) return { text: true, cut: "" };
+  var t = getPath(lesson, f.path + "." + textKey) || "", pts = d.pts || [];
+  var n = plainW(t) + pts.reduce(function(a, p){ return a + plainW(p); }, 0) + plainW(d.note);
+  if(n <= CAP || !t) return { text: true, cut: "" };
+  if(pts.length){ f.more = t; return { text: false, cut: "" }; }
+  var sent = String(t).match(/[^.!?]+[.!?]+["')]*\s*|[^.!?]+$/g) || [t], keep = "", w = 0;
+  sent.forEach(function(x, i){ var k = plainW(x); if(i === 0 || (keep === sent.slice(0, i).join("") && w + k <= CAP)){ keep += x; w += k; } });
+  var rest = String(t).slice(keep.length).trim();
+  if(rest) f.more = rest;
+  return { text: true, cut: rest ? keep.trim() : "" };
+}
+function leadHtml(f, key, cls, cut){
+  return cut ? '<p class="' + cls + '">' + cut + '</p>' : E(f.path + "." + key, "p", cls);
+}
 R.show = function(f){
-  var s = f.d, has = s.text || (s.pts && s.pts.length);
-  var txt = (s.text ? E(f.path + ".text", "p", "lead") : "") +
+  var s = f.d, tr = trim(f, s, "text"), has = (s.text && tr.text) || (s.pts && s.pts.length);
+  var txt = (s.text && tr.text ? leadHtml(f, "text", "lead", tr.cut) : "") +
     (s.pts ? '<ul class="pts">' + s.pts.map(function(x, i){ return E(f.path + ".pts." + i, "li", "", "").replace("<li ", '<li data-s="' + (s.build ? (s.ptsFrom || 1) + i : 0) + '" '); }).join("") + '</ul>' : "") +
     (s.note ? E(f.path + ".note", "p", "note") : "") +
     (s.photo && s.art ? photo(s.photo).replace('class="polaroid"', 'class="polaroid inflow"') : "");
@@ -281,7 +308,7 @@ R.predict = function(f){
   if(big && opts.length === 4) cls = "n4\" style=\"grid-template-columns:repeat(4,1fr)";
   return '<p class="kicker">' + kick + '</p>' + (s.title ? E(f.path + ".title", "h1", "ft small", "") : "") +
     E(f.path + ".q", "p", "lead", "") +
-    '<div class="opts ' + cls + '">' + opts.map(function(o, i){
+    '<div class="opts q ' + cls + (rev && s.why ? " rev" : "") + '">' + opts.map(function(o, i){
       var right = rev && s.a === i, txt = typeof o === "string" ? o : o.t;
       return '<div class="opt' + (right ? " right" : rev && s.a != null ? " dim" : "") + '" data-o="' + i + '">' +
         '<span class="letter">' + "ABCDEF".charAt(i) + '</span>' +
@@ -297,7 +324,7 @@ R.vote = function(f){
   var s = f.d, t = tally(f, s.opts.length);
   var cls = s.opts.length === 3 ? "n3" : s.opts.length === 2 ? "n2" : "n4";
   return '<p class="kicker">' + (s.kicker ? esc(s.kicker) : "Group vote") + '</p>' + (s.title ? E(f.path + ".title", "h1", "ft small", "") : "") + E(f.path + ".q", "p", "lead", "") +
-    '<div class="opts ' + cls + '">' + s.opts.map(function(o, i){
+    '<div class="opts q ' + cls + (S.rev[fi] && s.why ? " rev" : "") + '">' + s.opts.map(function(o, i){
       var txt = typeof o === "string" ? E(f.path + ".opts." + i, "span", "") : (o.art || "") + E(f.path + ".opts." + i + ".t", "span", "");
       return '<div class="opt" data-o="' + i + '"><span class="letter">' + "ABCDEF".charAt(i) + '</span>' + txt + '<div class="tally">' + dots(t[i]) + '</div><button class="minus" data-minus="' + i + '" aria-label="One less">-</button></div>';
     }).join("") + '</div>' + bar(t) + (s.why ? (S.rev[fi] ? '<div class="why"><span class="who">So</span>' + E(f.path + ".why", "span", "") + '</div>' : "") : "");
@@ -329,8 +356,8 @@ R.media = function(f){
 };
 
 R.realworld = function(f){
-  var s = f.d;
-  return '<div class="rw"><div><span class="tag">Where you\'d meet this</span>' + E(f.path + ".title", "h1", "ft small", "") + E(f.path + ".text", "p", "lead", "") +
+  var s = f.d, tr = trim(f, s, "text");
+  return '<div class="rw"><div><span class="tag">Where you\'d meet this</span>' + E(f.path + ".title", "h1", "ft small", "") + leadHtml(f, "text", "lead", tr.cut) +
     (ccNow() ? '<p class="ccline"><span class="cctag">' + esc(ccNow().week) + '</span> ' + esc(ccNow().line) + '</p>' : "") + '</div>' +
     '<div class="artbox' + (s.photo && !s.art ? " photoonly" : "") + '">' + (s.art || (s.photo ? "" : A.svg("-140 -110 300 220", A.bonnie(10, 10, 1.6, "happy")))) + photo(s.photo) + '</div></div>';
 };
@@ -355,7 +382,7 @@ R.driving = function(f){
   var s = f.d, opts = s.opts || ["Yes", "No", "It depends"], t = tally(f, opts.length);
   return '<p class="kicker">The big question</p><h1 class="ft">' + esc(window.B5TERM ? B5TERM.question : "If we could time travel, should we?") + '</h1>' +
     E(f.path + ".angle", "p", "lead", "") +
-    '<div class="opts ' + (opts.length === 3 ? "n3" : "n2") + '">' + opts.map(function(o, i){
+    '<div class="opts q short ' + (opts.length === 3 ? "n3" : "n2") + '">' + opts.map(function(o, i){
       return '<div class="opt" data-o="' + i + '"><span class="letter">' + "ABC".charAt(i) + '</span>' + E(f.path + ".opts." + i, "span", "", o) + '<div class="tally">' + dots(t[i]) + '</div><button class="minus" data-minus="' + i + '" aria-label="One less">-</button></div>';
     }).join("") + '</div>' + bar(t) + '<p class="hint">Passing is a fine answer too.</p>';
 };
@@ -853,6 +880,7 @@ function sayLine(){
       confidence: "Hands up together on three, or tap for anyone who'd rather not show.", driving: "Anyone can pass. Ask for a reason from anyone who wants to give one.",
       end: "Mark it taught, tap anyone who missed it, save the board." , sech: "About " + ((f.d && f.d.mins) || "") + " minutes." }[f.k] || "";
   }
+  if(f.more) s = '<b>Say</b> &nbsp;' + f.more + (s ? '<br>' + s : "");
   $("#say").innerHTML = s ? "<b>Prompt</b> &nbsp;" + s : "<b>Prompt</b> &nbsp;No prompt for this one.";
 }
 

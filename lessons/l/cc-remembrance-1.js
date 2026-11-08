@@ -10,7 +10,7 @@
    Shape as /lessons/l/rel-assert-1.js. ASCII only.
    ========================================================== */
 (function(){
-var A = window.LART, S = A.svg, T = A.T, C = A.cci, INK = "#0a2f38";
+var A = window.LART, S = A.svg, T = A.T, C = A.cci, CT = A.ccTile, INK = "#0a2f38";
 var RED = "#c8102e", DARK = "#7d0f12", CREAM = "#fff7ec", GREEN = "#2f6b3a", PURPLE = "#6a3d9a", TEAL = "#007291", ORANGE = "#ef7724", YELLOW = "#ffc247";
 
 /* a poppy: four petals, a dark middle and a leaf */
@@ -116,6 +116,16 @@ window.B5LESSON = {
           a: 0,
           why: "After the fighting, poppies grew all over the churned up fields in Belgium and France. Soldiers noticed them. The flower became the way to remember the people who died there.",
           say: "Votes first, then reveal. The national flower of England is actually the rose."
+        },
+        {
+          type: "media",
+          kicker: "For real",
+          title: "Poppies grow where the ground is dug up",
+          img: "https://commons.wikimedia.org/wiki/Special:FilePath/Moonfeld_toscana.jpg?width=1400",
+          alt: "A field full of red poppies",
+          caption: "Their seeds wait in the soil for years. When the battlefields were churned up, poppies came up everywhere.",
+          credit: "Photo: Juergen Kofler, CC BY-SA 3.0, Wikimedia Commons",
+          say: "This field is in Italy, not Flanders, but it is what the fields looked like after the war."
         },
         {
           title: "Eleven, eleven, eleven",
@@ -276,9 +286,19 @@ window.B5LESSON = {
           title: "People who serve today",
           text: "Remembering is also about the people keeping us safe now.",
           stack: true, artWidth: 1250,
-          art: S("0 0 1000 260", C("helmet", 120, 110, 120, "#d63b2f") + C("cross", 320, 110, 120, "#1e9e5a") + C("anchor", 520, 110, 120, TEAL) + C("shield", 720, 110, 120, "#3f6f8f") + C("hands", 900, 110, 120, ORANGE) +
+          art: S("0 0 1000 260", CT("helmet", 120, 110, 120, "#d63b2f") + CT("cross", 320, 110, 120, "#1e9e5a") + CT("anchor", 520, 110, 120, TEAL) + CT("shield", 720, 110, 120, "#3f6f8f") + CT("hands", 900, 110, 120, ORANGE) +
             T(120, 220, "Firefighters", 24, { a: "middle", f: 1 }) + T(320, 220, "Paramedics", 24, { a: "middle", f: 1 }) + T(520, 220, "Lifeboat crews", 24, { a: "middle", f: 1 }) + T(720, 220, "Armed forces", 24, { a: "middle", f: 1 }) + T(900, 220, "Volunteers", 24, { a: "middle", f: 1 })),
           say: "Most lifeboat crews are volunteers. Ask: which job would you pick?"
+        },
+        {
+          type: "media",
+          kicker: "For real",
+          title: "A lifeboat launching",
+          img: "https://commons.wikimedia.org/wiki/Special:FilePath/RNLI_and_771_NAS_Exercise_MOD_45153583.jpg?width=1400",
+          alt: "An orange and blue lifeboat sliding down a slipway into the sea",
+          caption: "The Lizard lifeboat in Cornwall, sliding down its slipway into the sea.",
+          credit: "Photo: Royal Navy, Ministry of Defence, Open Government Licence, Wikimedia Commons",
+          say: "Ask: would you volunteer for a job like this?"
         }
       ],
       check: {

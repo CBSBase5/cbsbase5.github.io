@@ -200,6 +200,15 @@ function cci(name, x, y, size, f, d){
   var k = (size || 48) / 48;
   return '<g transform="translate(' + (x - 24 * k).toFixed(1) + ' ' + (y - 24 * k).toFixed(1) + ') scale(' + k.toFixed(3) + ')">' + C.inner(name, f || INK, d || "#ffffff") + '</g>';
 }
+/* an icon on a round tile with a shadow, so a row of icons looks designed, not dropped in */
+function ccTile(name, x, y, size, f, d){
+  var r = (size || 48) * 0.62, dl = ((x * 7 + y) % 9) * 0.35;
+  return '<g class="float" style="animation-delay:-' + dl.toFixed(2) + 's">' +
+    '<circle cx="' + x + '" cy="' + (y + 7) + '" r="' + r.toFixed(1) + '" fill="' + INK + '"/>' +
+    '<circle cx="' + x + '" cy="' + y + '" r="' + r.toFixed(1) + '" fill="#fffdf8" stroke="' + INK + '" stroke-width="4"/>' +
+    '<circle cx="' + x + '" cy="' + y + '" r="' + (r * 0.84).toFixed(1) + '" fill="' + (f || INK) + '" opacity=".14"/>' +
+    cci(name, x, y, (size || 48) * 0.74, f, d) + '</g>';
+}
 function ccScene(id){
   var w = ccWeek(id), SC = window.B5CCScenes;
   if(!w || !SC || !w.look || !SC.has(w.look.scene)) return "";
@@ -208,5 +217,5 @@ function ccScene(id){
 }
 
 window.LART = { svg: svg, T: T, bonnie: bonnie, bambi: bambi, jay: jay, bird: bird, hand: hand, bubble: bubble, icon: icon, iconRow: iconRow, scene: scene, INK: INK,
-  cci: cci, ccScene: ccScene, ccWeek: ccWeek };
+  cci: cci, ccTile: ccTile, ccScene: ccScene, ccWeek: ccWeek };
 })();
