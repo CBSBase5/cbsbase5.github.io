@@ -24,6 +24,9 @@ window.B5LESSON = {
   id: "rel-assert-2",
   title: "My yes, my no",
   mins: 15,
+  cc: [
+    { week: "Anti-Bullying Week", line: "A clear, calm no is one of the best tools there is, for you and for anyone you back up." }
+  ],
   startMins: 5,
   finishMins: 5,
   cover: { line: "Saying no without being a dragon. Hearing no without turning into one.", art: S("0 0 560 380", A.scene(560, 380, { ground: 340, time: "dusk", sun: false }) + owl(160, 190, 1.6) + A.bubble(250, 70, 260, 70, "No thanks.", 34)) },

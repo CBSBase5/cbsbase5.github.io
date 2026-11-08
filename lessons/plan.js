@@ -109,6 +109,8 @@ function load(){
   try{ s = JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){}
   s = s && typeof s === "object" ? s : {};
   s.taught = s.taught || {};
+  s.sent = s.sent || {};
+  s.untick = s.untick || {};
   return s;
 }
 function save(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
@@ -170,10 +172,89 @@ function together(s){
 
 function mark(id, part, on){
   var s = load(), k = partKey(id, part);
-  if(on === false) delete s.taught[k]; else s.taught[k] = iso();
+  if(on === false){ delete s.taught[k]; s.untick[k] = 1; }
+  else { s.taught[k] = iso(); delete s.untick[k]; }
   save(s);
   return s;
 }
+
+/* ---------- the shared copy ----------
+   Send to Buddy writes one Evidence row per student for each lesson
+   (slug "lesson-<id>", or "lesson-<id>-pN" for a part). sync() reads
+   those back, so the taught record survives a wiped browser or a
+   different board. Staff only: it needs a school staff account, or the
+   staff passphrase already saved on this device by a staff page.
+   s.sent: what the sheet has ({ key: day }). s.untick: lessons unticked
+   here, which the sheet does not tick again. */
+var FIRST = "2026-11-02", PASSKEYS = ["b5.staff.key.v1", "b5.staffkey.v1"];
+function savedPass(){
+  var k = "";
+  try{ PASSKEYS.forEach(function(n){ k = k || localStorage.getItem(n) || ""; }); }catch(e){}
+  return k || null;
+}
+function rememberPass(p){ try{ if(p) localStorage.setItem(PASSKEYS[0], p); }catch(e){} }
+function within(pr, ms){
+  return Promise.race([pr, new Promise(function(res){ setTimeout(function(){ res({ ok: false, error: "slow" }); }, ms); })]);
+}
+function staffKey(){
+  var S = window.B5Site, k = savedPass();
+  return within(S.call("whoami").then(function(o){ return o && o.ok && o.staff && o.pass ? o.pass : k; }, function(){ return k; }), 4000)
+    .then(function(v){ return v && typeof v === "string" ? v : k; });
+}
+var syncing = null;
+function sync(){
+  if(syncing) return syncing;
+  var S = window.B5Site;
+  if(!S || !S.call || S.guest || !S.syncUrl) return Promise.resolve({ ok: false, why: "off", added: [] });
+  syncing = staffKey().then(function(k){
+    if(!k) return { ok: false, why: "no key", added: [] };
+    return within(S.call("evidence", { key: k, from: FIRST }), 9000).then(function(o){
+      if(!o || !o.ok) return { ok: false, why: (o && o.error) || "no answer", added: [] };
+      var s = load(), sent = {}, added = [];
+      (o.items || []).forEach(function(it){
+        if(String(it.Kind || "") !== "lesson") return;
+        var m = String(it.Slug || "").match(/^lesson-([a-z]+-[a-z]+-\d)(?:-p([123]))?$/);
+        if(!m || !byLesson[m[1]]) return;
+        var key = partKey(m[1], m[2] ? +m[2] : 0), day = String(it.Day || "").slice(0, 10);
+        if(!sent[key] || day < sent[key]) sent[key] = day;
+      });
+      Object.keys(sent).forEach(function(key){
+        if(!s.taught[key] && !s.untick[key]){ s.taught[key] = sent[key]; added.push(key); }
+      });
+      s.sent = sent; s.synced = new Date().toISOString();
+      save(s);
+      return { ok: true, added: added, sent: sent };
+    }, function(e){ return { ok: false, why: (e && e.message) || "no answer", added: [] }; });
+  });
+  return syncing;
+}
+/* taught here but not in the sheet: Send to Buddy has not happened yet.
+   Only known once a sync has worked on this device. */
+function unsent(s){
+  s = s || load();
+  if(!s.synced) return [];
+  var out = [];
+  Object.keys(s.taught).forEach(function(key){
+    if(s.sent[key]) return;
+    var m = key.split("#"), l = byLesson[m[0]]; if(!l) return;
+    out.push({ lesson: l, part: m[1] ? +m[1] : 0, day: s.taught[key] });
+  });
+  return out.sort(function(a, b){ return a.day < b.day ? -1 : 1; });
+}
+function sentMark(id, part, day){ var s = load(); s.sent[partKey(id, part)] = day || iso(); save(s); }
+
+/* the planned date of each lesson if every slot is taught, week by week
+   from Week 2 (used where the board's record cannot be seen, such as a
+   student looking back from their HQ) */
+var WEEK1 = "2026-11-09", DOFF = { mon: 0, tue: 1, wed: 2, thu: 3, fri: 4 };
+function addDays(d, n){ var x = new Date(d + "T12:00:00"); x.setDate(x.getDate() + n); return iso(x); }
+var PLANNED = {};
+SLOTS.forEach(function(slot){
+  var ids = slot.order ? slot.order.slice() : [];
+  if(!ids.length) slot.series.forEach(function(t){ (bySeries[t] ? bySeries[t].lessons : []).forEach(function(l){ ids.push(l.id); }); });
+  ids.forEach(function(id, i){ if(!PLANNED[id]) PLANNED[id] = addDays(WEEK1, i * 7 + DOFF[slot.days[0]]); });
+});
+function planned(id){ return PLANNED[id] || ""; }
 
 function presentHref(x){
   if(!x || !x.lesson) return "/lessons/";
@@ -184,11 +265,15 @@ function label(x){
   return x.lesson.title + (x.part ? " (" + PARTS[x.part].toLowerCase() + ")" : "");
 }
 
+/* bump when lesson files change, so boards fetch the new ones */
+window.B5LESSONS_V = 4;
+
 window.B5LESSONS = {
   pillars: P, series: SERIES, slots: SLOTS, hqs: HQS, parts: PARTS,
   bySeries: bySeries, byLesson: byLesson,
   iso: iso, load: load, save: save, partKey: partKey, isTaught: isTaught,
   nextFor: nextFor, slotFor: slotFor, together: together, mark: mark,
-  presentHref: presentHref, forActivity: forActivity, label: label
+  presentHref: presentHref, forActivity: forActivity, sync: sync, unsent: unsent, sentMark: sentMark,
+  rememberPass: rememberPass, planned: planned, label: label
 };
 })();

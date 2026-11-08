@@ -27,6 +27,8 @@ var css = ".lessontie{display:flex;gap:14px;align-items:center;flex-wrap:wrap;ma
   ".lessontie .lt-links{display:flex;gap:8px;flex-wrap:wrap}" +
   ".lessontie a{display:inline-block;padding:5px 12px;border:2px solid currentColor;border-radius:999px;color:inherit;text-decoration:none;font-weight:700;white-space:nowrap}" +
   ".lessontie a:hover,.lessontie a:focus-visible{background:" + pc + ";color:#fff;border-color:" + pc + "}" +
+  "\n.lessontie .lt-more{flex-basis:100%;font-size:.9rem}.lessontie .lt-more summary{cursor:pointer;font-weight:700;display:inline-block}" +
+  ".lessontie .lt-more a{margin:6px 6px 0 0;padding:3px 10px;font-weight:600}" +
   "@media print{.lessontie{display:none}}";
 
 /* a little board with a slide on it */
@@ -34,18 +36,30 @@ var icon = '<svg viewBox="0 0 46 34" aria-hidden="true"><rect x="2" y="2" width=
   '<rect x="8" y="8" width="16" height="4" rx="2" fill="' + pc + '"/><rect x="8" y="16" width="24" height="3" rx="1.5" fill="#0a2f38" opacity=".35"/>' +
   '<path d="M17 28l-4 5M29 28l4 5" stroke="#0a2f38" stroke-width="2.5" stroke-linecap="round"/><circle cx="37" cy="10" r="3" fill="#ef7724"/></svg>';
 
+/* with three or more lessons, one button for the latest by the plan
+   (or the first, before any are due) and the rest tucked away */
+function latest(){
+  var today = L.iso(), best = list[0];
+  list.forEach(function(l){ var d = L.planned ? L.planned(l.id) : ""; if(d && d <= today) best = l; });
+  return best;
+}
 function href(l){ return "/lessons/present.html?l=" + l.id + (l.split ? "&p=1" : "") + "&look=1"; }
 
+function many(){
+  var main = latest(), rest = list.filter(function(l){ return l !== main; });
+  return '<span class="lt-links"><a href="' + href(main) + '" title="Nothing counts, it is just a look">Look back: ' + esc(main.title) + '</a></span>' +
+    '<details class="lt-more"><summary>The other ' + rest.length + '</summary>' + rest.map(function(l){ return '<a href="' + href(l) + '">' + esc(l.title) + '</a>'; }).join("") + '</details>';
+}
 function put(){
   var anchor = document.querySelector(".qwrap .weektheme") || document.querySelector(".weektheme");
   if(!anchor || document.querySelector(".lessontie")) return;
   var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
   var box = document.createElement("div");
   box.className = "lessontie";
-  box.innerHTML = icon + '<p>Goes with ' + names() + ', the whole group ' + (list.length > 1 ? "lessons" : "lesson") + ' with Jay.</p>' +
-    '<span class="lt-links">' + list.map(function(l){
+  box.innerHTML = icon + '<p>' + (list.length > 2 ? 'Goes with the ' + esc(L.bySeries[list[0].target].title) + ' lessons with Jay.' : 'Goes with ' + names() + ', the whole group ' + (list.length > 1 ? "lessons" : "lesson") + ' with Jay.') + '</p>' +
+    (list.length > 2 ? many() : '<span class="lt-links">' + list.map(function(l){
       return '<a href="' + href(l) + '" title="Nothing counts, it is just a look">' + (list.length > 1 ? "Look back: " + esc(l.title) : "Look back at the slides") + '</a>';
-    }).join("") + '</span>';
+    }).join("") + '</span>');
   anchor.parentNode.insertBefore(box, anchor.nextSibling);
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", put); else put();

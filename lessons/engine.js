@@ -79,7 +79,7 @@ function start(){
     if(!lesson){ showMissing(meta.title, "The lesson file did not load."); return; }
     applyEdits();
     build();
-    var at = parseInt(q("f"), 10);
+    var at = q("f") === "end" ? frames.length - 1 : parseInt(q("f"), 10);
     go(isNaN(at) ? 0 : Math.max(0, Math.min(frames.length - 1, at)), true);
     if(LOOK) toast("Looking back at the lesson. Arrow keys or tap the arrows to move.");
     else if(PREVIEW) toast("Preview: nothing here counts or gets sent.");
@@ -152,6 +152,12 @@ function E(path, tag, cls, fallback){
    In art and lists, anything with data-s="n" appears on build step n. */
 var R = {};
 
+/* a Cultural Calendar tie in: lesson.cc is a list of { week, line }, shown
+   only when the lesson is taught in that week (weeks in /data/term.js) */
+function ccNow(){
+  try{ var w = window.B5TERM && B5TERM.currentWeek(), name = w && w.cc; if(!name || !lesson || !lesson.cc) return null;
+    return lesson.cc.filter(function(c){ return c.week === name; })[0] || null; }catch(e){ return null; }
+}
 R.cover = function(f){
   var c = lesson.cover || {};
   var pb = part ? '<span class="partbadge">Part ' + part + ' of 3: ' + PLAN.parts[part] + '</span>' : "";
@@ -160,6 +166,7 @@ R.cover = function(f){
     '<p class="kicker">' + esc(series.title) + ' &middot; lesson ' + meta.n + ' of ' + meta.of + '</p>' +
     E("title", "h1", "", meta.title) +
     E("cover.line", "p", "sline", meta.line) + pb +
+    (ccNow() ? '<p class="cctag">This week: ' + esc(ccNow().week) + '</p>' : "") +
     (era ? '<p class="sn" style="margin-top:22px">Time machine set to ' + esc(era.year) + (era.label ? ': ' + esc(era.label) : "") + '</p>' : "") +
     '</div><div class="artbox' + (c.art ? "" : " plain") + '">' + (c.art || A.svg("-140 -110 300 220", A.bonnie(10, 10, 1.6, "happy"))) + '</div></div>';
 };
@@ -313,7 +320,8 @@ R.media = function(f){
 
 R.realworld = function(f){
   var s = f.d;
-  return '<div class="rw"><div><span class="tag">Where you\'d meet this</span>' + E(f.path + ".title", "h1", "ft small", "") + E(f.path + ".text", "p", "lead", "") + '</div>' +
+  return '<div class="rw"><div><span class="tag">Where you\'d meet this</span>' + E(f.path + ".title", "h1", "ft small", "") + E(f.path + ".text", "p", "lead", "") +
+    (ccNow() ? '<p class="ccline"><span class="cctag">' + esc(ccNow().week) + '</span> ' + esc(ccNow().line) + '</p>' : "") + '</div>' +
     '<div class="artbox' + (s.photo && !s.art ? " photoonly" : "") + '">' + (s.art || (s.photo ? "" : A.svg("-140 -110 300 220", A.bonnie(10, 10, 1.6, "happy")))) + photo(s.photo) + '</div></div>';
 };
 /* a real photo: fills the box on its own, or pinned to the corner of a drawing like a polaroid. Tap to enlarge. */
@@ -863,7 +871,7 @@ function staffPass(){
       $("#passgo").onclick = function(){
         if(!window.B5Lock){ $("#passmsg").textContent = "The lock did not load here."; return; }
         var v = inp.value;
-        B5Lock.checkStaff(v).then(function(ok){ if(ok){ ov.hidden = true; PASS = v; res(v); } else $("#passmsg").textContent = "Not that one."; });
+        B5Lock.checkStaff(v).then(function(ok){ if(ok){ ov.hidden = true; PASS = v; PLAN.rememberPass(v); res(v); } else $("#passmsg").textContent = "Not that one."; });
       };
       $("#passno").onclick = function(){ ov.hidden = true; res(null); };
     });
@@ -956,7 +964,7 @@ function composeBoard(){
   cx.fillStyle = "#fff"; cx.font = "900 46px Archivo, Arial Black, Arial, sans-serif";
   cx.fillText(meta.title + (part ? " (part " + part + ")" : ""), 40, 64);
   cx.font = "700 24px Verdana, Arial, sans-serif";
-  cx.fillText("Base 5 lesson \u00b7 " + pillar.name + " \u00b7 " + series.title + " \u00b7 lesson " + meta.n + " of " + meta.of + " \u00b7 " + PLAN.iso(), 40, 104);
+  cx.fillText("Base 5 lesson \u00b7 " + pillar.name + " \u00b7 " + series.title + " \u00b7 lesson " + meta.n + " of " + meta.of + " \u00b7 " + (S.day || PLAN.iso()), 40, 104);
   var jobs = keys.map(function(k, n){
     var sn = S.snaps[k], x = 40 + (n % cols) * (tw + gap), y = top + Math.floor(n / cols) * (th + gap + 40);
     return loadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(sn.svg)).then(function(im){
@@ -1030,6 +1038,9 @@ function sendBuddy(){
   var dropTitleNow = meta.drop;
   if(window.B5LIB && B5LIB.items) B5LIB.items.forEach(function(it){ if(it.slug === meta.drop) dropTitleNow = it.title; });
   S.already = [];
+  /* sent on a later day (from the staff room's "not sent yet" list): keep the day it was taught */
+  var tday = PLAN.load().taught[PLAN.partKey(meta.id, part)], tnow = PLAN.iso();
+  S.day = tday && tday < tnow ? tday : tnow;
   sendMsg("Checking it's you...");
   staffPass().then(function(pass){
     if(!pass){ sendMsg("Not sent: Send to Buddy is for staff."); return null; }
@@ -1050,7 +1061,7 @@ function sendBuddy(){
       });
       sendMsg("Sending to the shared memory and Buddy...");
       return Site.call("lesson", {
-        key: pass, id: meta.id + (part ? "-p" + part : ""), title: meta.title + (part ? " (" + PLAN.parts[part].toLowerCase() + ")" : ""),
+        key: pass, day: S.day, id: meta.id + (part ? "-p" + part : ""), title: meta.title + (part ? " (" + PLAN.parts[part].toLowerCase() + ")" : ""),
         subject: pillar.name, target: meta.target, targetName: series.title, step: meta.step || 0,
         mins: part ? 15 : (lesson.mins || 45), line: summaryLine(), here: here, png: png,
         dropTitle: dropTitle, drops: drops, missed: Object.keys(drops), dropNote: "This goes with the lesson on " + meta.title.replace(/\?$/, "") + ", whenever you fancy it. No rush."
@@ -1067,6 +1078,7 @@ function sendBuddy(){
     var al = (S.already || []).filter(function(w, i, a){ return a.indexOf(w) === i; });
     if(al.length) line += " " + al.join(", ") + " already " + (al.length > 1 ? "have" : "has") + " " + dropTitleNow + " in their folder.";
     sendMsg(line);
+    PLAN.sentMark(meta.id, part, S.day);
     toast("Sent to Buddy.");
   }, function(e){ sendMsg("Not sent: " + (e && e.message ? e.message : "the sheet did not answer") + ". Try again in a minute."); });
 }
@@ -1133,5 +1145,19 @@ function confirmClear(){ return window.confirm("Clear the edits saved on this bo
 
 bindChrome();
 start();
+/* the shared copy of what has been taught: if it knows of lessons this
+   board does not, and the slot would now open a different one, move on
+   to that one before anything has happened */
+if(!PREVIEW && PLAN.sync){
+  var t0 = Date.now();
+  PLAN.sync().then(function(r){
+    if(!r || !r.ok || !r.added.length || !slotId || q("l") || fi !== 0 || Date.now() - t0 > 15000) return;
+    var nx = PLAN.nextFor(slotId);
+    if(nx && nx.lesson && (!meta || nx.lesson.id !== meta.id || nx.part !== part)){
+      toast("The shared record says that one is done. Moving on to " + PLAN.label(nx) + ".");
+      setTimeout(function(){ if(fi === 0) location.replace(PLAN.presentHref(nx)); }, 1800);
+    }
+  });
+}
 window.B5Present = { go: go, next: next, prev: prev, frames: function(){ return frames; }, state: S, snap: snap, evidence: evidence, results: results };
 })();
