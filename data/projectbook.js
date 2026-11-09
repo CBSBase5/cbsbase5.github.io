@@ -465,6 +465,137 @@ function hasVal(v){
 }
 function debounce(fn, ms){ var t; return function(){ var a = arguments, me = this; clearTimeout(t); t = setTimeout(function(){ fn.apply(me, a); }, ms); }; }
 
+
+/* ==========================================================
+   Each HQ's world (Nov 2026). The book takes on the look of the
+   student's own HQ (see /<hq>/<hq>.css): background, heading font,
+   stage colours, the map's scenery, the marker that travels the map
+   and the stamp words. Cards stay white, as in the HQs, so reading
+   is always comfortable. Staff pages and print keep the plain look.
+   ========================================================== */
+function rnd(seed){ var s = seed; return function(){ s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
+var THEMES = {
+  EGW: { cover: "#3a5cff", font: "Space+Grotesk:wght@500;700", fam: "'Space Grotesk',Archivo,sans-serif",
+    bg: "radial-gradient(ellipse at 80% 0%,#2a2f6b 0,transparent 55%),radial-gradient(ellipse at 0% 100%,#3b1f5c 0,transparent 50%),#11162b",
+    text: "#eef0ff", acc: "#ffd23f", accText: "#11162b", stamp: "#3a5cff",
+    stages: ["#22b8e6", "#8a5cf6", "#19c39a", "#ffd23f", "#ff8a5d", "#c9cdf0"], on: "#11162b",
+    map: { bg: "#0d1124", line: "rgba(201,205,240,.35)", road: "rgba(201,205,240,.07)", roadW: 18, dash: "rgba(238,240,255,.55)", dashArr: "1 12", dashW: 3, stop: "#161c3a" },
+    deco: function(W, H){
+      var r = rnd(7), o = "";
+      for(var i = 0; i < 110; i++){ var x = r() * W, y = r() * H, rr = .5 + r() * 1.7; o += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + rr.toFixed(1) + '" fill="#fff" opacity="' + (.25 + r() * .6).toFixed(2) + '"' + (i % 7 === 0 ? ' class="tw" style="animation-delay:' + (r() * 5).toFixed(1) + 's"' : '') + '/>'; }
+      return o + '<g transform="translate(' + (W - 70) + ' 46)"><circle r="24" fill="#ffe9a8"/><circle cx="10" cy="-6" r="22" fill="#0d1124"/></g>' +
+        '<g class="comet"><path d="M-60 0L0 0" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/><circle r="3" fill="#fff"/></g>';
+    },
+    marker: '<g class="bob"><path d="M-30 6L-6 0M-28 14L-6 4M-22 -6L-6 -3" stroke="#ffd23f" stroke-width="3" stroke-linecap="round" opacity=".7"/><circle r="11" fill="#ffd23f" stroke="#11162b" stroke-width="3"/><circle cx="-3" cy="-3" r="3" fill="#fff8d6"/></g>',
+    words: ["Star found", "Stellar", "Out of this world", "Brilliant", "Nailed it", "Bonnie approves"] },
+  LP: { cover: "#ff7a2f", font: "Chakra+Petch:wght@500;600;700", fam: "'Chakra Petch',Archivo,sans-serif",
+    bg: "linear-gradient(rgba(184,214,234,.07) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,rgba(184,214,234,.07) 1px,transparent 1px) 0 0/24px 24px,#0b2840",
+    text: "#f1f8ff", acc: "#ff7a2f", accText: "#0b2840", stamp: "#ff4f8b",
+    stages: ["#3ad0ff", "#c6f03c", "#ff7a2f", "#ff4f8b", "#ffd23f", "#f1f8ff"], on: "#0b2840",
+    map: { bg: "#0d2e4a", line: "rgba(184,214,234,.45)", road: "rgba(184,214,234,.08)", roadW: 20, dash: "#f1f8ff", dashArr: "14 8", dashW: 2.5, stop: "#103350" },
+    deco: function(W, H){
+      return '<defs><pattern id="pbg1" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#b8d6ea" stroke-opacity=".12"/></pattern>' +
+        '<pattern id="pbg2" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M120 0H0V120" fill="none" stroke="#b8d6ea" stroke-opacity=".25"/></pattern></defs>' +
+        '<rect width="' + W + '" height="' + H + '" fill="url(#pbg1)"/><rect width="' + W + '" height="' + H + '" fill="url(#pbg2)"/>' +
+        '<g stroke="#b8d6ea" stroke-opacity=".5" stroke-width="2" fill="none"><path d="M14 34V14H34M' + (W - 34) + ' 14H' + (W - 14) + 'V34M14 ' + (H - 34) + 'V' + (H - 14) + 'H34M' + (W - 34) + ' ' + (H - 14) + 'H' + (W - 14) + 'V' + (H - 34) + '"/></g>' +
+        '<g transform="translate(' + (W - 190) + ' ' + (H - 50) + ')"><rect width="170" height="34" fill="none" stroke="#b8d6ea" stroke-opacity=".45"/><text x="10" y="22" style="font:600 11px \'Chakra Petch\',sans-serif;letter-spacing:.12em;fill:#b8d6ea;opacity:.7">DWG NO. ' + esc(WHO || "B5") + '-ELP-01</text></g>';
+    },
+    marker: '<g class="bob" transform="rotate(35)"><rect x="-4" y="-22" width="8" height="34" rx="1" fill="#ffd23f" stroke="#0b2840" stroke-width="2.5"/><path d="M-4 12L0 22 4 12z" fill="#f3d9b8" stroke="#0b2840" stroke-width="2.5" stroke-linejoin="round"/><rect x="-4" y="-26" width="8" height="6" fill="#ff4f8b" stroke="#0b2840" stroke-width="2.5"/></g>',
+    words: ["Approved", "Signed off", "Built it", "Spot on", "Measured up", "Bonnie approves"] },
+  LW: { cover: "#c0392b", font: "Bebas+Neue&family=Outfit:wght@500;700", fam: "'Bebas Neue','Outfit',Archivo,sans-serif", big: true,
+    bg: "radial-gradient(ellipse at 20% -10%,rgba(255,197,61,.28) 0,transparent 45%),radial-gradient(ellipse at 85% -10%,rgba(255,197,61,.2) 0,transparent 45%),linear-gradient(#27132b,#1a0d1c)",
+    text: "#fff6fb", acc: "#ff5a4e", accText: "#fff6fb", stamp: "#c0392b",
+    stages: ["#ffc53d", "#2ed3c6", "#ff8a7f", "#e8a3ff", "#ffb35c", "#fff6fb"], on: "#1a0d1c",
+    map: { bg: "#1f0f22", line: "rgba(232,210,226,.3)", road: "rgba(255,255,255,.05)", roadW: 22, dash: "#ffc53d", dashArr: "0 20", dashW: 9, chase: true, stop: "#2d1631" },
+    deco: function(W, H){
+      var o = '<defs><radialGradient id="pbsp" cx="50%" cy="0%" r="100%"><stop offset="0" stop-color="#ffe7a3" stop-opacity=".32"/><stop offset="1" stop-color="#ffe7a3" stop-opacity="0"/></radialGradient>' +
+        '<linearGradient id="pbcur" x1="0" x2="1"><stop offset="0" stop-color="#7a1424"/><stop offset=".5" stop-color="#b3223a"/><stop offset="1" stop-color="#7a1424"/></linearGradient></defs>';
+      [W * .28, W * .72].forEach(function(x, i){ o += '<g class="spot s' + i + '" style="transform-origin:' + x + 'px 0px"><path d="M' + x + ' 0L' + (x - W * .2) + ' ' + H + 'H' + (x + W * .2) + 'Z" fill="url(#pbsp)"/></g>'; });
+      for(var c = 0; c < 2; c++){ var x0 = c ? W - 34 : 0; for(var k = 0; k < 3; k++) o += '<rect x="' + (x0 + k * 11) + '" y="0" width="12" height="' + H + '" fill="url(#pbcur)" opacity=".9"/>'; }
+      var sc = ""; for(var j = 0; j < W; j += 40) sc += '<path d="M' + j + ' 0Q' + (j + 20) + ' 34 ' + (j + 40) + ' 0" fill="#9b1c31"/>';
+      o += '<rect width="' + W + '" height="10" fill="#7a1424"/>' + sc;
+      for(var f = 30; f < W - 20; f += 46) o += '<circle cx="' + f + '" cy="' + (H - 10) + '" r="4" fill="#ffc53d"/><circle cx="' + f + '" cy="' + (H - 10) + '" r="10" fill="#ffc53d" opacity=".15"/>';
+      return o;
+    },
+    marker: '<g class="bob"><path d="M0 -16L4.7 -6.5 15.2 -4.9 7.6 2.5 9.4 13 0 8 -9.4 13 -7.6 2.5 -15.2 -4.9 -4.7 -6.5z" fill="#ffc53d" stroke="#1a0d1c" stroke-width="2.5" stroke-linejoin="round"/><circle cx="-4" cy="-1" r="1.8" fill="#1a0d1c"/><circle cx="4" cy="-1" r="1.8" fill="#1a0d1c"/></g>',
+    words: ["Encore!", "Bravo!", "Standing ovation", "Showstopper", "Curtain call", "Bonnie approves"] },
+  LC: { cover: "#2f6b4f", font: "Space+Mono:wght@400;700", fam: "'Space Mono','Courier New',monospace",
+    bg: "repeating-linear-gradient(90deg,rgba(216,213,182,.035) 0 22px,transparent 22px 44px),radial-gradient(ellipse at 50% -5%,rgba(251,248,228,.14) 0,transparent 50%),#1b1c16",
+    text: "#fbf8e4", acc: "#e6d84a", accText: "#1b1c16", stamp: "#1f8a5a",
+    stages: ["#e6d84a", "#39d98a", "#ff7b6b", "#9ad0ff", "#d8d5b6", "#fbf8e4"], on: "#1b1c16",
+    map: { bg: "#17180f", line: "rgba(216,213,182,.3)", road: "#25261e", roadW: 26, dash: "#e6d84a", dashArr: "16 12", dashW: 4, stop: "#25261e" },
+    deco: function(W, H){
+      var o = '<defs><filter id="pbgl" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="8"/></filter></defs>';
+      for(var y = 30; y < H; y += 170){ for(var x = W * .2; x < W; x += W * .3){ o += '<g class="hum"><rect x="' + (x - 60) + '" y="' + (y - 34) + '" width="120" height="8" rx="3" fill="#fbf8e4" filter="url(#pbgl)" opacity=".5"/><rect x="' + (x - 55) + '" y="' + (y - 32) + '" width="110" height="4" rx="2" fill="#fbf8e4" opacity=".8"/></g>'; } }
+      return o + '<g transform="translate(' + (W - 96) + ' ' + (H - 40) + ')"><rect width="70" height="26" rx="3" fill="#0f5b38" stroke="#39d98a" stroke-width="2"/><text x="35" y="18" text-anchor="middle" style="font:700 13px \'Space Mono\',monospace;fill:#c9f7d8;letter-spacing:.2em">EXIT</text></g>';
+    },
+    marker: '<g class="bob"><path d="M8 -4L40 -18V14Z" fill="#fbf8e4" opacity=".18"/><rect x="-14" y="-7" width="22" height="13" rx="3" fill="#323428" stroke="#fbf8e4" stroke-width="2.5"/><rect x="6" y="-9" width="6" height="17" rx="2" fill="#e6d84a" stroke="#fbf8e4" stroke-width="2"/></g>',
+    words: ["Shift logged", "Clocked in", "Room cleared", "All clear", "Lights on", "Bonnie approves"] },
+  HK: { cover: "#ff7a1a", font: "Black+Ops+One&family=Rubik:wght@500;700", fam: "'Black Ops One','Rubik',Archivo,sans-serif", big: true,
+    bg: "radial-gradient(ellipse at 50% 120%,rgba(63,167,214,.22) 0,transparent 55%),linear-gradient(#0b1622,#13222f)",
+    text: "#f2f7fb", acc: "#ff7a1a", accText: "#0b1622", stamp: "#e06010",
+    stages: ["#3fa7d6", "#7ee081", "#ff7a1a", "#ffc145", "#c8b27a", "#f2f7fb"], on: "#0b1622",
+    map: { bg: "#0e1d2b", line: "rgba(207,221,232,.3)", road: "rgba(63,167,214,.2)", roadW: 30, dash: "#cfdde8", dashArr: "2 9", dashW: 2, stop: "#13222f" },
+    deco: function(W, H){
+      var r = rnd(3), o = "";
+      for(var i = 0; i < 5; i++){ var x = (.1 + r() * .8) * W, y = (.15 + r() * .75) * H; o += '<circle class="sonar" cx="' + x.toFixed(0) + '" cy="' + y.toFixed(0) + '" r="70" fill="none" stroke="#7ee081" stroke-width="2" style="transform-origin:' + x.toFixed(0) + 'px ' + y.toFixed(0) + 'px;animation-delay:' + (i * 1.3).toFixed(1) + 's"/>'; }
+      for(var w = 0; w < 14; w++){ var wx = r() * W, wy = r() * H; o += '<path d="M' + wx.toFixed(0) + ' ' + wy.toFixed(0) + 'q8 -5 16 0t16 0" fill="none" stroke="#cfdde8" stroke-opacity=".15" stroke-width="2"/>'; }
+      for(var g = 0; g < 9; g++){ var gx = 6 + g * 7; o += '<path d="M' + gx + ' ' + H + 'Q' + (gx + 4) + ' ' + (H - 40) + ' ' + (gx - 2) + ' ' + (H - 70 - g * 4) + '" fill="none" stroke="#3e7a4a" stroke-width="3"/><path d="M' + (W - gx) + ' ' + H + 'Q' + (W - gx - 4) + ' ' + (H - 40) + ' ' + (W - gx + 2) + ' ' + (H - 60 - g * 5) + '" fill="none" stroke="#3e7a4a" stroke-width="3"/>'; }
+      return o;
+    },
+    marker: '<g class="bob"><path d="M0 -26V-12" stroke="#cfdde8" stroke-width="2"/><path d="M-10 0A10 10 0 0 1 10 0Z" fill="#ff4b3e" stroke="#0b1622" stroke-width="2.5"/><path d="M-10 0A10 10 0 0 0 10 0Z" fill="#f2f7fb" stroke="#0b1622" stroke-width="2.5"/><ellipse cy="12" rx="16" ry="3" fill="none" stroke="#cfdde8" stroke-opacity=".4" stroke-width="2"/></g>',
+    words: ["Catch logged", "Objective secured", "Mission complete", "Reeled in", "Squad approves", "Bonnie approves"] },
+  JT: { cover: "#1f8a3c", font: "Oswald:wght@500;600;700", fam: "'Oswald','Arial Narrow',Archivo,sans-serif", big: true,
+    bg: "radial-gradient(circle at 0 0,rgba(255,255,255,.12) 0,transparent 30%),radial-gradient(circle at 100% 0,rgba(255,255,255,.12) 0,transparent 30%),repeating-linear-gradient(90deg,#123020 0 80px,#0f2a1b 80px 160px)",
+    text: "#f6fbf7", acc: "#ffc72c", accText: "#0c2416", stamp: "#1f8a3c",
+    stages: ["#ffc72c", "#7ee08a", "#ffffff", "#7fd3ff", "#ffb35c", "#cfe6d6"], on: "#0c2416",
+    map: { bg: "#123020", line: "rgba(255,255,255,.4)", road: "rgba(255,255,255,.07)", roadW: 22, dash: "#ffffff", dashArr: "10 10", dashW: 4, stop: "#0c2416" },
+    deco: function(W, H){
+      var o = "";
+      for(var x = 0; x < W; x += 140) o += '<rect x="' + x + '" width="70" height="' + H + '" fill="#163a26"/>';
+      o += '<g fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="3"><rect x="16" y="16" width="' + (W - 32) + '" height="' + (H - 32) + '"/><path d="M' + (W / 2) + ' 16V' + (H - 16) + '"/><circle cx="' + (W / 2) + '" cy="' + (H / 2) + '" r="60"/>' +
+        '<rect x="16" y="' + (H / 2 - 90) + '" width="90" height="180"/><rect x="' + (W - 106) + '" y="' + (H / 2 - 90) + '" width="90" height="180"/></g>';
+      return o;
+    },
+    marker: '<g class="bob spin"><circle r="12" fill="#fff" stroke="#0c2416" stroke-width="2.5"/><path d="M0 -5l4.8 3.5-1.8 5.6h-6l-1.8-5.6z" fill="#0c2416"/><path d="M0 -5V-12M4.8 -1.5l6.5 -2M3 4.1l4 5.6M-3 4.1l-4 5.6M-4.8 -1.5l-6.5 -2" stroke="#0c2416" stroke-width="1.6"/></g>',
+    words: ["GOAL!", "Back of the net!", "What a strike", "Top bins", "Clean sheet", "Man of the match", "Bonnie approves"] }
+};
+var TH = (!STAFF && WHO && THEMES[WHO]) || null;
+function applyTheme(){
+  if(!TH) return;
+  STAGES.forEach(function(st, i){ st.pc = st.c; st.c = TH.stages[i]; });
+  STAMPS = TH.words;
+  try{
+    var ln = document.createElement("link"); ln.rel = "stylesheet";
+    ln.href = "https://fonts.googleapis.com/css2?family=" + TH.font + "&display=swap";
+    document.head.appendChild(ln);
+  }catch(e){}
+  var css = el("style");
+  css.textContent =
+    "body.pb-th{background:" + TH.bg + ";background-attachment:fixed;color:" + TH.text + "}" +
+    "body.pb-th .grain{opacity:.5}" +
+    "body.pb-th{--pbfont:" + TH.fam + ";--pbacc:" + TH.acc + ";--pbacctext:" + TH.accText + ";--pbon:" + TH.on + ";--pbtext:" + TH.text + ";--pbmapbg:" + TH.map.bg + ";--pbmapline:" + TH.map.line + "}" +
+    "body.pb-th .pb-top h1,body.pb-th .pb-head h1,body.pb-th .pb-count,body.pb-th .pb-small,body.pb-th .pb-top .edit,body.pb-th .pb-week>b,body.pb-th .pb-keys span{color:" + TH.text + "}" +
+    (TH.big ? "body.pb-th .pb-top h1{font-size:clamp(2.6rem,7vw,4.6rem);letter-spacing:.02em;font-weight:400}body.pb-th .pb-head h1{font-size:clamp(2rem,5.6vw,3.2rem);letter-spacing:.02em;font-weight:400}body.pb-th .pb-card h2{letter-spacing:.02em;font-weight:400;font-size:clamp(1.6rem,4vw,2.3rem)}" : "") +
+    "body.pb-th .pb-kick{background:" + TH.acc + ";color:" + TH.accText + "}" +
+    "body.pb-th .pb-btn.quiet{color:" + TH.text + ";border-color:" + TH.text + "}" +
+    "body.pb-th .pb-card .pb-btn.quiet,body.pb-th .pb-stampcard .pb-btn.quiet{color:var(--pbink);border-color:var(--pbink)}" +
+    "body.pb-th .pb-dots button{border-color:" + TH.text + ";background:transparent}body.pb-th .pb-dots button.has{background:" + TH.text + ";opacity:.5}body.pb-th .pb-dots button.on{background:var(--sc);opacity:1;border-color:var(--sc)}" +
+    "body.pb-th .pb-saved{color:" + TH.stages[1] + "}" +
+    "body.pb-th .pb-bar{background:rgba(255,255,255,.12);border-color:" + TH.text + "}" +
+    "body.pb-th .pb-bar i{background:" + TH.acc + "}" +
+    "body.pb-th .pb-map{border-color:" + TH.map.line + ";box-shadow:0 10px 40px rgba(0,0,0,.45)}" +
+    "body.pb-th .pb-map .lbl{fill:" + TH.text + "}" +
+    "body.pb-th .pb-map .sign{fill:" + TH.on + "}" +
+    "body.pb-th .pb-map .opt{fill:" + TH.text + "}" +
+    "body.pb-th .pb-head .tt span{color:var(--sc)}" +
+    "body.pb-th .pb-pages button{background:rgba(255,255,255,.92)}" +
+    "body.pb-th .pb-news{background:rgba(255,255,255,.94);color:#0a2f38}" +
+    "body.pb-th .pb-penline{color:#fff}";
+  document.head.appendChild(css);
+  document.body.classList.add("pb-th");
+}
+
 /* ==========================================================
    Storage: the student's device, or (staff) a copy loaded from
    the sheet that writes straight back to it
@@ -686,11 +817,12 @@ var CSS =
 ":root{--pbink:#0a2f38;--pbpaper:#fffdf8;--pbteal:#007291;--pborange:#ef7724;--pbjay:#00708f}" +
 ".pb{max-width:1180px;margin:0 auto;padding:18px 16px 110px;color:var(--pbink);font-family:'Atkinson Hyperlegible',Verdana,sans-serif;position:relative;z-index:1}" +
 ".pb button{font:inherit;color:inherit;cursor:pointer}" +
-".pb h1,.pb h2,.pb h3{font-family:Archivo,'Arial Black',sans-serif;margin:0;line-height:1.08}" +
+".pb h1,.pb h2,.pb h3{font-family:var(--pbfont,Archivo),'Arial Black',sans-serif;margin:0;line-height:1.08}" +
 ".pb-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:14px 12px 15px 11px;border:3px solid var(--pbink);background:var(--pbpaper);font-weight:700;box-shadow:3px 4px 0 var(--pbink);transition:transform .12s,box-shadow .12s;text-decoration:none;color:var(--pbink)}" +
 ".pb-btn:hover{transform:translate(-1px,-2px);box-shadow:4px 6px 0 var(--pbink)}" +
 ".pb-btn:active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--pbink)}" +
-".pb-btn.main{background:var(--pborange);color:#fff;font-family:Archivo,sans-serif;font-size:1.15rem;padding:14px 22px}" +
+".pb-btn.main{background:var(--pbacc,var(--pborange));color:var(--pbacctext,#fff);font-family:var(--pbfont,Archivo),sans-serif;font-size:1.15rem;padding:14px 22px}" +
+".pb-btn.icon{padding:10px 12px}" +
 ".pb-btn.teal{background:var(--pbteal);color:#fff}" +
 ".pb-btn.quiet{border-width:2px;box-shadow:none;background:transparent}" +
 ".pb-btn.small{padding:7px 12px;font-size:.92rem;border-width:2px;box-shadow:2px 3px 0 var(--pbink)}" +
@@ -721,7 +853,7 @@ var CSS =
 ".pb-news b{font-family:Archivo,sans-serif}" +
 ".pb-news .pb-btn{padding:6px 12px;font-size:.9rem}" +
 /* the map */
-".pb-map{position:relative;margin:10px 0 0;border-radius:26px 20px 24px 18px;background:#fbf5ea;border:3px solid var(--pbink);box-shadow:5px 6px 0 rgba(10,47,56,.16);overflow:hidden}" +
+".pb-map{position:relative;margin:10px 0 0;border-radius:26px 20px 24px 18px;background:var(--pbmapbg,#fbf5ea);border:3px solid var(--pbink);box-shadow:5px 6px 0 rgba(10,47,56,.16);overflow:hidden}" +
 ".pb-map svg{display:block;width:100%;height:auto}" +
 ".pb-map .stop{cursor:pointer;outline:none}" +
 ".pb-map .stop .face{transition:transform .2s}" +
@@ -739,6 +871,21 @@ var CSS =
 ".pb-map .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:pbdraw 1.6s ease-out forwards}" +
 ".pb-map .pop{transform-box:fill-box;transform-origin:center;animation:pbpop .5s cubic-bezier(.3,1.6,.5,1) both}" +
 "@keyframes pbbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}" +
+/* the HQ worlds on the map: all slow, nothing flashes */
+".pb-map .tw{animation:pbtw 5s ease-in-out infinite}" +
+"@keyframes pbtw{0%,100%{opacity:.2}50%{opacity:1}}" +
+".pb-map .comet{animation:pbcomet 14s linear infinite;opacity:0}" +
+"@keyframes pbcomet{0%{transform:translate(-80px,40px);opacity:0}4%{opacity:.9}12%{transform:translate(110%,180px);opacity:0}100%{transform:translate(110%,180px);opacity:0}}" +
+".pb-map .spot{animation:pbspot 9s ease-in-out infinite alternate}.pb-map .spot.s1{animation-delay:-4.5s}" +
+"@keyframes pbspot{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}" +
+".pb-map .chase{animation:pbchase 2.4s linear infinite}" +
+"@keyframes pbchase{to{stroke-dashoffset:-40}}" +
+".pb-map .hum{animation:pbhum 3.5s ease-in-out infinite}" +
+"@keyframes pbhum{0%,100%{opacity:.85}50%{opacity:1}}" +
+".pb-map .sonar{transform-box:view-box;animation:pbsonar 6.5s ease-out infinite;opacity:0}" +
+"@keyframes pbsonar{0%{transform:scale(.1);opacity:.6}100%{transform:scale(1.3);opacity:0}}" +
+".pb-map .spin{animation:pbbob 2.4s ease-in-out infinite,pbspin 6s linear infinite}" +
+"@keyframes pbspin{to{rotate:360deg}}" +
 "@keyframes pbdraw{to{stroke-dashoffset:0}}" +
 "@keyframes pbpop{from{transform:scale(0)}to{transform:scale(1)}}" +
 "@keyframes pbpulse{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.5);opacity:0}}" +
@@ -748,7 +895,7 @@ var CSS =
 /* ---- a step ---- */
 ".pb-step{--sc:#007291}" +
 ".pb-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 14px}" +
-".pb-head .pb-sticon{width:62px;height:62px;border-radius:20px 16px 22px 14px;background:var(--sc);color:#fff;display:flex;align-items:center;justify-content:center;border:3px solid var(--pbink);box-shadow:3px 4px 0 var(--pbink);transform:rotate(-4deg);flex:none}" +
+".pb-head .pb-sticon{width:62px;height:62px;border-radius:20px 16px 22px 14px;background:var(--sc);color:var(--pbon,#fff);display:flex;align-items:center;justify-content:center;border:3px solid var(--pbink);box-shadow:3px 4px 0 var(--pbink);transform:rotate(-4deg);flex:none}" +
 ".pb-head .pb-sticon .pb-ic{width:36px;height:36px}" +
 ".pb-head .tt{flex:1;min-width:200px}" +
 ".pb-head .tt span{display:block;font-family:Archivo,sans-serif;font-weight:800;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sc);margin-bottom:4px}" +
@@ -757,7 +904,7 @@ var CSS =
 ".pb-saved.on{opacity:1}" +
 ".pb-pages{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:-4px 0 12px}" +
 ".pb-pages button{border:2px solid var(--pbink);background:#fff;border-radius:10px;padding:5px 11px;font-weight:700}" +
-".pb-pages button[aria-pressed=true]{background:var(--sc);color:#fff}" +
+".pb-pages button[aria-pressed=true]{background:var(--sc);color:var(--pbon,#fff)}" +
 ".pb-sticky{position:relative;max-width:520px;margin:4px 0 16px;padding:14px 16px 14px 18px;background:#fff1a8;border:2px solid #d8c25a;box-shadow:3px 5px 0 rgba(10,47,56,.18);transform:rotate(-1.2deg);font-size:1.05rem;line-height:1.45;font-family:'Comic Sans MS','Chalkboard SE','Atkinson Hyperlegible',sans-serif}" +
 ".pb-sticky b{display:block;font-family:Archivo,sans-serif;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;color:var(--pbjay)}" +
 ".pb-sticky::before{content:'';position:absolute;top:-10px;left:40%;width:70px;height:20px;background:rgba(255,255,255,.6);transform:rotate(-4deg)}" +
@@ -817,7 +964,7 @@ var CSS =
 ".pb-picks{display:flex;flex-direction:column;gap:8px;max-width:560px}" +
 ".pb-picks button{text-align:left;border:3px solid var(--pbink);background:#fff;border-radius:16px;padding:12px 16px;font-weight:700;font-size:1.08rem;transition:transform .15s}" +
 ".pb-picks button:hover{transform:translateX(4px)}" +
-".pb-picks button[aria-pressed=true]{background:var(--sc);color:#fff;box-shadow:3px 4px 0 var(--pbink)}" +
+".pb-picks button[aria-pressed=true]{background:var(--sc);color:var(--pbon,#fff);box-shadow:3px 4px 0 var(--pbink)}" +
 ".pb-days{display:flex;gap:10px;flex-wrap:wrap}" +
 ".pb-days button{width:72px;height:72px;border-radius:50%;border:3px solid var(--pbink);background:#fff;font-family:Archivo,sans-serif;font-weight:800;font-size:1.05rem;transition:transform .2s}" +
 ".pb-days button[aria-pressed=true]{background:var(--pborange);color:#fff;transform:rotate(-8deg) scale(1.06)}" +
@@ -857,6 +1004,7 @@ var CSS =
 ".pb-pol .ph svg{width:46px;height:46px;fill:none;stroke:var(--pbink);stroke-width:2;opacity:.6}" +
 ".pb-pol .cap{display:block;margin-top:8px;font-family:'Comic Sans MS','Chalkboard SE',sans-serif;font-size:.95rem;text-align:center}" +
 ".pb-pol .pb-x{position:absolute;top:-12px;right:-12px}" +
+".pb [hidden],.pb-help[hidden]{display:none !important}" +
 ".pb-linkadd{display:grid;grid-template-columns:1fr 1.3fr auto;gap:8px}" +
 "@media (max-width:640px){.pb-linkadd{grid-template-columns:1fr}}" +
 ".pb-log{list-style:none;padding:0;margin:0 0 14px;border-left:4px solid var(--sc);margin-left:8px}" +
@@ -927,6 +1075,11 @@ var CSS =
 ".pb-help .tiles button[aria-pressed=true]{background:var(--pbink);color:#fff}" +
 ".pb-help .tiles svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}" +
 ".pb-help .hc{margin-top:12px}" +
+".pb-help .hint0{margin:0 0 10px;font-weight:700}" +
+".pb-linktoggle{margin-top:10px;background:none;border:0;padding:4px 0;font-weight:700;text-decoration:underline;color:var(--pbjay)}" +
+".pb-camrow .pb-btn{font-size:1.1rem;padding:13px 20px}" +
+".pb-camrow .pb-btn svg{width:26px;height:26px}" +
+".pb-pol input.cap{width:100%;box-sizing:border-box;border:0;border-bottom:2px dashed #ccc;background:transparent;text-align:center;font-family:'Comic Sans MS','Chalkboard SE',sans-serif;font-size:.95rem;margin-top:8px;padding:2px}" +
 ".pb-help .hc:empty{display:none}" +
 ".pb-help .hq{font-family:Archivo,sans-serif;font-weight:700;font-size:1.15rem;margin:0 0 4px}" +
 ".pb-help .ok{font-weight:700;color:#1e7a4a;margin:10px 0 0}" +
@@ -1057,6 +1210,8 @@ var BULB = '<svg viewBox="0 0 24 24"><path d="' + I.brain + '"/></svg>';
 var MIC = '<svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>';
 var CAM = '<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 var HICON = {
+  st: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01"/></svg>',
+  say: '<svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/></svg>',
   ask: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/></svg>',
   eg: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="5" ry="4"/><circle cx="6" cy="9.5" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="18" cy="9.5" r="2"/></svg>',
   look: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>',
@@ -1106,15 +1261,12 @@ function fText(card, ctx, long){
     if(long) growTA(inp);
     try{ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }catch(e){}
   }
-  box._insert = ins;
-  var mic = micFor(function(t){
+  box._insert = ins; box._starter = ins;
+  box._say = function(t){
     var cur = inp.value;
     inp.value = cur + (cur && !/\s$/.test(cur) ? " " : "") + t;
     setF(ctx.step, ctx.pg, card.id, inp.value); if(long) growTA(inp);
-  });
-  if(mic) box.appendChild(mic);
-  var ch = starters(card, ins);
-  if(ch) box.appendChild(ch);
+  };
   return box;
 }
 function fDate(card, ctx){
@@ -1232,11 +1384,9 @@ function fList(card, ctx, kind){
   inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); go.click(); } });
   box.appendChild(add);
   box._insert = function(t){ if(/\s$/.test(t)){ inp.value = t; try{ inp.focus(); }catch(e){} } else addOne(t); };
-  var micL = micFor(function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; try{ inp.focus(); }catch(e){} });
-  if(micL) box.appendChild(micL);
-  var ch = starters(card, function(s, b){ addOne(s); if(b){ b.style.opacity = ".45"; } });
-  if(ch) box.appendChild(ch);
-  function full(){ var f = card.max && getC(ctx.step, ctx.pg, card.id).length >= card.max; add.style.display = f ? "none" : ""; if(ch) ch.style.display = f ? "none" : ""; }
+  box._starter = function(t){ addOne(t); };
+  box._say = function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; try{ inp.focus(); }catch(e){} };
+  function full(){ var f = card.max && getC(ctx.step, ctx.pg, card.id).length >= card.max; add.style.display = f ? "none" : ""; }
   if(kind === "cues"){
     var pr = el("div", "pb-chips"); var pbx = el("button", "pb-btn", "Practise it"); pbx.type = "button";
     pbx.onclick = function(){ cueRunner(getC(ctx.step, ctx.pg, card.id).map(function(i){ return typeof i.v === "string" ? i.v : ""; }).filter(Boolean)); };
@@ -1274,8 +1424,11 @@ function fLinks(card, ctx){
         pol.style.setProperty("--r", ((n % 2 ? 1 : -1) * (2 + (n * 7) % 4)) + "deg");
         pol.style.setProperty("--pc", ["#cfe9ef", "#ffe1c7", "#e6d9ef", "#d8f0df"][n % 4]);
         var src = photoSrc(v);
-        pol.innerHTML = '<div class="ph">' + (src ? '<img alt="" src="' + src + '">' : PIC) + '</div><span class="cap">' + esc(v.title || (src ? "" : "Untitled")) + jayTag(it.by) + '</span>' +
+        pol.innerHTML = '<div class="ph">' + (src ? '<img alt="" src="' + src + '">' : PIC) + '</div>' + jayTag(it.by) +
           (u ? '<a class="pb-btn small" style="margin-top:8px" href="' + esc(u) + '" target="_blank" rel="noopener">Open</a>' : '');
+        var cap = el("input", "cap"); cap.value = v.title || ""; cap.placeholder = "Add a caption"; cap.maxLength = 80; cap.setAttribute("aria-label", "Caption");
+        cap.oninput = debounce(function(){ var nv = {}; for(var k in v) nv[k] = v[k]; nv.title = cap.value; putC(ctx.step, ctx.pg, card.id, it.id, nv); }, 500);
+        pol.insertBefore(cap, pol.children[1] || null);
         var x = el("button", "pb-x", "&times;"); x.type = "button"; x.setAttribute("aria-label", "Take this one out");
         x.onclick = function(){ if(v.ph) sdel(kPhoto(v.o || "s", v.ph)); putC(ctx.step, ctx.pg, card.id, it.id, null, true); draw(); };
         pol.appendChild(x); list.appendChild(pol);
@@ -1301,12 +1454,15 @@ function fLinks(card, ctx){
     putC(ctx.step, ctx.pg, card.id, uid(), { title: t || (card.polaroid ? "" : "A link"), url: u });
     ins[0].value = ""; ins[1].value = ""; msg.textContent = ""; draw();
   };
-  box.appendChild(add); box.appendChild(msg);
   var cam = photoButton(function(id){
-    putC(ctx.step, ctx.pg, card.id, uid(), { title: ins[0].value.trim(), url: "", ph: id, o: PEN });
-    ins[0].value = ""; draw();
+    putC(ctx.step, ctx.pg, card.id, uid(), { title: "", url: "", ph: id, o: PEN });
+    draw();
   }, msg);
-  if(cam) box.appendChild(cam);
+  if(cam){ cam.classList.add("pb-camrow"); var cb0 = cam.querySelector(".pb-btn"); if(cb0){ cb0.classList.remove("small"); cb0.classList.add("main"); } box.appendChild(cam); }
+  var tog = el("button", "pb-linktoggle", "Add a link instead"); tog.type = "button";
+  add.hidden = !!cam; tog.hidden = !cam;
+  tog.onclick = function(){ add.hidden = !add.hidden; tog.textContent = add.hidden ? "Add a link instead" : "Hide the link box"; if(!add.hidden) ins[1].focus(); };
+  box.appendChild(tog); box.appendChild(add); box.appendChild(msg);
   draw();
   return box;
 }
@@ -1331,9 +1487,8 @@ function fLog(card, ctx){
   inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); addOne(inp.value); inp.value = ""; } });
   box.appendChild(add);
   box._insert = function(t){ inp.value = t; try{ inp.focus(); }catch(e){} };
-  var micG = micFor(function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; });
-  if(micG) box.appendChild(micG);
-  var ch = starters(card, function(s){ inp.value = s + " "; inp.focus(); }); if(ch) box.appendChild(ch);
+  box._starter = function(t){ inp.value = t + " "; try{ inp.focus(); }catch(e){} };
+  box._say = function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; };
   draw();
   return box;
 }
@@ -1346,7 +1501,7 @@ function fDq(card, ctx){
   var box = el("div");
   box.appendChild(el("p", "pb-dq", esc(dq())));
   var t = fText(card, ctx, true);
-  box.appendChild(t); box._insert = t._insert;
+  box.appendChild(t); box._insert = t._insert; box._starter = t._starter; box._say = t._say;
   return box;
 }
 
@@ -1421,9 +1576,8 @@ function fWeb(card, ctx){
   bulb.onclick = function(){ inp.focus(); bulbTaps++; if(bulbTaps === 7){ bulbTaps = 0; burst(); } };
   box.appendChild(add);
   box._insert = function(t){ if(/\s$/.test(t)){ inp.value = t; try{ inp.focus(); }catch(e){} } else addOne(t); };
-  var micW = micFor(function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; });
-  if(micW) box.appendChild(micW);
-  var ch = starters(card, function(s){ inp.value = s + " "; inp.focus(); }); if(ch) box.appendChild(ch);
+  box._starter = function(t){ inp.value = t + " "; try{ inp.focus(); }catch(e){} };
+  box._say = function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; };
   setTimeout(function(){ draw(); }, 0);
   var rs = debounce(function(){ if(web.isConnected) draw(); }, 200);
   window.addEventListener("resize", rs);
@@ -1456,8 +1610,8 @@ function fSketch(card, ctx){
   var g = getDraw(ctx.step, ctx.pg, card.id), strokes = decodeSk(g.v), ink = 0, w = 1, rubber = false, gridKey = card.id + "_grid";
   var gridOn = card.grid ? getF(ctx.step, ctx.pg, gridKey).v !== false : false;
   var tools = el("div", "pb-tools");
-  tools.innerHTML = INKS.map(function(c, i){ return '<button type="button" class="ink" data-ink="' + i + '" style="background:' + c + '" aria-label="Colour ' + (i + 1) + '" aria-pressed="' + (i === 0) + '"></button>'; }).join("") +
-    '<span class="sep"></span>' + ["Thin", "Medium", "Thick"].map(function(n, i){ return '<button type="button" class="tb" data-w="' + i + '" aria-pressed="' + (i === 1) + '">' + n + '</button>'; }).join("") +
+  tools.innerHTML = [0, 1, 2, 4].map(function(i){ return '<button type="button" class="ink" data-ink="' + i + '" style="background:' + INKS[i] + '" aria-label="Colour ' + (i + 1) + '" aria-pressed="' + (i === 0) + '"></button>'; }).join("") +
+    '<span class="sep"></span>' + [["Thin", 0], ["Thick", 2]].map(function(n){ return '<button type="button" class="tb" data-w="' + n[1] + '" aria-pressed="false">' + n[0] + '</button>'; }).join("") +
     '<button type="button" class="tb" data-a="rub" aria-pressed="false">Rubber</button><span class="sep"></span>' +
     '<button type="button" class="tb" data-a="undo">Undo</button><button type="button" class="tb" data-a="clear">Clear</button>' +
     (card.grid ? '<button type="button" class="tb" data-a="grid" aria-pressed="' + gridOn + '">Grid</button>' : '');
@@ -1531,12 +1685,16 @@ function fSketch(card, ctx){
     };
     drawPh(); box.appendChild(phBox);
     var lk = el("div", "pb-mini"), lid = card.id + "_link", lg = getF(ctx.step, ctx.pg, lid);
-    lk.innerHTML = '<label>Or a link to a photo, video or file <small style="opacity:.7">(optional)</small></label>';
+    lk.innerHTML = '<label>A link to a photo, video or file</label>';
     var li = el("input", "pb-in" + (lg.by === "j" ? " jay" : "")); li.type = "url"; li.placeholder = "https://drive.google.com/..."; li.value = lg.v || ""; li.setAttribute("aria-label", "Link");
     var open = el("p", "hint");
     function showOpen(){ var u = safeHref(li.value); open.innerHTML = u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">Open the link</a>' : ""; }
     li.addEventListener("input", debounce(function(){ setF(ctx.step, ctx.pg, lid, li.value.trim()); showOpen(); }, 500));
-    lk.appendChild(li); lk.appendChild(open); box.appendChild(lk); showOpen();
+    lk.appendChild(li); lk.appendChild(open);
+    var tg = el("button", "pb-linktoggle", "Add a link instead"); tg.type = "button";
+    lk.hidden = !li.value; tg.hidden = !!li.value;
+    tg.onclick = function(){ lk.hidden = false; tg.hidden = true; li.focus(); };
+    box.appendChild(tg); box.appendChild(lk); showOpen();
   }
   return box;
 }
@@ -1544,14 +1702,14 @@ function fSketch(card, ctx){
 /* the cover */
 function coverHtml(look, title){
   look = look || {};
-  var c = COVERS[look.c] || COVERS[0], st = Array.isArray(look.s) ? look.s.slice(0, 3) : [];
+  var c = COVERS[look.c] || (TH && TH.cover) || COVERS[0], st = Array.isArray(look.s) ? look.s.slice(0, 3) : [];
   var spots = [["auto", "10px", "62px", "auto", "-8deg"], ["44%", "-4px", "auto", "auto", "14deg"], ["auto", "auto", "60px", "68px", "8deg"]];
   return '<div class="bk" style="--cv:' + c + '"><span class="tape"></span><b>' + esc(title || "My project") + '</b><small>Enterprise Learning Project</small>' +
     st.map(function(n, i){ var s = spots[i]; return '<span class="stk" style="top:' + s[0] + ';right:' + s[1] + ';bottom:' + s[2] + ';left:' + s[3] + ';transform:rotate(' + s[4] + ')">' + stickerSvg(n) + '</span>'; }).join("") +
     '<span class="ini">' + esc(WHO || "") + '</span></div>';
 }
 function fCover(card, ctx){
-  var g = getF(ctx.step, ctx.pg, card.id), look = g.v && typeof g.v === "object" ? { c: g.v.c, s: (g.v.s || []).slice() } : { c: 0, s: [] };
+  var g = getF(ctx.step, ctx.pg, card.id), look = g.v && typeof g.v === "object" ? { c: g.v.c, s: (g.v.s || []).slice() } : { c: TH ? -1 : 0, s: [] };
   var wrap = el("div", "pb-covered");
   var prev = el("div", "pb-cover"); prev.style.width = "200px";
   var right = el("div");
@@ -1672,6 +1830,8 @@ function helpEl(card, ctx, body){
     return parts.length ? { s: st, c: c, t: parts.join("\n") } : null;
   }).filter(Boolean);
   var tiles = [];
+  if(card.st && card.st.length && body._starter) tiles.push(["st", "Tap a starter"]);
+  if(SRC && body._say) tiles.push(["say", "Say it"]);
   if(H.ask && body._insert) tiles.push(["ask", "A smaller question"]);
   if(H.eg) tiles.push(["eg", "See an example"]);
   if(looks.length) tiles.push(["look", "Look back at my book"]);
@@ -1679,9 +1839,9 @@ function helpEl(card, ctx, body){
   if(!S.guest) tiles.push(["jay", "Ask Jay or Holly"]);
   if(!tiles.length) return null;
   var wrap = el("div", "pb-helpwrap");
-  var btn = el("button", "pb-helpbtn", BULB + "<span>Not sure? Help me think</span>"); btn.type = "button"; btn.setAttribute("aria-expanded", "false");
+  var btn = el("button", "pb-helpbtn", HICON.jay.replace("<svg", '<svg aria-hidden="true"') + "<span>Need a hand?</span>"); btn.type = "button"; btn.setAttribute("aria-expanded", "false");
   var box = el("div", "pb-help"); box.hidden = true;
-  box.innerHTML = '<div class="tiles" role="group" aria-label="Ways to help">' + tiles.map(function(t){ return '<button type="button" data-h="' + t[0] + '" aria-pressed="false">' + HICON[t[0]] + '<span>' + t[1] + '</span></button>'; }).join("") + '</div><div class="hc" aria-live="polite"></div>';
+  box.innerHTML = (card.hint ? '<p class="hint0">' + esc(card.hint) + '</p>' : '') + '<div class="tiles" role="group" aria-label="Ways to help">' + tiles.map(function(t){ return '<button type="button" data-h="' + t[0] + '" aria-pressed="false">' + HICON[t[0]] + '<span>' + t[1] + '</span></button>'; }).join("") + '</div><div class="hc" aria-live="polite"></div>';
   wrap.appendChild(btn); wrap.appendChild(box);
   var hc = box.querySelector(".hc");
   function say(t){ if(WHO === "LC" && window.B5Speak && t) B5Speak.say(t); }
@@ -1691,7 +1851,17 @@ function helpEl(card, ctx, body){
   };
   function show(kind){
     [].forEach.call(box.querySelectorAll("[data-h]"), function(x){ x.setAttribute("aria-pressed", x.dataset.h === kind ? "true" : "false"); });
-    if(kind === "ask"){
+    if(kind === "st"){
+      hc.innerHTML = '<div class="pb-chips">' + card.st.map(function(t, i){ return '<button type="button" data-s="' + i + '">' + esc(t) + '</button>'; }).join("") + '</div><p class="ok" hidden></p>';
+      hc.querySelector(".pb-chips").onclick = function(e){
+        var b = e.target.closest("[data-s]"); if(!b) return;
+        body._starter(card.st[+b.dataset.s]); b.style.opacity = ".45";
+        var ok = hc.querySelector(".ok"); ok.hidden = false; ok.textContent = "Popped it in. Change it however you like.";
+      };
+    } else if(kind === "say"){
+      hc.innerHTML = ""; var mw = micFor(function(t){ body._say(t); }); if(mw) hc.appendChild(mw);
+      var mb = hc.querySelector(".pb-mic"); if(mb) mb.click();
+    } else if(kind === "ask"){
       hc.innerHTML = '<p class="hq">' + esc(H.ask.q) + '</p><div class="pb-chips">' + H.ask.o.map(function(o, i){ return '<button type="button" data-o="' + i + '">' + esc(o[0]) + '</button>'; }).join("") + '</div><p class="ok" hidden></p>';
       hc.querySelector(".pb-chips").onclick = function(e){
         var b = e.target.closest("[data-o]"); if(!b) return;
@@ -1766,8 +1936,8 @@ function speakBtn(card){
 }
 function cardEl(card, ctx, all){
   var c = el("div", "pb-card");
-  c.innerHTML = (card.label !== card.q || (all && STAFF) ? '<span class="lab">' + esc(card.label) + '</span>' : '') + '<div class="cq"><h2>' + esc(all && STAFF ? card.label : card.q) + '</h2>' + speakBtn(card) + '</div>' +
-    (card.hint && !(all && STAFF) ? '<p class="hint">' + esc(card.hint) + '</p>' : (all && STAFF && card.q !== card.label ? '<p class="hint">Student sees: ' + esc(card.q) + '</p>' : ""));
+  c.innerHTML = (STAFF && card.label !== card.q ? '<span class="lab">' + esc(card.label) + '</span>' : '') + '<div class="cq"><h2>' + esc(STAFF ? card.label : card.q) + '</h2>' + speakBtn(card) + '</div>' +
+    (STAFF && card.q !== card.label ? '<p class="hint">Student sees: ' + esc(card.q) + '</p>' : "");
   var say = c.querySelector(".pb-say");
   if(say) say.onclick = function(){ if(window.B5Speak) B5Speak.say(card.q + ". " + (card.hint || "")); };
   var b = el("div", "body"), inner = renderBody(card, ctx); b.appendChild(inner); c.appendChild(b);
@@ -1882,7 +2052,11 @@ function drawRoute(nx){
   var tw = thisWeek(), wk = tw ? tw.steps : [];
   var anim = !mapAnimated && !REDUCED; mapAnimated = true;
   var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="group" aria-label="The map of your project book">';
-  svg += '<path class="road" d="' + full + '"/><path class="dash' + (anim ? ' draw' : '') + '" style="--len:4000" d="' + full + '"/>';
+  var M = TH ? TH.map : null;
+  if(TH) svg += '<g aria-hidden="true">' + TH.deco(W, H) + '</g>';
+  svg += M ? '<path class="road" style="stroke:' + M.road + ';stroke-width:' + M.roadW + '" d="' + full + '"/>' +
+      '<path class="dash' + (M.chase ? ' chase' : '') + '" style="stroke:' + M.dash + ';stroke-width:' + M.dashW + ';stroke-dasharray:' + M.dashArr + '" d="' + full + '"/>'
+    : '<path class="road" d="' + full + '"/><path class="dash' + (anim ? ' draw' : '') + '" style="--len:4000" d="' + full + '"/>';
   /* the trail: coloured where both ends are stamped */
   pts.forEach(function(p, i){
     if(!i) return;
@@ -1909,9 +2083,10 @@ function drawRoute(nx){
       '<g class="face' + (anim ? ' pop' : '') + '" style="animation-delay:' + (.3 + i * .05) + 's">' +
       (cur ? '<circle class="pulse" r="30"/>' : '') +
       (wk.indexOf(s.id) >= 0 && !st.done ? '<circle class="wk" r="36"/>' : '') +
-      '<circle class="ring" r="28" fill="' + (st.done ? c : "#fffdf8") + '" stroke="' + (st.done ? "#0a2f38" : c) + '" stroke-width="' + (st.done ? 3 : 5) + '"' + (s.optional && !st.done ? ' stroke-dasharray="6 5"' : '') + '/>' +
+      (TH && st.done ? '<circle r="40" fill="' + c + '" opacity=".18"/>' : '') +
+      '<circle class="ring" r="28" fill="' + (st.done ? c : (M ? M.stop : "#fffdf8")) + '" stroke="' + (st.done ? (TH ? TH.on : "#0a2f38") : c) + '" stroke-width="' + (st.done ? 3 : 5) + '"' + (s.optional && !st.done ? ' stroke-dasharray="6 5"' : '') + '/>' +
       (st.started && !st.done ? '<path d="M0 -28A28 28 0 0 1 28 0" fill="none" stroke="' + c + '" stroke-width="9"/>' : '') +
-      '<g transform="translate(-13 -13) scale(1.08)" fill="none" stroke="' + (st.done ? "#fff" : "#0a2f38") + '" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="' + I[s.id] + '"/></g>' +
+      '<g transform="translate(-13 -13) scale(1.08)" fill="none" stroke="' + (TH ? (st.done ? TH.on : TH.text) : (st.done ? "#fff" : "#0a2f38")) + '" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="' + I[s.id] + '"/></g>' +
       (st.done ? '<g transform="translate(20 -20) rotate(-12)"><circle r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><path d="M-5 0l3.5 3.5L5.5-4" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>' : '') +
       (jayNew(s.id) ? '<g transform="translate(-22 -20)"><circle r="11" fill="#00708f" stroke="#0a2f38" stroke-width="2"/><path d="M-5 5l1-3 6-6 2 2-6 6z" fill="#fff"/></g>' : '') +
       (st.pages > 1 ? '<g transform="translate(22 20)"><circle r="10" fill="#0a2f38"/><text x="0" y="4" text-anchor="middle" style="font:800 11px Archivo,sans-serif;fill:#fff">' + st.pages + '</text></g>' : '') +
@@ -1923,7 +2098,7 @@ function drawRoute(nx){
   /* the time pod sits by the next stop (or the last one) */
   var at = nx ? pts.filter(function(p){ return p.s.id === nx.id; })[0] : pts[pts.length - 1];
   var from = lastPod || at;
-  svg += '<g class="pod" id="pbPod" style="cursor:pointer" transform="translate(' + (from.x + 34) + ' ' + (from.y - 34) + ')">' + POD + '</g>';
+  svg += '<g class="pod" id="pbPod" style="cursor:pointer" transform="translate(' + (from.x + 34) + ' ' + (from.y - 34) + ')">' + (TH ? TH.marker : POD) + '</g>';
   svg += '</svg>';
   box.innerHTML = svg;
   if(from !== at) setTimeout(function(){ var pod = $("pbPod"); if(pod) pod.setAttribute("transform", "translate(" + (at.x + 34) + " " + (at.y - 34) + ")"); }, 650);
@@ -1970,7 +2145,7 @@ function drawStep(dir){
     '<div class="pb-step" style="--sc:' + st.c + '">' +
     '<div class="pb-head"><button type="button" class="pb-btn small" id="pbBack">' + BACK + 'Map</button>' +
     '<span class="pb-sticon">' + icon(s.id) + '</span><div class="tt"><span>' + (s.stage >= 0 ? esc(st.half) + " &middot; " + esc(st.n) : "Your book") + (s.optional ? " &middot; optional" : "") + '</span><h1>' + esc(s.n) + '</h1></div>' +
-    '<span class="pb-saved" aria-live="polite"></span></div>';
+    '<span class="pb-saved" aria-live="polite"></span>' + (s.cards.length > 1 ? '<button type="button" class="pb-btn small quiet" id="pbAllBtn">' + (view.all ? "One at a time" : "See the whole page") + '</button>' : '') + '</div>';
   if(pages > 1) h += '<div class="pb-pages" role="group" aria-label="Pages">' + Array.apply(null, Array(pages)).map(function(_, i){ return '<button type="button" data-pg="' + (i + 1) + '" aria-pressed="' + (view.pg === i + 1) + '">Page ' + (i + 1) + (getDone(s.id, i + 1) ? " &#10003;" : "") + '</button>'; }).join("") + '</div>';
   if(jb.sticky && jb.sticky.v) h += '<div class="pb-sticky' + (jayNew(s.id) ? " new" : "") + '"><b>A note from Jay</b>' + esc(jb.sticky.v) + '</div>';
   h += '<div class="pb-deck" id="pbDeck"></div>';
@@ -1983,13 +2158,13 @@ function drawStep(dir){
   h += '</div>';
   root.innerHTML = h;
   $("pbBack").onclick = function(){ drawMap(); };
+  if($("pbAllBtn")) $("pbAllBtn").onclick = function(){ view.all = !view.all; if(!view.all) view.idx = 0; drawStep("r"); };
   [].forEach.call(root.querySelectorAll("[data-pg]"), function(b){ b.onclick = function(){ openStep(s.id, +b.dataset.pg); }; });
   var deck = $("pbDeck"), nav = $("pbNav");
   if(view.all){
     deck.className = "pb-deck pb-all";
     s.cards.forEach(function(c){ deck.appendChild(cardEl(c, ctx, true)); });
-    nav.innerHTML = '<span class="pb-dots"></span><button type="button" class="pb-btn quiet" id="pbOne">One at a time</button>' + (s.id === "cover" ? '<button type="button" class="pb-btn main" id="pbDone">Done' + NEXT + '</button>' : '<button type="button" class="pb-btn main" id="pbToStamp">Stamp it' + NEXT + '</button>');
-    $("pbOne").onclick = function(){ view.all = false; view.idx = 0; drawStep("r"); };
+    nav.innerHTML = '<span class="pb-dots"></span>' + (s.id === "cover" ? '<button type="button" class="pb-btn main" id="pbDone">Done' + NEXT + '</button>' : '<button type="button" class="pb-btn main" id="pbToStamp">Stamp it' + NEXT + '</button>');
     if($("pbDone")) $("pbDone").onclick = function(){ drawMap(); };
     if($("pbToStamp")) $("pbToStamp").onclick = function(){ view.all = false; view.idx = s.cards.length; drawStep("r"); };
     window.scrollTo(0, 0);
@@ -2007,15 +2182,12 @@ function drawStep(dir){
   var dots = '<span class="pb-dots">' + s.cards.map(function(cd, i){ return '<button type="button" data-go="' + i + '" class="' + (i === idx ? "on" : "") + (cardHasWork(cd, ctx) ? " has" : "") + '" aria-label="Card ' + (i + 1) + ': ' + esc(cd.label) + '"></button>'; }).join("") + '</span>';
   var last = s.id === "cover" ? idx === n - 1 : idx === n;
   nav.innerHTML = dots +
-    (idx > 0 ? '<button type="button" class="pb-btn quiet" id="pbPrev">' + BACK + 'Back</button>' : '') +
-    (n > 1 ? '<button type="button" class="pb-btn quiet" id="pbAllBtn">See it all</button>' : '') +
-    (!last ? (idx < n && !cardHasWork(s.cards[idx], ctx) ? '<button type="button" class="pb-btn quiet" id="pbSkip">Skip this one</button>' : '') + '<button type="button" class="pb-btn main" id="pbNext">' + (idx === n - 1 ? "Nearly there" : "Next") + NEXT + '</button>'
+    (idx > 0 ? '<button type="button" class="pb-btn quiet icon" id="pbPrev" aria-label="Back a card">' + BACK + '</button>' : '') +
+    (!last ? '<button type="button" class="pb-btn main" id="pbNext">Next' + NEXT + '</button>'
            : (s.id === "cover" ? '<button type="button" class="pb-btn main" id="pbDone">Looks good' + NEXT + '</button>' : ''));
   [].forEach.call(nav.querySelectorAll("[data-go]"), function(b){ b.onclick = function(){ var to = +b.dataset.go; var d = to < view.idx ? "l" : "r"; view.idx = to; drawStep(d); }; });
   if($("pbPrev")) $("pbPrev").onclick = function(){ view.idx--; drawStep("l"); };
   if($("pbNext")) $("pbNext").onclick = function(){ view.idx++; drawStep("r"); };
-  if($("pbSkip")) $("pbSkip").onclick = function(){ view.idx++; drawStep("r"); };
-  if($("pbAllBtn")) $("pbAllBtn").onclick = function(){ view.all = true; drawStep("r"); };
   if($("pbDone")) $("pbDone").onclick = function(){ drawMap(); };
   var first = deck.querySelector("input.pb-in, textarea.pb-ta");
   if(first && !("ontouchstart" in window)){ try{ first.focus({ preventScroll: true }); }catch(e){} }
@@ -2038,7 +2210,7 @@ function stampCard(s, done){
       var word = STAMPS[Math.floor(Math.random() * STAMPS.length)];
       if(stampedList().length === ROUTE.length - 1 && !getDone(s.id, view.pg)) word = "Book complete!";
       setDone(s.id, view.pg, true, word);
-      stampFx(word, stageOf(s).c);
+      stampFx(word, TH ? TH.stamp : stageOf(s).c);
       stampNote(s, view.pg);
       if(word === "Book complete!") setTimeout(bonnie, 700);
       setTimeout(function(){ drawMap(); }, 1300);
@@ -2166,7 +2338,7 @@ function printBook(opt){
     for(var p = 1; p <= n; p++){
       if(!opt.blank && opt.onlyWork && !pageHasWork(s.id, p) && !getDone(s.id, p)) continue;
       var ctx = { step: s.id, pg: p }, done = opt.blank ? null : getDone(s.id, p), jb = jayBits(s.id, p), pil = (!opt.blank && jb.pillars && jb.pillars.v) || [];
-      h += '<section class="pp" style="--sc:' + st.c + '"><div class="ph">' + icon(s.id) + '<h2>' + esc(s.n) + (n > 1 ? ' <small>page ' + p + '</small>' : '') + '</h2><small>' + esc(st.n) + '</small>' + (done ? '<span class="stampmark">' + esc(done.w || "Stamped") + '</span>' : '') + '</div>' +
+      h += '<section class="pp" style="--sc:' + (st.pc || st.c) + '"><div class="ph">' + icon(s.id) + '<h2>' + esc(s.n) + (n > 1 ? ' <small>page ' + p + '</small>' : '') + '</h2><small>' + esc(st.n) + '</small>' + (done ? '<span class="stampmark">' + esc(done.w || "Stamped") + '</span>' : '') + '</div>' +
         '<div class="grid">' + s.cards.map(function(c){ return printBox(c, ctx, opt.blank); }).join("") + '</div>' +
         '<div class="pf">' + PILLARS.map(function(pp){ return '<i class="' + (pil.indexOf(pp[0]) >= 0 ? "on" : "") + '" style="background:' + pp[2] + '" title="' + esc(pp[1]) + '"></i>'; }).join("") +
         (opt.staff ? '<div class="sup"><b>Engagement and support</b>' + esc(opt.blank ? "" : supportText(s.id, p)) + '</div>' : '') + '</div></section>';
@@ -2188,14 +2360,14 @@ function pageSize(size, margin){
    page with something on it, and the stamp collection at the back */
 function printBooklet(){
   var out = $("pbPrint"); if(!out){ out = el("div"); out.id = "pbPrint"; document.body.appendChild(out); }
-  var look = getF("cover", 1, "look").v || {}, title = getF("cover", 1, "title").v || "My project", cv = COVERS[look.c] || COVERS[0];
+  var look = getF("cover", 1, "look").v || {}, title = getF("cover", 1, "title").v || "My project", cv = COVERS[look.c] || (TH && TH.cover) || COVERS[0];
   var st = Array.isArray(look.s) ? look.s.slice(0, 3) : [], spots = [["10mm", "10mm", "auto", "auto", "-10deg"], ["auto", "auto", "14mm", "10mm", "12deg"], ["auto", "12mm", "40mm", "auto", "-6deg"]];
   var h = '<section class="bp"><div class="bcov" style="--cv:' + cv + '">' + st.map(function(n, i){ var s = spots[i]; return '<span class="stk" style="top:' + s[0] + ';right:' + s[1] + ';bottom:' + s[2] + ';left:' + s[3] + ';transform:rotate(' + s[4] + ')">' + stickerSvg(n) + '</span>'; }).join("") +
     '<h1>' + esc(title) + '</h1><p>' + esc(dq()) + '</p><p>Enterprise Learning Project &middot; ' + esc(TERM) + '</p><p class="by">by ' + esc(WHO) + '</p></div></section>';
   var ans = getF("answer", 1, "answer"), because = getF("answer", 1, "answer_n").v;
   if(hasVal(ans.v)) h += '<section class="bp"><div class="band" style="--sc:#0a2f38">' + icon("answer") + '<h2>My answer</h2></div><p class="it" style="font-size:12pt">' + esc(dq()) + '</p><p class="quote">' + esc(ans.v) + (because ? '. ' + esc(String(because).charAt(0).toUpperCase() + String(because).slice(1)) : '') + '</p></section>';
   ROUTE.forEach(function(s){
-    var n = pagesOf(s.id), sc = stageOf(s).c;
+    var n = pagesOf(s.id), sc = stageOf(s).pc || stageOf(s).c;
     for(var p = 1; p <= n; p++){
       if(!pageHasWork(s.id, p)) continue;
       var ctx = { step: s.id, pg: p }, items = "";
@@ -2215,7 +2387,7 @@ function printBooklet(){
   });
   var list = stampedList();
   h += '<section class="bp"><div class="band" style="--sc:#ef7724">' + icon("review") + '<h2>My stamp collection</h2></div><p class="it" style="font-size:12pt">' + list.length + ' of ' + ROUTE.length + ' steps stamped.</p><div class="stampsgrid">' +
-    ROUTE.map(function(s){ var on = list.indexOf(s.id) >= 0; return '<div style="--c:' + stageOf(s).c + '"><i class="' + (on ? "on" : "") + '">' + icon(s.id) + '</i>' + esc(s.n) + '</div>'; }).join("") + '</div></section>';
+    ROUTE.map(function(s){ var on = list.indexOf(s.id) >= 0; return '<div style="--c:' + (stageOf(s).pc || stageOf(s).c) + '"><i class="' + (on ? "on" : "") + '">' + icon(s.id) + '</i>' + esc(s.n) + '</div>'; }).join("") + '</div></section>';
   out.className = "bk";
   out.innerHTML = h;
   pageSize("A5 portrait", "10mm");
@@ -2441,6 +2613,7 @@ function dqEditor(){
 var st = el("style"); st.textContent = CSS; document.head.appendChild(st);
 
 function startStudent(){
+  applyTheme();
   mount();
   if(!WHO || !P){
     root.innerHTML = '<div class="pb-card" style="max-width:560px;margin:40px auto"><h2>This book lives in a student HQ</h2><p class="hint">Open it from your HQ, or staff can use the project books page in the staff room.</p><p><a class="pb-btn" href="/">Base 5 home</a></p></div>';
