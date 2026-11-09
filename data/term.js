@@ -23,6 +23,9 @@ window.B5TERM = {
      Trips moved from Tuesday to Wednesday from Week 2 (Nov 2026),
      and Wednesday's old day moved to Tuesday. Week 1 keeps its
      own Tuesday trip (timetable, in the weeks list below).
+     Digital media with Andy moved to Friday 12:45 to 1:30 (9 Nov
+     2026), so Tuesday's maths/english runs on from 10:30, and PE
+     is off the timetable for now (its session is kept below).
      -------------------------------------------------------- */
   timetable: {
     mon: [
@@ -33,7 +36,7 @@ window.B5TERM = {
     ],
     tue: [
       ["9:30","9:45","breathein"], ["9:45","10:00","brain"], ["10:00","10:30","cc"],
-      ["10:30","11:15","digital"], ["11:15","11:45","core"],
+      ["10:30","11:45","core"],
       ["11:45","12:30","lunch"], ["12:30","1:15","project"], ["1:15","2:00","physical"],
       ["2:00","2:30","breatheout"]
     ],
@@ -51,7 +54,7 @@ window.B5TERM = {
     fri: [
       ["9:30","9:45","breathein"], ["9:45","10:00","brain"], ["10:00","10:30","cc"],
       ["10:30","10:45","phse"], ["10:45","11:45","core"],
-      ["11:45","12:45","lunch"], ["12:45","1:30","pe"], ["1:30","2:00","pfa"],
+      ["11:45","12:45","lunch"], ["12:45","1:30","digital"], ["1:30","2:00","pfa"],
       ["2:00","2:30","breatheout"]
     ]
   },
@@ -72,10 +75,10 @@ window.B5TERM = {
      and at the top of each day page. A week can override it. */
   dayLines: {
     mon: "Forest school with Vernon before lunch, then your project and something creative to finish.",
-    tue: "Digital media with Andy, then your project and the physical world after lunch.",
+    tue: "The longest maths and english slot of the week, then your project and the physical world after lunch.",
     wed: "Brain games and CC first, then out on the trip from half ten.",
     thu: "Horticulture with Kara in the morning, then an hour and a half on your project or GCSE.",
-    fri: "The longest maths and english slot of the week, then PE and PFA."
+    fri: "Maths and english in the morning, then digital media with Andy and PFA to finish the week."
   },
 
   /* --------------------------------------------------------
@@ -165,7 +168,7 @@ window.B5TERM = {
     digital: {
       title:"Digital Media with Andy", line:"Screens, kit and how it works.", type:"make",
       heading:"Digital media with Andy",
-      sub:"Three quarters of an hour with Andy.",
+      sub:"Friday afternoon, three quarters of an hour with Andy.",
       body:"Andy runs this one. Hands on with the kit rather than reading about it.",
       links:[["Digital media shelf","/practice/shelves.html#dm"]],
       ways:["Watch first, try after","Work with a partner","Take something apart","Sit this one out"]
@@ -199,6 +202,7 @@ window.B5TERM = {
       ways:["Do it from a window","Work with Jay or HB","Go for a walk and talk about it","Sit this one out"]
     },
 
+    /* Not on the timetable for now (Nov 2026). Kept so it can go back in. */
     pe: {
       title:"PE", line:"Three quarters of an hour off the chairs.", type:"key",
       sub:"Three quarters of an hour off the chairs.",
@@ -343,7 +347,7 @@ window.B5TERM = {
       theme:"The last jump before Christmas",
       sub:"Five days, a trip on Wednesday, and home for Christmas on Friday.",
       days:{
-        fri:{ title:"Last day of term", line:"The longest maths and english slot of the week, PE and PFA, then home for Christmas at half two." }
+        fri:{ title:"Last day of term", line:"Maths and english, digital media with Andy and PFA, then home for Christmas at half two." }
       },
       sessions:{}, feature:[]
     }

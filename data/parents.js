@@ -60,19 +60,19 @@ window.B5PARENTS = {
     ["Brain games", "9:45", "Fifteen minutes of games like GeoGuessr and Wordle to warm up. Nothing is marked."],
     ["Cultural calendar", "10:00", "Half an hour on whatever the school is marking that week, and why people mark it."],
     ["PHSE", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays. Talking rather than writing. Willow, the school's PHSE lead, sometimes joins us."],
-    ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, which I pitch at each student's level. Most days also have forest school, digital media or horticulture."],
+    ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, which I pitch at each student's level. Mondays and Thursdays also have forest school or horticulture."],
     ["Lunch", "11:45", "A proper break. On trip days, lunch happens while the group is out."],
-    ["The afternoon", "12:30 to 2:00", "Projects on the half term's big question, or GCSE work for those taking exams. Depending on the day, there is also something creative, physical world, PE or preparation for adulthood."],
+    ["The afternoon", "12:30 to 2:00", "Projects on the half term's big question, or GCSE work for those taking exams. Depending on the day, there is also something creative, physical world, digital media or preparation for adulthood."],
     ["Breathe out", "2:00", "Winding down together before home time at 2:30."]
   ],
 
   /* What each day of the week is like. */
   week: {
     mon: "Forest school with Vernon in the morning, then project time and something creative to finish.",
-    tue: "Digital media with Andy, then project time, and the physical world after lunch.",
+    tue: "The longest maths and English slot of the week, then project time and the physical world after lunch.",
     wed: "Trip day. Details come to you directly from school.",
     thu: "Horticulture with Kara in the morning, then a long slot for projects or GCSE work.",
-    fri: "The longest maths and English slot of the week, then PE, and preparation for adulthood to round off the week."
+    fri: "Maths and English in the morning, then digital media with Andy, and preparation for adulthood to round off the week."
   },
 
   /* Small things that can help, from home. */
