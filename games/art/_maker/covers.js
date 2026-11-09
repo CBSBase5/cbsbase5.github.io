@@ -7,6 +7,18 @@ function ext(col, n, dark){
 function T(txt, style){ return '<span style="display:inline-block;'+style+'">'+txt+'</span>'; }
 
 var COVERS = {
+  "pigeon-post": {
+    vars:{base:"#0d3340",base2:"#08222b",accent:"#ef7724",sub:"#ffd27a",ribbon:"#c8312f",ribbonInk:"#fffdf8",s1:"#ef7724",s2:"#20adca",s3:"#c8312f"},
+    chip:"FLYING",
+    title:T("Pigeon Post","font:900 112px/1 Archivo;color:#fffdf8;-webkit-text-stroke:5px #0a2f38;paint-order:stroke fill;"+ext("#ef7724",8,"#000")),
+    sub:"FLY THE THANK YOUS",
+    ribbon:"FLAP &middot; GLIDE &middot; DELIVER",
+    burst:["5","NOTES!"],
+    tag:"A REMEMBRANCE WEEK GAME",
+    small:"Fly thank you notes across town, then meet Winkie, a real hero pigeon.",
+    players:"1<br>PLAYER",
+    spine:T("Pigeon Post","font:900 46px/1 Archivo;color:#fffdf8;"+ext("#ef7724",4,"#000"))
+  },
   "deep-diya": {
     vars:{base:"#16123a",base2:"#0b0a24",accent:"#ffb627",sub:"#ffd27a",ribbon:"#ff4f81",ribbonInk:"#16123a",s1:"#ffb627",s2:"#3ff0d0",s3:"#ff4f81"},
     chip:"PIXEL",

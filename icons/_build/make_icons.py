@@ -261,6 +261,15 @@ ICONS = {
         '<path d="M32 19Q37 27 32 34Q27 27 32 19Z" fill="%s"/>' % Y +
         '<path d="M10 38H54Q52 54 32 54Q12 54 10 38Z" fill="%s"/>' % T +
         '<path d="M17 44h30" stroke="%s" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 6"/>' % P),
+    "icons/pigeon-post": (P,
+        '<path d="M6 30L20 26L20 38Z" fill="%s"/>' % T +
+        '<ellipse cx="30" cy="36" rx="17" ry="11" fill="%s"/>' % T +
+        '<circle cx="44" cy="25" r="9" fill="%s"/>' % T +
+        '<path d="M52 24l7 3-7 2z" fill="%s"/>' % K +
+        '<path d="M34 31Q30 12 16 10Q18 26 28 34Z" fill="%s" stroke="%s" stroke-width="2.5" stroke-linejoin="round"/>' % (C, P) +
+        eyes(46, 46, 23, 2.4) +
+        '<rect x="34" y="44" width="20" height="14" rx="2" fill="%s"/>' % O +
+        '<path d="M35 46l9 6 9-6" fill="none" stroke="%s" stroke-width="2.2" stroke-linejoin="round"/>' % P),
     "icons/sankofa": (P,
         '<path d="M32 51C15 40 11 27 18 20C24 14 31 17 32 24C33 17 40 14 46 20C53 27 49 40 32 51Z" fill="none" stroke="%s" stroke-width="5" stroke-linejoin="round"/>' % O +
         '<path d="M32 24C30 30 23 30 23 26C23 23 27 23 27 26M32 24C34 30 41 30 41 26C41 23 37 23 37 26" fill="none" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % O +

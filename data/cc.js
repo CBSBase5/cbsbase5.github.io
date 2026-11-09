@@ -445,7 +445,7 @@ window.B5CC = {
       ],
       link:["Armistice Day, Royal British Legion","https://www.britishlegion.org.uk/get-involved/remembrance/armistice-day"],
       jobs:["firefighter","paramedic","sailor","fundraiser"],
-      game:null,
+      game:{ title:"Pigeon Post", href:"/practice/pigeon-post.html", verb:"Play", blurb:"Fly thank you notes across town, then meet Winkie, the real pigeon who saved four lives." },
       look:{ bg:"#a4161a", bg2:"#d90429", ink:"#ffffff", pop:"#161a1d", pop2:"#f5ebe0", motif:"poppy", pattern:"dots", scene:"remembrance", effect:"petals", fx:["#d90429","#ef233c","#a4161a"] }
     },
     {

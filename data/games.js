@@ -102,6 +102,12 @@ window.B5GAMES = {
       tags:["make","learning"], added:"2026-10-12", art:"/practice/jump-lab-art/box.webp", fill:"bright", motif:"blocks", year:"Whenever you make it"
     },
     {
+      id:"pigeon-post", title:"Pigeon Post", href:"/practice/pigeon-post.html",
+      blurb:"Hold to flap, let go to glide. Fly thank you notes to five people who help us, dodge kites, cats and seagulls, then meet Winkie, the real pigeon who saved four lives in 1942.",
+      meta:"For Remembrance week &middot; five deliveries &middot; saves on this device",
+      tags:["cc","fun"], added:"2026-11-09", art:"/games/art/pigeon-post/box.webp", fill:"teal", motif:"heart", year:"1942 and today"
+    },
+    {
       id:"deep-diya", title:"Deep Diya", href:"/practice/deep-diya.html",
       blurb:"Run Nani's mithai shop by day, then dive a dark sea by night with a lantern to find lost recipes, hidden secrets and the old story of Diwali.",
       meta:"For Festivals of Light &middot; seven nights &middot; saves on this device",
