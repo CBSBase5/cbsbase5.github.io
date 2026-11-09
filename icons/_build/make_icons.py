@@ -143,6 +143,13 @@ ICONS = {
         '<path d="M25 46.5Q32 37 39 46.5Z" fill="%s"/>' % O +
         '<rect x="15" y="9" width="34" height="7" rx="3.5" fill="%s"/>' % T +
         '<rect x="15" y="48" width="34" height="7" rx="3.5" fill="%s"/>' % T),
+    # the project book (ELP workbook): a teal book, orange ribbon, a stamp on the cover
+    "icons/project-book": (P,
+        '<path d="M14 10H44A6 6 0 0 1 50 16V56H20A6 6 0 0 1 14 50Z" fill="%s"/>' % T +
+        '<path d="M14 50A6 6 0 0 1 20 44H50" fill="none" stroke="%s" stroke-width="3"/>' % P +
+        '<path d="M38 10V27L42.5 23.5L47 27V10Z" fill="%s"/>' % O +
+        '<circle cx="27" cy="27" r="8.5" fill="none" stroke="%s" stroke-width="3"/>' % P +
+        '<path d="M23.2 27.2l2.6 2.6 5-5.4" fill="none" stroke="%s" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' % O),
     "icons/staff": (P,
         '<rect x="14" y="13" width="36" height="44" rx="6" fill="%s"/>' % T +
         '<rect x="23" y="8" width="18" height="10" rx="4" fill="%s"/>' % O +

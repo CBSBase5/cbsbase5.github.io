@@ -90,6 +90,7 @@ var QUIPS = [
 ];
 
 /* ---------- set up ---------- */
+var BOOKS = { JT: "/jt-hq/", LW: "/lw/", LC: "/lc/", EGW: "/egw/", LP: "/lp/", HK: "/hk/" };
 var P = window.PROJECT || {};
 var WHO = P.who, ME = PEOPLE[WHO];
 if(!ME) return;
@@ -181,6 +182,13 @@ function build(){
       STAGES.map(function(s, i){ return '<button type="button" class="stop" data-i="' + i + '"><i class="dot"></i><span>' + s.n + '</span></button>'; }).join("") +
     '</div>' +
     '<p class="stagehint" id="stageHint"></p><p class="quip" id="quip" aria-live="polite"></p>');
+
+  /* the project book (ELP workbook) lives in the student's HQ: /data/projectbook.js */
+  h += card("teal", "w12",
+    '<span class="kicker">Goes with this page</span>' +
+    '<h3>Your project book</h3>' +
+    '<p class="lead">The ELP workbook, a small card at a time: brainstorm, research, drafts, the lot. Stamp each step as you go. Jay can write in it too.</p>' +
+    '<a class="btn" href="' + BOOKS[WHO] + 'project-book.html">Open my project book</a>');
 
   h += card("plum", "w12",
     '<span class="kicker">The big question</span>' +

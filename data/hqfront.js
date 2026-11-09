@@ -15,6 +15,10 @@
      a day with a session only some students go to, for those students
      (from "alongside" in /data/term.js, loaded here if the page has not)
                                       "Horizon today, 10:00 to 12:15"
+   Always, just above Everything else: the project book (ELP workbook,
+   /data/projectbook.js), with the next stop, or a line when Jay has
+   written in it that the student has not opened yet. Also added to
+   the HQ's top links as "Project book".
 
    HQ home pages only, loaded in the head straight after
    /data/b5site.js and /data/hqrooms.js, so nothing flashes up first.
@@ -148,8 +152,33 @@ var ICON = {
   folder: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" fill="currentColor"/></svg>',
   card: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="currentColor"/><path d="M6 9h6M6 12h4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><rect x="15" y="8" width="4" height="4" rx=".8" fill="#fff"/></svg>',
   rooms: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
-  back: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  back: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  book: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10a4 4 0 0 1 4 4v14H8a3 3 0 0 1-3-3z" fill="currentColor"/><path d="M5 18a3 3 0 0 1 3-3h11M9 7h6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
 };
+/* the project book: next stop, and whether Jay has written anything not yet opened */
+function bookLine(){
+  var sum = readJ(P + "pb.now", null), seen = readJ(P + "pb.seen", {}), jay = [];
+  var re = new RegExp("^" + P.replace(/[.]/g, "\\.") + "pb\\.([a-z0-9-]+)\\.j\\.([a-z]+)\\.(\\d+)$");
+  try{
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i), m = k && k.match(re); if(!m) continue;
+      if(sum && sum.book && m[1] !== sum.book) continue;
+      var pg = readJ(k, {}), tw = +pg.tw || 0;
+      if(tw && tw > (+seen[m[1] + "." + m[2] + "." + m[3]] || 0)) jay.push(m[2]);
+    }
+  }catch(e){}
+  if(jay.length) return { t: "Jay wrote in your project book", s: "Have a look whenever you like." };
+  if(!sum || !sum.stamped) return { t: "Your project book", s: sum && sum.next ? "Start whenever you like: " + esc(sum.next) : "Your ELP workbook, one small card at a time." };
+  if(!sum.next) return { t: "Your project book", s: "All " + (+sum.of || 21) + " steps stamped. Nice one." };
+  return { t: "Your project book", s: (+sum.stamped) + " of " + (+sum.of || 21) + " stamped. Next stop: " + esc(sum.next) };
+}
+function bookNav(){
+  var nav = d.querySelector(".hqnav");
+  if(!nav || nav.querySelector('a[href$="/project-book.html"]')) return;
+  var a = d.createElement("a"); a.href = BASE + "project-book.html"; a.textContent = "Project book";
+  var f = nav.querySelector('a[href$="/folder.html"]');
+  if(f && f.nextSibling) nav.insertBefore(a, f.nextSibling); else nav.insertBefore(a, nav.firstChild);
+}
 var front, top, core, folderNew = 0;
 function news(icon, title, sub, onClick, href){
   var b = el(href ? "a" : "button", "fd-news", '<span class="ic">' + ICON[icon] + '</span><span><b>' + title + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span><span class="chev" aria-hidden="true">&rsaquo;</span>');
@@ -179,6 +208,8 @@ function drawFront(){
   if(folderNew && !guest) front.appendChild(news("folder", folderNew + " new thing" + (folderNew === 1 ? "" : "s") + " from Jay", "In your folder, just for you.", null, BASE + "folder.html"));
   if(new Date().getDay() === 5 && window.HQExtras && window.HQExtras.postcard)
     front.appendChild(news("card", "Your Friday postcard is ready", "Your week, drawn as a card. Nothing on it is marked.", function(){ window.HQExtras.postcard(); }));
+  var bk = bookLine();
+  if(bk) front.appendChild(news("book", bk.t, bk.s, null, BASE + "project-book.html"));
   var open = ROOMS.filter(function(r){ return r.state === "open"; }).length;
   var more = el("button", "fd-more", '<span class="ic">' + ICON.rooms + '</span><span><b>Everything else in my HQ</b>' +
     (nr.length ? '<span class="tag">' + nr.length + ' new</span>' : '') + '</span><span class="chev" aria-hidden="true">&rsaquo;</span>');
@@ -214,7 +245,7 @@ if(!window.B5TERM && /^(EGW|LP|LW|LC|HK|JT)$/.test(WHO)){
   d.head.appendChild(ts);
 }
 function boot(){
-  arrange();
+  arrange(); bookNav();
   setTimeout(arrange, 0); setTimeout(arrange, 400); setTimeout(arrange, 1500);
   var hero = d.querySelector(".hero");
   if(hero && window.MutationObserver) new MutationObserver(function(){ if(hero.querySelector(".hp-core")) arrange(); }).observe(hero, { childList: true });
