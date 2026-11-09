@@ -32,6 +32,14 @@
    pbsup.<WHO>.<BOOK>.<step>.<page>, outside the student's prefix, so
    the student's pages never keep or show them.
 
+   Under every card, "Not sure? Help me think" (HELP below): a smaller
+   question, an example from Bonnie's book, their own earlier answers,
+   where to find out, and a one tap "a hand please" to Jay. Writing boxes
+   have voice typing (Say it); photo cards take photos with the camera.
+   Stamping a page sends it to BridgeLink Buddy as a Learning note.
+   /data/bookplan.js suggests steps for each week (shown on the map and
+   on day pages). "Make my booklet" prints the finished book as A5.
+
    A new project next half term: change BOOK (and TERM). The old book
    stays saved and opens with ?book=<old id>.
    ASCII only in this file.
@@ -247,6 +255,185 @@ var STEPS = [
   ]}
 ];
 var BY = {}; STEPS.forEach(function(s){ BY[s.id] = s; });
+
+/* ==========================================================
+   Help me think: support for every card when a student does not
+   know the answer yet. Each card can have:
+     ask    a smaller, easier question; tapping an answer drops a
+            sentence into their box (they can change it)
+     eg     an example, from Bonnie's own project book (her project:
+            a podcast called Paws Through Time)
+     look   their own earlier answers in the book ("step.card")
+     where  where they could find out, with an optional link
+   Every card also offers "Ask Jay or Holly": one tap sends Jay a
+   message, and the staff page shows that they asked.
+   ========================================================== */
+var A = function(q, o){ return { q: q, o: o }; };
+var HELP = {
+  "cover.title": { ask: A("What is your project mostly about?", [["A place", "The Trip to "], ["A person", "Meet "], ["A big what if", "What If "], ["A warning", "Do Not Touch the Past"], ["Something funny", "Oops, Wrong Century"]]),
+    eg: "Bonnie called hers: Paws Through Time.", look: ["intro.work", "brain.web"] },
+  "cover.look": { eg: "Bonnie picked orange, a paw and a clock. Obviously." },
+
+  "intro.dq": { ask: A("Which bit of the question jumps out at you?", [["Could we?", "It is asking whether time travel could even happen, and what it would be like."], ["Should we?", "It is asking whether time travel would be a good idea or a bad idea."], ["Who decides?", "It is asking who should get to decide if people time travel."], ["What could go wrong?", "It is asking what could go wrong if people could change the past."]]),
+    eg: "Bonnie wrote: It is asking if going back in time is a good idea, or if it just causes chaos (and missed walks).",
+    where: "Say it out loud to Jay or Holly first, then pop it in. Talking it through counts." },
+  "intro.work": { ask: A("What do you like making most?", [["Something to watch", "I might make a short film or an animation."], ["Something to listen to", "I might make a song or a podcast."], ["Something to play", "I might make a game or a quiz."], ["Something to hold", "I might make a model or a sculpture."], ["Something to read", "I might make a comic or a story."]]),
+    eg: "Bonnie: I might make a podcast where I interview dogs from different centuries.", look: ["brain.web", "cover.title"],
+    where: "The Idea Lab prints ideas when you pull the lever.", link: ["Open the Idea Lab", "/projects/ideas.html"] },
+  "intro.consider": { ask: A("Which of these could trip you up?", [["Time", "Having enough time to finish"], ["Kit", "Getting the right kit"], ["Help", "Knowing who to ask for help"], ["Space", "Somewhere quiet to work"], ["Skills", "Learning a skill I do not have yet"]]),
+    eg: "Bonnie listed: Do I have a microphone? Will the cat agree to be interviewed?" },
+  "intro.important": { ask: A("Anything about when or where?", [["A date", "It needs to be ready by "], ["A place", "I will work on it in "], ["A rule", "Jay said we need to "]]),
+    eg: "Bonnie: The exhibition is in the last week of term. No barking during recording.", where: "Jay knows the dates. Ask him, then pop them in." },
+  "intro.other": { eg: "Bonnie: I would like to record outside if it is not raining." },
+
+  "brain.web": { ask: A("Try one of these sparks", [["A year", "Go back to the year "], ["A person", "Meet "], ["A place", "Visit "], ["A change", "Change one thing: "], ["A never", "Never change "], ["The future", "Jump forward to "]]),
+    eg: "Bonnie's ideas: Meet the first dog ever. Stop baths being invented. Watch a 1966 football match.", look: ["intro.dq", "intro.work"],
+    where: "The Question Wall and the Idea Lab are full of sparks.", link: ["Open the Idea Lab", "/projects/ideas.html"] },
+  "brain.sketch": { eg: "Bonnie drew a big clock in the middle, with arrows to everywhere she would visit.", look: ["brain.web"] },
+
+  "research.intent": { ask: A("Which of these do you most want to know?", [["How", "How would a time machine work?"], ["What happened", "What happened in the year I want to visit?"], ["What if", "What would happen if someone changed the past?"], ["Who", "Who has thought about time travel before?"]]),
+    eg: "Bonnie: I want to find out what dogs did in Victorian times.", look: ["brain.web", "intro.work"] },
+  "research.days": { eg: "Just tap the days you worked on it. That is all this one needs." },
+  "research.source": { ask: A("Where could you look?", [["A search", "A search on the school laptop"], ["A video", "A video"], ["A book", "A library book"], ["A person", "Asking someone who knows"], ["A trip", "Something I saw on a trip"]]),
+    eg: "Bonnie used a dog history video, and Jay (he knows a lot about biscuits).", where: "Not sure a website is any good? Ask Jay to look with you." },
+  "research.info": { ask: A("Start small. Which fits?", [["A surprise", "The most surprising thing I found was "], ["A number", "A number I found was "], ["Then and now", "Back then it was different because "], ["Someone said", "Someone said "]]),
+    eg: "Bonnie found out Victorian dogs had jobs, like turning the meat on a spit. She is outraged.", look: ["research.intent", "research.source"] },
+  "research.facts": { ask: A("Turn one thing you found into a short fact", [["Who", "The person who did it was "], ["When", "It happened in "], ["Where", "It happened in "], ["How many", "There were "]]),
+    eg: "Bonnie: The first dog show was in 1859. Poodles were water dogs.", look: ["research.info"] },
+  "research.consider": { ask: A("Check your sources", [["Is it true?", "Is this source true?"], ["Is it old?", "Is it up to date?"], ["Who made it?", "Who made it, and why?"]]),
+    eg: "Bonnie: The website was made by a dog food company. Hmm." },
+
+  "criteria.sources": { ask: A("Think of something you love that is a bit like your project", [["A film", "A film I like: "], ["A song", "A song I like: "], ["A game", "A game I like: "], ["A video maker", "A video maker I like: "]]),
+    eg: "Bonnie: Doctor Who, and a podcast her owner listens to on walks.", look: ["intro.work"] },
+  "criteria.compare": { ask: A("Finish one of these", [["Borrow", "I would borrow the way it "], ["Change", "I would do differently: "], ["Better", "It would be better if "]]),
+    eg: "Bonnie would borrow the music at the start, but make it shorter so people do not wander off.", look: ["criteria.sources"] },
+  "criteria.rubric": { ask: A("What would make you proud of it?", [["Finished", "It is finished"], ["Clear", "People understand it"], ["Mine", "It is my own idea"], ["Answers it", "It answers the big question"], ["Effort", "I tried my hardest on it"], ["Looks good", "It looks or sounds good"]]),
+    eg: "Bonnie: It answers the question. Good looks like: someone could tell you my answer after listening.", look: ["intro.work", "criteria.sources"] },
+  "criteria.consider": { eg: "Bonnie: Keep it under five minutes. Dogs get bored." },
+
+  "expert.name": { ask: A("Who knows about your topic?", [["Jay", "Jay"], ["Holly", "Holly"], ["Someone at home", "Someone at home"], ["Another teacher", "Another teacher at school"], ["Someone online", "Someone online (found with Jay)"]]),
+    eg: "Bonnie picked the vet, because the vet knows everything about dogs.", where: "Not sure who? Jay can help you find someone." },
+  "expert.about": { ask: A("What makes them an expert?", [["Their job", "Their job is "], ["Years", "They have done it for "], ["Things made", "They have made "], ["What they know", "They know a lot about "]]),
+    eg: "Bonnie: The vet has looked after dogs for 20 years.", look: ["expert.name"] },
+  "expert.photo": { eg: "A stick person with glasses absolutely counts.", where: "Ask your expert if you can take a photo. If not, draw them." },
+  "expert.questions": { ask: A("Start with one of these", [["Hardest part", "What is the hardest part of your job?"], ["Getting started", "How did you get started?"], ["Should we?", "Do you think we should time travel?"], ["Advice", "What advice would you give me?"]]),
+    eg: "Bonnie asked: Were dogs happier 100 years ago?", look: ["research.intent"] },
+
+  "explore.where": { ask: A("Which trip is it?", [["Museum", "The museum"], ["Outside", "Outside in the local area"], ["Library", "The library"], ["Online", "A virtual tour online"]]),
+    eg: "Bonnie: The park, to compare it with old photos.", where: "Jay knows this half term's trips." },
+  "explore.date": { eg: "Tap Today if it is today." },
+  "explore.reason": { ask: A("Why go?", [["See", "To see real things from the past"], ["Ask", "To ask people questions"], ["Compare", "To compare then and now"], ["Ideas", "To get ideas for my project"]]),
+    eg: "Bonnie: To see if the park was more fun in 1950." },
+  "explore.questions": { ask: A("Start with one of these", [["What", "What is the oldest thing here?"], ["Why", "Why is this here?"], ["Then and now", "What has changed since then?"], ["Should we?", "Would going back here be a good idea?"]]),
+    look: ["research.intent"] },
+  "explore.record": { ask: A("Start with one", [["First", "First we "], ["Saw", "I saw "], ["Best bit", "The best bit was "], ["Weirdest", "The weirdest thing was "]]),
+    eg: "Bonnie: First we walked to the park. I saw a bench from 1950. The best bit was a squirrel." },
+  "explore.pics": { eg: "Bonnie took one photo of the old bench and one of a very rude squirrel.", where: "Tap Take a photo while you are there, or add them when you are back." },
+  "explore.outcome": { ask: A("What did the visit change?", [["I know", "Now I know "], ["An idea", "It gave me an idea: "], ["My mind", "It changed my mind about "], ["Sure", "It made me sure that "]]),
+    look: ["explore.reason", "explore.record"] },
+
+  "document.log": { ask: A("What are you doing today?", [["Starting", "Starting my "], ["Finishing", "Finishing my "], ["Fixing", "Fixing my "], ["Trying", "Trying out "], ["Thinking", "Thinking about "]]),
+    eg: "Bonnie, Tue 10 Nov: Recording the intro. The book adds her stamps for her." },
+
+  "skill.skill": { ask: A("What does your project need you to be good at?", [["Drawing", "Drawing"], ["Filming", "Filming"], ["Editing", "Editing"], ["Building", "Building"], ["Writing", "Writing"], ["Speaking", "Speaking to people"]]),
+    eg: "Bonnie: Speaking clearly into a microphone (without licking it).", look: ["intro.work"] },
+  "skill.sketch": { eg: "Bonnie drew the same clock five times. The fifth was the best. That is practice." },
+  "skill.learned": { ask: A("Compare before and now", [["Now I can", "Now I can "], ["Better at", "I got better at "], ["Still tricky", "It is still tricky to "], ["A trick", "A trick that helped: "]]),
+    look: ["skill.skill"] },
+
+  "drafts.draft": { eg: "Bonnie's first draft was a messy plan on the back of a biscuit box.", where: "A draft can be a photo of something on paper. Tap Take a photo." },
+  "drafts.works": { ask: A("What do you like about it?", [["The look", "I like how it looks"], ["The idea", "The idea is good"], ["One part", "My favourite part is "], ["People", "People liked "]]),
+    eg: "Bonnie: The jingle at the start is catchy." },
+  "drafts.change": { ask: A("If you had one more go, what would you change?", [["Longer", "Make it longer"], ["Shorter", "Make it shorter"], ["Clearer", "Make it clearer"], ["Neater", "Make it neater"], ["Add", "Add "]]),
+    eg: "Bonnie: Less barking in the middle bit.", look: ["criteria.rubric"] },
+
+  "experiment.name": { ask: A("Test something small", [["Which is better", "Which is better: "], ["Will it work", "Will it work if "], ["How long", "How long does it take to "], ["What people like", "Do people prefer "]]),
+    eg: "Bonnie tested: which microphone sounds better, the laptop or the headset?" },
+  "experiment.date": { eg: "Tap Today if it is today." },
+  "experiment.reason": { ask: A("Why test it?", [["To choose", "So I know which one to use"], ["To check", "To check it works before the real thing"], ["Curious", "Because I was curious"]]),
+    look: ["experiment.name"] },
+  "experiment.kit": { ask: A("What do you need?", [["Laptop", "Laptop"], ["Paper", "Paper and pens"], ["Camera", "Camera"], ["Timer", "A timer"], ["Materials", "Materials to build with"]]),
+    eg: "Bonnie: Laptop, headset, one very patient cat." },
+  "experiment.questions": { ask: A("Start with one of these", [["Which", "Which one is better?"], ["Why", "Why did it happen?"], ["Again", "Would it happen again?"]]) },
+  "experiment.happened": { ask: A("How did it go?", [["It worked", "It worked because "], ["It did not", "It did not work because "], ["A surprise", "The surprise was "], ["One was better", "One worked better: "]]),
+    eg: "Bonnie: The headset was clearer. The laptop picked up the cat." },
+  "experiment.next": { ask: A("So what next?", [["Use it", "I will use "], ["Again", "I will test it again with "], ["Change", "I will change "]]),
+    look: ["experiment.happened"] },
+
+  "midway.feel": { eg: "There is no wrong answer here. Bonnie picked Good, because recording is hard but fun." },
+  "midway.good": { ask: A("Think of one moment", [["Enjoyed", "I enjoyed "], ["Pleased", "I am pleased with "], ["Easy", "It was easy to "], ["Made", "I made "]]),
+    look: ["document.log", "drafts.works"] },
+  "midway.support": { ask: A("Which would help most?", [["Time", "More time on it"], ["Showing", "Someone showing me how"], ["Quiet", "A quieter place to work"], ["Kit", "Different kit"], ["Talking", "Talking it through with Jay or Holly"], ["Fine", "Nothing right now, I am fine"]]),
+    eg: "Bonnie: Someone to hold the microphone. Paws are not great at it." },
+  "midway.next": { ask: A("What is next?", [["Finish", "Finish "], ["Start", "Start "], ["Try", "Try "]]),
+    look: ["intro.work", "drafts.change"] },
+
+  "reflect.reflect": { ask: A("Pick a feeling to start from", [["Proud", "I am proud of "], ["Hard", "It was hard when "], ["Changed", "I changed my mind about "], ["Surprised", "I was surprised that "]]),
+    eg: "Bonnie: I was surprised that I liked editing more than recording.", look: ["midway.good", "midway.support"] },
+  "reflect.feedback": { ask: A("Who did you show it to?", [["Jay", "Jay said "], ["Holly", "Holly said "], ["Home", "Someone at home said "], ["A friend", "A friend said "]]),
+    eg: "Bonnie: Jay said the jingle is stuck in his head. Sorry, Jay.", where: "Show someone, then ask them: what is one thing you like, and one thing to change?" },
+  "reflect.next": { ask: A("What will you do with it?", [["Keep", "I will keep "], ["Change", "I will change "], ["Add", "I will add "]]),
+    look: ["reflect.feedback"] },
+
+  "safety.use": { ask: A("Will you use any of these?", [["Sharp things", "Scissors or a craft knife"], ["Hot things", "A glue gun"], ["Power tools", "Power tools"], ["Screens", "A laptop or camera"], ["Paint", "Paint or glue"]]) },
+  "safety.howsafe": { ask: A("Pick the ones that fit", [["Away from me", "Cut away from my body"], ["Back on the stand", "Put it back on its stand"], ["With an adult", "Use it with an adult nearby"], ["Tidy cables", "Keep cables tidy"]]),
+    look: ["safety.use"], where: "Jay or Holly will show you how to use anything new before you start." },
+  "safety.me": { ask: A("Pick the ones that fit", [["Breaks", "Take a break when I need one"], ["Ask", "Ask for help if I am not sure"], ["Gloves", "Wear gloves or goggles"], ["Stop", "Stop if something feels wrong"]]) },
+  "safety.remember": { ask: A("Three to remember", [["Ask first", "Ask before using new kit"], ["Tidy", "Tidy up as I go"], ["Wash", "Wash my hands after"]]) },
+  "safety.important": { where: "Jay will go through anything important with you before you start." },
+
+  "make.goal": { ask: A("By the end of today...", [["I will have", "By the end I will have "], ["Finish", "I will finish "], ["Start", "I will start "]]),
+    eg: "Bonnie: By the end I will have recorded episode one.", look: ["intro.work", "drafts.change"] },
+  "make.done": { ask: A("What got done today?", [["Finished", "Finished the "], ["Started", "Started the "], ["Fixed", "Fixed the "], ["Tried", "Tried "]]),
+    look: ["make.goal"] },
+  "make.evidence": { eg: "Bonnie took a photo of her set up every day, even the messy days.", where: "Tap Take a photo as you go. Messy photos are still evidence." },
+
+  "extend.idea": { ask: A("How could it grow?", [["Bigger", "Make a bigger version"], ["Part two", "Make a part two"], ["Share it", "Share it with more people"], ["Add", "Add "], ["Something new", "Turn it into a "]]),
+    eg: "Bonnie: Season two, where she interviews cats. Controversial.", look: ["brain.web"] },
+  "extend.sketch": { eg: "Bonnie drew a poster for season two.", look: ["extend.idea"] },
+
+  "review.rating": { eg: "There is no wrong answer. Pick the one that feels true today.", look: ["midway.feel"] },
+  "review.reason": { ask: A("Start with one", [["Because", "Because "], ["It worked", "Mostly because it "], ["It did not", "Because it did not "]]),
+    look: ["review.rating", "midway.feel"] },
+  "review.proud": { ask: A("Think of one moment", [["One bit", "The bit where "], ["Finishing", "That I finished it"], ["Keeping going", "That I kept going when "], ["My idea", "My idea of "]]),
+    look: ["midway.good", "reflect.reflect"] },
+  "review.best": { ask: A("Start with one", [["The best part", "The best part was "], ["It worked", "It really worked when "]]),
+    look: ["drafts.works", "reflect.feedback"] },
+  "review.work": { ask: A("Start with one", [["Next time", "Next time I will "], ["Better at", "I want to get better at "], ["Plan", "I will plan "]]),
+    look: ["midway.support", "drafts.change"] },
+  "review.skill": { ask: A("Tap one", [["Planning", "Planning"], ["Making", "Making"], ["Asking", "Asking questions"], ["Keeping going", "Not giving up"], ["Presenting", "Presenting"]]),
+    look: ["skill.skill", "skill.learned"] },
+
+  "celebrate.wall": { eg: "Bonnie's gallery: her microphone set up, the edit on screen, and her face when it was finished.", where: "Tap Take a photo, or pick ones you took before." },
+  "celebrate.said": { ask: A("Start with one", [["Liked", "Someone liked "], ["Asked", "Someone asked "], ["Laughed", "Someone laughed at "]]),
+    eg: "Bonnie: Someone said they would listen to season two. Even the cat." },
+
+  "prespractice.where": { where: "Ask Jay what the options are. Recording it instead of doing it live is fine." },
+  "prespractice.what": { ask: A("Pick what you will do", [["Show it", "Show my project"], ["How I made it", "Talk about how I made it"], ["My answer", "Say my answer to the big question"], ["Questions", "Answer a question or two"]]) },
+  "prespractice.how": { ask: A("Which would help?", [["Cue cards", "Have my cue cards"], ["Someone next to me", "Have someone next to me"], ["Small group", "Present to a small group"], ["Record it", "Record it first"], ["I am OK", "I am OK, thanks"]]) },
+
+  "present.cues": { ask: A("Every presentation needs a few of these. Tap one to start a card.", [["Hello", "Hello, my project is called "], ["The question", "The question was: should we time travel?"], ["What I made", "I made a "], ["How", "To make it I "], ["My answer", "My answer is "], ["Thanks", "Thanks for watching. Any questions?"]]),
+    eg: "Bonnie's cards: Hello, I am Bonnie. My podcast is Paws Through Time. My answer is: it depends.", look: ["cover.title", "intro.work", "answer.answer"] },
+  "present.how": { eg: "Pick the one that feels true. Getting through it at all is a win." },
+  "present.note": { ask: A("Start with one", [["Next time", "Next time I will "], ["Liked", "I liked "], ["Nerves", "It helped my nerves when "]]) },
+
+  "finalref.complete": { eg: "Be honest: nobody is marking this. Bonnie picked: It's finished, but rushed." },
+  "finalref.feel": { look: ["review.rating"] },
+  "finalref.answered": { look: ["answer.answer", "intro.dq"] },
+  "finalref.changes": { look: ["drafts.change", "review.work"] },
+  "finalref.problems": { ask: A("Start with one", [["Tricky", "It was tricky when "], ["Helped", "It helped when "], ["On my own", "Working on my own was "], ["With someone", "Working with someone was "]]),
+    look: ["midway.support", "reflect.reflect"] },
+  "finalref.suggest": { ask: A("Start with one", [["Could have", "It could have "], ["Add", "Next time add "], ["Less", "Less "]]),
+    look: ["drafts.change", "review.work"] },
+  "finalref.skills": { ask: A("Tap any that are true", [["Plan", "I can plan a project"], ["Find out", "I can find things out"], ["Ask", "I can ask an expert questions"], ["Draft", "I can make a draft better"], ["Make", "I can make "], ["Present", "I can present my work"]]),
+    look: ["skill.skill", "review.skill"] },
+
+  "answer.answer": { eg: "Bonnie: It depends. Going back just to watch is fine. Changing things is a disaster.", look: ["intro.dq", "brain.web", "research.info"] },
+  "answer.how": { ask: A("Start with one", [["It shows", "My project shows "], ["When people see it", "When people see it they "], ["The ending", "The ending shows "]]),
+    look: ["answer.answer", "intro.work"] },
+  "answer.outcomes": { ask: A("Start with one", [["Made", "I made "], ["Learned", "I learned "], ["People found out", "People found out "], ["Changed my mind", "I changed my mind about "]]),
+    look: ["finalref.skills", "review.proud"] }
+};
 var ROUTE = STEPS.filter(function(s){ return s.stage >= 0; });
 
 var STAMPS = ["Stamped!", "Sorted", "In the book", "Nice one", "Done for now", "Bonnie approves", "Smashed it", "Ta-da"];
@@ -299,12 +486,19 @@ function skeys(pre){
   try{ for(var i = 0; i < localStorage.length; i++){ var kk = localStorage.key(i); if(kk && kk.indexOf(pre) === 0) out.push(kk); } }catch(e){}
   return out;
 }
+function sdel(k){
+  if(STAFF){ MEM[k] = ""; queue(WHO, k, ""); return; }
+  try{ localStorage.removeItem(k); }catch(e){}
+}
 function rj(k){ try{ var v = JSON.parse(sget(k) || "null"); return v && typeof v === "object" ? v : null; }catch(e){ return null; } }
 function wj(k, v){ sset(k, JSON.stringify(v)); }
 
 function kPage(o, step, pg){ return P + "pb." + BOOK + "." + o + "." + step + "." + pg; }
 function kDraw(o, step, pg, fid){ return P + "pb." + BOOK + ".d" + o + "." + step + "." + pg + "." + fid; }
 function kMeta(){ return P + "pb." + BOOK + ".jm"; }
+function kPhoto(o, id){ return P + "pb." + BOOK + ".ph" + o + "." + id; }
+function photoSrc(v){ if(!v || !v.ph) return ""; var x = rj(kPhoto(v.o || "s", v.ph)); return x && /^data:image\/jpeg;base64,/.test(String(x.v || "")) ? String(x.v) : ""; }
+function photoCount(){ return skeys(P + "pb." + BOOK + ".ph").length; }
 function kSup(step, pg){ return "pbsup." + WHO + "." + BOOK + "." + step + "." + pg; }
 
 /* the pen: the student writes as "s"; Jay (staff page, or Jay's pen on a student's device) as "j" */
@@ -388,7 +582,7 @@ function pagesOf(step){
 function pageHasWork(step, pg){
   var st = BY[step];
   return st.cards.some(function(c){
-    if(c.t === "sketch") return !!getDraw(step, pg, c.id).v || hasVal(getF(step, pg, c.id + "_link").v);
+    if(c.t === "sketch") return !!getDraw(step, pg, c.id).v || hasVal(getF(step, pg, c.id + "_link").v) || !!photoSrc(getF(step, pg, c.id + "_ph").v);
     if(c.t === "dq") return hasVal(getF(step, pg, c.id).v);
     if(["list", "qa", "rubric", "links", "log", "cues", "web"].indexOf(c.t) >= 0) return getC(step, pg, c.id).length > 0;
     if(c.t === "stamps") return false;
@@ -721,10 +915,49 @@ var CSS =
 "@keyframes pbtrot{to{left:110vw}}" +
 ".pb-bonnie svg{width:110px;height:auto;animation:pbbob .35s ease-in-out infinite}" +
 "@media (prefers-reduced-motion:reduce){.pb *,.pb-stampfx *,.pb-bonnie,.pb-bonnie svg{animation:none !important;transition:none !important}.pb-map .draw{stroke-dashoffset:0}}" +
+/* help me think */
+".pb-helpwrap{margin:16px 0 0}" +
+".pb-helpbtn{display:inline-flex;align-items:center;gap:8px;border:2px dashed var(--pbjay);background:#eef8fa;color:var(--pbjay);border-radius:999px;padding:8px 16px 8px 10px;font-weight:700;transition:transform .15s}" +
+".pb-helpbtn:hover{transform:translateY(-2px)}" +
+".pb-helpbtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}" +
+".pb-help{margin-top:12px;padding:14px;border-radius:20px 16px 22px 14px;background:#eef8fa;border:2px solid var(--pbjay);animation:pbinr .3s both}" +
+".pb-help .tiles{display:flex;flex-wrap:wrap;gap:10px}" +
+".pb-help .tiles button{display:flex;flex-direction:column;align-items:center;gap:6px;width:118px;padding:12px 8px;border-radius:16px;border:2px solid var(--pbink);background:#fff;font-weight:700;font-size:.9rem;line-height:1.2;text-align:center;transition:transform .15s}" +
+".pb-help .tiles button:hover{transform:translateY(-3px) rotate(-1deg)}" +
+".pb-help .tiles button[aria-pressed=true]{background:var(--pbink);color:#fff}" +
+".pb-help .tiles svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}" +
+".pb-help .hc{margin-top:12px}" +
+".pb-help .hc:empty{display:none}" +
+".pb-help .hq{font-family:Archivo,sans-serif;font-weight:700;font-size:1.15rem;margin:0 0 4px}" +
+".pb-help .ok{font-weight:700;color:#1e7a4a;margin:10px 0 0}" +
+".pb-eg{display:flex;gap:12px;align-items:flex-start;background:#fff8e6;border:2px solid #e3c98a;border-radius:16px;padding:12px 14px;transform:rotate(-.6deg)}" +
+".pb-eg svg{width:56px;height:auto;flex:none}" +
+".pb-eg b{display:block;font-family:Archivo,sans-serif;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:#a0673f;margin-bottom:4px}" +
+".pb-eg p{margin:0;font-family:'Comic Sans MS','Chalkboard SE','Atkinson Hyperlegible',sans-serif;font-size:1.05rem}" +
+".pb-look{background:#fff;border:2px solid rgba(10,47,56,.25);border-radius:14px;padding:10px 12px;margin:0 0 8px}" +
+".pb-look b{display:block;font-size:.85rem;color:var(--pbjay)}" +
+".pb-look p{margin:4px 0 6px;white-space:pre-wrap}" +
+".pb-helpflag{display:inline-block;margin:8px 0 0;background:#fff1a8;border:2px solid #d8c25a;border-radius:999px;padding:3px 12px;font-weight:700;font-size:.88rem}" +
+/* voice typing and photos */
+".pb-mic{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--pbink);background:#fff;border-radius:999px;padding:7px 14px 7px 10px;font-weight:700}" +
+".pb-mic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}" +
+".pb-mic.on{background:var(--pborange);color:#fff;border-color:var(--pborange)}" +
+"@media (prefers-reduced-motion:no-preference){.pb-mic.on{animation:pbmic 1s ease-in-out infinite}}" +
+"@keyframes pbmic{50%{box-shadow:0 0 0 8px rgba(239,119,36,.25)}}" +
+".pb-micline{font-size:.92rem;opacity:.8;margin:6px 0 0;min-height:1.2em}" +
+".pb-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 0}" +
+".pb-cam{display:inline-flex;align-items:center;gap:8px}" +
+".pb-thumb{width:64px;height:48px;object-fit:cover;border-radius:8px;border:2px solid var(--pbink);flex:none}" +
+".pb-pol .ph img{width:100%;height:100%;object-fit:cover;border-radius:2px}" +
+".pb-photo{display:block;max-width:100%;max-height:300px;border-radius:12px;border:3px solid var(--pbink);margin:8px 0}" +
+".pb-week{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 0;font-size:.95rem}" +
+".pb-week b{font-family:Archivo,sans-serif}" +
+".pb-week span{border:2px dashed var(--pborange);border-radius:999px;padding:3px 10px;font-weight:700;background:#fff}" +
+".pb-week span.done{border-style:solid;background:#fff3e2}" +
+".pb-map .wk{fill:none;stroke:var(--pborange);stroke-width:3;stroke-dasharray:4 6}" +
 /* print */
 "#pbPrint{display:none}" +
 "@media print{" +
-  "@page{size:A4 landscape;margin:9mm}" +
   "html body.pb-printing > *:not(#pbPrint){display:none !important}" +
   "body.pb-printing{background:#fff !important}" +
   "body.pb-printing #pbPrint{display:block}" +
@@ -754,7 +987,33 @@ var CSS =
 "#pbPrint .facesp{display:flex;gap:6px}#pbPrint .facesp span{border:1.5px solid #b9c9cc;border-radius:99px;padding:1px 7px;font-size:8.5pt}#pbPrint .facesp span.on{background:#0a2f38;color:#fff;border-color:#0a2f38}" +
 "#pbPrint .coverp{align-items:center;justify-content:center;text-align:center;background:var(--sc);color:#fff}" +
 "#pbPrint .coverp h1{font-family:Archivo,sans-serif;font-size:34pt;margin:0 0 10px}" +
-"#pbPrint .coverp p{font-size:14pt;margin:4px 0}";
+"#pbPrint .coverp p{font-size:14pt;margin:4px 0}" +
+"#pbPrint .bx img{max-width:100%;max-height:48mm;border-radius:6px;margin:2px 4px 2px 0}" +
+/* the booklet (A5) */
+"#pbPrint.bk .bp{page-break-after:always;break-after:page;box-sizing:border-box;padding:2mm 1mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}" +
+"#pbPrint.bk .bp:last-child{page-break-after:auto;break-after:auto}" +
+"#pbPrint.bk .bcov{position:relative;background:var(--cv);color:#fff;border-radius:6mm;padding:18mm 12mm;display:flex;flex-direction:column;justify-content:center;text-align:center;height:178mm;box-sizing:border-box;overflow:hidden}" +
+"#pbPrint.bk .bcov h1{font-family:Archivo,sans-serif;font-size:30pt;line-height:1.05;margin:0 0 8mm}" +
+"#pbPrint.bk .bcov p{font-size:13pt;margin:2mm 0}" +
+"#pbPrint.bk .bcov .stk{position:absolute;width:30mm;height:30mm}" +
+"#pbPrint.bk .bcov .by{font-family:Archivo,sans-serif;font-size:22pt;margin-top:10mm}" +
+"#pbPrint.bk .band{display:flex;align-items:center;gap:3mm;border-bottom:1.2mm solid var(--sc);padding-bottom:2mm;margin-bottom:4mm}" +
+"#pbPrint.bk .band .pb-ic{width:10mm;height:10mm;stroke:var(--sc)}" +
+"#pbPrint.bk .band h2{font-family:Archivo,sans-serif;font-size:17pt;margin:0;flex:1}" +
+"#pbPrint.bk .band small{font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:var(--sc);font-weight:700}" +
+"#pbPrint.bk .it{margin:0 0 4mm;break-inside:avoid}" +
+"#pbPrint.bk .it h4{margin:0 0 1mm;font-family:Archivo,sans-serif;font-size:8.5pt;letter-spacing:.08em;text-transform:uppercase;color:#007291}" +
+"#pbPrint.bk .it p{margin:0 0 1mm;font-size:11pt;line-height:1.4;white-space:pre-wrap}" +
+"#pbPrint.bk .it ul{margin:0;padding-left:5mm;font-size:11pt}" +
+"#pbPrint.bk .it .j{font-style:italic}" +
+"#pbPrint.bk .it img{max-width:100%;max-height:70mm;border-radius:3mm;margin:1mm 2mm 1mm 0}" +
+"#pbPrint.bk .it svg.sk{width:100%;height:auto;max-height:70mm;border-radius:3mm;border:1px solid #ddd}" +
+"#pbPrint.bk .quote{font-family:Archivo,sans-serif;font-size:24pt;line-height:1.15;margin:10mm 0 6mm;color:#0a2f38}" +
+"#pbPrint.bk .stampsgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-top:6mm}" +
+"#pbPrint.bk .stampsgrid div{text-align:center;font-size:7.5pt;font-weight:700;line-height:1.2}" +
+"#pbPrint.bk .stampsgrid i{display:flex;align-items:center;justify-content:center;width:14mm;height:14mm;margin:0 auto 1mm;border-radius:50%;border:.8mm solid var(--c)}" +
+"#pbPrint.bk .stampsgrid i.on{background:var(--c)}" +
+"#pbPrint.bk .stampsgrid i .pb-ic{width:7mm;height:7mm;stroke:var(--c)}#pbPrint.bk .stampsgrid i.on .pb-ic{stroke:#fff}";
 
 /* ==========================================================
    Pictures drawn in code
@@ -794,6 +1053,17 @@ var SAY = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 
 var PEN_SVG = '<svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg>';
 var BACK = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
 var NEXT = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+var BULB = '<svg viewBox="0 0 24 24"><path d="' + I.brain + '"/></svg>';
+var MIC = '<svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>';
+var CAM = '<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+var HICON = {
+  ask: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/></svg>',
+  eg: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="5" ry="4"/><circle cx="6" cy="9.5" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="18" cy="9.5" r="2"/></svg>',
+  look: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>',
+  where: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>',
+  jay: '<svg viewBox="0 0 24 24"><path d="M7 11V6a1.5 1.5 0 0 1 3 0v4M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V11M16 11V8a1.5 1.5 0 0 1 3 0v6a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-2.7L3.5 14a1.6 1.6 0 0 1 2.6-1.8L7 13.5"/></svg>'
+};
+var BFACE = '<svg viewBox="0 0 64 60" aria-hidden="true"><g fill="#a0673f" stroke="#0a2f38" stroke-width="2.5"><circle cx="14" cy="16" r="9"/><circle cx="50" cy="16" r="9"/><circle cx="32" cy="32" r="20"/><circle cx="32" cy="12" r="9"/></g><circle cx="25" cy="31" r="2.6" fill="#0a2f38"/><circle cx="39" cy="31" r="2.6" fill="#0a2f38"/><ellipse cx="32" cy="40" rx="4.5" ry="3.2" fill="#0a2f38"/></svg>';
 var PIC = '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>';
 
 /* ==========================================================
@@ -829,13 +1099,21 @@ function fText(card, ctx, long){
   inp.addEventListener("input", function(){ save(); if(long) growTA(inp); });
   box.appendChild(inp);
   if(long) setTimeout(function(){ growTA(inp); }, 0);
-  var ch = starters(card, function(s){
+  function ins(s){
     var cur = inp.value;
-    inp.value = long ? cur + (cur && !/\s$/.test(cur) ? (/[.!?]$/.test(cur.trim()) ? " " : "\n") : "") + s + (/\.\.\.$/.test(s) ? " " : "") : s;
+    inp.value = long ? cur + (cur && !/\s$/.test(cur) ? (/[.!?]$/.test(cur.trim()) ? " " : "\n") : "") + s + (/\.\.\.$/.test(s) ? " " : "") : (/\s$/.test(s) || !cur ? s : s);
     setF(ctx.step, ctx.pg, card.id, inp.value); inp.classList.toggle("jay", PEN === "j");
     if(long) growTA(inp);
     try{ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }catch(e){}
+  }
+  box._insert = ins;
+  var mic = micFor(function(t){
+    var cur = inp.value;
+    inp.value = cur + (cur && !/\s$/.test(cur) ? " " : "") + t;
+    setF(ctx.step, ctx.pg, card.id, inp.value); if(long) growTA(inp);
   });
+  if(mic) box.appendChild(mic);
+  var ch = starters(card, ins);
   if(ch) box.appendChild(ch);
   return box;
 }
@@ -953,6 +1231,9 @@ function fList(card, ctx, kind){
   go.onclick = function(){ addOne(inp.value); inp.value = ""; inp.focus(); };
   inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); go.click(); } });
   box.appendChild(add);
+  box._insert = function(t){ if(/\s$/.test(t)){ inp.value = t; try{ inp.focus(); }catch(e){} } else addOne(t); };
+  var micL = micFor(function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; try{ inp.focus(); }catch(e){} });
+  if(micL) box.appendChild(micL);
   var ch = starters(card, function(s, b){ addOne(s); if(b){ b.style.opacity = ".45"; } });
   if(ch) box.appendChild(ch);
   function full(){ var f = card.max && getC(ctx.step, ctx.pg, card.id).length >= card.max; add.style.display = f ? "none" : ""; if(ch) ch.style.display = f ? "none" : ""; }
@@ -992,17 +1273,19 @@ function fLinks(card, ctx){
         var pol = el("div", "pb-pol");
         pol.style.setProperty("--r", ((n % 2 ? 1 : -1) * (2 + (n * 7) % 4)) + "deg");
         pol.style.setProperty("--pc", ["#cfe9ef", "#ffe1c7", "#e6d9ef", "#d8f0df"][n % 4]);
-        pol.innerHTML = '<div class="ph">' + PIC + '</div><span class="cap">' + esc(v.title || "Untitled") + jayTag(it.by) + '</span>' +
+        var src = photoSrc(v);
+        pol.innerHTML = '<div class="ph">' + (src ? '<img alt="" src="' + src + '">' : PIC) + '</div><span class="cap">' + esc(v.title || (src ? "" : "Untitled")) + jayTag(it.by) + '</span>' +
           (u ? '<a class="pb-btn small" style="margin-top:8px" href="' + esc(u) + '" target="_blank" rel="noopener">Open</a>' : '');
         var x = el("button", "pb-x", "&times;"); x.type = "button"; x.setAttribute("aria-label", "Take this one out");
-        x.onclick = function(){ putC(ctx.step, ctx.pg, card.id, it.id, null, true); draw(); };
+        x.onclick = function(){ if(v.ph) sdel(kPhoto(v.o || "s", v.ph)); putC(ctx.step, ctx.pg, card.id, it.id, null, true); draw(); };
         pol.appendChild(x); list.appendChild(pol);
       } else {
         var row = el("div", "pb-items"); row.style.margin = "0";
         var li = el("li", it.by === "j" ? "jay" : "");
-        li.innerHTML = '<span class="tx">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(v.title || "A link") + '</a>' : esc(v.title)) + jayTag(it.by) + '</span>';
+        var src2 = photoSrc(v);
+        li.innerHTML = (src2 ? '<img class="pb-thumb" alt="" src="' + src2 + '">' : '') + '<span class="tx">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(v.title || "A link") + '</a>' : esc(v.title || (src2 ? "A photo" : ""))) + jayTag(it.by) + '</span>';
         var x2 = el("button", "pb-x", "&times;"); x2.type = "button"; x2.setAttribute("aria-label", "Take this one out");
-        x2.onclick = function(){ putC(ctx.step, ctx.pg, card.id, it.id, null, true); draw(); };
+        x2.onclick = function(){ if(v.ph) sdel(kPhoto(v.o || "s", v.ph)); putC(ctx.step, ctx.pg, card.id, it.id, null, true); draw(); };
         li.appendChild(x2); row.appendChild(li); list.appendChild(row);
       }
     });
@@ -1019,6 +1302,11 @@ function fLinks(card, ctx){
     ins[0].value = ""; ins[1].value = ""; msg.textContent = ""; draw();
   };
   box.appendChild(add); box.appendChild(msg);
+  var cam = photoButton(function(id){
+    putC(ctx.step, ctx.pg, card.id, uid(), { title: ins[0].value.trim(), url: "", ph: id, o: PEN });
+    ins[0].value = ""; draw();
+  }, msg);
+  if(cam) box.appendChild(cam);
   draw();
   return box;
 }
@@ -1042,6 +1330,9 @@ function fLog(card, ctx){
   add.querySelector("button").onclick = function(){ addOne(inp.value); inp.value = ""; };
   inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); addOne(inp.value); inp.value = ""; } });
   box.appendChild(add);
+  box._insert = function(t){ inp.value = t; try{ inp.focus(); }catch(e){} };
+  var micG = micFor(function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; });
+  if(micG) box.appendChild(micG);
   var ch = starters(card, function(s){ inp.value = s + " "; inp.focus(); }); if(ch) box.appendChild(ch);
   draw();
   return box;
@@ -1055,7 +1346,7 @@ function fDq(card, ctx){
   var box = el("div");
   box.appendChild(el("p", "pb-dq", esc(dq())));
   var t = fText(card, ctx, true);
-  box.appendChild(t);
+  box.appendChild(t); box._insert = t._insert;
   return box;
 }
 
@@ -1129,6 +1420,9 @@ function fWeb(card, ctx){
   inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); addOne(inp.value); inp.value = ""; } });
   bulb.onclick = function(){ inp.focus(); bulbTaps++; if(bulbTaps === 7){ bulbTaps = 0; burst(); } };
   box.appendChild(add);
+  box._insert = function(t){ if(/\s$/.test(t)){ inp.value = t; try{ inp.focus(); }catch(e){} } else addOne(t); };
+  var micW = micFor(function(t){ inp.value = (inp.value ? inp.value + " " : "") + t; });
+  if(micW) box.appendChild(micW);
   var ch = starters(card, function(s){ inp.value = s + " "; inp.focus(); }); if(ch) box.appendChild(ch);
   setTimeout(function(){ draw(); }, 0);
   var rs = debounce(function(){ if(web.isConnected) draw(); }, 200);
@@ -1227,6 +1521,15 @@ function fSketch(card, ctx){
   var rs = debounce(function(){ if(cv.isConnected) size(); }, 200);
   window.addEventListener("resize", rs);
   if(card.link){
+    var phId = card.id + "_ph", phBox = el("div", "pb-mini");
+    var drawPh = function(){
+      var g2 = getF(ctx.step, ctx.pg, phId), src = photoSrc(g2.v);
+      phBox.innerHTML = src ? '<img class="pb-photo" alt="Your photo" src="' + src + '">' : '';
+      if(src){ var rm = el("button", "pb-btn small quiet", "Take the photo out"); rm.type = "button"; rm.onclick = function(){ sdel(kPhoto(g2.v.o || "s", g2.v.ph)); setF(ctx.step, ctx.pg, phId, null); drawPh(); }; phBox.appendChild(rm); }
+      var cb = photoButton(function(id){ if(src) sdel(kPhoto(g2.v.o || "s", g2.v.ph)); setF(ctx.step, ctx.pg, phId, { ph: id, o: PEN }); drawPh(); }, null, src ? "Take a different photo" : "Or take a photo instead");
+      if(cb) phBox.appendChild(cb);
+    };
+    drawPh(); box.appendChild(phBox);
     var lk = el("div", "pb-mini"), lid = card.id + "_link", lg = getF(ctx.step, ctx.pg, lid);
     lk.innerHTML = '<label>Or a link to a photo, video or file <small style="opacity:.7">(optional)</small></label>';
     var li = el("input", "pb-in" + (lg.by === "j" ? " jay" : "")); li.type = "url"; li.placeholder = "https://drive.google.com/..."; li.value = lg.v || ""; li.setAttribute("aria-label", "Link");
@@ -1269,6 +1572,165 @@ function fCover(card, ctx){
   return wrap;
 }
 
+/* voice typing: Chrome's own speech to text. On some school networks it
+   cannot connect; then it says so, and points at the Chromebook's own
+   dictation (Search + D, once switched on in Accessibility settings). */
+var SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+function micFor(onText){
+  if(!SRC || STAFF) return null;
+  var w = el("div"), b = el("button", "pb-mic", MIC + "<span>Say it</span>"), line = el("p", "pb-micline");
+  b.type = "button"; b.setAttribute("aria-label", "Say it instead of typing");
+  var row = el("div", "pb-row"); row.appendChild(b); w.appendChild(row); w.appendChild(line);
+  var rec = null;
+  b.onclick = function(){
+    if(rec){ try{ rec.stop(); }catch(e){} return; }
+    try{ rec = new SRC(); }catch(e){ line.textContent = "Voice typing is not available on this laptop."; return; }
+    rec.lang = "en-GB"; rec.interimResults = true; rec.continuous = false;
+    var got = "";
+    rec.onstart = function(){ b.classList.add("on"); b.querySelector("span").textContent = "Listening... tap to stop"; line.textContent = "Say it whenever you are ready."; };
+    rec.onresult = function(e){
+      var interim = "";
+      for(var i = e.resultIndex; i < e.results.length; i++){
+        if(e.results[i].isFinal) got += e.results[i][0].transcript; else interim += e.results[i][0].transcript;
+      }
+      line.textContent = interim ? "Hearing: " + interim : "";
+    };
+    rec.onerror = function(e){
+      var c = e && e.error;
+      line.textContent = c === "no-speech" ? "Did not catch anything. Have another go whenever." :
+        c === "not-allowed" ? "The microphone is switched off for this page. Jay can help switch it on." :
+        c === "aborted" ? "" : "Voice typing could not connect on this laptop. On a Chromebook, Search + D starts its own dictation (if it is switched on).";
+    };
+    rec.onend = function(){
+      b.classList.remove("on"); b.querySelector("span").textContent = "Say it"; rec = null;
+      got = got.trim();
+      if(got){ onText(got.charAt(0).toUpperCase() + got.slice(1)); line.textContent = "Popped it in. Change it however you like."; }
+    };
+    try{ rec.start(); }catch(e){ rec = null; line.textContent = "Voice typing did not start. Have another go in a moment."; }
+  };
+  return w;
+}
+
+/* photos: taken with the laptop camera (or picked from the laptop), made
+   small, and saved in the book like everything else */
+function shrinkPhoto(file){
+  return new Promise(function(res){
+    var r = new FileReader();
+    r.onerror = function(){ res(null); };
+    r.onload = function(){
+      var im = new Image();
+      im.onerror = function(){ res(null); };
+      im.onload = function(){
+        var sizes = [720, 600, 500, 420, 340, 280], qs = [.62, .5, .4];
+        for(var i = 0; i < sizes.length; i++){
+          var k = Math.min(1, sizes[i] / Math.max(im.width, im.height)), cv = document.createElement("canvas");
+          cv.width = Math.max(1, Math.round(im.width * k)); cv.height = Math.max(1, Math.round(im.height * k));
+          var c2 = cv.getContext("2d"); c2.fillStyle = "#fff"; c2.fillRect(0, 0, cv.width, cv.height); c2.drawImage(im, 0, 0, cv.width, cv.height);
+          for(var j = 0; j < qs.length; j++){ var d = cv.toDataURL("image/jpeg", qs[j]); if(d.length <= 38000) return res(d); }
+        }
+        res(null);
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+function photoButton(onSaved, msgEl, label){
+  if(S.guest && !STAFF) return null;
+  var w = el("div", "pb-row"), b = el("button", "pb-btn small pb-cam", CAM + (label || "Take a photo")), say = msgEl || el("p", "hint");
+  b.type = "button"; w.appendChild(b); if(!msgEl) w.appendChild(say);
+  var inp = el("input"); inp.type = "file"; inp.accept = "image/*"; inp.setAttribute("capture", "environment"); inp.hidden = true; w.appendChild(inp);
+  b.onclick = function(){
+    if(photoCount() >= 40){ say.textContent = "The book has 40 photos already. Take one out to add another, or use a Drive link."; return; }
+    inp.value = ""; inp.click();
+  };
+  inp.onchange = function(){
+    var f = inp.files && inp.files[0]; if(!f) return;
+    say.textContent = "Making it fit the book...";
+    shrinkPhoto(f).then(function(d){
+      if(!d){ say.textContent = "That photo would not fit. Try another, or put it in your Drive and paste the link."; return; }
+      var id = uid(); wj(kPhoto(PEN, id), { v: d, t: now() });
+      say.textContent = "Photo in."; onSaved(id);
+    });
+  };
+  return w;
+}
+
+/* "Not sure? Help me think" under each card */
+function helpEl(card, ctx, body){
+  if(card.t === "stamps") return null;
+  var H = HELP[ctx.step + "." + card.id] || {};
+  if(STAFF){
+    var fl = getF(ctx.step, ctx.pg, "_help_" + card.id).v;
+    return fl ? el("p", "pb-helpflag", "Asked for a hand with this, " + esc(niceDate(+fl))) : null;
+  }
+  var looks = (H.look || []).map(function(r){
+    var p = r.split("."), st = BY[p[0]]; if(!st) return null;
+    var c = st.cards.filter(function(x){ return x.id === p[1]; })[0]; if(!c) return null;
+    var n = p[0] === "cover" ? 1 : pagesOf(p[0]), parts = [];
+    for(var i = 1; i <= n; i++){ var t = cardText(c, { step: p[0], pg: i }); if(t) parts.push(t.replace(/ \[Jay\]/g, "")); }
+    return parts.length ? { s: st, c: c, t: parts.join("\n") } : null;
+  }).filter(Boolean);
+  var tiles = [];
+  if(H.ask && body._insert) tiles.push(["ask", "A smaller question"]);
+  if(H.eg) tiles.push(["eg", "See an example"]);
+  if(looks.length) tiles.push(["look", "Look back at my book"]);
+  if(H.where) tiles.push(["where", "Where could I find out?"]);
+  if(!S.guest) tiles.push(["jay", "Ask Jay or Holly"]);
+  if(!tiles.length) return null;
+  var wrap = el("div", "pb-helpwrap");
+  var btn = el("button", "pb-helpbtn", BULB + "<span>Not sure? Help me think</span>"); btn.type = "button"; btn.setAttribute("aria-expanded", "false");
+  var box = el("div", "pb-help"); box.hidden = true;
+  box.innerHTML = '<div class="tiles" role="group" aria-label="Ways to help">' + tiles.map(function(t){ return '<button type="button" data-h="' + t[0] + '" aria-pressed="false">' + HICON[t[0]] + '<span>' + t[1] + '</span></button>'; }).join("") + '</div><div class="hc" aria-live="polite"></div>';
+  wrap.appendChild(btn); wrap.appendChild(box);
+  var hc = box.querySelector(".hc");
+  function say(t){ if(WHO === "LC" && window.B5Speak && t) B5Speak.say(t); }
+  btn.onclick = function(){
+    box.hidden = !box.hidden; btn.setAttribute("aria-expanded", box.hidden ? "false" : "true");
+    if(!box.hidden && tiles.length === 1) show(tiles[0][0]);
+  };
+  function show(kind){
+    [].forEach.call(box.querySelectorAll("[data-h]"), function(x){ x.setAttribute("aria-pressed", x.dataset.h === kind ? "true" : "false"); });
+    if(kind === "ask"){
+      hc.innerHTML = '<p class="hq">' + esc(H.ask.q) + '</p><div class="pb-chips">' + H.ask.o.map(function(o, i){ return '<button type="button" data-o="' + i + '">' + esc(o[0]) + '</button>'; }).join("") + '</div><p class="ok" hidden></p>';
+      hc.querySelector(".pb-chips").onclick = function(e){
+        var b = e.target.closest("[data-o]"); if(!b) return;
+        var o = H.ask.o[+b.dataset.o]; body._insert(o[1]);
+        var ok = hc.querySelector(".ok"); ok.hidden = false;
+        ok.textContent = /\s$/.test(o[1]) ? "Started it for you. Finish it however you like." : "Popped it in. Change it however you like.";
+      };
+      say(H.ask.q);
+    } else if(kind === "eg"){
+      hc.innerHTML = '<div class="pb-eg">' + BFACE + '<div><b>From Bonnie\'s project book</b><p>' + esc(H.eg) + '</p></div></div>';
+      say(H.eg);
+    } else if(kind === "look"){
+      hc.innerHTML = '<p class="hq">You have already written some of this</p>' + looks.map(function(L){
+        return '<div class="pb-look"><b>' + esc(L.s.n) + ': ' + esc(L.c.label) + '</b><p>' + esc(L.t) + '</p>' + (L.s.id !== ctx.step ? '<button type="button" class="pb-btn small quiet" data-go="' + L.s.id + '">Open that page</button>' : '') + '</div>';
+      }).join("");
+      hc.onclick = function(e){ var b = e.target.closest("[data-go]"); if(b) openStep(b.dataset.go); };
+    } else if(kind === "where"){
+      hc.innerHTML = '<p>' + esc(H.where) + '</p>' + (H.link ? '<a class="pb-btn small" href="' + esc(H.link[1]) + '">' + esc(H.link[0]) + '</a>' : '');
+      say(H.where);
+    } else if(kind === "jay"){
+      hc.innerHTML = '<p>Send Jay a message saying you would like a hand with this one? Jay or Holly will come over when they can.</p>' +
+        '<div class="pb-row"><button type="button" class="pb-btn small teal" data-a="yes">Yes please</button><button type="button" class="pb-btn small quiet" data-a="no">Not now</button></div><p class="ok" hidden></p>';
+      hc.onclick = function(e){
+        var b = e.target.closest("[data-a]"); if(!b) return;
+        if(b.dataset.a === "no"){ hc.innerHTML = ""; [].forEach.call(box.querySelectorAll("[data-h]"), function(x){ x.setAttribute("aria-pressed", "false"); }); return; }
+        var ok = hc.querySelector(".ok"); ok.hidden = false; ok.textContent = "Sending...";
+        b.disabled = true;
+        var pp = page(PEN, ctx.step, ctx.pg), t = now(); pp.f["_help_" + card.id] = { v: t, t: t }; pp.t = t; wj(kPage(PEN, ctx.step, ctx.pg), pp);
+        var text = WHO + " would like a hand with their project book. " + BY[ctx.step].n + ": " + card.q;
+        (S.call ? S.call("send", { who: WHO, tool: "Project book: a hand please", page: location.pathname + "#" + ctx.step, text: text }) : Promise.reject())
+          .then(function(o){ if(!o || !o.ok) throw 0; ok.textContent = "Sent. Jay or Holly will come over. Carry on with something else, or have a break."; })
+          .catch(function(){ ok.textContent = "That did not send just now. Give Jay or Holly a wave instead."; });
+      };
+    }
+  }
+  box.querySelector(".tiles").onclick = function(e){ var b = e.target.closest("[data-h]"); if(b) show(b.dataset.h); };
+  return wrap;
+}
+
 function renderBody(card, ctx){
   switch(card.t){
     case "text": return fText(card, ctx, false);
@@ -1293,7 +1755,7 @@ function renderBody(card, ctx){
 }
 function cardHasWork(card, ctx){
   var s = ctx.step, p = ctx.pg;
-  if(card.t === "sketch") return !!getDraw(s, p, card.id).v || hasVal(getF(s, p, card.id + "_link").v);
+  if(card.t === "sketch") return !!getDraw(s, p, card.id).v || hasVal(getF(s, p, card.id + "_link").v) || !!photoSrc(getF(s, p, card.id + "_ph").v);
   if(["list", "qa", "rubric", "links", "log", "cues", "web"].indexOf(card.t) >= 0) return getC(s, p, card.id).length > 0;
   if(card.t === "stamps") return true;
   return hasVal(getF(s, p, card.id).v);
@@ -1308,7 +1770,8 @@ function cardEl(card, ctx, all){
     (card.hint && !(all && STAFF) ? '<p class="hint">' + esc(card.hint) + '</p>' : (all && STAFF && card.q !== card.label ? '<p class="hint">Student sees: ' + esc(card.q) + '</p>' : ""));
   var say = c.querySelector(".pb-say");
   if(say) say.onclick = function(){ if(window.B5Speak) B5Speak.say(card.q + ". " + (card.hint || "")); };
-  var b = el("div", "body"); b.appendChild(renderBody(card, ctx)); c.appendChild(b);
+  var b = el("div", "body"), inner = renderBody(card, ctx); b.appendChild(inner); c.appendChild(b);
+  var hp = helpEl(card, ctx, inner); if(hp) c.appendChild(hp);
   return c;
 }
 
@@ -1364,12 +1827,13 @@ function drawMap(){
     '<div class="pb-count"><span>' + list.length + ' of ' + ROUTE.length + ' stamped</span><span class="pb-bar"><i id="pbBar" style="width:0"></i></span></div>' +
     (nx ? '<button type="button" class="pb-btn main" id="pbGo">' + (list.length || stepState(nx.id).started ? "Carry on: " : "Start here: ") + esc(nx.n) + NEXT + '</button>'
         : '<button type="button" class="pb-btn main" id="pbAll">Your book is complete! Have a look back' + NEXT + '</button>') +
+    weekLine() +
     '<p class="pb-small">Or tap any stop on the map. Any order is fine, and you can come back to any page.</p></div></div>';
   var news = ROUTE.filter(function(s){ return jayNew(s.id); });
   if(news.length) h += '<div class="pb-news" role="status"><b>Jay wrote in your book</b><span>on ' + news.map(function(s){ return esc(s.n); }).join(", ") + '.</span>' +
     news.slice(0, 3).map(function(s){ return '<button type="button" class="pb-btn small" data-open="' + s.id + '">Open ' + esc(s.n) + '</button>'; }).join("") + '</div>';
   h += '<div class="pb-map" id="pbMap"></div>';
-  h += '<div class="pb-foot"><button type="button" class="pb-btn" id="pbPrintBtn">Print my book</button>' + (S.guest ? '' : '<button type="button" class="pb-btn" id="pbSendBtn">Send Jay a look</button>') + '<div class="sendbox" id="pbSend" hidden></div></div>';
+  h += '<div class="pb-foot"><button type="button" class="pb-btn" id="pbPrintBtn">Print my book</button><button type="button" class="pb-btn" id="pbBookletBtn">Make my booklet</button>' + (S.guest ? '' : '<button type="button" class="pb-btn" id="pbSendBtn">Send Jay a look</button>') + '<div class="sendbox" id="pbSend" hidden></div></div>';
   root.innerHTML = h;
   setTimeout(function(){ var b = $("pbBar"); if(b) b.style.width = Math.round(list.length / ROUTE.length * 100) + "%"; }, 60);
   $("pbCover").onclick = function(){ openStep("cover", 1, 0); };
@@ -1377,6 +1841,7 @@ function drawMap(){
   if($("pbAll")) $("pbAll").onclick = function(){ printBook({ blank: false }); };
   [].forEach.call(root.querySelectorAll("[data-open]"), function(b){ b.onclick = function(){ openStep(b.dataset.open); }; });
   $("pbPrintBtn").onclick = function(){ printBook({ blank: false }); };
+  $("pbBookletBtn").onclick = printBooklet;
   if($("pbSendBtn")) $("pbSendBtn").onclick = function(){
     var box = $("pbSend"); box.hidden = !box.hidden;
     if(!box.hidden && !box.firstChild && window.Base5Send) Base5Send.mount(box, { tool: WHO + "'s project book", filename: (WHO || "my").toLowerCase() + "-project-book", getText: bookText });
@@ -1386,6 +1851,14 @@ function drawMap(){
   window.scrollTo(0, 0);
 }
 
+function thisWeek(){
+  var B = window.B5BOOKPLAN; if(!B || B.book !== BOOK) return null;
+  return B.weekOf(B.today());
+}
+function weekLine(){
+  var w = thisWeek(); if(!w) return "";
+  return '<div class="pb-week"><b>This week:</b>' + w.steps.map(function(id){ var st = stepState(id); return '<span class="' + (st.done ? "done" : "") + '">' + (st.done ? "&#10003; " : "") + esc(BY[id].n) + '</span>'; }).join("") + '</div>';
+}
 var mapAnimated = false, podTaps = 0, lastPod = null;
 function drawRoute(nx){
   var box = $("pbMap"); if(!box) return;
@@ -1406,6 +1879,7 @@ function drawRoute(nx){
   }
   var full = pts.map(function(p, i){ return i ? seg(pts[i - 1], p).replace(/^M[^LC]+/, "") : "M" + p.x + " " + p.y; }).join("");
   var states = ROUTE.map(function(s){ return stepState(s.id); });
+  var tw = thisWeek(), wk = tw ? tw.steps : [];
   var anim = !mapAnimated && !REDUCED; mapAnimated = true;
   var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="group" aria-label="The map of your project book">';
   svg += '<path class="road" d="' + full + '"/><path class="dash' + (anim ? ' draw' : '') + '" style="--len:4000" d="' + full + '"/>';
@@ -1434,6 +1908,7 @@ function drawRoute(nx){
     svg += '<g class="stop" tabindex="0" role="button" data-id="' + s.id + '" aria-label="' + esc(s.n) + (st.done ? ", stamped" : st.started ? ", started" : "") + '" transform="translate(' + p.x + ' ' + p.y + ')">' +
       '<g class="face' + (anim ? ' pop' : '') + '" style="animation-delay:' + (.3 + i * .05) + 's">' +
       (cur ? '<circle class="pulse" r="30"/>' : '') +
+      (wk.indexOf(s.id) >= 0 && !st.done ? '<circle class="wk" r="36"/>' : '') +
       '<circle class="ring" r="28" fill="' + (st.done ? c : "#fffdf8") + '" stroke="' + (st.done ? "#0a2f38" : c) + '" stroke-width="' + (st.done ? 3 : 5) + '"' + (s.optional && !st.done ? ' stroke-dasharray="6 5"' : '') + '/>' +
       (st.started && !st.done ? '<path d="M0 -28A28 28 0 0 1 28 0" fill="none" stroke="' + c + '" stroke-width="9"/>' : '') +
       '<g transform="translate(-13 -13) scale(1.08)" fill="none" stroke="' + (st.done ? "#fff" : "#0a2f38") + '" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="' + I[s.id] + '"/></g>' +
@@ -1564,6 +2039,7 @@ function stampCard(s, done){
       if(stampedList().length === ROUTE.length - 1 && !getDone(s.id, view.pg)) word = "Book complete!";
       setDone(s.id, view.pg, true, word);
       stampFx(word, stageOf(s).c);
+      stampNote(s, view.pg);
       if(word === "Book complete!") setTimeout(bonnie, 700);
       setTimeout(function(){ drawMap(); }, 1300);
     };
@@ -1580,19 +2056,31 @@ function stampCard(s, done){
   return c;
 }
 
+/* a stamp goes to BridgeLink Buddy as a Learning note, through the Base 5
+   sheet (its "activity" action: one Evidence row per step per day, and a
+   note in Buddy when "Evidence to Buddy" is on). Only the student's own
+   school sign in counts, so staff and guests are skipped by the sheet. */
+function stampNote(s, pg){
+  if(STAFF || S.guest || PEN === "j" || !S.call) return;
+  var bits = [];
+  s.cards.forEach(function(c){ var t = cardText(c, { step: s.id, pg: pg }); if(t) bits.push(c.label + ": " + t.replace(/^- /gm, "").replace(/\n/g, "; ")); });
+  var line = (bits.join(". ") || "Stamped without writing (done another way).").slice(0, 290);
+  S.call("activity", { slug: "game-pb-" + s.id, title: "Project book: " + s.n, subject: "Project", secs: 60, line: line, made: "Stamped " + s.n + " in the project book" }).catch(function(){});
+}
+
 /* the whole book as plain text, for Send to Jay */
 function itemText(card, it){
   var v = it.v;
   if(card.t === "qa") return (v.q || "") + (v.a ? " - " + v.a : "");
   if(card.t === "rubric") return (v.c || "") + (v.d ? ": " + v.d : "");
-  if(card.t === "links") return (v.title || "Link") + (v.url ? " (" + v.url + ")" : "");
+  if(card.t === "links") return (v.title || (v.ph ? "A photo" : "Link")) + (v.url ? " (" + v.url + ")" : "") + (v.ph && v.title ? " (photo)" : "");
   if(card.t === "log") return niceDate(v.d) + ": " + (v.f || "");
   if(card.t === "web") return v.text || "";
   return typeof v === "string" ? v : "";
 }
 function cardText(card, ctx){
   var s = ctx.step, p = ctx.pg;
-  if(card.t === "sketch"){ var d = getDraw(s, p, card.id).v, l = getF(s, p, card.id + "_link").v; return (d ? "(a drawing)" : "") + (l ? (d ? " " : "") + l : ""); }
+  if(card.t === "sketch"){ var d = getDraw(s, p, card.id).v, l = getF(s, p, card.id + "_link").v, ph = photoSrc(getF(s, p, card.id + "_ph").v); return [d ? "(a drawing)" : "", ph ? "(a photo)" : "", l || ""].filter(Boolean).join(" "); }
   if(["list", "qa", "rubric", "links", "log", "cues", "web"].indexOf(card.t) >= 0) return getC(s, p, card.id).map(function(it){ return "- " + itemText(card, it) + (it.by === "j" ? " [Jay]" : ""); }).join("\n");
   if(card.t === "stamps") return "";
   var g = getF(s, p, card.id), v = g.v;
@@ -1628,8 +2116,8 @@ function printBox(card, ctx, blank){
       card.t === "dq" ? '<p><b>' + esc(dq()) + '</b></p><div class="lines"></div>' :
       '<div class="lines"' + (wide ? ' style="height:46mm"' : '') + '></div>';
   } else if(card.t === "sketch"){
-    var d = getDraw(s, p, card.id), lk = getF(s, p, card.id + "_link").v;
-    inner = (d.v ? skSvg(d.v) : "") + (lk ? '<p>' + esc(lk) + '</p>' : "");
+    var d = getDraw(s, p, card.id), lk = getF(s, p, card.id + "_link").v, phs = photoSrc(getF(s, p, card.id + "_ph").v);
+    inner = (phs ? '<img alt="" src="' + phs + '">' : "") + (d.v ? skSvg(d.v) : "") + (lk ? '<p>' + esc(lk) + '</p>' : "");
     if(!inner) inner = '<div class="lines" style="height:46mm"></div>';
   } else if(card.t === "web"){
     var its = getC(s, p, card.id);
@@ -1651,7 +2139,11 @@ function printBox(card, ctx, blank){
   } else if(card.t === "dq"){
     var dg = getF(s, p, card.id);
     inner = '<p><b>' + esc(dq()) + '</b></p>' + (dg.v ? '<p class="' + (dg.by === "j" ? "j" : "") + '">' + esc(dg.v) + '</p>' : "");
-  } else if(["list", "qa", "rubric", "links", "log", "cues"].indexOf(card.t) >= 0){
+  } else if(card.t === "links"){
+    var lks = getC(s, p, card.id);
+    inner = lks.map(function(it){ var src = photoSrc(it.v); return src ? '<img alt="" src="' + src + '">' : ""; }).join("") +
+      (lks.length ? '<ul>' + lks.map(function(it){ return '<li class="' + (it.by === "j" ? "j" : "") + '">' + esc(itemText(card, it)) + '</li>'; }).join("") + '</ul>' : "");
+  } else if(["list", "qa", "rubric", "log", "cues"].indexOf(card.t) >= 0){
     var li = getC(s, p, card.id);
     inner = li.length ? '<ul>' + li.map(function(it){ return '<li class="' + (it.by === "j" ? "j" : "") + '">' + esc(itemText(card, it)) + '</li>'; }).join("") + '</ul>' : "";
   } else if(card.t === "days"){
@@ -1680,11 +2172,57 @@ function printBook(opt){
         (opt.staff ? '<div class="sup"><b>Engagement and support</b>' + esc(opt.blank ? "" : supportText(s.id, p)) + '</div>' : '') + '</div></section>';
     }
   });
+  out.className = "";
   out.innerHTML = h;
+  pageSize("A4 landscape", "9mm");
   document.body.classList.add("pb-printing");
   var done = function(){ document.body.classList.remove("pb-printing"); window.removeEventListener("afterprint", done); };
   window.addEventListener("afterprint", done);
   setTimeout(function(){ window.print(); setTimeout(done, 1500); }, 120);
+}
+function pageSize(size, margin){
+  var st = $("pbPageSize"); if(!st){ st = el("style"); st.id = "pbPageSize"; document.head.appendChild(st); }
+  st.textContent = "@media print{@page{size:" + size + ";margin:" + margin + "}}";
+}
+/* the finished book as an A5 booklet: their cover, their answer, every
+   page with something on it, and the stamp collection at the back */
+function printBooklet(){
+  var out = $("pbPrint"); if(!out){ out = el("div"); out.id = "pbPrint"; document.body.appendChild(out); }
+  var look = getF("cover", 1, "look").v || {}, title = getF("cover", 1, "title").v || "My project", cv = COVERS[look.c] || COVERS[0];
+  var st = Array.isArray(look.s) ? look.s.slice(0, 3) : [], spots = [["10mm", "10mm", "auto", "auto", "-10deg"], ["auto", "auto", "14mm", "10mm", "12deg"], ["auto", "12mm", "40mm", "auto", "-6deg"]];
+  var h = '<section class="bp"><div class="bcov" style="--cv:' + cv + '">' + st.map(function(n, i){ var s = spots[i]; return '<span class="stk" style="top:' + s[0] + ';right:' + s[1] + ';bottom:' + s[2] + ';left:' + s[3] + ';transform:rotate(' + s[4] + ')">' + stickerSvg(n) + '</span>'; }).join("") +
+    '<h1>' + esc(title) + '</h1><p>' + esc(dq()) + '</p><p>Enterprise Learning Project &middot; ' + esc(TERM) + '</p><p class="by">by ' + esc(WHO) + '</p></div></section>';
+  var ans = getF("answer", 1, "answer"), because = getF("answer", 1, "answer_n").v;
+  if(hasVal(ans.v)) h += '<section class="bp"><div class="band" style="--sc:#0a2f38">' + icon("answer") + '<h2>My answer</h2></div><p class="it" style="font-size:12pt">' + esc(dq()) + '</p><p class="quote">' + esc(ans.v) + (because ? '. ' + esc(String(because).charAt(0).toUpperCase() + String(because).slice(1)) : '') + '</p></section>';
+  ROUTE.forEach(function(s){
+    var n = pagesOf(s.id), sc = stageOf(s).c;
+    for(var p = 1; p <= n; p++){
+      if(!pageHasWork(s.id, p)) continue;
+      var ctx = { step: s.id, pg: p }, items = "";
+      s.cards.forEach(function(c){
+        if(c.t === "stamps") return;
+        var inner = "";
+        if(c.t === "sketch"){ var d = getDraw(s.id, p, c.id).v, ph = photoSrc(getF(s.id, p, c.id + "_ph").v); inner = (ph ? '<img alt="" src="' + ph + '">' : "") + (d ? skSvg(d) : ""); }
+        else if(c.t === "web" || c.t === "faces" || c.t === "pick" || c.t === "days" || c.t === "dq"){ var bx = printBox(c, ctx, false); inner = bx.replace(/^<div class="bx[^"]*"><h4>[\s\S]*?<\/h4>/, "").replace(/<\/div>$/, ""); if(c.t !== "dq" && !cardHasWork(c, ctx)) inner = ""; if(c.t === "dq" && !hasVal(getF(s.id, p, c.id).v)) inner = ""; }
+        else if(c.t === "links"){ var L = getC(s.id, p, c.id); inner = L.map(function(it){ var src = photoSrc(it.v); return src ? '<img alt="" src="' + src + '">' : ""; }).join("") + L.filter(function(it){ return (it.v || {}).title || (it.v || {}).url; }).map(function(it){ return '<p>' + esc(itemText(c, it)) + '</p>'; }).join(""); }
+        else if(["list", "qa", "rubric", "log", "cues"].indexOf(c.t) >= 0){ var L2 = getC(s.id, p, c.id); inner = L2.length ? '<ul>' + L2.map(function(it){ return '<li class="' + (it.by === "j" ? "j" : "") + '">' + esc(itemText(c, it)) + '</li>'; }).join("") + '</ul>' : ""; }
+        else if(c.t !== "cover"){ var g = getF(s.id, p, c.id); inner = hasVal(g.v) ? '<p class="' + (g.by === "j" ? "j" : "") + '">' + esc(c.t === "date" ? niceDate(g.v) : g.v) + '</p>' : ""; }
+        if(inner) items += '<div class="it"><h4>' + esc(c.label) + '</h4>' + inner + '</div>';
+      });
+      if(!items) continue;
+      h += '<section class="bp" style="--sc:' + sc + '"><div class="band">' + icon(s.id) + '<h2>' + esc(s.n) + '</h2><small>' + esc(stageOf(s).n) + '</small></div>' + items + '</section>';
+    }
+  });
+  var list = stampedList();
+  h += '<section class="bp"><div class="band" style="--sc:#ef7724">' + icon("review") + '<h2>My stamp collection</h2></div><p class="it" style="font-size:12pt">' + list.length + ' of ' + ROUTE.length + ' steps stamped.</p><div class="stampsgrid">' +
+    ROUTE.map(function(s){ var on = list.indexOf(s.id) >= 0; return '<div style="--c:' + stageOf(s).c + '"><i class="' + (on ? "on" : "") + '">' + icon(s.id) + '</i>' + esc(s.n) + '</div>'; }).join("") + '</div></section>';
+  out.className = "bk";
+  out.innerHTML = h;
+  pageSize("A5 portrait", "10mm");
+  document.body.classList.add("pb-printing");
+  var done = function(){ document.body.classList.remove("pb-printing"); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  setTimeout(function(){ window.print(); setTimeout(done, 1500); }, 150);
 }
 function supportText(step, pg){
   var v = rj(kSup(step, pg)); if(!v) return "";
@@ -1811,7 +2349,7 @@ function drawStaff(){
   var ctx = { step: s.id, pg: staffSel.pg };
   var h = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px">' + WHOS.map(function(w){ return '<button type="button" class="pb-btn small' + (w === WHO ? " teal" : "") + '" data-pick="' + w + '" aria-pressed="' + (w === WHO) + '">' + w + '</button>'; }).join("") +
     '<span style="flex:1"></span><button type="button" class="pb-btn small quiet" id="pbRefresh">Refresh</button>' +
-    '<button type="button" class="pb-btn small" id="pbPrintF">Print ' + WHO + '\'s book</button><button type="button" class="pb-btn small quiet" id="pbPrintB">Print a blank book</button>' +
+    '<button type="button" class="pb-btn small" id="pbPrintF">Print ' + WHO + '\'s book</button><button type="button" class="pb-btn small" id="pbPrintK">' + WHO + '\'s booklet</button><button type="button" class="pb-btn small quiet" id="pbPrintB">Print a blank book</button>' +
     '<button type="button" class="pb-btn small quiet" id="pbDqBtn">Driving question</button></div>';
   h += '<div style="display:grid;grid-template-columns:minmax(220px,280px) 1fr;gap:18px;align-items:start" class="pb-staffgrid">';
   /* the step list */
@@ -1819,10 +2357,10 @@ function drawStaff(){
     [BY.cover].concat(ROUTE).map(function(x, i){
       var ss = x.id === "cover" ? { done: false, started: hasVal(getF("cover", 1, "title").v) } : stepState(x.id), c = x.stage >= 0 ? stageOf(x).c : "#0a2f38";
       var stageHead = x.stage >= 0 && (i === 1 || ROUTE[i - 2].stage !== x.stage) ? '<div style="font:800 .68rem Archivo,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:' + c + ';margin:10px 0 2px">' + esc(stageOf(x).n) + '</div>' : '';
-      var jp = 0; for(var q = 1; q <= (x.id === "cover" ? 1 : ss.pages); q++){ if(rj(kSup(x.id, q))) jp++; }
+      var jp = 0, hand = false; for(var q = 1; q <= (x.id === "cover" ? 1 : ss.pages); q++){ if(rj(kSup(x.id, q))) jp++; x.cards.forEach(function(cd){ if(getF(x.id, q, "_help_" + cd.id).v) hand = true; }); }
       return stageHead + '<button type="button" data-step="' + x.id + '" style="display:flex;align-items:center;gap:8px;text-align:left;padding:7px 10px;border-radius:12px;border:2px solid ' + (x.id === s.id ? "#0a2f38" : "transparent") + ';background:' + (x.id === s.id ? "#fff" : "transparent") + '">' +
         '<span style="width:14px;height:14px;border-radius:50%;flex:none;border:2px solid ' + c + ';background:' + (ss.done ? c : ss.started ? "linear-gradient(90deg," + c + " 50%,#fff 50%)" : "#fff") + '"></span>' +
-        '<span style="flex:1;font-weight:700;font-size:.92rem">' + esc(x.n) + '</span>' + (ss.pages > 1 ? '<small>' + ss.pages + 'pp</small>' : '') + (jp ? '<small title="Has an engagement and support note">&#9998;</small>' : '') + '</button>';
+        '<span style="flex:1;font-weight:700;font-size:.92rem">' + esc(x.n) + '</span>' + (ss.pages > 1 ? '<small>' + ss.pages + 'pp</small>' : '') + (hand ? '<small title="Asked for a hand on this page" style="background:#fff1a8;border-radius:99px;padding:0 6px">hand</small>' : '') + (jp ? '<small title="Has an engagement and support note">&#9998;</small>' : '') + '</button>';
     }).join("") + '</nav>';
   /* the page */
   h += '<div class="pb-step" style="--sc:' + (s.stage >= 0 ? st.c : "#0a2f38") + '"><div class="pb-head"><span class="pb-sticon">' + icon(s.id) + '</span><div class="tt"><span>' + esc(WHO) + "'s book" + (s.stage >= 0 ? " &middot; " + esc(st.n) : "") + '</span><h1>' + esc(s.n) + '</h1></div>' +
@@ -1844,6 +2382,7 @@ function drawStaff(){
   $("pbRefresh").onclick = function(){ staffStatus("Refreshing " + WHO + "'s book..."); var w = WHO; loadOne(w).then(function(){ useStudent(w); drawCohort(); drawStaff(); staffStatus("Up to date."); }, function(){ staffStatus("Could not reach the sheet just now.", true); }); };
   $("pbPrintF").onclick = function(){ printBook({ staff: true, blank: false, onlyWork: false }); };
   $("pbPrintB").onclick = function(){ printBook({ staff: true, blank: true }); };
+  $("pbPrintK").onclick = printBooklet;
   $("pbDqBtn").onclick = dqEditor;
 }
 var SUPPORT = ["Independently", "With a little prompting", "With adult support", "Adult scribed", "Talked it through first", "Used the starters", "Worked with Holly", "Needed a break, came back", "Chose to stop for today"];
@@ -1910,6 +2449,7 @@ function startStudent(){
   if(WHO === "LC") loadScript("/data/b5speak.js?v=1", function(){ return !!window.B5Speak; });
   var hash = (location.hash || "").replace("#", "");
   if(BY[hash]) openStep(hash); else drawMap();
+  window.addEventListener("hashchange", function(){ var h = (location.hash || "").replace("#", ""); if(BY[h]) openStep(h); });
   penButton();
   /* evidence for BridgeLink Buddy: time on task, counted by the sheet */
   if(window.B5Evidence && !S.guest) B5Evidence.start({ slug: "game-project-book", title: "Project book (ELP workbook)", subject: "Project", line: function(){
