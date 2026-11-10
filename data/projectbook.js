@@ -636,7 +636,10 @@ function sdel(k){
        and when it comes back into view (the sheet's copy wins)
      - writes only in Jay's pen, and sends just those writes (Jay's
        pages, drawings and photos) to the sheet
-   The student's own copy is never touched from a staff device.
+   The student's own copy is never touched from a staff device,
+   unless the bar's "Who's writing?" is set to the student: then the
+   two of them are working together on Jay's laptop, and what gets
+   written and stamped is the student's own work in their own book.
    ========================================================== */
 var MIRROR = false, MKEYD = "", mdirty = {}, mT = null, mBusy = false, mLast = 0;
 function staffDevice(){ try{ return localStorage.getItem("b5.sync.off") === "1"; }catch(e){ return false; } }
@@ -646,7 +649,8 @@ function isJayKey(k){
   return /^\.(j|dj|phj)\./.test(rest) || rest === ".jm";
 }
 function mirrorDirty(k){
-  if(!isJayKey(k)) return;
+  if(k.indexOf(P + "pb.") !== 0) return;
+  if(!isJayKey(k) && PEN !== "s") return;
   mdirty[k] = now();
   try{ localStorage.setItem(MKEYD, JSON.stringify(mdirty)); }catch(e){}
   clearTimeout(mT); mT = setTimeout(mirrorPush, 1500);
@@ -668,7 +672,7 @@ function mirrorPush(){
     clearTimeout(mT); mT = setTimeout(mirrorPush, 20000);
   });
 }
-function mirrorNote(t){ var n = $("pbMirror"); if(n) n.querySelector("small").textContent = t; }
+function mirrorNote(t){ var n = $("pbMirror"); if(!n) return; n.dataset.note = t; var sm = n.querySelector("small"); if(sm) sm.textContent = t; }
 function mirrorPull(){
   if(!S.call) return Promise.resolve(false);
   mLast = Date.now();
@@ -689,9 +693,9 @@ function mirrorPull(){
     return changed;
   }).catch(function(){ mirrorNote("Could not reach the sheet, so this may not be " + WHO + "'s latest book."); return false; });
 }
-function mirrorRedraw(){
+function mirrorRedraw(force){
   var a = document.activeElement;
-  if(a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return;
+  if(!force && a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return;
   if(view.at === "map") drawMap(); else if(view.at === "step") drawStep("r");
 }
 function rj(k){ try{ var v = JSON.parse(sget(k) || "null"); return v && typeof v === "object" ? v : null; }catch(e){ return null; } }
@@ -838,7 +842,7 @@ function markSeen(step){
 
 /* the front door line in the HQ reads this (only rewritten when it changes) */
 function writeSummary(){
-  if(STAFF || MIRROR) return;
+  if(STAFF || (MIRROR && PEN !== "s")) return;
   var nx = nextStep(), list = stampedList();
   var sum = { book: BOOK, next: nx ? nx.n : "", nextId: nx ? nx.id : "", stamped: list.length, of: ROUTE.length };
   var s = JSON.stringify(sum);
@@ -3106,11 +3110,28 @@ function startStudent(){
   if(WHO === "LC") loadScript("/data/b5speak.js?v=1", function(){ return !!window.B5Speak; });
   MIRROR = !S.guest && !!S.call && !!S.syncUrl && !window.B5Sync && staffDevice();
   if(MIRROR){
-    PEN = "j";
+    var MPEN = "b5.pb.mpen." + WHO;
+    try{ PEN = sessionStorage.getItem(MPEN) === "s" ? "s" : "j"; }catch(e){ PEN = "j"; }
     MKEYD = "b5.pbmirror.dirty." + WHO;
     try{ mdirty = JSON.parse(localStorage.getItem(MKEYD) || "{}") || {}; }catch(e){ mdirty = {}; }
-    var bar = el("div", "pb-penline", "Staff device: this is " + esc(WHO) + "'s book from the sheet, and anything you write goes in as Jay's writing. <small style=\"opacity:.85;margin-left:6px\">Fetching the latest...</small>");
-    bar.id = "pbMirror"; bar.style.margin = "0 0 12px"; bar.style.borderRadius = "12px";
+    var bar = el("div", "pb-penline");
+    bar.id = "pbMirror"; bar.style.cssText = "margin:0 0 12px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:center";
+    var drawBar = function(){
+      bar.style.background = PEN === "s" ? "#1e7a4a" : "";
+      bar.innerHTML = '<span>Staff device. Who is writing?</span>' +
+        '<span role="group" aria-label="Who is writing" style="display:inline-flex;gap:6px">' +
+        [["s", WHO], ["j", "Jay"]].map(function(o){ return '<button type="button" data-mpen="' + o[0] + '" aria-pressed="' + (PEN === o[0]) + '" style="font:inherit;font-weight:800;border:2px solid #fff;border-radius:999px;padding:3px 14px;cursor:pointer;background:' + (PEN === o[0] ? "#fff" : "transparent") + ';color:' + (PEN === o[0] ? "#0a2f38" : "#fff") + '">' + esc(o[1]) + '</button>'; }).join("") + '</span>' +
+        '<span>' + (PEN === "s" ? esc(WHO) + "'s own work, saved in their book." : "Goes in as Jay's writing, with a Jay tag.") + '</span>' +
+        '<small style="opacity:.85">' + (bar.dataset.note || "Fetching the latest...") + '</small>';
+    };
+    bar.addEventListener("click", function(e){
+      var b = e.target.closest("[data-mpen]"); if(!b || b.dataset.mpen === PEN) return;
+      PEN = b.dataset.mpen;
+      try{ sessionStorage.setItem(MPEN, PEN); }catch(er){}
+      drawBar(); mirrorRedraw(true);
+    });
+    window.pbMirrorBar = drawBar;
+    drawBar();
     document.body.insertBefore(bar, root);
     mirrorPush();
   }
