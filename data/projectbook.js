@@ -2656,6 +2656,197 @@ function loadScript(src, test){
   return new Promise(function(r){ var s = document.createElement("script"); s.src = src; s.onload = s.onerror = function(){ r(); }; document.head.appendChild(s); });
 }
 
+
+/* ==========================================================
+   Evidence slides (staff page): a page, or every stamped page in
+   a stage, as slides for the student's evidence deck. Downloads a
+   .pptx (made by /data/minipptx.js) to bring into the deck with
+   Google Slides' File > Import slides. Text stays editable. Writing
+   Jay did or scribed is in italics, and the slide says so.
+   ========================================================== */
+function skPng(str){
+  var cv = document.createElement("canvas"); cv.width = DRAW_W; cv.height = DRAW_H;
+  var c = cv.getContext("2d"); c.fillStyle = "#ffffff"; c.fillRect(0, 0, DRAW_W, DRAW_H);
+  decodeSk(str).forEach(function(s){
+    c.strokeStyle = s.c === 9 ? "#ffffff" : inkOf(s); c.lineWidth = widthOf(s); c.lineCap = "round"; c.lineJoin = "round";
+    c.beginPath(); for(var i = 0; i + 1 < s.p.length; i += 2){ if(i) c.lineTo(s.p[i], s.p[i + 1]); else c.moveTo(s.p[i], s.p[i + 1]); }
+    if(s.p.length === 2) c.lineTo(s.p[0] + .1, s.p[1]);
+    c.stroke();
+  });
+  return cv.toDataURL("image/png");
+}
+function webPng(items){
+  var W = 1200, H = 680, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  var c = cv.getContext("2d"); c.fillStyle = "#ffffff"; c.fillRect(0, 0, W, H);
+  c.setLineDash([10, 10]); c.strokeStyle = "rgba(10,47,56,.4)"; c.lineWidth = 3;
+  items.forEach(function(it){ var v = it.v || {}; c.beginPath(); c.moveTo(W / 2, H / 2); c.lineTo((+v.x || .5) * W, (+v.y || .5) * H); c.stroke(); });
+  c.setLineDash([]);
+  c.fillStyle = "#ffd23f"; c.strokeStyle = "#0a2f38"; c.lineWidth = 4; c.beginPath(); c.arc(W / 2, H / 2, 46, 0, Math.PI * 2); c.fill(); c.stroke();
+  c.font = "bold 26px Arial"; c.textAlign = "center"; c.textBaseline = "middle";
+  items.forEach(function(it, n){
+    var v = it.v || {}, x = (+v.x || .5) * W, y = (+v.y || .5) * H, words = String(v.text || "").split(" "), lines = [], line = "";
+    words.forEach(function(w){ if(c.measureText(line + " " + w).width > 230 && line){ lines.push(line); line = w; } else line = (line + " " + w).trim(); });
+    if(line) lines.push(line);
+    var bw = 0; lines.forEach(function(l){ bw = Math.max(bw, c.measureText(l).width); });
+    bw += 34; var bh = lines.length * 32 + 22;
+    c.fillStyle = BUBC[(v.c || n) % BUBC.length]; c.strokeStyle = "#0a2f38"; c.lineWidth = 3;
+    if(it.by === "j") c.setLineDash([8, 6]);
+    c.beginPath(); if(c.roundRect) c.roundRect(x - bw / 2, y - bh / 2, bw, bh, 18); else c.rect(x - bw / 2, y - bh / 2, bw, bh); c.fill(); c.stroke(); c.setLineDash([]);
+    c.fillStyle = it.by === "j" ? "#00708f" : "#0a2f38";
+    lines.forEach(function(l, i){ c.fillText(l, x, y - bh / 2 + 27 + i * 32); });
+  });
+  return cv.toDataURL("image/png");
+}
+function imgDims(src){
+  return new Promise(function(res){ var im = new Image(); im.onload = function(){ res({ w: im.naturalWidth || 4, h: im.naturalHeight || 3 }); }; im.onerror = function(){ res({ w: 4, h: 3 }); }; im.src = src; });
+}
+var BULLET = "\u2022 ";
+/* what one card says, as text lines (with who wrote them) and pictures */
+function cardEvidence(card, ctx){
+  var s = ctx.step, p = ctx.pg, out = { label: card.label, lines: [], imgs: [] };
+  function line(t, by){ t = String(t == null ? "" : t).trim(); if(t) out.lines.push({ text: t, jay: by === "j" }); }
+  if(card.t === "stamps" || card.t === "cover") return out;
+  if(card.t === "sketch"){
+    var d = getDraw(s, p, card.id), ph = getF(s, p, card.id + "_ph"), src = photoSrc(ph.v), lk = getF(s, p, card.id + "_link");
+    if(src) out.imgs.push({ src: src, cap: card.label + " (photo)" });
+    if(d.v) out.imgs.push({ src: skPng(d.v), cap: card.label + (/drawing|draft/i.test(card.label) ? "" : " (drawing)") + (d.by === "j" ? ", drawn with Jay" : "") });
+    if(lk.v) line(lk.v, lk.by);
+    return out;
+  }
+  if(card.t === "web"){
+    var its = getC(s, p, card.id);
+    if(its.length){ out.imgs.push({ src: webPng(its), cap: card.label }); its.forEach(function(it){ line(BULLET + ((it.v || {}).text || ""), it.by); }); }
+    return out;
+  }
+  if(card.t === "links"){
+    getC(s, p, card.id).forEach(function(it){
+      var v = it.v || {}, src2 = photoSrc(v);
+      if(src2) out.imgs.push({ src: src2, cap: v.title || card.label });
+      if(v.url || (v.title && !src2)) line(BULLET + itemText(card, it), it.by);
+    });
+    return out;
+  }
+  if(["list", "qa", "rubric", "log", "cues"].indexOf(card.t) >= 0){
+    getC(s, p, card.id).forEach(function(it){ line(BULLET + itemText(card, it), it.by); });
+    return out;
+  }
+  var g = getF(s, p, card.id), v = g.v;
+  if(card.t === "faces") v = v == null ? "" : FACES[v];
+  else if(card.t === "days") v = Array.isArray(v) && v.length ? v.map(function(i){ return ["Mon", "Tue", "Wed", "Thu", "Fri"][i]; }).join(", ") : "";
+  else if(card.t === "date") v = v ? niceDate(v) : "";
+  if(card.t === "dq" && hasVal(v)) line("Driving question: " + dq(), "s");
+  if(hasVal(v)) String(v).split(/\n+/).forEach(function(t){ line(t, g.by); });
+  if(card.note){ var n = getF(s, p, card.id + "_n"); if(hasVal(n.v)) line(n.v, n.by); }
+  return out;
+}
+function evDate(t){ var d = new Date(t); return isNaN(d) ? "" : DAYN[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + " " + d.getFullYear(); }
+/* the slides for one page of a step */
+function pageSlides(step, pg){
+  var st = BY[step], sg = stageOf(st), col = (sg.pc || sg.c).replace("#", ""), ctx = { step: step, pg: pg };
+  var done = getDone(step, pg), jb = jayBits(step, pg), pil = (jb.pillars && jb.pillars.v) || [], sup = supportText(step, pg);
+  var blocks = st.cards.map(function(c){ return cardEvidence(c, ctx); });
+  var texts = blocks.filter(function(b){ return b.lines.length; }), imgs = [];
+  blocks.forEach(function(b){ imgs = imgs.concat(b.imgs); });
+  var anyJay = texts.some(function(b){ return b.lines.some(function(l){ return l.jay; }); });
+  var title = st.n + (st.pages && 0 ? "" : "") + (pagesOf(step) > 1 ? " (page " + pg + ")" : "");
+  var sub = WHO + "  |  " + sg.n + "  |  " + (done ? "Stamped " + evDate(done.t) + (done.by === "j" ? " with Jay" : "") : "In progress");
+  function frame(t, extra){
+    var shapes = [
+      { t: "rect", x: 0, y: 0, w: 13.333, h: 1.08, fill: col },
+      { t: "text", x: .45, y: .1, w: 8.8, h: .62, paras: [{ runs: [{ text: t, size: 28, bold: true, color: "FFFFFF" }] }] },
+      { t: "text", x: .45, y: .68, w: 9.2, h: .34, paras: [{ runs: [{ text: sub, size: 12, color: "FFFFFF" }] }] },
+      { t: "text", x: 9.3, y: .14, w: 3.65, h: .82, anchor: "t", paras: [
+        { align: "r", after: 2, runs: [{ text: "Enterprise Learning Project", size: 11, bold: true, color: "FFFFFF" }] },
+        { align: "r", runs: [{ text: TERM, size: 10, color: "FFFFFF" }] }] }
+    ];
+    var foot = [];
+    if(pil.length) foot.push({ after: 2, runs: [{ text: "Counts towards: ", size: 11, bold: true }, { text: PILLARS.filter(function(x){ return pil.indexOf(x[0]) >= 0; }).map(function(x){ return x[1]; }).join(", "), size: 11 }] });
+    if(sup) foot.push({ after: 2, runs: [{ text: "Engagement and support: ", size: 11, bold: true }, { text: sup, size: 11 }] });
+    if(anyJay) foot.push({ runs: [{ text: "Text in italics was written or scribed by Jay.", size: 10, italic: true, color: "3D5B64" }] });
+    if(foot.length) shapes.push({ t: "text", x: .45, y: 6.28, w: 12.43, h: .95, fill: "EDE7DF", round: true, anchor: "ctr", inset: .14, paras: foot });
+    return { bg: "FFFDF8", shapes: shapes.concat(extra || []) };
+  }
+  var bodyTop = 1.3, bodyH = pil.length || sup || anyJay ? 4.8 : 5.9;
+  /* split text into slides by an estimate of its height */
+  function blockParas(b){
+    var ps = [{ after: 2, runs: [{ text: b.label, size: 12, bold: true, color: col }] }];
+    b.lines.forEach(function(l, i){ ps.push({ after: i === b.lines.length - 1 ? 10 : 3, runs: [{ text: l.text, size: 14, italic: l.jay }] }); });
+    return ps;
+  }
+  function estH(b, w){
+    var cpl = Math.max(20, Math.floor(w * 9.2)), h = .3;
+    b.lines.forEach(function(l){ h += Math.ceil(Math.max(1, l.text.length) / cpl) * .24 + .05; });
+    return h + .1;
+  }
+  var textW = imgs.length ? 7.3 : 12.43, groups = [[]], used = 0;
+  texts.forEach(function(b){
+    var h = estH(b, textW);
+    if(used + h > bodyH && groups[groups.length - 1].length){ groups.push([]); used = 0; }
+    groups[groups.length - 1].push(b); used += h;
+  });
+  return Promise.all(imgs.map(function(im){ return imgDims(im.src); })).then(function(dims){
+    var slides = [], left = imgs.map(function(im, i){ return { im: im, d: dims[i] }; });
+    function place(list, x, y, w, h, perCol){
+      var out = [], n = list.length; if(!n) return out;
+      var cols = perCol ? 1 : (n > 2 ? 2 : n), rows = Math.ceil(n / cols), gap = .2;
+      var cw = (w - gap * (cols - 1)) / cols, ch = (h - gap * (rows - 1)) / rows;
+      list.forEach(function(it, i){
+        var b = B5Pptx.bytes(it.im.src); if(!b) return;
+        var r = it.d.w / it.d.h, iw = cw, ih = cw / r; if(ih > ch - .3){ ih = ch - .3; iw = ih * r; }
+        var cx = x + (i % cols) * (cw + gap) + (cw - iw) / 2, cy = y + Math.floor(i / cols) * (ch + gap);
+        out.push({ t: "img", x: cx, y: cy, w: iw, h: ih, data: b.data, ext: b.ext });
+        out.push({ t: "text", x: x + (i % cols) * (cw + gap), y: cy + ih + .02, w: cw, h: .28, inset: 0, paras: [{ align: "ctr", runs: [{ text: it.im.cap, size: 10, italic: true, color: "3D5B64" }] }] });
+      });
+      return out;
+    }
+    groups.forEach(function(g, gi){
+      var extra = [];
+      if(g.length){
+        var paras = []; g.forEach(function(b){ paras = paras.concat(blockParas(b)); });
+        extra.push({ t: "text", x: .45, y: bodyTop, w: textW, h: bodyH, shrink: true, paras: paras });
+      } else if(!left.length){
+        extra.push({ t: "text", x: .45, y: bodyTop, w: 12.43, h: 1, paras: [{ runs: [{ text: done ? "Stamped. Done another way (on paper, out loud or with Jay)." : "Nothing on this page yet.", size: 14, italic: true }] }] });
+      }
+      if(imgs.length && left.length){ var take = left.splice(0, 2); extra = extra.concat(place(take, 8.05, bodyTop, 4.83, bodyH, true)); }
+      slides.push(frame(title + (gi ? " (continued)" : ""), extra));
+    });
+    while(left.length){ var more = left.splice(0, 4); slides.push(frame(title + ": photos and drawings", place(more, .45, bodyTop, 12.43, bodyH, false))); }
+    return slides;
+  });
+}
+function stageTitleSlide(i){
+  var sg = STAGES[i], col = (sg.pc || sg.c).replace("#", ""), steps = ROUTE.filter(function(s){ return s.stage === i; });
+  var rows = steps.map(function(s){
+    var n = pagesOf(s.id), d = null; for(var p = 1; p <= n; p++){ var x = getDone(s.id, p); if(x && (!d || x.t > d.t)) d = x; }
+    return { after: 6, runs: [{ text: (d ? "\u2713 " : "\u25CB ") + s.n + (s.optional ? " (optional)" : ""), size: 18, bold: !!d }, { text: d ? "   stamped " + evDate(d.t) : "   not stamped", size: 13, color: d ? "1E7A4A" : "8A8A8A" }] };
+  });
+  return { bg: "FFFDF8", shapes: [
+    { t: "rect", x: 0, y: 0, w: .35, h: 7.5, fill: col },
+    { t: "text", x: .9, y: .6, w: 11.8, h: .5, paras: [{ runs: [{ text: "Enterprise Learning Project  |  " + TERM, size: 14, bold: true, color: col }] }] },
+    { t: "text", x: .9, y: 1.1, w: 11.8, h: 1.1, paras: [{ runs: [{ text: "Stage " + (i + 1) + ": " + sg.n, size: 40, bold: true }] }] },
+    { t: "text", x: .9, y: 2.15, w: 11.8, h: .5, paras: [{ runs: [{ text: WHO + "  |  " + sg.half + "  |  " + dq(), size: 16, color: "3D5B64" }] }] },
+    { t: "text", x: .9, y: 3.0, w: 11.8, h: 4, paras: rows }
+  ] };
+}
+function exportEvidence(kind, arg){
+  var who = WHO;
+  staffStatus("Making the slides...");
+  loadScript("/data/minipptx.js?v=1", function(){ return !!window.B5Pptx; }).then(function(){
+    if(!window.B5Pptx){ staffStatus("The slide maker did not load. Try again in a moment.", true); return; }
+    var jobs = [], head = [], name;
+    if(kind === "page"){ jobs.push([arg.step, arg.pg]); name = BY[arg.step].n; }
+    else {
+      var i = +arg; head.push(stageTitleSlide(i)); name = "Stage " + (i + 1) + " " + STAGES[i].n;
+      ROUTE.filter(function(s){ return s.stage === i; }).forEach(function(s){ var n = pagesOf(s.id); for(var p = 1; p <= n; p++){ if(getDone(s.id, p)) jobs.push([s.id, p]); } });
+    }
+    return jobs.reduce(function(pr, j){ return pr.then(function(acc){ return pageSlides(j[0], j[1]).then(function(sl){ return acc.concat(sl); }); }); }, Promise.resolve(head)).then(function(slides){
+      var file = (who + " ELP " + name).replace(/[^A-Za-z0-9 ]+/g, "").replace(/\s+/g, "-") + ".pptx";
+      B5Pptx.download(file, slides);
+      staffStatus(slides.length + " slide" + (slides.length === 1 ? "" : "s") + " downloaded as " + file + ". In the evidence deck: File > Import slides > Upload.");
+    });
+  }).catch(function(){ staffStatus("The slides could not be made just now.", true); });
+}
+
 /* ==========================================================
    Staff: every book, and writing in any of them
    ========================================================== */
@@ -2727,7 +2918,12 @@ function drawStaff(){
   var h = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px">' + WHOS.map(function(w){ return '<button type="button" class="pb-btn small' + (w === WHO ? " teal" : "") + '" data-pick="' + w + '" aria-pressed="' + (w === WHO) + '">' + w + '</button>'; }).join("") +
     '<span style="flex:1"></span><button type="button" class="pb-btn small quiet" id="pbRefresh">Refresh</button>' +
     '<button type="button" class="pb-btn small" id="pbPrintF">Print ' + WHO + '\'s book</button><button type="button" class="pb-btn small" id="pbPrintK">' + WHO + '\'s booklet</button><button type="button" class="pb-btn small quiet" id="pbPrintB">Print a blank book</button>' +
-    '<button type="button" class="pb-btn small quiet" id="pbDqBtn">Driving question</button></div>';
+    '<button type="button" class="pb-btn small quiet" id="pbDqBtn">Driving question</button></div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:-4px 0 16px"><b style="font-size:.92rem">Evidence slides for ' + WHO + ':</b>' + STAGES.map(function(sg, i){
+      var any = ROUTE.some(function(x){ if(x.stage !== i) return false; for(var q = 1; q <= pagesOf(x.id); q++){ if(getDone(x.id, q)) return true; } return false; });
+      var all = stageDone(i);
+      return '<button type="button" class="pb-btn small' + (all ? '' : ' quiet') + '" data-evstage="' + i + '"' + (any ? '' : ' disabled style="opacity:.4"') + ' title="' + (any ? "Every stamped page in this stage, with a title slide" : "Nothing stamped in this stage yet") + '">' + (all ? "&#9733; " : "") + 'Stage ' + (i + 1) + '</button>';
+    }).join("") + '<small style="opacity:.7">A star means the stage is finished.</small></div>';
   h += '<div style="display:grid;grid-template-columns:minmax(220px,280px) 1fr;gap:18px;align-items:start" class="pb-staffgrid">';
   /* the step list */
   h += '<nav aria-label="Steps" style="display:flex;flex-direction:column;gap:4px;position:sticky;top:10px;max-height:92vh;overflow:auto">' +
@@ -2752,6 +2948,7 @@ function drawStaff(){
   me.onclick = function(e){
     var b = e.target.closest("button"); if(!b) return;
     if(b.dataset.pick){ pickStudent(b.dataset.pick); return; }
+    if(b.dataset.evstage){ exportEvidence("stage", b.dataset.evstage); return; }
     if(b.dataset.step && b.closest("nav")){ staffSel = { step: b.dataset.step, pg: 1 }; drawStaff(); return; }
     if(b.dataset.pg){ staffSel.pg = +b.dataset.pg; drawStaff(); return; }
     if(b.dataset.newpg){ var np = pagesOf(s.id) + 1, pp = page("j", s.id, np); pp.t = now(); pp.made = pp.t; wj(kPage("j", s.id, np), pp); staffSel.pg = np; drawStaff(); return; }
@@ -2778,7 +2975,8 @@ function jayPanel(s, ctx){
     }).join("") + '</div><textarea class="pb-ta" id="pbSupT" style="min-height:70px" aria-label="Engagement and support note">' + esc(sup.text || "") + '</textarea></div>' +
     '<div><h3 style="font-size:1rem;margin-bottom:8px">A sticky note for ' + esc(WHO) + '</h3><textarea class="pb-ta" id="pbSticky" style="min-height:70px;background:#fff8c9" aria-label="Sticky note">' + esc((jb.sticky && jb.sticky.v) || "") + '</textarea>' +
     '<p class="hint" style="font-size:.88rem">Shows on this page in their book, and the map shows a pen badge until they open it.</p>' +
-    '<div style="margin-top:10px">' + (done ? '<span class="pb-stamped" style="--sc:' + stageOf(s).c + '">' + esc(done.w || "Stamped") + '</span> <button type="button" class="pb-btn small quiet" id="pbUn">Take the stamp off</button>' : '<button type="button" class="pb-btn small" id="pbSt">Stamp this page for ' + esc(WHO) + '</button>') + '</div></div>' +
+    '<div style="margin-top:10px">' + (done ? '<span class="pb-stamped" style="--sc:' + stageOf(s).c + '">' + esc(done.w || "Stamped") + '</span> <button type="button" class="pb-btn small quiet" id="pbUn">Take the stamp off</button>' : '<button type="button" class="pb-btn small" id="pbSt">Stamp this page for ' + esc(WHO) + '</button>') + '</div>' +
+    '<div style="margin-top:10px"><button type="button" class="pb-btn small teal" id="pbEv">Evidence slide for this page</button></div></div>' +
     '</div>';
   $("pbJay").appendChild(box);
   $("pbPil").onclick = function(e){
@@ -2800,6 +2998,7 @@ function jayPanel(s, ctx){
   supT.oninput = debounce(saveT, 600); supT.onblur = saveT;
   stk.oninput = debounce(saveK, 600); stk.onblur = saveK;
   if($("pbSt")) $("pbSt").onclick = function(){ setDone(s.id, ctx.pg, true, "Stamped with Jay"); drawStaff(); drawCohort(); };
+  $("pbEv").onclick = function(){ exportEvidence("page", { step: s.id, pg: ctx.pg }); };
   if($("pbUn")) $("pbUn").onclick = function(){ setDone(s.id, ctx.pg, false); drawStaff(); drawCohort(); };
 }
 function dqEditor(){
