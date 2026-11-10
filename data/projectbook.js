@@ -439,6 +439,8 @@ var ROUTE = STEPS.filter(function(s){ return s.stage >= 0; });
 var STAMPS = ["Stamped!", "Sorted", "In the book", "Nice one", "Done for now", "Bonnie approves", "Smashed it", "Ta-da"];
 var COVERS = ["#007291", "#ef7724", "#7b4b8f", "#0a2f38", "#1e9e5a", "#00a6c9", "#f0a80f", "#4f57ad"];
 var STICKERS = ["star", "bolt", "clock", "rocket", "paw", "heart", "planet", "skull"];
+/* one more sticker for each finished stage, in stage order */
+var EARNED = ["bulb", "compass", "pencil", "medal", "hammer", "trophy"];
 var INKS = ["#0a2f38", "#007291", "#ef7724", "#7b4b8f", "#1e9e5a", "#e0950b"];
 var WIDTHS = [3, 7, 16];
 var DRAW_W = 1000, DRAW_H = 625, DRAW_MAX = 40000;
@@ -725,6 +727,12 @@ function stepState(step){
   for(var i = 1; i <= n; i++){ if(getDone(step, i)) stamped++; if(pageHasWork(step, i)) started = true; }
   return { pages: n, stamped: stamped, started: started || stamped > 0, done: stamped > 0 };
 }
+function stageDone(i){
+  var need = ROUTE.filter(function(s){ return s.stage === i && !s.optional; });
+  return need.length > 0 && need.every(function(s){ return stepState(s.id).done; });
+}
+function bookDone(){ return ROUTE.filter(function(s){ return !s.optional; }).every(function(s){ return stepState(s.id).done; }); }
+function kCel(){ return P + "pb." + BOOK + ".cel"; }
 function stampedList(){ return ROUTE.filter(function(s){ return stepState(s.id).done; }).map(function(s){ return s.id; }); }
 function nextStep(){
   for(var i = 0; i < ROUTE.length; i++){
@@ -866,7 +874,37 @@ var CSS =
 ".pb-map .dash{fill:none;stroke:#fffdf8;stroke-width:3;stroke-dasharray:2 14;stroke-linecap:round}" +
 ".pb-map .trail{fill:none;stroke-width:10;stroke-linecap:round}" +
 ".pb-map .pulse{fill:none;stroke:var(--pborange);stroke-width:4;transform-box:fill-box;transform-origin:center}" +
-".pb-map .pod{transition:transform 1.1s cubic-bezier(.5,-.3,.3,1.3)}" +
+".pb-map .pod.land>g{animation:pbland .5s cubic-bezier(.3,1.6,.5,1)}" +
+"@keyframes pbland{0%{transform:scale(1.35) translateY(-10px)}100%{transform:none}}" +
+".pb-map .newtrail{stroke-dasharray:1;stroke-dashoffset:1;animation:pbdraw2 1.1s .2s ease-out forwards}" +
+"@keyframes pbdraw2{to{stroke-dashoffset:0}}" +
+".pb-map .freshstamp{animation:pbfresh .7s cubic-bezier(.3,1.6,.5,1) both}" +
+"@keyframes pbfresh{0%{transform:scale(1.9) rotate(-20deg);opacity:0}100%{transform:none;opacity:1}}" +
+".pb-map .signdone rect{filter:drop-shadow(0 0 8px var(--g,#ffd23f))}" +
+".pb-map .bon{cursor:pointer}" +
+".pb-map .bon .legs{animation:pbbob .3s ease-in-out infinite}" +
+".pb-snd{position:absolute;right:16px;top:14px;display:inline-flex;align-items:center;gap:6px;border:2px solid currentColor;background:transparent;border-radius:999px;padding:6px 12px 6px 9px;font-weight:700;font-size:.85rem;opacity:.75;color:var(--pbtext,#0a2f38)}" +
+".pb .pb-snd{color:var(--pbtext,#0a2f38)}.pb-snd:hover{opacity:1}.pb-snd svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}" +
+".pb.turn-in{animation:pbturnin .6s cubic-bezier(.2,.8,.25,1) both;transform-origin:0 50%}" +
+".pb.turn-out{animation:pbturnout .6s cubic-bezier(.2,.8,.25,1) both;transform-origin:100% 50%}" +
+"@keyframes pbturnin{0%{transform:perspective(1600px) rotateY(-70deg);opacity:.15}100%{transform:none;opacity:1}}" +
+"@keyframes pbturnout{0%{transform:perspective(1600px) rotateY(70deg);opacity:.15}100%{transform:none;opacity:1}}" +
+/* a finished stage */
+".pb-party{position:fixed;inset:0;z-index:2147482950;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,20,30,.55);animation:pbfade .3s both}" +
+"@keyframes pbfade{from{opacity:0}}" +
+".pb-party .pc{position:relative;max-width:520px;width:100%;background:#fffdf8;color:#0a2f38;border:4px solid #0a2f38;border-radius:28px 22px 26px 20px;box-shadow:10px 12px 0 var(--sc);padding:26px 24px 22px;text-align:center;animation:pbparty .6s cubic-bezier(.3,1.5,.5,1) both}" +
+"@keyframes pbparty{from{transform:scale(.4) rotate(-8deg);opacity:0}}" +
+".pb-party .kick{display:inline-block;background:var(--sc);color:var(--on,#fff);font:800 .78rem Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:5px 14px}" +
+".pb-party h2{font-family:var(--pbfont,Archivo),sans-serif;font-size:clamp(1.8rem,6vw,2.6rem);margin:12px 0 6px;line-height:1.05}" +
+".pb-party p{margin:0 0 6px;font-size:1.05rem}" +
+".pb-party .unlock{display:flex;align-items:center;justify-content:center;gap:14px;margin:16px 0 4px;padding:12px;border:3px dashed var(--sc);border-radius:18px;background:#fff}" +
+".pb-party .unlock svg{width:74px;height:74px;animation:pbunlock 1.2s .4s cubic-bezier(.3,1.6,.5,1) both}" +
+"@keyframes pbunlock{0%{transform:scale(0) rotate(-180deg)}100%{transform:none}}" +
+".pb-party .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}" +
+".pb-stkset button.locked{opacity:.35;filter:grayscale(1);cursor:not-allowed;position:relative}" +
+".pb-stkset button.locked::after{content:'';position:absolute;right:4px;bottom:4px;width:14px;height:12px;border-radius:3px;background:#0a2f38}" +
+".pb-cover .bk.gold{box-shadow:inset 10px 0 0 rgba(0,0,0,.18),inset 0 0 0 5px #ffd23f,6px 8px 0 var(--pbink)}" +
+".pb-cover .bk .done{position:absolute;left:-30px;bottom:44px;transform:rotate(-38deg);background:#ffd23f;color:#0a2f38;font:900 .7rem Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:4px 40px}" +
 ".pb-map .pod .bob{animation:pbbob 2.4s ease-in-out infinite}" +
 ".pb-map .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:pbdraw 1.6s ease-out forwards}" +
 ".pb-map .pop{transform-box:fill-box;transform-origin:center;animation:pbpop .5s cubic-bezier(.3,1.6,.5,1) both}" +
@@ -1189,7 +1227,13 @@ function stickerSvg(n){
     paw: '<ellipse cx="32" cy="42" rx="13" ry="11" fill="#a0673f" stroke="' + K + '" stroke-width="3"/><circle cx="16" cy="28" r="6" fill="#a0673f" stroke="' + K + '" stroke-width="2.5"/><circle cx="26" cy="18" r="6" fill="#a0673f" stroke="' + K + '" stroke-width="2.5"/><circle cx="38" cy="18" r="6" fill="#a0673f" stroke="' + K + '" stroke-width="2.5"/><circle cx="48" cy="28" r="6" fill="#a0673f" stroke="' + K + '" stroke-width="2.5"/>',
     heart: '<path d="M32 54S8 40 8 23a12 12 0 0 1 24-4 12 12 0 0 1 24 4c0 17-24 31-24 31z" fill="#ef7724" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/>',
     planet: '<circle cx="32" cy="32" r="16" fill="#7b4b8f" stroke="' + K + '" stroke-width="3"/><ellipse cx="32" cy="34" rx="28" ry="8" fill="none" stroke="#ffc247" stroke-width="4" transform="rotate(-18 32 34)"/>',
-    skull: '<path d="M32 6c-13 0-22 9-22 21 0 7 3 12 8 15v8h28v-8c5-3 8-8 8-15 0-12-9-21-22-21z" fill="#fffdf8" stroke="' + K + '" stroke-width="3"/><circle cx="23" cy="29" r="5" fill="' + K + '"/><circle cx="41" cy="29" r="5" fill="' + K + '"/><path d="M28 50v-5M36 50v-5" stroke="' + K + '" stroke-width="3"/>'
+    skull: '<path d="M32 6c-13 0-22 9-22 21 0 7 3 12 8 15v8h28v-8c5-3 8-8 8-15 0-12-9-21-22-21z" fill="#fffdf8" stroke="' + K + '" stroke-width="3"/><circle cx="23" cy="29" r="5" fill="' + K + '"/><circle cx="41" cy="29" r="5" fill="' + K + '"/><path d="M28 50v-5M36 50v-5" stroke="' + K + '" stroke-width="3"/>',
+    bulb: '<path d="M32 5a17 17 0 0 0-10 31c2 2 3 4 3 7h14c0-3 1-5 3-7A17 17 0 0 0 32 5z" fill="#ffd23f" stroke="' + K + '" stroke-width="3"/><path d="M25 49h14M27 56h10" stroke="' + K + '" stroke-width="4" stroke-linecap="round"/><path d="M26 22a7 7 0 0 1 6-6" fill="none" stroke="#fffdf8" stroke-width="3" stroke-linecap="round"/>',
+    compass: '<circle cx="32" cy="32" r="26" fill="#fffdf8" stroke="' + K + '" stroke-width="3.5"/><path d="M41 23l-6 15-12 3 6-15z" fill="#ef7724" stroke="' + K + '" stroke-width="2.5" stroke-linejoin="round"/><circle cx="32" cy="32" r="3" fill="' + K + '"/>',
+    pencil: '<g transform="rotate(40 32 32)"><rect x="25" y="6" width="14" height="38" fill="#ffc247" stroke="' + K + '" stroke-width="3"/><path d="M25 44l7 14 7-14z" fill="#f3d9b8" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/><rect x="25" y="2" width="14" height="8" fill="#ef7724" stroke="' + K + '" stroke-width="3"/></g>',
+    medal: '<path d="M22 3l10 20 10-20" fill="none" stroke="#007291" stroke-width="7"/><circle cx="32" cy="40" r="17" fill="#ffc247" stroke="' + K + '" stroke-width="3.5"/><path d="M32 30l2.9 5.9 6.5 1-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4-4.7-4.6 6.5-1z" fill="#fffdf8" stroke="' + K + '" stroke-width="2"/>',
+    hammer: '<g transform="rotate(-35 32 32)"><rect x="28.5" y="22" width="7" height="38" rx="3" fill="#a0673f" stroke="' + K + '" stroke-width="3"/><rect x="13" y="8" width="38" height="16" rx="3" fill="#8b9aa3" stroke="' + K + '" stroke-width="3"/></g>',
+    trophy: '<path d="M20 7h24v13a12 12 0 0 1-24 0z" fill="#ffd23f" stroke="' + K + '" stroke-width="3"/><path d="M20 11h-8c0 10 6 14 10 14M44 11h8c0 10-6 14-10 14" fill="none" stroke="' + K + '" stroke-width="3"/><path d="M32 32v9M22 56h20l-3-14H25z" fill="#ffd23f" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/>'
   };
   return '<svg viewBox="0 0 64 64" aria-hidden="true">' + (a[n] || a.star) + '</svg>';
 }
@@ -1568,7 +1612,7 @@ function fWeb(card, ctx){
     var n = items().length, a = n * 2.39996 + .6, rr = .3 + (n % 3) * .06;
     var id = uid();
     putC(ctx.step, ctx.pg, card.id, id, { text: t, x: Math.max(.1, Math.min(.9, .5 + rr * Math.cos(a))), y: Math.max(.1, Math.min(.9, .5 + rr * 1.1 * Math.sin(a))), c: n % BUBC.length });
-    draw(id);
+    draw(id); sfx("pop");
     if(items().length === 10) bonnie();
   }
   add.querySelector("button").onclick = function(){ addOne(inp.value); inp.value = ""; inp.focus(); };
@@ -1704,7 +1748,8 @@ function coverHtml(look, title){
   look = look || {};
   var c = COVERS[look.c] || (TH && TH.cover) || COVERS[0], st = Array.isArray(look.s) ? look.s.slice(0, 3) : [];
   var spots = [["auto", "10px", "62px", "auto", "-8deg"], ["44%", "-4px", "auto", "auto", "14deg"], ["auto", "auto", "60px", "68px", "8deg"]];
-  return '<div class="bk" style="--cv:' + c + '"><span class="tape"></span><b>' + esc(title || "My project") + '</b><small>Enterprise Learning Project</small>' +
+  var gold = !STAFF && WHO && bookDone();
+  return '<div class="bk' + (gold ? " gold" : "") + '" style="--cv:' + c + '"><span class="tape"></span><b>' + esc(title || "My project") + '</b><small>Enterprise Learning Project</small>' + (gold ? '<span class="done">Complete</span>' : '') +
     st.map(function(n, i){ var s = spots[i]; return '<span class="stk" style="top:' + s[0] + ';right:' + s[1] + ';bottom:' + s[2] + ';left:' + s[3] + ';transform:rotate(' + s[4] + ')">' + stickerSvg(n) + '</span>'; }).join("") +
     '<span class="ini">' + esc(WHO || "") + '</span></div>';
 }
@@ -1714,7 +1759,11 @@ function fCover(card, ctx){
   var prev = el("div", "pb-cover"); prev.style.width = "200px";
   var right = el("div");
   right.innerHTML = '<p class="lab">Colour</p><div class="pb-swatch">' + COVERS.map(function(c, i){ return '<button type="button" data-c="' + i + '" style="background:' + c + '" aria-label="Colour ' + (i + 1) + '" aria-pressed="' + (look.c === i) + '"></button>'; }).join("") + '</div>' +
-    '<p class="lab">Stickers (up to three)</p><div class="pb-stkset">' + STICKERS.map(function(n){ return '<button type="button" data-s="' + n + '" aria-label="' + n + ' sticker" aria-pressed="' + (look.s.indexOf(n) >= 0) + '">' + stickerSvg(n) + '</button>'; }).join("") + '</div>';
+    '<p class="lab">Stickers (up to three)</p><div class="pb-stkset">' + STICKERS.map(function(n){ return '<button type="button" data-s="' + n + '" aria-label="' + n + ' sticker" aria-pressed="' + (look.s.indexOf(n) >= 0) + '">' + stickerSvg(n) + '</button>'; }).join("") + '</div>' +
+    '<p class="lab" style="margin-top:14px">Earned stickers: one for each stage you finish</p><div class="pb-stkset">' + EARNED.map(function(n, i){
+      var ok = stageDone(i);
+      return '<button type="button" ' + (ok ? 'data-s="' + n + '" aria-pressed="' + (look.s.indexOf(n) >= 0) + '"' : 'class="locked" disabled') + ' title="' + (ok ? "Earned: " + esc(STAGES[i].n) : "Finish stage " + (i + 1) + " to earn this one") + '" aria-label="' + (ok ? n + " sticker" : "Locked sticker, finish stage " + (i + 1)) + '">' + stickerSvg(n) + '</button>';
+    }).join("") + '</div>';
   function show(){ prev.innerHTML = coverHtml(look, getF("cover", 1, "title").v); }
   right.addEventListener("click", function(e){
     var b = e.target.closest("button"); if(!b) return;
@@ -1946,6 +1995,49 @@ function cardEl(card, ctx, all){
 }
 
 /* ==========================================================
+   Sound: made in code, off until the student switches it on
+   (this device only, b5.pb.sound)
+   ========================================================== */
+var SOUNDKEY = "b5.pb.sound", AC = null;
+function soundOn(){ try{ return localStorage.getItem(SOUNDKEY) === "1"; }catch(e){ return false; } }
+function actx(){
+  if(!AC){ try{ AC = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ AC = null; } }
+  if(AC && AC.state === "suspended"){ try{ AC.resume(); }catch(e){} }
+  return AC;
+}
+function tone(f, t0, dur, type, vol, f2){
+  var a = actx(); if(!a) return;
+  var o = a.createOscillator(), g = a.createGain(), t = a.currentTime + t0;
+  o.type = type || "sine"; o.frequency.setValueAtTime(f, t);
+  if(f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol || .12, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + .05);
+}
+function noise(t0, dur, vol, freq){
+  var a = actx(); if(!a) return;
+  var n = Math.max(1, Math.floor(a.sampleRate * dur)), b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+  for(var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  var src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  src.buffer = b; f.type = "lowpass"; f.frequency.value = freq || 800; g.gain.value = vol || .25;
+  src.connect(f); f.connect(g); g.connect(a.destination); src.start(a.currentTime + t0);
+}
+function sfx(k){
+  if(STAFF || !soundOn()) return;
+  try{
+    if(k === "tick") tone(880, 0, .05, "sine", .05);
+    else if(k === "pop") tone(320, 0, .1, "sine", .12, 900);
+    else if(k === "turn") noise(0, .3, .16, 2200);
+    else if(k === "stamp"){ noise(0, .2, .5, 450); tone(95, 0, .2, "sine", .3, 50); }
+    else if(k === "go"){ tone(523, 0, .09, "triangle", .07); tone(659, .09, .09, "triangle", .07); tone(784, .18, .12, "triangle", .07); }
+    else if(k === "land") tone(440, 0, .12, "sine", .08, 660);
+    else if(k === "fanfare"){ [523, 659, 784].forEach(function(f, i){ tone(f, i * .13, .22, "triangle", .12); }); tone(1047, .39, .7, "triangle", .12); tone(784, .39, .7, "sine", .06); }
+    else if(k === "woof"){ tone(250, 0, .09, "sawtooth", .09, 170); tone(235, .15, .11, "sawtooth", .09, 160); }
+  }catch(e){}
+}
+var SPK_ON = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+var SPK_OFF = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+
+/* ==========================================================
    Fun bits
    ========================================================== */
 function burst(colour){
@@ -1986,7 +2078,14 @@ function mount(){
 }
 function stageOf(s){ return STAGES[s.stage] || { n: "", half: "", c: "#007291" }; }
 
+function turn(cls){
+  if(REDUCED || !root) return;
+  root.classList.remove("turn-in", "turn-out"); void root.offsetWidth; root.classList.add(cls);
+  sfx("turn");
+  setTimeout(function(){ root.classList.remove(cls); }, 700);
+}
 function drawMap(){
+  var wasStep = view.at === "step";
   view = { at: "map" };
   writeSummary();
   var nx = nextStep(), list = stampedList(), m = meta();
@@ -2019,6 +2118,34 @@ function drawMap(){
   };
   drawRoute(nx);
   window.scrollTo(0, 0);
+  if(wasStep) turn("turn-out");
+  /* sound switch (this device only) */
+  var snd = el("button", "pb-snd", (soundOn() ? SPK_ON : SPK_OFF) + "<span>" + (soundOn() ? "Sound on" : "Sound off") + "</span>");
+  snd.type = "button"; snd.setAttribute("aria-pressed", soundOn() ? "true" : "false");
+  snd.onclick = function(){ try{ if(soundOn()) localStorage.removeItem(SOUNDKEY); else localStorage.setItem(SOUNDKEY, "1"); }catch(e){} snd.innerHTML = (soundOn() ? SPK_ON : SPK_OFF) + "<span>" + (soundOn() ? "Sound on" : "Sound off") + "</span>"; snd.setAttribute("aria-pressed", soundOn() ? "true" : "false"); sfx("pop"); };
+  root.appendChild(snd);
+  /* a finished stage or book gets its moment once the marker has moved */
+  var party = null; try{ party = sessionStorage.getItem("b5.pb.party"); sessionStorage.removeItem("b5.pb.party"); }catch(e){}
+  if(party) setTimeout(function(){ if(view.at === "map") stageParty(party); }, REDUCED ? 200 : 2400);
+}
+function stageParty(which){
+  var book = which === "book", i = book ? 5 : +String(which).slice(1), st = STAGES[i] || STAGES[0];
+  var ov = el("div", "pb-party"); ov.setAttribute("role", "dialog"); ov.setAttribute("aria-label", book ? "Book complete" : "Stage complete");
+  ov.style.setProperty("--sc", st.c); ov.style.setProperty("--on", TH ? TH.on : "#fff");
+  ov.innerHTML = '<div class="pc"><span class="kick">' + (book ? "The whole book" : "Stage " + (i + 1) + " of 6") + '</span>' +
+    '<h2>' + (book ? "Book complete!" : esc(st.n) + ", done!") + '</h2>' +
+    '<p>' + (book ? "Every step stamped. Your cover has gone gold." : "Every step in this stage is stamped. Nice one.") + '</p>' +
+    (book ? '' : '<div class="unlock">' + stickerSvg(EARNED[i]) + '<p style="margin:0;text-align:left"><b>New sticker earned</b><br>Pop it on your cover whenever you like.</p></div>') +
+    '<div class="row">' + (book ? '<button type="button" class="pb-btn main" data-a="booklet">Make my booklet</button>' : '<button type="button" class="pb-btn main" data-a="cover">Put it on my cover</button>') + '<button type="button" class="pb-btn" data-a="x">Back to the map</button></div></div>';
+  document.body.appendChild(ov);
+  sfx("fanfare"); burst(st.c); setTimeout(function(){ burst(); }, 700); setTimeout(bonnie, 500);
+  ov.addEventListener("click", function(e){
+    var b = e.target.closest("[data-a]"); if(!b && e.target !== ov) return;
+    ov.remove();
+    if(b && b.dataset.a === "cover") openStep("cover", 1, 1);
+    if(b && b.dataset.a === "booklet") printBooklet();
+  });
+  setTimeout(function(){ var f = ov.querySelector(".pb-btn"); if(f) try{ f.focus(); }catch(e){} }, 50);
 }
 
 function thisWeek(){
@@ -2029,7 +2156,7 @@ function weekLine(){
   var w = thisWeek(); if(!w) return "";
   return '<div class="pb-week"><b>This week:</b>' + w.steps.map(function(id){ var st = stepState(id); return '<span class="' + (st.done ? "done" : "") + '">' + (st.done ? "&#10003; " : "") + esc(BY[id].n) + '</span>'; }).join("") + '</div>';
 }
-var mapAnimated = false, podTaps = 0, lastPod = null;
+var mapAnimated = false, podTaps = 0;
 function drawRoute(nx){
   var box = $("pbMap"); if(!box) return;
   var W = Math.max(320, box.clientWidth || 900);
@@ -2057,10 +2184,13 @@ function drawRoute(nx){
   svg += M ? '<path class="road" style="stroke:' + M.road + ';stroke-width:' + M.roadW + '" d="' + full + '"/>' +
       '<path class="dash' + (M.chase ? ' chase' : '') + '" style="stroke:' + M.dash + ';stroke-width:' + M.dashW + ';stroke-dasharray:' + M.dashArr + '" d="' + full + '"/>'
     : '<path class="road" d="' + full + '"/><path class="dash' + (anim ? ' draw' : '') + '" style="--len:4000" d="' + full + '"/>';
-  /* the trail: coloured where both ends are stamped */
+  /* the trail: coloured where both ends are stamped; a fresh stamp draws its bit in */
+  var fresh = null; try{ fresh = sessionStorage.getItem("b5.pb.fresh"); sessionStorage.removeItem("b5.pb.fresh"); }catch(e){}
+  if(REDUCED) fresh = null;
   pts.forEach(function(p, i){
     if(!i) return;
-    if(states[i].done && states[i - 1].done) svg += '<path class="trail" stroke="' + stageOf(p.s).c + '" d="' + seg(pts[i - 1], p) + '"/>';
+    var nw = fresh && (p.s.id === fresh || pts[i - 1].s.id === fresh);
+    if(states[i].done && states[i - 1].done) svg += '<path class="trail' + (nw ? ' newtrail' : '') + '"' + (nw ? ' pathLength="1"' : '') + ' stroke="' + stageOf(p.s).c + '" d="' + seg(pts[i - 1], p) + '"/>';
   });
   /* stage signs */
   var seen = {}, placed = [];
@@ -2070,8 +2200,10 @@ function drawRoute(nx){
     var x = Math.max(10 + tw / 2, Math.min(W - 10 - tw / 2, p.x)), y = p.y - 64;
     placed.forEach(function(q){ if(q.r === p.r && q.y === y && Math.abs(q.x - x) < (q.w + tw) / 2 + 6) y -= 26; });
     placed.push({ r: p.r, x: x, y: y, w: tw });
-    svg += '<g class="' + (anim ? 'pop' : '') + '" style="animation-delay:' + (p.s.stage * .12) + 's"><rect x="' + (x - tw / 2) + '" y="' + y + '" width="' + tw + '" height="22" rx="11" fill="' + st.c + '"/>' +
-      '<text class="sign" x="' + x + '" y="' + (y + 15) + '" text-anchor="middle">' + esc(txt) + '</text></g>';
+    var sd = stageDone(p.s.stage);
+    svg += '<g class="' + (anim ? 'pop' : '') + (sd ? ' signdone' : '') + '" style="animation-delay:' + (p.s.stage * .12) + 's;--g:' + st.c + '"><rect x="' + (x - tw / 2) + '" y="' + y + '" width="' + tw + '" height="22" rx="11" fill="' + st.c + '"/>' +
+      '<text class="sign" x="' + x + '" y="' + (y + 15) + '" text-anchor="middle">' + esc(txt) + '</text>' +
+      (sd ? '<g transform="translate(' + (x + tw / 2 - 2) + ' ' + (y + 2) + ')">' + '<circle r="10" fill="#fffdf8" stroke="' + st.c + '" stroke-width="3"/><path d="M0 -5.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L0 2.7l-3.2 1.7.6-3.6-2.6-2.5 3.6-.5z" fill="' + st.c + '"/></g>' : '') + '</g>';
   });
   /* stops */
   pts.forEach(function(p, i){
@@ -2080,7 +2212,7 @@ function drawRoute(nx){
     words.forEach(function(w){ if((l1 + " " + w).trim().length <= 14 && !l2) l1 = (l1 + " " + w).trim(); else l2 = (l2 + " " + w).trim(); });
     if(l2.length > 16) l2 = l2.slice(0, 15) + ".";
     svg += '<g class="stop" tabindex="0" role="button" data-id="' + s.id + '" aria-label="' + esc(s.n) + (st.done ? ", stamped" : st.started ? ", started" : "") + '" transform="translate(' + p.x + ' ' + p.y + ')">' +
-      '<g class="face' + (anim ? ' pop' : '') + '" style="animation-delay:' + (.3 + i * .05) + 's">' +
+      '<g class="face' + (anim ? ' pop' : '') + (fresh === s.id ? ' freshstamp' : '') + '" style="animation-delay:' + (fresh === s.id ? '.15' : (.3 + i * .05)) + 's">' +
       (cur ? '<circle class="pulse" r="30"/>' : '') +
       (wk.indexOf(s.id) >= 0 && !st.done ? '<circle class="wk" r="36"/>' : '') +
       (TH && st.done ? '<circle r="40" fill="' + c + '" opacity=".18"/>' : '') +
@@ -2095,15 +2227,47 @@ function drawRoute(nx){
       (s.optional ? '<text class="opt" y="' + (l2 ? 75 : 60) + '" text-anchor="middle">optional</text>' : '') +
       '</g>';
   });
-  /* the time pod sits by the next stop (or the last one) */
-  var at = nx ? pts.filter(function(p){ return p.s.id === nx.id; })[0] : pts[pts.length - 1];
-  var from = lastPod || at;
-  svg += '<g class="pod" id="pbPod" style="cursor:pointer" transform="translate(' + (from.x + 34) + ' ' + (from.y - 34) + ')">' + (TH ? TH.marker : POD) + '</g>';
+  /* the marker sits by the next stop (or the last one), and drives the road to get there */
+  var atI = nx ? ROUTE.indexOf(nx) : pts.length - 1; if(atI < 0) atI = pts.length - 1;
+  var MK = "b5.pb.at." + WHO + "." + BOOK, fromI = atI;
+  try{ var was = sessionStorage.getItem(MK); if(was != null && BY[was]){ var wi = ROUTE.indexOf(BY[was]); if(wi >= 0) fromI = wi; } sessionStorage.setItem(MK, pts[atI].s.id); }catch(e){}
+  var OX = 30, OY = -34, from = pts[fromI];
+  svg += '<g class="pod" id="pbPod" style="cursor:pointer" transform="translate(' + (from.x + OX) + ' ' + (from.y + OY) + ')">' + (TH ? TH.marker : POD) + '</g>';
   svg += '</svg>';
   box.innerHTML = svg;
-  if(from !== at) setTimeout(function(){ var pod = $("pbPod"); if(pod) pod.setAttribute("transform", "translate(" + (at.x + 34) + " " + (at.y - 34) + ")"); }, 650);
-  lastPod = at;
+  var road = box.querySelector("path.road"), Ls = [], svgEl = box.querySelector("svg");
+  try{
+    var tmp = document.createElementNS("http://www.w3.org/2000/svg", "path"), acc = "";
+    tmp.setAttribute("visibility", "hidden"); svgEl.appendChild(tmp);
+    pts.forEach(function(p, i){
+      acc += i ? seg(pts[i - 1], p).replace(/^M[^LC]+/, "") : "M" + p.x + " " + p.y;
+      if(!i){ Ls.push(0); return; }
+      tmp.setAttribute("d", acc); Ls.push(tmp.getTotalLength());
+    });
+    svgEl.removeChild(tmp);
+  }catch(e){ Ls = []; }
+  var pod = $("pbPod");
+  if(fromI !== atI && Ls.length === pts.length && road && road.getPointAtLength && !REDUCED){
+    var a0 = Ls[fromI], a1 = Ls[atI], dur = Math.max(700, Math.min(3200, 600 + Math.abs(a1 - a0) * 1.1)), t0 = null;
+    setTimeout(function(){
+      sfx("go");
+      (function step(ts){
+        if(!pod.isConnected) return;
+        if(t0 == null) t0 = ts;
+        var k = Math.min(1, (ts - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+        var pt = road.getPointAtLength(a0 + (a1 - a0) * e);
+        pod.setAttribute("transform", "translate(" + (pt.x + OX).toFixed(1) + " " + (pt.y + OY).toFixed(1) + ")");
+        if(k < 1) requestAnimationFrame(step);
+        else { pod.classList.add("land"); sfx("land"); setTimeout(function(){ pod.classList.remove("land"); }, 600); }
+      })(performance.now());
+    }, 650);
+  } else if(fromI !== atI){
+    pod.setAttribute("transform", "translate(" + (pts[atI].x + OX) + " " + (pts[atI].y + OY) + ")");
+  }
+  bonnieWalk(box, road, Ls.length ? Ls[Ls.length - 1] : 0);
   box.onclick = function(e){
+    var bn = e.target.closest(".bon");
+    if(bn){ sfx("woof"); var say = bn.querySelector(".woof"); if(say){ say.setAttribute("opacity", "1"); setTimeout(function(){ say.setAttribute("opacity", "0"); }, 1400); } return; }
     if(e.target.closest("#pbPod")){
       podTaps++;
       if(podTaps % 5 === 0) bonnie();
@@ -2112,6 +2276,37 @@ function drawRoute(nx){
     var g = e.target.closest(".stop"); if(g) openStep(g.dataset.id);
   };
   box.onkeydown = function(e){ var g = e.target.closest(".stop"); if(g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); openStep(g.dataset.id); } };
+}
+/* Bonnie wanders a stretch of the road now and then. Tap her. */
+var BONNIE_G = BONNIE.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
+var bonT = null;
+function bonnieWalk(box, road, total){
+  clearTimeout(bonT);
+  if(REDUCED || STAFF || !road || !road.getPointAtLength || total < 400) return;
+  function go(){
+    if(view.at !== "map" || !road.isConnected) return;
+    var svgEl = road.ownerSVGElement; if(!svgEl) return;
+    var g = document.createElementNS("http://www.w3.org/2000/svg", "g"), back = Math.random() < .5;
+    var start = Math.random() * (total - 320), span = 220 + Math.random() * 120;
+    var a0 = back ? start + span : start, a1 = back ? start : start + span;
+    g.setAttribute("class", "bon"); g.setAttribute("role", "img"); g.setAttribute("aria-label", "Bonnie");
+    g.innerHTML = '<g class="flip"><g class="legs" transform="translate(-30 -40) scale(.5)">' + BONNIE_G + '</g></g>' +
+      '<g class="woof" opacity="0" style="transition:opacity .2s"><rect x="-26" y="-74" width="52" height="22" rx="11" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><text x="0" y="-58" text-anchor="middle" style="font:800 12px Archivo,sans-serif;fill:#0a2f38">Woof!</text></g>';
+    svgEl.appendChild(g);
+    var flip = g.querySelector(".flip");
+    var dur = 6500, t0 = null, prev = null;
+    (function step(ts){
+      if(!g.isConnected) return;
+      if(t0 == null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / dur), pt = road.getPointAtLength(a0 + (a1 - a0) * k);
+      if(prev){ var dx = pt.x - prev.x; if(Math.abs(dx) > .3) flip.setAttribute("transform", dx < 0 ? "scale(-1 1)" : ""); }
+      prev = pt;
+      g.setAttribute("transform", "translate(" + pt.x.toFixed(1) + " " + (pt.y - 4).toFixed(1) + ")");
+      g.style.opacity = k < .08 ? k / .08 : k > .92 ? (1 - k) / .08 : 1;
+      if(k < 1) requestAnimationFrame(step); else { g.remove(); bonT = setTimeout(go, 22000 + Math.random() * 20000); }
+    })(performance.now());
+  }
+  bonT = setTimeout(go, 5000 + Math.random() * 4000);
 }
 var reMap = debounce(function(){ if(view.at === "map" && $("pbMap")) drawRoute(nextStep()); }, 200);
 window.addEventListener("resize", reMap);
@@ -2134,9 +2329,11 @@ function openStep(id, pg, idx){
     for(var j = 0; j < s.cards.length; j++){ if(!cardHasWork(s.cards[j], ctx0)){ idx = j; break; } if(j === s.cards.length - 1) idx = s.cards.length; }
     if(getDone(id, pg) || jayNew(id)) idx = 0;
   }
+  var fromMap = view.at === "map";
   view = { at: "step", id: id, pg: pg, idx: idx, all: false };
   if(!STAFF) markSeen(id);
   drawStep("r");
+  if(fromMap) turn("turn-in");
 }
 function drawStep(dir){
   var s = BY[view.id], st = stageOf(s), pages = s.id === "cover" ? 1 : pagesOf(s.id), ctx = { step: s.id, pg: view.pg };
@@ -2186,8 +2383,8 @@ function drawStep(dir){
     (!last ? '<button type="button" class="pb-btn main" id="pbNext">Next' + NEXT + '</button>'
            : (s.id === "cover" ? '<button type="button" class="pb-btn main" id="pbDone">Looks good' + NEXT + '</button>' : ''));
   [].forEach.call(nav.querySelectorAll("[data-go]"), function(b){ b.onclick = function(){ var to = +b.dataset.go; var d = to < view.idx ? "l" : "r"; view.idx = to; drawStep(d); }; });
-  if($("pbPrev")) $("pbPrev").onclick = function(){ view.idx--; drawStep("l"); };
-  if($("pbNext")) $("pbNext").onclick = function(){ view.idx++; drawStep("r"); };
+  if($("pbPrev")) $("pbPrev").onclick = function(){ sfx("tick"); view.idx--; drawStep("l"); };
+  if($("pbNext")) $("pbNext").onclick = function(){ sfx("tick"); view.idx++; drawStep("r"); };
   if($("pbDone")) $("pbDone").onclick = function(){ drawMap(); };
   var first = deck.querySelector("input.pb-in, textarea.pb-ta");
   if(first && !("ontouchstart" in window)){ try{ first.focus({ preventScroll: true }); }catch(e){} }
@@ -2210,8 +2407,16 @@ function stampCard(s, done){
       var word = STAMPS[Math.floor(Math.random() * STAMPS.length)];
       if(stampedList().length === ROUTE.length - 1 && !getDone(s.id, view.pg)) word = "Book complete!";
       setDone(s.id, view.pg, true, word);
+      sfx("stamp");
       stampFx(word, TH ? TH.stamp : stageOf(s).c);
       stampNote(s, view.pg);
+      try{ sessionStorage.setItem("b5.pb.fresh", s.id); }catch(e){}
+      if(PEN === "s"){
+        var cel = rj(kCel()) || {}, party = null;
+        if(s.stage >= 0 && stageDone(s.stage) && !cel["s" + s.stage]){ cel["s" + s.stage] = now(); party = "s" + s.stage; }
+        if(bookDone() && !cel.book){ cel.book = now(); party = "book"; }
+        if(party){ wj(kCel(), cel); try{ sessionStorage.setItem("b5.pb.party", party); }catch(e){} }
+      }
       if(word === "Book complete!") setTimeout(bonnie, 700);
       setTimeout(function(){ drawMap(); }, 1300);
     };
