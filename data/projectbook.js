@@ -612,6 +612,7 @@ function sget(k){
 function sset(k, v){
   if(STAFF){ MEM[k] = v; queue(WHO, k, v); return; }
   try{ localStorage.setItem(k, v); }catch(e){}
+  if(MIRROR) mirrorDirty(k);
 }
 function skeys(pre){
   var out = [];
@@ -622,6 +623,76 @@ function skeys(pre){
 function sdel(k){
   if(STAFF){ MEM[k] = ""; queue(WHO, k, ""); return; }
   try{ localStorage.removeItem(k); }catch(e){}
+  if(MIRROR) mirrorDirty(k);
+}
+
+/* ==========================================================
+   A staff device (the "This is a staff device" tick in the live
+   view, b5.sync.off) never saves HQ progress to the sheet, so trying
+   a student's HQ on Jay's laptop cannot change their work. The book
+   still has to show the student's real book there, and anything Jay
+   writes in it has to reach them. So on a staff device the book:
+     - loads this student's book from the sheet every time it opens,
+       and when it comes back into view (the sheet's copy wins)
+     - writes only in Jay's pen, and sends just those writes (Jay's
+       pages, drawings and photos) to the sheet
+   The student's own copy is never touched from a staff device.
+   ========================================================== */
+var MIRROR = false, MKEYD = "", mdirty = {}, mT = null, mBusy = false, mLast = 0;
+function staffDevice(){ try{ return localStorage.getItem("b5.sync.off") === "1"; }catch(e){ return false; } }
+function isJayKey(k){
+  var pre = P + "pb." + BOOK; if(k.indexOf(pre) !== 0) return false;
+  var rest = k.slice(pre.length);
+  return /^\.(j|dj|phj)\./.test(rest) || rest === ".jm";
+}
+function mirrorDirty(k){
+  if(!isJayKey(k)) return;
+  mdirty[k] = now();
+  try{ localStorage.setItem(MKEYD, JSON.stringify(mdirty)); }catch(e){}
+  clearTimeout(mT); mT = setTimeout(mirrorPush, 1500);
+}
+function mirrorPush(){
+  var keys = Object.keys(mdirty); if(!keys.length || !S.call) return;
+  if(mBusy){ clearTimeout(mT); mT = setTimeout(mirrorPush, 1500); return; }
+  var items = {}, sent = {};
+  keys.forEach(function(k){ var v = null; try{ v = localStorage.getItem(k); }catch(e){} items[k] = { v: v == null ? "" : v, t: mdirty[k] }; sent[k] = mdirty[k]; });
+  mBusy = true;
+  S.call("save", { who: WHO, items: items }).then(function(o){
+    mBusy = false;
+    if(!o || !o.ok) throw new Error("not saved");
+    Object.keys(sent).forEach(function(k){ if(mdirty[k] === sent[k]) delete mdirty[k]; });
+    try{ localStorage.setItem(MKEYD, JSON.stringify(mdirty)); }catch(e){}
+    mirrorNote("Saved to " + WHO + "'s book");
+  }).catch(function(){
+    mBusy = false; mirrorNote("Not sent yet. It goes as soon as the sheet can be reached.");
+    clearTimeout(mT); mT = setTimeout(mirrorPush, 20000);
+  });
+}
+function mirrorNote(t){ var n = $("pbMirror"); if(n) n.querySelector("small").textContent = t; }
+function mirrorPull(){
+  if(!S.call) return Promise.resolve(false);
+  mLast = Date.now();
+  return S.call("load", { who: WHO, since: 0 }).then(function(o){
+    if(!o || !o.ok) throw new Error("no answer");
+    var pre = P + "pb.", items = o.items || {}, changed = false, have = {};
+    Object.keys(items).forEach(function(k){
+      if(k.indexOf(pre) !== 0 || mdirty[k]) return;
+      have[k] = 1;
+      var v = String(items[k].v == null ? "" : items[k].v), cur = null;
+      try{ cur = localStorage.getItem(k); }catch(e){}
+      if(v === ""){ if(cur != null){ try{ localStorage.removeItem(k); }catch(e){} changed = true; } }
+      else if(cur !== v){ try{ localStorage.setItem(k, v); }catch(e){} changed = true; }
+    });
+    /* anything only on this laptop (an old try out) goes, unless it is Jay's writing still to send */
+    skeys(pre).forEach(function(k){ if(!have[k] && !mdirty[k]){ try{ localStorage.removeItem(k); }catch(e){} changed = true; } });
+    mirrorNote("Showing " + WHO + "'s book as it is now");
+    return changed;
+  }).catch(function(){ mirrorNote("Could not reach the sheet, so this may not be " + WHO + "'s latest book."); return false; });
+}
+function mirrorRedraw(){
+  var a = document.activeElement;
+  if(a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return;
+  if(view.at === "map") drawMap(); else if(view.at === "step") drawStep("r");
 }
 function rj(k){ try{ var v = JSON.parse(sget(k) || "null"); return v && typeof v === "object" ? v : null; }catch(e){ return null; } }
 function wj(k, v){ sset(k, JSON.stringify(v)); }
@@ -767,7 +838,7 @@ function markSeen(step){
 
 /* the front door line in the HQ reads this (only rewritten when it changes) */
 function writeSummary(){
-  if(STAFF) return;
+  if(STAFF || MIRROR) return;
   var nx = nextStep(), list = stampedList();
   var sum = { book: BOOK, next: nx ? nx.n : "", nextId: nx ? nx.id : "", stamped: list.length, of: ROUTE.length };
   var s = JSON.stringify(sum);
@@ -2338,7 +2409,7 @@ function openStep(id, pg, idx){
 function drawStep(dir){
   var s = BY[view.id], st = stageOf(s), pages = s.id === "cover" ? 1 : pagesOf(s.id), ctx = { step: s.id, pg: view.pg };
   var jb = s.id === "cover" ? {} : jayBits(s.id, view.pg), done = s.id === "cover" ? null : getDone(s.id, view.pg);
-  var h = (PEN === "j" && !STAFF ? '<div class="pb-penline">Jay\'s pen is on: anything written now shows as Jay\'s</div>' : '') +
+  var h = (PEN === "j" && !STAFF && !MIRROR ? '<div class="pb-penline">Jay\'s pen is on: anything written now shows as Jay\'s</div>' : '') +
     '<div class="pb-step" style="--sc:' + st.c + '">' +
     '<div class="pb-head"><button type="button" class="pb-btn small" id="pbBack">' + BACK + 'Map</button>' +
     '<span class="pb-sticon">' + icon(s.id) + '</span><div class="tt"><span>' + (s.stage >= 0 ? esc(st.half) + " &middot; " + esc(st.n) : "Your book") + (s.optional ? " &middot; optional" : "") + '</span><h1>' + esc(s.n) + '</h1></div>' +
@@ -2863,7 +2934,11 @@ function staffMount(){
   var pend = Object.keys(PENDING).filter(function(w){ return Object.keys(PENDING[w] || {}).length; });
   if(pend.length) push();
   loadAll();
+  /* keep up with the students: every two minutes while the page is in view, and on coming back to it */
+  setInterval(function(){ if(document.visibilityState === "visible" && !busyTyping() && Date.now() - lastLoad > 110000) loadAll(true); }, 30000);
+  document.addEventListener("visibilitychange", function(){ if(document.visibilityState === "visible" && Date.now() - lastLoad > 20000) loadAll(true); });
 }
+function busyTyping(){ var a = document.activeElement; return !!(a && /^(INPUT|TEXTAREA)$/.test(a.tagName)); }
 function loadOne(who){
   if(!S.call) return Promise.reject(new Error("off"));
   return S.call("load", { who: who, since: 0 }).then(function(o){
@@ -2875,13 +2950,18 @@ function loadOne(who){
     ALL[who] = m;
   });
 }
-function loadAll(){
-  staffStatus("Opening the books...");
+var lastLoad = 0, loading = false;
+function hhmm(){ var d = new Date(); return (d.getHours() < 10 ? "0" : "") + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes(); }
+function loadAll(quiet){
+  if(loading) return; loading = true;
+  if(!quiet) staffStatus("Opening the books...");
   var i = 0, fails = 0, keep = WHO;
   (function next(){
     if(i >= WHOS.length){
-      staffStatus(fails ? "Some books could not be opened just now. Try Refresh in a moment." : "All six books are open. Pick a student.", !!fails);
-      drawCohort(); pickStudent(keep || WHOS[0]);
+      loading = false; lastLoad = Date.now();
+      staffStatus(fails ? "Some books could not be opened just now. It tries again by itself, or press Refresh." : "Up to date at " + hhmm() + ". This page refreshes by itself every couple of minutes.", !!fails);
+      drawCohort(); if(quiet && WHO) useStudent(keep); else pickStudent(keep || WHOS[0]);
+      if(quiet && keep && !busyTyping()) drawStaff();
       return;
     }
     var w = WHOS[i++];
@@ -2953,7 +3033,7 @@ function drawStaff(){
     if(b.dataset.pg){ staffSel.pg = +b.dataset.pg; drawStaff(); return; }
     if(b.dataset.newpg){ var np = pagesOf(s.id) + 1, pp = page("j", s.id, np); pp.t = now(); pp.made = pp.t; wj(kPage("j", s.id, np), pp); staffSel.pg = np; drawStaff(); return; }
   };
-  $("pbRefresh").onclick = function(){ staffStatus("Refreshing " + WHO + "'s book..."); var w = WHO; loadOne(w).then(function(){ useStudent(w); drawCohort(); drawStaff(); staffStatus("Up to date."); }, function(){ staffStatus("Could not reach the sheet just now.", true); }); };
+  $("pbRefresh").onclick = function(){ staffStatus("Refreshing every book..."); loadAll(true); };
   $("pbPrintF").onclick = function(){ printBook({ staff: true, blank: false, onlyWork: false }); };
   $("pbPrintB").onclick = function(){ printBook({ staff: true, blank: true }); };
   $("pbPrintK").onclick = printBooklet;
@@ -3024,18 +3104,31 @@ function startStudent(){
     return;
   }
   if(WHO === "LC") loadScript("/data/b5speak.js?v=1", function(){ return !!window.B5Speak; });
+  MIRROR = !S.guest && !!S.call && !!S.syncUrl && !window.B5Sync && staffDevice();
+  if(MIRROR){
+    PEN = "j";
+    MKEYD = "b5.pbmirror.dirty." + WHO;
+    try{ mdirty = JSON.parse(localStorage.getItem(MKEYD) || "{}") || {}; }catch(e){ mdirty = {}; }
+    var bar = el("div", "pb-penline", "Staff device: this is " + esc(WHO) + "'s book from the sheet, and anything you write goes in as Jay's writing. <small style=\"opacity:.85;margin-left:6px\">Fetching the latest...</small>");
+    bar.id = "pbMirror"; bar.style.margin = "0 0 12px"; bar.style.borderRadius = "12px";
+    document.body.insertBefore(bar, root);
+    mirrorPush();
+  }
   var hash = (location.hash || "").replace("#", "");
   if(BY[hash]) openStep(hash); else drawMap();
+  if(MIRROR) mirrorPull().then(function(ch){ if(ch) mirrorRedraw(); });
   window.addEventListener("hashchange", function(){ var h = (location.hash || "").replace("#", ""); if(BY[h]) openStep(h); });
-  penButton();
+  if(!MIRROR) penButton();
   /* evidence for BridgeLink Buddy: time on task, counted by the sheet */
-  if(window.B5Evidence && !S.guest) B5Evidence.start({ slug: "game-project-book", title: "Project book (ELP workbook)", subject: "Project", line: function(){
+  if(window.B5Evidence && !S.guest && !MIRROR) B5Evidence.start({ slug: "game-project-book", title: "Project book (ELP workbook)", subject: "Project", line: function(){
     var on = Object.keys(sessionSteps).filter(function(k){ return BY[k] && k !== "cover"; }).map(function(k){ return BY[k].n; });
     return (on.length ? "Worked on " + on.join(", ") + ". " : "") + stampedList().length + " of " + ROUTE.length + " steps stamped in the project book.";
   } });
   /* Jay may have written from the staff room: check again when the book comes back into view */
   document.addEventListener("visibilitychange", function(){
     if(document.visibilityState === "visible" && window.B5Sync && B5Sync.pull) B5Sync.pull().then(function(){ if(view.at === "map") drawMap(); });
+    if(document.visibilityState === "visible" && MIRROR && Date.now() - mLast > 15000) mirrorPull().then(function(ch){ if(ch) mirrorRedraw(); });
+    if(document.visibilityState === "hidden" && MIRROR) mirrorPush();
   });
 }
 
