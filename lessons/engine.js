@@ -172,7 +172,7 @@ R.cover = function(f){
   var pb = part ? '<span class="partbadge">Part ' + part + ' of ' + NP + ': ' + pname(part) + '</span>' : "";
   var era = eraNow();
   return '<div class="cover"><div>' +
-    '<p class="kicker">' + esc(series.title) + (meta.byWeek ? ' &middot; this week' : ' &middot; lesson ' + meta.n + ' of ' + meta.of) + '</p>' +
+    '<p class="kicker">' + esc(series.title) + (meta.byWeek ? (meta.theme ? ' &middot; week ' + meta.week + ': ' + esc(meta.theme) : ' &middot; this week') : ' &middot; lesson ' + meta.n + ' of ' + meta.of) + '</p>' +
     E("title", "h1", "", meta.title) +
     (part > 1 && lesson.objective && lesson.objective.mission ? '<p class="sline"><b>This week\'s mission:</b> ' + E("objective.mission", "span", "") + '</p>' : E("cover.line", "p", "sline", meta.line)) + pb +
     (ccNow() ? '<p class="cctag">This week: ' + esc(ccNow().week) + '</p>' : "") +
@@ -427,8 +427,8 @@ R.end = function(f){
   PLAN.series.forEach(function(se){ total += se.lessons.length; });
   var here = hereList(), snaps = Object.keys(S.snaps).length;
   var nextInSeries = null;
-  if(part && part < NP) nextInSeries = "Part " + (part + 1) + " (" + pname(part + 1).toLowerCase() + ") next " + (meta.byWeek ? "session." : "PHSE slot.");
-  else if(meta.n < meta.of) nextInSeries = "Next in this series: " + series.lessons[meta.n].title + ".";
+  if(part && part < NP) nextInSeries = "Part " + (part + 1) + " (" + pname(part + 1).toLowerCase() + ") next " + (meta.pillar === "cc" ? "session." : "PHSE slot.");
+  else if(meta.n < meta.of && !meta.old) nextInSeries = (meta.byWeek ? "Next week: " : "Next in this series: ") + series.lessons[meta.n].title + ".";
   return '<p class="kicker">' + (part && part < NP ? "That's part " + part + " done" : "That's the lesson") + '</p>' +
     '<h1 class="ft small">' + (part && part < NP ? "Good stopping point." : "Done. Nice one, Base 5.") + '</h1>' +
     '<div class="endgrid"><div class="panel"><h2>Lessons together</h2>' +
@@ -859,7 +859,7 @@ function menu(){
   var url = location.pathname + "?" + location.search.replace(/^\?/, "").split("&").filter(function(x){ return x && x.indexOf("f=") !== 0 && x.indexOf("preview=") !== 0; }).join("&");
   if(!LOOK) h += '<div class="sg">This lesson</div><button class="mi" data-reset="1">Reset this lesson (start again, not counted)</button>' +
     '<a href="' + esc(url + (PREVIEW ? "" : "&preview=1")) + '">' + (PREVIEW ? "Leave preview and teach it for real" : "Switch to preview (nothing counts)") + '</a>';
-  h += LOOK ? '<div class="sg">Elsewhere</div><a href="/">Base 5 home</a>' : '<div class="sg">Elsewhere</div><a href="/lessons/">The Lessons library</a><a href="/">Base 5 home</a>';
+  h += LOOK ? '<div class="sg">Elsewhere</div><a href="/">Base 5 home</a>' : '<div class="sg">Elsewhere</div>' + (meta.notes ? '<a href="/lessons/notes.html?l=' + esc(meta.id) + '" target="_blank" rel="noopener">Staff notes for this week (all three tiers, opens a new tab)</a>' : '') + '<a href="/lessons/">The Lessons library</a><a href="/">Base 5 home</a>';
   box.innerHTML = h;
   $$("[data-go]", box).forEach(function(b){ b.addEventListener("click", function(){ ov.hidden = true; go(+b.dataset.go); }); });
   $$("[data-reset]", box).forEach(function(b){ b.addEventListener("click", function(){ resetLesson(); }); });
@@ -1115,7 +1115,7 @@ function sendBuddy(){
       });
       sendMsg("Sending to the shared memory and Buddy...");
       return Site.call("lesson", {
-        key: pass, day: S.day, id: meta.id + (part ? "-p" + part : ""), title: (meta.byWeek ? "Cultural Calendar: " : "") + meta.title + (part ? " (" + pname(part).toLowerCase() + ")" : ""),
+        key: pass, day: S.day, id: meta.id + (part ? "-p" + part : ""), title: (meta.pillar === "cc" ? "Cultural Calendar: " : meta.theme ? "PHSE, " + meta.theme + ": " : "") + meta.title + (part ? " (" + pname(part).toLowerCase() + ")" : ""),
         subject: pillar.name, target: meta.target, targetName: series.title, step: meta.step || 0,
         mins: part ? 15 : (lesson.mins || 45), line: summaryLine(), here: here, png: png,
         dropTitle: dropTitle, drops: drops, missed: Object.keys(drops), dropNote: "This goes with the lesson on " + meta.title.replace(/\?$/, "") + ", whenever you fancy it. No rush."

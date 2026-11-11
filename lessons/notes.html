@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PHSE staff notes - Lessons - Base 5</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/lessons.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=13">
+<!--
+  Base 5 - PHSE staff notes, one page per week of the Autumn 2 Relational plan.
+  Reads the notes block from each weekly lesson file (/lessons/l/rel-week-N.js)
+  and the list of weeks from /lessons/plan.js. Staff facing: the full trust plan
+  for all three tiers, including the sensitive strands that never go on the board.
+  ASCII only.
+-->
+<style>
+.weeks{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 22px}
+.weeks a{font-family:var(--display);font-weight:800;text-decoration:none;color:inherit;border:2.5px solid var(--ink);border-radius:14px 10px 15px 9px;padding:8px 14px;background:var(--white);box-shadow:3px 4px 0 var(--ink)}
+.weeks a.on{background:#6a5acd;color:#fff}
+.weeks a small{display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.nb{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);box-shadow:6px 7px 0 var(--ink);padding:18px 22px;margin:0 0 20px}
+.nb h2{font-family:var(--display);margin:0 0 10px;font-size:1.3rem}
+.nb h3{font-family:var(--display);margin:14px 0 6px;font-size:1.02rem}
+.nb p,.nb li{line-height:1.5}
+.nb ul{margin:6px 0 0;padding-left:22px}
+.nb li{margin:4px 0}
+.words{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.words div{border:2.5px solid var(--ink);border-radius:14px 10px 15px 9px;padding:10px 14px;background:#e8e5fa}
+.words b{display:block;font-family:var(--display);font-size:1.15rem}
+.shape{display:grid;grid-template-columns:minmax(160px,240px) 1fr;gap:8px 16px}
+.shape b{font-family:var(--display)}
+.tier{border-top:12px solid #6a5acd}
+.tier .tnum{display:inline-block;font-family:var(--display);font-weight:900;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:#6a5acd;color:#fff;margin-bottom:6px}
+.tier .target{font-family:var(--display);font-size:1.2rem;margin:4px 0 8px}
+.onboard{background:#dff5ee;border:2px solid var(--teal);border-radius:12px;padding:8px 12px;margin:10px 0}
+.care{background:#fff1dc;border:2.5px dashed #ef7724;border-radius:14px;padding:10px 14px;margin:12px 0 0}
+.care h3{margin-top:0}
+.lead2{font-size:1.02rem;max-width:62rem}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mini{font:inherit;font-size:.9rem;font-weight:700;border:2px solid var(--ink);border-radius:10px;background:var(--white);padding:6px 12px;color:inherit;text-decoration:none}
+.mini.go{background:var(--orange)}
+@media (max-width:640px){.shape{grid-template-columns:1fr}}
+@media print{.weeks,.acts,.grain,.backrow{display:none !important}.nb{box-shadow:none;break-inside:avoid}body{background:#fff}}
+</style>
+<script src="/data/b5site.js?v=8"></script>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+  <header class="hero hero-sm hero-page">
+    <div class="toprow">
+      <h1 class="echo" data-echo="PHSE notes">PHSE notes</h1>
+    </div>
+    <div class="line"><span class="chip">Staff</span><p>The trust's Autumn 2 PSHE and RSE plan, week by week, for all three tiers. The board lessons carry Tier 1 for everyone plus "Going further" slides; everything else, including the sensitive strands, lives here.</p></div>
+  </header>
+  <p class="backrow"><a class="mini" href="/lessons/">Back to Lessons</a></p>
+  <div class="weeks" id="weeks"></div>
+  <div id="out"><div class="nb"><p>Loading the week...</p></div></div>
+</div>
+
+<script src="/lessons/plan.js?v=9"></script>
+<script src="/cc/cc-art.js?v=8"></script>
+<script src="/lessons/art.js?v=4"></script>
+<script>
+(function(){
+var L = window.B5LESSONS, out = document.getElementById("out");
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function q(n){ var m = location.search.match(new RegExp("[?&]" + n + "=([^&]*)")); return m ? decodeURIComponent(m[1]) : ""; }
+function nice(iso){ var p = iso.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); }
+
+var weeks = L.bySeries["rel-assert"].lessons.filter(function(l){ return l.notes; });
+var today = L.iso(), id = q("l");
+if(!id){ weeks.forEach(function(l){ if(!id && l.to >= today) id = l.id; }); }
+if(!id) id = weeks[weeks.length - 1].id;
+var meta = L.byLesson[id];
+
+document.getElementById("weeks").innerHTML = weeks.map(function(l){
+  return '<a href="?l=' + l.id + '"' + (l.id === id ? ' class="on"' : '') + '><small>Week ' + l.week + ', ' + nice(l.from) + '</small>' + esc(l.theme) + '</a>';
+}).join("");
+
+function list(a){ return a && a.length ? '<ul>' + a.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : ""; }
+
+function render(){
+  var n = (window.B5LESSON || {}).notes;
+  if(!n){ out.innerHTML = '<div class="nb"><p>No notes for this week yet.</p></div>'; return; }
+  var parts = L.partNums(meta), h = "";
+  h += '<div class="nb"><p class="kicker" style="margin:0">' + esc(n.week) + '</p><h2 style="font-size:1.7rem">' + esc(n.theme) + ': ' + esc(meta.title) + '</h2>' +
+    '<p class="lead2">' + esc(meta.line) + ' The board lesson links to step ' + meta.step + ' of the Relational target in Buddy.</p>' +
+    '<div class="acts">' + (meta.ready ? '<a class="mini" href="/lessons/present.html?l=' + meta.id + '&amp;p=1&amp;preview=1">Preview the lesson</a>' + parts.map(function(p){ return '<a class="mini" href="/lessons/present.html?l=' + meta.id + '&amp;p=' + p + '">Part ' + p + ': ' + esc(L.partName(meta, p)) + '</a>'; }).join("") : '<span class="mini">Slides still being made</span>') +
+    '<button class="mini" type="button" onclick="window.print()">Print these notes</button></div></div>';
+
+  h += '<div class="nb"><h2>Words of the week</h2><div class="words">' + n.words.map(function(w){ return '<div><b>' + esc(w[0]) + '</b>' + esc(w[1]) + '</div>'; }).join("") + '</div>' +
+    (n.extraWords ? '<p style="margin-top:10px">' + esc(n.extraWords) + '</p>' : "") + '</div>';
+
+  if(n.car && n.car.length) h += '<div class="nb"><h2>Car Chat questions</h2>' + n.car.map(function(c){ return '<p><b>' + esc(c[0]) + ':</b> ' + esc(c[1]) + '</p>'; }).join("") + '</div>';
+
+  if(n.shape) h += '<div class="nb"><h2>How the week runs</h2><div class="shape">' + n.shape.map(function(r){ return '<b>' + esc(r[0]) + '</b><span>' + esc(r[1]) + '</span>'; }).join("") + '</div></div>';
+
+  (n.tiers || []).forEach(function(t){
+    h += '<div class="nb tier"><span class="tnum">Tier ' + t.n + '</span><div class="target">' + esc(t.target) + '</div>' +
+      '<h3>Milestones</h3>' + list(t.milestones) +
+      (t.board ? '<div class="onboard"><b>On the board:</b> ' + esc(t.board) + '</div>' : "") +
+      (t.more && t.more.length ? '<h3>More for this tier (talk, small group or one to one)</h3>' + list(t.more) : "") +
+      (t.care && t.care.length ? '<div class="care"><h3>Handle with care</h3>' + list(t.care) + '</div>' : "") + '</div>';
+  });
+
+  if(n.safeguard) h += '<div class="nb care" style="border-style:solid"><h2>Before teaching the sensitive strands</h2>' + list(n.safeguard) + '</div>';
+
+  if(n.clips && n.clips.length) h += '<div class="nb"><h2>Film clips</h2>' + (n.clipsLine ? '<p>' + esc(n.clipsLine) + '</p>' : "") + '<ul>' + n.clips.map(function(c){ return '<li><b>' + esc(c[0]) + '</b>: ' + esc(c[1]) + '</li>'; }).join("") + '</ul></div>';
+
+  if(n.support) h += '<div class="nb"><h2>Support to signpost</h2>' + list(n.support) + '</div>';
+  out.innerHTML = h;
+  document.title = n.theme + " - PHSE staff notes - Base 5";
+}
+
+if(!meta){ out.innerHTML = '<div class="nb"><p>That week is not on the list.</p></div>'; return; }
+var sc = document.createElement("script");
+sc.src = "/lessons/l/" + meta.id + ".js?v=" + (window.B5LESSONS_V || 1);
+sc.onload = render;
+sc.onerror = function(){ out.innerHTML = '<div class="nb"><h2>' + esc(meta.theme) + '</h2><p>The notes for this week are still being written.</p></div>'; };
+document.head.appendChild(sc);
+})();
+</script>
+</body>
+</html>

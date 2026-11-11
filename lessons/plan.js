@@ -77,11 +77,30 @@ var SERIES = [
     { id: "pfa-careers-2", step: 2, title: "Jobs that vanished, jobs that appeared", line: "Lamplighters to drone pilots.", ready: true, drop: "career-explorer" },
     { id: "pfa-careers-3", step: 2, title: "What suits me?", line: "Interests, strengths and where they lead.", ready: true, drop: "career-explorer" }
   ]},
-  { target: "rel-assert", pillar: "rel", title: "Assertiveness in relationships", split: true, lessons: [
-    { id: "rel-assert-1", step: 1, title: "Mouse, dragon or owl?", line: "Passive, aggressive and assertive.", ready: true, drop: "my-yes-my-no" },
-    { id: "rel-assert-2", step: 2, title: "My yes, my no", line: "Saying no, and hearing it.", ready: true, drop: "my-yes-my-no" },
-    { id: "rel-assert-3", step: 3, title: "Asking for what I need", line: "I statements and picking the moment.", ready: true, drop: "my-yes-my-no" },
-    { id: "rel-assert-4", step: 3, title: "Under pressure", line: "Group pressure, and backing someone else up.", ready: true, drop: "my-yes-my-no" }
+  /* Relational: from Week 2 (9 Nov 2026) the PHSE slot follows the trust's weekly
+     PSHE/RSE themes (26/27 SB Relational Pillar, Autumn 2 "Building Connections"),
+     one lesson a week over the Monday, Thursday and Friday 15 minute slots. Still the
+     rel-assert target, so Send to Buddy links each week to a milestone step.
+     The first four lessons (old:true) were the series before that; they stay for
+     looking back and for the HQ activity, and no slot opens them now.
+     notes:true means /lessons/notes.html?l=<id> has the week's staff notes for all
+     three tiers (sensitive strands live there, never on the board).
+     A lesson can set its own parts and partNames (Week 2 started on a Thursday). */
+  { target: "rel-assert", pillar: "rel", title: "Assertiveness in relationships", split: true, byWeek: true, lessons: [
+    { id: "rel-assert-1", old: true, step: 1, title: "Mouse, dragon or owl?", line: "Passive, aggressive and assertive.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-assert-2", old: true, step: 2, title: "My yes, my no", line: "Saying no, and hearing it.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-assert-3", old: true, step: 3, title: "Asking for what I need", line: "I statements and picking the moment.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-assert-4", old: true, step: 3, title: "Under pressure", line: "Group pressure, and backing someone else up.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-week-2", from: "2026-11-09", to: "2026-11-13", week: 2, theme: "Supportive Relationships", step: 3, notes: true, parts: 2, partNames: ["", "Hook and explore", "Explain"],
+      title: "Got your back", line: "What supportive friends actually do.", ready: true, drop: "my-yes-my-no" },
+    { id: "rel-week-3", from: "2026-11-16", to: "2026-11-20", week: 3, theme: "Conflict and Assertiveness", step: 2, notes: true,
+      title: "Row, or sort it?", line: "Disagreeing without it turning into a war.", ready: false, drop: "my-yes-my-no" },
+    { id: "rel-week-4", from: "2026-11-23", to: "2026-11-27", week: 4, theme: "Self Respect", step: 1, notes: true,
+      title: "Proud of me", line: "Self respect, and listening to your own body.", ready: false, drop: "my-yes-my-no" },
+    { id: "rel-week-5", from: "2026-11-30", to: "2026-12-04", week: 5, theme: "Choice and Autonomy", step: 2, notes: true,
+      title: "Whose choice is it?", line: "Making your own choices, and letting others make theirs.", ready: false, drop: "my-yes-my-no" },
+    { id: "rel-week-6", from: "2026-12-07", to: "2026-12-11", week: 6, theme: "Personal Safety", step: 1, notes: true,
+      title: "Safe moves", line: "Spotting risk and picking the safe action.", ready: false, drop: "my-yes-my-no" }
   ]},
   /* Cultural Calendar: one lesson a week, the week's theme from /data/cc.js, in five
      30 minute parts (10:00 each day). Whole school: any base can open it from /cc/
@@ -115,7 +134,7 @@ var SLOTS = [
   { id: "thu-project",   days: ["thu"], session: "project",   series: ["hs-myths", "se-earth"], mins: 45, label: "Thursday, first half of the project slot" },
   { id: "fri-pfa",       days: ["fri"], session: "pfa",       series: ["pfa-transport", "pfa-careers"], mins: 30, label: "Friday, PFA",
     order: ["pfa-transport-1", "pfa-careers-1", "pfa-transport-2", "pfa-careers-2", "pfa-transport-3", "pfa-careers-3"] },
-  { id: "phse",          days: ["mon", "thu", "fri"], session: "phse", series: ["rel-assert"], mins: 15, split: true, label: "PHSE, Monday, Thursday and Friday" },
+  { id: "phse",          days: ["mon", "thu", "fri"], session: "phse", series: ["rel-assert"], mins: 15, split: true, byWeek: true, label: "PHSE, Monday, Thursday and Friday" },
   { id: "cc",            days: ["mon", "tue", "wed", "thu", "fri"], session: "cc", series: ["cc"], mins: 30, split: true, byWeek: true, label: "Cultural Calendar, every day at 10:00" }
 ];
 
@@ -139,7 +158,7 @@ var bySeries = {}, byLesson = {};
 SERIES.forEach(function(s){
   bySeries[s.target] = s;
   s.lessons.forEach(function(l, i){ l.n = i + 1; l.of = s.lessons.length; l.target = s.target; l.pillar = s.pillar; l.split = !!s.split;
-    l.parts = s.split ? (s.parts || 3) : 0; l.partNames = s.partNames || PARTS; l.byWeek = !!s.byWeek; byLesson[l.id] = l; });
+    l.parts = s.split ? (l.parts || s.parts || 3) : 0; l.partNames = l.partNames || s.partNames || PARTS; l.byWeek = !!s.byWeek && !l.old; byLesson[l.id] = l; });
 });
 
 /* how many parts a lesson has, and their names */
@@ -302,7 +321,7 @@ function label(x){
 }
 
 /* bump when lesson files change, so boards fetch the new ones */
-window.B5LESSONS_V = 8;
+window.B5LESSONS_V = 9;
 
 window.B5LESSONS = {
   pillars: P, series: SERIES, slots: SLOTS, hqs: HQS, parts: PARTS,

@@ -79,7 +79,7 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
 
 <script src="/data/term.js?v=11"></script>
 <script src="/data/a2/library.js"></script>
-<script src="/lessons/plan.js?v=8"></script>
+<script src="/lessons/plan.js?v=9"></script>
 <script>
 (function(){
 var L = window.B5LESSONS, T = window.B5TERM;
@@ -116,7 +116,7 @@ function list(){
   var unsent = L.unsent(st);
   L.slots.forEach(function(slot){
     var nx = L.nextFor(slot.id, st);
-    html += '<p class="slotline" style="margin:22px 0 10px 4px;opacity:.9"><b>' + esc(slot.label) + '</b>, ' + slot.mins + ' minutes' + (slot.split ? ', one lesson across the week in three parts' : '') + '</p>';
+    html += '<p class="slotline" style="margin:22px 0 10px 4px;opacity:.9"><b>' + esc(slot.label) + '</b>, ' + slot.mins + ' minutes' + (slot.split ? (slot.id === 'phse' ? ', one lesson a week on the trust\'s PSHE theme, in parts (<a href="/lessons/notes.html">staff notes for all three tiers</a>)' : ', one lesson across the week in three parts') : '') + '</p>';
     slot.series.forEach(function(t){
       var se = L.bySeries[t], p = L.pillars[se.pillar];
       html += '<section class="series" style="--pc:' + p.colour + ';--pw:' + p.wash + '"><header><h2>' + esc(se.title) + '</h2><span>' + esc(p.name) + '</span></header><ol>';
@@ -138,10 +138,12 @@ function list(){
           var on = !!st.taught[L.partKey(l.id, pp)];
           acts += '<button class="mini" type="button" data-id="' + l.id + '" data-p="' + pp + '" data-on="' + (on ? 1 : 0) + '">' + (on ? 'Untick' : 'Mark taught') + (l.split ? ' ' + pp : '') + '</button>';
         });
+        if(l.notes) acts += '<a class="mini" href="/lessons/notes.html?l=' + l.id + '" title="The trust plan for this week, all three tiers">Staff notes</a>';
+        if(l.old) tag = (tag ? tag + ' ' : '') + '<span class="tag soon" title="Taught before the PHSE slot moved to the weekly themes">Before the weekly plan</span>';
         var act = actTitle(l.drop);
         var notSent = unsent.filter(function(x){ return x.lesson.id === l.id; });
         if(notSent.length) tag += notSent.map(function(x){ return '<a class="tag unsent" href="/lessons/present.html?l=' + l.id + (x.part ? '&amp;p=' + x.part : '') + '&amp;f=end" title="Open the last slide to send it">Not sent' + (x.part ? ' (' + L.partName(l, x.part).toLowerCase() + ')' : '') + '</a>'; }).join("");
-        html += '<li class="' + (done ? 'done' : '') + '"><span class="n">' + l.n + '</span><div><h3>' + esc(l.title) + '</h3><p>' + esc(l.line) + (L.planned(l.id) ? ' <span class="plan">Planned ' + esc(nice(L.planned(l.id))) + '</span>' : '') + '</p>' +
+        html += '<li class="' + (done ? 'done' : '') + '"><span class="n">' + l.n + '</span><div><h3>' + (l.theme ? '<span style="opacity:.6">Week ' + l.week + ', ' + esc(l.theme) + ':</span> ' : '') + esc(l.title) + '</h3><p>' + esc(l.line) + (L.planned(l.id) ? ' <span class="plan">Planned ' + esc(nice(L.planned(l.id))) + '</span>' : '') + '</p>' +
           (act ? '<p class="goes">Goes with the HQ activity <b>' + esc(act) + '</b> &middot; <a href="/paper/?list=' + encodeURIComponent(l.drop) + '.medium" target="_blank" rel="noopener">on paper</a></p>' : '') + '</div><div class="acts">' + tag + acts + '</div></li>';
       });
       html += '</ol></section>';
