@@ -687,8 +687,13 @@ function mirrorPull(){
       if(v === ""){ if(cur != null){ try{ localStorage.removeItem(k); }catch(e){} changed = true; } }
       else if(cur !== v){ try{ localStorage.setItem(k, v); }catch(e){} changed = true; }
     });
-    /* anything only on this laptop (an old try out) goes, unless it is Jay's writing still to send */
-    skeys(pre).forEach(function(k){ if(!have[k] && !mdirty[k]){ try{ localStorage.removeItem(k); }catch(e){} changed = true; } });
+    /* anything only on this laptop is held aside (never deleted), so the book shows the sheet's
+       copy; the staff page can send held work on to the book (see Rescue) */
+    skeys(pre).forEach(function(k){
+      if(have[k] || mdirty[k]) return;
+      try{ var hv = localStorage.getItem(k); if(hv) localStorage.setItem("b5.pbheld." + k, hv); localStorage.removeItem(k); }catch(e){}
+      changed = true;
+    });
     mirrorNote("Showing " + WHO + "'s book as it is now");
     return changed;
   }).catch(function(){ mirrorNote("Could not reach the sheet, so this may not be " + WHO + "'s latest book."); return false; });
@@ -2922,6 +2927,86 @@ function exportEvidence(kind, arg){
   }).catch(function(){ staffStatus("The slides could not be made just now.", true); });
 }
 
+
+/* ==========================================================
+   Rescue: book work that only ever saved on this laptop
+   Before 10 Nov 2026 a book opened on a staff device saved on that
+   laptop and never reached the sheet. Those pages are either still
+   in the student's keys on this laptop, or held aside by the book
+   (b5.pbheld.<key>) when it loaded the sheet's copy. The staff page
+   lists them and sends them to the right books in one go.
+   ========================================================== */
+var HELD = "b5.pbheld.";
+function jsonT(v){ try{ var o = JSON.parse(v); return o && +o.t || 0; }catch(e){ return 0; } }
+function strandedScan(){
+  var out = {};
+  WHOS.forEach(function(w){
+    var pre = PREFIX[w] + "pb." + BOOK + ".", server = ALL[w] || {}, found = {};
+    try{
+      for(var i = 0; i < localStorage.length; i++){
+        var k = localStorage.key(i), orig = null;
+        if(!k) continue;
+        if(k.indexOf(pre) === 0) orig = k; else if(k.indexOf(HELD + pre) === 0) orig = k.slice(HELD.length);
+        if(!orig) continue;
+        var v = localStorage.getItem(k); if(!v) continue;
+        var sv = server[orig];
+        if(sv && sv === v) continue;
+        if(sv && jsonT(v) <= jsonT(sv)) continue;
+        if(!found[orig] || jsonT(v) > jsonT(found[orig].v)) found[orig] = { v: v, from: k };
+      }
+    }catch(e){}
+    var keys = Object.keys(found);
+    if(keys.length) out[w] = found;
+  });
+  return out;
+}
+function rescueCard(){
+  var box = $("pbRescue"); if(!box) return;
+  var st = strandedScan(), whos = Object.keys(st);
+  if(!whos.length){ box.innerHTML = ""; return; }
+  var lines = whos.map(function(w){
+    var steps = {}; Object.keys(st[w]).forEach(function(k){ var m = k.slice((PREFIX[w] + "pb." + BOOK + ".").length).match(/^(?:s|j|ds|dj|phs|phj)\.([a-z]+)\./); if(m && BY[m[1]]) steps[BY[m[1]].n] = 1; });
+    var names = Object.keys(steps);
+    return '<li><b>' + w + '</b>: ' + (names.length ? esc(names.join(", ")) : "photos and settings") + '</li>';
+  }).join("");
+  box.innerHTML = '<div class="pb-card" style="--sc:#e0950b;margin:0 0 18px;background:#fff8e6"><span class="lab">On this laptop only</span>' +
+    '<h2 style="font-size:1.3rem">Book work that never reached the sheet</h2>' +
+    '<p class="hint">From before the 10 November fix, when a book opened on a staff device only saved on that laptop.</p><ul style="margin:8px 0 12px">' + lines + '</ul>' +
+    '<p style="margin:0 0 6px;font-weight:700">Count it as</p><div class="pb-chips" id="pbRsPen" style="margin:0 0 12px">' +
+    '<button type="button" data-rp="as" aria-pressed="true" style="background:#0a2f38;color:#fff">As it was written (yours stays yours, theirs stays theirs)</button>' +
+    '<button type="button" data-rp="j" aria-pressed="false">All of it as Jay\'s writing</button></div>' +
+    '<button type="button" class="pb-btn main" id="pbRsGo">Send it to the books</button> <button type="button" class="pb-btn quiet" id="pbRsNo">Not now</button><p class="hint" id="pbRsMsg"></p></div>';
+  var mode = "as";
+  $("pbRsPen").onclick = function(e){ var b = e.target.closest("[data-rp]"); if(!b) return; mode = b.dataset.rp; [].forEach.call(this.querySelectorAll("[data-rp]"), function(x){ var on = x === b; x.setAttribute("aria-pressed", on); x.style.background = on ? "#0a2f38" : ""; x.style.color = on ? "#fff" : ""; }); };
+  $("pbRsNo").onclick = function(){ box.innerHTML = ""; };
+  $("pbRsGo").onclick = function(){
+    var msg = $("pbRsMsg"), go = this; go.disabled = true; msg.textContent = "Sending...";
+    var t = now(), fails = 0;
+    whos.reduce(function(pr, w){
+      return pr.then(function(){
+        var items = {}, pre = PREFIX[w] + "pb." + BOOK + ".";
+        Object.keys(st[w]).forEach(function(k){
+          var v = st[w][k].v, key = k;
+          if(mode === "j"){
+            var rest = k.slice(pre.length).replace(/^s\./, "j.").replace(/^ds\./, "dj.").replace(/^phs\./, "phj.");
+            key = pre + rest; v = v.replace(/"o":"s"/g, '"o":"j"');
+          }
+          items[key] = { v: v, t: t };
+        });
+        return S.call("save", { who: w, items: items }).then(function(o){
+          if(!o || !o.ok) throw 0;
+          Object.keys(st[w]).forEach(function(k){ if(st[w][k].from.indexOf(HELD) === 0){ try{ localStorage.removeItem(st[w][k].from); }catch(e){} } });
+        }).catch(function(){ fails++; });
+      });
+    }, Promise.resolve()).then(function(){
+      go.disabled = false;
+      if(fails){ msg.textContent = "Some of it could not be sent just now. Have another go in a moment."; return; }
+      msg.textContent = "Sent. Loading the books again...";
+      loadAll(true);
+    });
+  };
+}
+
 /* ==========================================================
    Staff: every book, and writing in any of them
    ========================================================== */
@@ -2933,7 +3018,7 @@ function staffMount(){
     '<div class="pb-top" style="grid-template-columns:1fr"><div><span class="pb-kick">Staff</span><h1>Project books</h1>' +
     '<p class="pb-small" style="max-width:760px">Every student\'s ELP workbook. Write on any page and it lands in their book, in your pen colour with a Jay tag. Tag the pillars, keep an engagement and support note (only staff ever see those), leave a sticky note, or stamp a page for them.</p>' +
     '<p class="pb-small" id="pbStatus" style="font-weight:700;opacity:1">Opening the books...</p></div></div>' +
-    '<div id="pbCohort"></div><div id="pbStaff"></div>';
+    '<div id="pbRescue"></div><div id="pbCohort"></div><div id="pbStaff"></div>';
   statusEl = $("pbStatus");
   var pend = Object.keys(PENDING).filter(function(w){ return Object.keys(PENDING[w] || {}).length; });
   if(pend.length) push();
@@ -2966,7 +3051,7 @@ function loadAll(quiet){
       staffStatus(fails ? "Some books could not be opened just now. It tries again by itself, or press Refresh." :
         bookKeysTotal() ? "Up to date at " + hhmm() + ". This page refreshes by itself every couple of minutes." :
         "Up to date at " + hhmm() + ", and the sheet has nothing from any project book yet. It shows here as soon as a student writes or stamps on their own device, or you do in a student's book on yours.", !!fails);
-      drawCohort(); if(quiet && WHO) useStudent(keep); else pickStudent(keep || WHOS[0]);
+      drawCohort(); rescueCard(); if(quiet && WHO) useStudent(keep); else pickStudent(keep || WHOS[0]);
       if(quiet && keep && !busyTyping()) drawStaff();
       return;
     }
