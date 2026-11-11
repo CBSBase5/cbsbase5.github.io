@@ -2963,7 +2963,9 @@ function loadAll(quiet){
   (function next(){
     if(i >= WHOS.length){
       loading = false; lastLoad = Date.now();
-      staffStatus(fails ? "Some books could not be opened just now. It tries again by itself, or press Refresh." : "Up to date at " + hhmm() + ". This page refreshes by itself every couple of minutes.", !!fails);
+      staffStatus(fails ? "Some books could not be opened just now. It tries again by itself, or press Refresh." :
+        bookKeysTotal() ? "Up to date at " + hhmm() + ". This page refreshes by itself every couple of minutes." :
+        "Up to date at " + hhmm() + ", and the sheet has nothing from any project book yet. It shows here as soon as a student writes or stamps on their own device, or you do in a student's book on yours.", !!fails);
       drawCohort(); if(quiet && WHO) useStudent(keep); else pickStudent(keep || WHOS[0]);
       if(quiet && keep && !busyTyping()) drawStaff();
       return;
@@ -2972,17 +2974,26 @@ function loadAll(quiet){
     loadOne(w).catch(function(){ fails++; if(!ALL[w]) ALL[w] = {}; }).then(next);
   })();
 }
+/* the newest change saved in the current student's book, from the sheet */
+function lastChange(){
+  var t = 0;
+  skeys(P + "pb." + BOOK + ".").forEach(function(k){ var v = rj(k); if(v && +v.t > t) t = +v.t; });
+  if(!t) return "nothing yet";
+  var d = new Date(t), mm = d.getMinutes();
+  return DAYN[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + ", " + d.getHours() + ":" + (mm < 10 ? "0" : "") + mm;
+}
+function bookKeysTotal(){ var n = 0; WHOS.forEach(function(w){ var m = ALL[w] || {}; for(var k in m){ if(k.indexOf(PREFIX[w] + "pb." + BOOK + ".") === 0 && m[k]) n++; } }); return n; }
 function useStudent(w){ WHO = w; P = PREFIX[w]; MEM = ALL[w] || (ALL[w] = {}); }
 function drawCohort(){
   var keep = WHO, h = '<div class="pb-card" style="--sc:#007291;padding:16px 18px;margin:6px 0 18px"><span class="lab">Where everyone is</span><div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:.9rem;min-width:760px">' +
-    '<tr><th></th>' + ROUTE.map(function(s){ return '<th title="' + esc(s.n) + '" style="padding:2px 3px"><span style="display:inline-flex;width:26px;height:26px;border-radius:8px;background:' + stageOf(s).c + ';color:#fff;align-items:center;justify-content:center">' + icon(s.id).replace('class="pb-ic"', 'class="pb-ic" style="width:16px;height:16px"') + '</span></th>'; }).join("") + '<th style="text-align:left;padding-left:8px">Stamped</th></tr>';
+    '<tr><th></th>' + ROUTE.map(function(s){ return '<th title="' + esc(s.n) + '" style="padding:2px 3px"><span style="display:inline-flex;width:26px;height:26px;border-radius:8px;background:' + stageOf(s).c + ';color:#fff;align-items:center;justify-content:center">' + icon(s.id).replace('class="pb-ic"', 'class="pb-ic" style="width:16px;height:16px"') + '</span></th>'; }).join("") + '<th style="text-align:left;padding-left:8px">Stamped</th><th style="text-align:left;padding-left:12px">Last change</th></tr>';
   WHOS.forEach(function(w){
     useStudent(w);
     var n = 0;
     h += '<tr><th style="text-align:left;padding:4px 10px 4px 0"><button type="button" class="pb-btn small" data-who="' + w + '">' + w + '</button></th>' + ROUTE.map(function(s){
       var st = stepState(s.id); if(st.done) n++;
       return '<td style="text-align:center;padding:2px"><button type="button" data-who="' + w + '" data-step="' + s.id + '" title="' + esc(w + ": " + s.n) + '" aria-label="' + esc(w + ", " + s.n + (st.done ? ", stamped" : st.started ? ", started" : "")) + '" style="width:22px;height:22px;border-radius:50%;padding:0;border:2px solid ' + stageOf(s).c + ';background:' + (st.done ? stageOf(s).c : st.started ? "linear-gradient(90deg," + stageOf(s).c + " 50%,#fff 50%)" : "#fff") + '"></button></td>';
-    }).join("") + '<td style="padding-left:8px;font-weight:700">' + n + ' of ' + ROUTE.length + '</td></tr>';
+    }).join("") + '<td style="padding-left:8px;font-weight:700">' + n + ' of ' + ROUTE.length + '</td><td style="padding-left:12px;white-space:nowrap;opacity:.8">' + lastChange() + '</td></tr>';
   });
   h += '</table></div></div>';
   $("pbCohort").innerHTML = h;
