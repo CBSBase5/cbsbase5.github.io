@@ -94,13 +94,13 @@ var SERIES = [
     { id: "rel-week-2", from: "2026-11-09", to: "2026-11-13", week: 2, theme: "Supportive Relationships", step: 3, notes: true, parts: 2, partNames: ["", "Hook and explore", "Explain"],
       title: "Got your back", line: "What supportive friends actually do.", ready: true, drop: "my-yes-my-no" },
     { id: "rel-week-3", from: "2026-11-16", to: "2026-11-20", week: 3, theme: "Conflict and Assertiveness", step: 2, notes: true,
-      title: "Row, or sort it?", line: "Disagreeing without it turning into a war.", ready: false, drop: "my-yes-my-no" },
+      title: "Row, or sort it?", line: "Disagreeing without it turning into a war.", ready: true, drop: "my-yes-my-no" },
     { id: "rel-week-4", from: "2026-11-23", to: "2026-11-27", week: 4, theme: "Self Respect", step: 1, notes: true,
-      title: "Proud of me", line: "Self respect, and listening to your own body.", ready: false, drop: "my-yes-my-no" },
+      title: "Proud of me", line: "Strengths, kinder self-talk, and putting things right.", ready: true, drop: "my-yes-my-no" },
     { id: "rel-week-5", from: "2026-11-30", to: "2026-12-04", week: 5, theme: "Choice and Autonomy", step: 2, notes: true,
-      title: "Whose choice is it?", line: "Making your own choices, and letting others make theirs.", ready: false, drop: "my-yes-my-no" },
+      title: "Whose choice is it?", line: "Making your own choices, and letting others make theirs.", ready: true, drop: "my-yes-my-no" },
     { id: "rel-week-6", from: "2026-12-07", to: "2026-12-11", week: 6, theme: "Personal Safety", step: 1, notes: true,
-      title: "Safe moves", line: "Spotting risk and picking the safe action.", ready: false, drop: "my-yes-my-no" }
+      title: "Safe moves", line: "Spotting risk and picking the safe action.", ready: true, drop: "my-yes-my-no" }
   ]},
   /* Cultural Calendar: one lesson a week, the week's theme from /data/cc.js, in five
      30 minute parts (10:00 each day). Whole school: any base can open it from /cc/
@@ -321,7 +321,7 @@ function label(x){
 }
 
 /* bump when lesson files change, so boards fetch the new ones */
-window.B5LESSONS_V = 9;
+window.B5LESSONS_V = 10;
 
 window.B5LESSONS = {
   pillars: P, series: SERIES, slots: SLOTS, hqs: HQS, parts: PARTS,
