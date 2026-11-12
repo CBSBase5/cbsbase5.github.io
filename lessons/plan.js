@@ -119,6 +119,13 @@ var SERIES = [
       colour: "#0b6e4f", deep: "#064a35", wash: "#dcf3ea" },
     { id: "cc-steam-1", cc: "steam-for-good", from: "2026-12-07", to: "2026-12-11", step: 0, title: "STEAM for Good", line: "What is one problem round here you could actually fix?", ready: true,
       colour: "#3a0ca3", deep: "#26066e", wash: "#e8e1fb" }
+  ]},
+  /* Cultural Calendar extras: stand alone 30 minute lessons for a week whose
+     five part lesson has already been taught. No slot opens them; the No Jay
+     day page (/nojay/) and the Lessons library do. Not split, no step. */
+  { target: "cc-extra", pillar: "cc", title: "Cultural Calendar extras", lessons: [
+    { id: "cc-remembrance-2", cc: "remembrance", step: 0, title: "Message received", line: "The Christmas truce, how messages got through, and Morse code.", ready: true,
+      colour: "#b5171c", deep: "#7d0f12", wash: "#fbe4e2" }
   ]}
 ];
 
@@ -321,7 +328,7 @@ function label(x){
 }
 
 /* bump when lesson files change, so boards fetch the new ones */
-window.B5LESSONS_V = 10;
+window.B5LESSONS_V = 11;
 
 window.B5LESSONS = {
   pillars: P, series: SERIES, slots: SLOTS, hqs: HQS, parts: PARTS,

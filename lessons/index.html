@@ -79,7 +79,7 @@ a.tcard:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
 
 <script src="/data/term.js?v=11"></script>
 <script src="/data/a2/library.js"></script>
-<script src="/lessons/plan.js?v=10"></script>
+<script src="/lessons/plan.js?v=11"></script>
 <script>
 (function(){
 var L = window.B5LESSONS, T = window.B5TERM;
@@ -114,8 +114,13 @@ function today(){
 function list(){
   var st = L.load(), html = "";
   var unsent = L.unsent(st);
-  L.slots.forEach(function(slot){
-    var nx = L.nextFor(slot.id, st);
+  /* series no slot opens (Cultural Calendar extras) go last */
+  var slots = L.slots.slice(), inSlot = {};
+  L.slots.forEach(function(x){ x.series.forEach(function(t){ inSlot[t] = 1; }); });
+  var extra = L.series.filter(function(se){ return !inSlot[se.target]; }).map(function(se){ return se.target; });
+  if(extra.length) slots.push({ id: "extra", label: "Extras, for when a session needs something different", mins: 30, series: extra });
+  slots.forEach(function(slot){
+    var nx = L.nextFor(slot.id, st) || {};
     html += '<p class="slotline" style="margin:22px 0 10px 4px;opacity:.9"><b>' + esc(slot.label) + '</b>, ' + slot.mins + ' minutes' + (slot.split ? (slot.id === 'phse' ? ', one lesson a week on the trust\'s PSHE theme, in parts (<a href="/lessons/notes.html">staff notes for all three tiers</a>)' : ', one lesson across the week in three parts') : '') + '</p>';
     slot.series.forEach(function(t){
       var se = L.bySeries[t], p = L.pillars[se.pillar];

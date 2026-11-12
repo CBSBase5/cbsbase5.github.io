@@ -142,7 +142,7 @@
 <script src="/data/term.js?v=11"></script>
 <script src="/data/a2/drops.js"></script>
 <script src="/data/a2/core.js"></script>
-<script src="/lessons/plan.js?v=10"></script>
+<script src="/lessons/plan.js?v=11"></script>
 <script>
 (function(){
 "use strict";
@@ -185,9 +185,13 @@ document.getElementById("printPlan").addEventListener("click", function(){ windo
 /* ---------- lessons ---------- */
 var hasRecord = false;
 try{ hasRecord = !!(LS && Object.keys(LS.load().taught || {}).length); }catch(e){}
+/* a different lesson for one session on one day, eg when the planned one has been taught already */
+var SWAP = { "2026-11-12": { cc: "cc-remembrance-2" } };
 function lessonFor(sessionKey){
   if(!LS) return null;
   var slot = LS.slotFor(key, sessionKey); if(!slot) return null;
+  var sw = (SWAP[date] || {})[sessionKey];
+  if(sw && LS.byLesson[sw]) return { slot: slot, lesson: LS.byLesson[sw], part: 0, free: true };
   var l = null, part = 0;
   if(slot.byWeek){
     slot.series.forEach(function(t){ ((LS.bySeries[t] || {}).lessons || []).forEach(function(x){ if(!x.old && x.from <= date && date <= x.to) l = x; }); });
@@ -212,7 +216,7 @@ function lessonFor(sessionKey){
 }
 function lessonHTML(x){
   var l = x.lesson, lk = LS.looks(l);
-  var href = LS.presentHref(x);
+  var href = LS.presentHref(x.free ? { lesson: x.lesson } : x);
   var pn = x.part ? LS.partName(l, x.part) : "";
   var acts = '<a class="go" href="' + esc(href) + '">Slides</a>' +
     '<a href="' + esc(href + (href.indexOf("?") > -1 ? "&" : "?") + "preview=1") + '">Preview</a>';
@@ -305,7 +309,7 @@ var firstLesson = null;
 slots.some(function(s){ if(T.mins(s[1]) <= (isToday ? nowM : 0)) return false; var x = lessonFor(s[2]); if(x){ firstLesson = { x: x, s: s }; return true; } return false; });
 var grab = '<div class="nj-grab">';
 if(firstLesson){
-  grab += '<a class="nj-big t" href="' + esc(LS.presentHref(firstLesson.x)) + '"><b>Next lesson slides</b><span>' + esc(firstLesson.s[0]) + ': ' + esc(firstLesson.x.lesson.title) + (firstLesson.x.part ? " (" + esc(LS.partName(firstLesson.x.lesson, firstLesson.x.part).toLowerCase()) + ")" : "") + '</span></a>';
+  grab += '<a class="nj-big t" href="' + esc(LS.presentHref(firstLesson.x.free ? { lesson: firstLesson.x.lesson } : firstLesson.x)) + '"><b>Next lesson slides</b><span>' + esc(firstLesson.s[0]) + ': ' + esc(firstLesson.x.lesson.title) + (firstLesson.x.part ? " (" + esc(LS.partName(firstLesson.x.lesson, firstLesson.x.part).toLowerCase()) + ")" : "") + '</span></a>';
 } else {
   grab += '<a class="nj-big t" href="/lessons/"><b>All lessons</b><span>Ready for the board</span></a>';
 }
