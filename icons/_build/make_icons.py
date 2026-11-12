@@ -158,6 +158,11 @@ ICONS = {
         '<path d="M15 9H40L50 19V55H15Z" fill="%s"/>' % T +
         '<path d="M40 9V19H50Z" fill="%s"/>' % O +
         '<path d="M21 28H43M21 36H43M21 44H35" stroke="%s" stroke-width="3.2" stroke-linecap="round"/>' % P),
+    "icons/nojay": (P,
+        '<rect x="13" y="12" width="38" height="45" rx="7" fill="%s"/>' % T +
+        '<rect x="23" y="7" width="18" height="10" rx="4" fill="%s"/>' % O +
+        '<path d="M20 30L24 34L31 26M20 44L24 48L31 40" stroke="%s" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' % P +
+        '<path d="M35 31H44M35 45H44" stroke="%s" stroke-width="3.2" stroke-linecap="round"/>' % P),
     "icons/cc": (P,
         '<rect x="10" y="14" width="44" height="40" rx="8" fill="%s"/>' % TINT +
         '<path d="M10 22a8 8 0 0 1 8-8h28a8 8 0 0 1 8 8v4H10Z" fill="%s"/>' % T +

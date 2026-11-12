@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No Jay day - Base 5</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/nojay.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=13">
+<script src="/data/b5site.js?v=8"></script>
+<style>
+/* The No Jay day plan: everything a colleague needs to run a Base 5
+   day without Jay, built from the same files as the day page and the
+   Lessons library, so it is right for any day without editing.
+     ?d=2026-11-12   a particular day (default: today, or the next
+                     school day)
+   Lessons: the slides each session would open, from /lessons/plan.js.
+   On the device Jay teaches from, that is the board's own record;
+   anywhere else it is the planned lesson for that date.
+   Printables: each student's sheets from /paper/ (their drops for the
+   day or week, and their Maths and English).
+   Not behind the staff sign in, so cover staff can open it from any
+   device. Initials only, nothing about any one child. ASCII only. */
+.nj-wrap{padding-bottom:50px}
+.nj-hello{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);box-shadow:var(--lift);padding:18px 22px;margin:0 0 18px;position:relative;overflow:hidden}
+.nj-hello::before{content:"";position:absolute;inset:0 auto 0 0;width:12px;background:linear-gradient(180deg,var(--teal),var(--orange))}
+.nj-hello h2{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.45rem;margin:0 0 6px}
+.nj-hello p{margin:0 0 8px;max-width:70ch}
+.nj-rules{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 4px;padding:0;list-style:none}
+.nj-rules li{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 12px;font-size:.93rem}
+.nj-rules li b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;margin-bottom:2px}
+@media (max-width:900px){.nj-rules{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.nj-rules{grid-template-columns:1fr}}
+
+.nj-days{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px;align-items:center}
+.nj-days a{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.9rem;letter-spacing:.04em;text-decoration:none;color:var(--ink);background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:7px 14px}
+.nj-days a.on{background:var(--ink);color:var(--paper)}
+.nj-days a.off{opacity:.45;pointer-events:none}
+.nj-days a.today{box-shadow:0 0 0 3px var(--yellow)}
+.nj-days .sp{flex:1}
+.nj-days button{font:inherit;font-size:.9rem;font-weight:700;border:2px solid var(--ink);border-radius:999px;padding:7px 14px;background:var(--yellow);color:var(--ink);cursor:pointer}
+
+.nj-h{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.5rem;margin:26px 0 4px;text-transform:uppercase;letter-spacing:.02em}
+.nj-sub{margin:0 0 12px;color:var(--body-tint);font-size:.95rem;max-width:72ch}
+
+/* grab and go: big buttons first */
+.nj-grab{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 8px}
+@media (max-width:900px){.nj-grab{grid-template-columns:1fr}}
+.nj-big{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:#fff;border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:16px 18px;box-shadow:4px 5px 0 var(--ink);transition:transform .14s ease}
+.nj-big:hover{transform:translate(-2px,-2px) rotate(-.6deg)}
+.nj-big b{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.25rem}
+.nj-big span{font-size:.92rem;opacity:.95}
+.nj-big.t{background:linear-gradient(160deg,#00a6c9,#007291)}
+.nj-big.o{background:linear-gradient(160deg,#ff9a4d,#ef7724);color:var(--ink)}
+.nj-big.p{background:linear-gradient(160deg,#9a67ad,#7b4b8f)}
+
+/* one card per student */
+.nj-kids{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 6px}
+@media (max-width:900px){.nj-kids{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.nj-kids{grid-template-columns:1fr}}
+.nj-kid{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);overflow:hidden;box-shadow:var(--lift)}
+.nj-kid header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;color:var(--k-ink,#fff);background:var(--k-fill,var(--teal))}
+.nj-kid header b{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.35rem;letter-spacing:.03em}
+.nj-kid header a{font-size:.85rem;font-weight:700;color:inherit;border:2px solid currentColor;border-radius:999px;padding:3px 11px;text-decoration:none}
+.nj-kid ul{list-style:none;margin:0;padding:10px 12px 12px;display:grid;gap:6px}
+.nj-kid li a{display:flex;justify-content:space-between;gap:8px;align-items:center;text-decoration:none;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:8px 11px;font-size:.93rem}
+.nj-kid li a:hover{border-color:var(--ink)}
+.nj-kid li a em{font-style:normal;font-size:.8rem;color:var(--body-tint);white-space:nowrap}
+.nj-kid .alongside{margin:0 12px 10px;font-size:.85rem;background:#fff4d6;border:2px dashed var(--yellow-deep);border-radius:10px;padding:6px 10px}
+
+/* the day, session by session */
+.nj-day{display:grid;gap:12px}
+.nj-row{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:start}
+@media (max-width:620px){.nj-row{grid-template-columns:1fr;gap:4px}}
+.nj-time{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1rem;padding-top:14px}
+.nj-time small{display:block;font-family:var(--body);font-weight:400;font-size:.8rem;color:var(--body-tint)}
+.nj-card{background:var(--white);border:var(--border) solid var(--ink);border-left:12px solid var(--edge,var(--teal));border-radius:0 var(--r) var(--r) 0;padding:12px 16px;box-shadow:var(--lift)}
+.nj-card.quiet{box-shadow:none;border-width:2px 2px 2px 8px;border-color:var(--line);border-left-color:var(--edge,var(--line));background:transparent}
+.nj-card.now{box-shadow:0 0 0 4px var(--yellow),var(--lift)}
+.nj-card h3{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 900;font-size:1.15rem;margin:0 0 4px}
+.nj-card p{margin:0 0 8px;max-width:72ch}
+.nj-card p:last-child{margin-bottom:0}
+.nj-card .who{font-size:.88rem;color:var(--body-tint)}
+.nj-lesson{margin:10px 0 2px;border-radius:16px;padding:12px 14px;background:var(--wash,#eef);border:2px solid var(--deep,var(--ink))}
+.nj-lesson .k{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--deep,var(--ink))}
+.nj-lesson .t{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.2rem;margin:2px 0}
+.nj-lesson .l{font-size:.93rem;margin:0 0 10px}
+.nj-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.nj-acts a{font-size:.9rem;font-weight:700;text-decoration:none;color:var(--ink);background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:6px 13px}
+.nj-acts a.go{background:var(--deep,var(--ink));color:#fff;border-color:var(--deep,var(--ink));font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;letter-spacing:.04em;padding:9px 18px;font-size:1rem}
+.nj-acts a:hover{transform:translateY(-1px)}
+.nj-note{font-size:.84rem;color:var(--body-tint);margin-top:8px}
+.nj-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.nj-links a{font-size:.86rem;color:var(--teal);font-weight:700}
+.nj-foot{margin-top:28px;font-size:.9rem;color:var(--body-tint)}
+.nj-foot a{color:var(--teal);font-weight:700}
+.nj-none{padding:16px;border:2px dashed var(--line);border-radius:14px;background:var(--white)}
+
+@media print{
+  .grain,.nj-days,.nj-big,.nj-printhide{display:none !important}
+  body{background:#fff}
+  .nj-card,.nj-kid,.nj-hello{box-shadow:none !important;break-inside:avoid}
+  .nj-grab{display:none}
+  a{color:inherit}
+}
+@media (prefers-reduced-motion:reduce){.nj-big,.nj-acts a{transition:none}.nj-big:hover,.nj-acts a:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap nj-wrap">
+
+  <header class="hero hero-sm hero-page">
+    <div class="toprow">
+      <h1 class="echo" data-echo="No Jay day">No Jay <span class="accent">day</span></h1>
+      <span class="badge" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fffdf8" stroke="#0a2f38" stroke-width="6"/><rect x="27" y="24" width="46" height="56" rx="8" fill="#007291" stroke="#0a2f38" stroke-width="4"/><rect x="39" y="17" width="22" height="13" rx="5" fill="#ef7724" stroke="#0a2f38" stroke-width="4"/><path d="M35 45l5 5 9-10M35 64l5 5 9-10" stroke="#fffdf8" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M55 47h11M55 66h11" stroke="#fffdf8" stroke-width="5" stroke-linecap="round"/></svg></span>
+    </div>
+    <div class="line"><span class="chip" id="dateChip">Today</span><p>Everything you need to run Base 5 today: the day session by session, the lesson slides and every student's printables.</p></div>
+  </header>
+
+  <section class="nj-hello">
+    <h2>Thank you so much for covering</h2>
+    <p>The day runs as normal, just without me. Nothing here needs to be finished, marked or sent anywhere. If it all goes a bit sideways, a calm day is a good day.</p>
+    <ul class="nj-rules">
+      <li><b>Invite, don't instruct</b>"Fancy having a go?" and two choices works far better than "you need to".</li>
+      <li><b>Passing is allowed</b>Sitting a session out, listening only or doing it on paper all count.</li>
+      <li><b>Space first</b>If someone is heightened, give them time and room. Holly knows the group best.</li>
+      <li><b>Safeguarding</b>As always: anything at all goes to Helen, the DSL.</li>
+    </ul>
+  </section>
+
+  <nav class="nj-days" id="days" aria-label="Pick a day"></nav>
+
+  <div id="grab"></div>
+
+  <h2 class="nj-h">The day</h2>
+  <p class="nj-sub" id="dayLine"></p>
+  <div class="nj-day" id="day"></div>
+
+  <h2 class="nj-h">Printables, student by student</h2>
+  <p class="nj-sub">Each student's own sheets at their own level, ready to print. Screens are fine too: their HQ has the same activities in Your folder.</p>
+  <div class="nj-kids" id="kids"></div>
+
+  <p class="nj-foot nj-printhide">More: <a href="/lessons/">every lesson</a> &middot; <a href="/">the Base 5 home page</a> &middot; <a href="/games/">the game vault</a> &middot; <a href="/tools/">tools</a> (the dog button is a favourite).</p>
+</div>
+
+<script src="/data/term.js?v=11"></script>
+<script src="/data/a2/drops.js"></script>
+<script src="/data/a2/core.js"></script>
+<script src="/lessons/plan.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+var T = window.B5TERM, LS = window.B5LESSONS, D = window.B5DROPS || { items: [] };
+if(!T){ document.getElementById("day").innerHTML = '<div class="nj-none">The timetable could not load. Try a refresh.</div>'; return; }
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
+function parse(d){ var p = d.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+var MON3 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var today = T.todayIso();
+
+/* ---------- which day ---------- */
+function weekOf(d){ for(var i = 0; i < T.weeks.length; i++){ if(d >= T.weeks[i].start && d <= T.weeks[i].end) return T.weeks[i]; } return null; }
+function isSchool(d){
+  var w = weekOf(d); if(!w) return false;
+  var k = T.dayKeys[(parse(d).getDay() + 6) % 7]; if(!k) return false;
+  return T.schoolDays(w).indexOf(k) > -1;
+}
+var q = (location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/) || [])[1] || "";
+var date = q && isSchool(q) ? q : "";
+if(!date){
+  var x = parse(today);
+  for(var n = 0; n < 21 && !date; n++){ var c = T.iso(x); if(isSchool(c)) date = c; x.setDate(x.getDate() + 1); }
+}
+if(!date){ document.getElementById("day").innerHTML = '<div class="nj-none">No school days left this term. Have a lovely break.</div>'; return; }
+var week = weekOf(date), key = T.dayKeys[(parse(date).getDay() + 6) % 7], dd = (week.days && week.days[key]) || {};
+var isToday = date === today;
+var monday = T.iso(T.dateOf(week, "mon")), friday = T.iso(T.dateOf(week, "fri"));
+document.getElementById("dateChip").textContent = (isToday ? "Today, " : "") + T.niceDate(parse(date));
+document.title = "No Jay day, " + T.niceDate(parse(date)) + " - Base 5";
+
+/* ---------- day strip ---------- */
+var days = T.dayKeys.map(function(k){
+  var d = T.iso(T.dateOf(week, k)), ok = isSchool(d);
+  return '<a href="?d=' + d + '" class="' + (d === date ? "on " : "") + (ok ? "" : "off ") + (d === today ? "today" : "") + '">' + T.dayNames[k].slice(0, 3) + " " + parse(d).getDate() + '</a>';
+}).join("");
+document.getElementById("days").innerHTML = days + '<span class="sp"></span><button type="button" id="printPlan">Print this plan</button>';
+document.getElementById("printPlan").addEventListener("click", function(){ window.print(); });
+
+/* ---------- lessons ---------- */
+var hasRecord = false;
+try{ hasRecord = !!(LS && Object.keys(LS.load().taught || {}).length); }catch(e){}
+function lessonFor(sessionKey){
+  if(!LS) return null;
+  var slot = LS.slotFor(key, sessionKey); if(!slot) return null;
+  var l = null, part = 0;
+  if(slot.byWeek){
+    slot.series.forEach(function(t){ ((LS.bySeries[t] || {}).lessons || []).forEach(function(x){ if(!x.old && x.from <= date && date <= x.to) l = x; }); });
+    if(!l) return null;
+    var np = LS.nParts(l);
+    if(np){
+      var idx = slot.days.indexOf(key), off = Math.max(0, slot.days.length - np);
+      part = Math.min(np, Math.max(1, idx - off + 1));
+    }
+    return { slot: slot, lesson: l, part: part };
+  }
+  if(isToday && hasRecord){
+    var nx = LS.nextFor(slot.id);
+    if(nx && nx.lesson) return nx;
+  }
+  var ids = slot.order ? slot.order.slice() : [];
+  if(!ids.length) slot.series.forEach(function(t){ ((LS.bySeries[t] || {}).lessons || []).forEach(function(x){ ids.push(x.id); }); });
+  var hit = ids.filter(function(id){ return LS.planned(id) === date; })[0] ||
+            ids.filter(function(id){ return LS.planned(id) >= date; })[0];
+  if(!hit) return null;
+  return { slot: slot, lesson: LS.byLesson[hit], part: 0 };
+}
+function lessonHTML(x){
+  var l = x.lesson, lk = LS.looks(l);
+  var href = LS.presentHref(x);
+  var pn = x.part ? LS.partName(l, x.part) : "";
+  var acts = '<a class="go" href="' + esc(href) + '">Open the slides</a>' +
+    '<a href="' + esc(href + (href.indexOf("?") > -1 ? "&" : "?") + "preview=1") + '">Look through first</a>';
+  if(l.notes) acts += '<a href="/lessons/notes.html?l=' + esc(l.id) + '">Staff notes</a>';
+  if(l.drop) acts += '<a href="/paper/?list=' + esc(l.drop) + '&title=' + encodeURIComponent(l.title + ": follow on sheet") + '">Print the follow on sheet</a>';
+  return '<div class="nj-lesson" style="--wash:' + lk.wash + ';--deep:' + lk.deep + '">' +
+    '<div class="k">' + esc(lk.name) + (x.slot && x.slot.mins ? " &middot; " + x.slot.mins + " minutes" : "") + (pn ? " &middot; " + esc(pn) : "") + '</div>' +
+    '<div class="t">' + esc(l.title) + '</div>' +
+    '<p class="l">' + esc(l.line || "") + '</p>' +
+    '<div class="nj-acts">' + acts + '</div>' +
+    '<p class="nj-note">Slides work with a clicker or the arrow keys. Every slide has prompt lines behind it, so no planning needed. "Look through first" lets you preview without it counting as taught.</p>' +
+  '</div>';
+}
+
+/* ---------- what to do in each session, for whoever is covering ---------- */
+var HQS = [["EGW","/egw/","Lots of GCSE work"],["LP","/lp/",""],["LW","/lw/",""],["LC","/lc/",""],["HK","/hk/",""],["JT","/jt-hq/",""]];
+var COVER = {
+  breathein: { p: "Let everyone arrive in their own time. Nobody needs to be asked anything yet. A hello is plenty." },
+  brain: { p: "Put a quick puzzle on the board (Wordle or anything from the game vault) and see who joins in. Watching counts.", links: [["Game vault", "/games/"]] },
+  cc: { p: "This week's Cultural Calendar lesson is ready on the board. Half an hour, talking and doing rather than writing." },
+  phse: { p: "Fifteen minutes, talking rather than writing. Listening only is a perfectly good way to take part. Please glance at the staff notes first." },
+  maths: { p: "Half an hour of maths. Each student opens their own HQ: the newest activity is waiting in Your folder. Rather do it on paper? Their sheets are below.", hq: true },
+  core: { p: "Maths or English, whichever they fancy. Each student opens their own HQ and goes to Your folder. Paper versions are below.", hq: true },
+  forest: { p: "Vernon runs Forest School as normal. Coats on if it is that sort of day." },
+  hort: { p: "Kara runs Horticulture as normal, outside in the beds." },
+  digital: { p: "Andy runs Digital Media as normal." },
+  project: { p: "Their own project on \"If we could time travel, should we?\", from their HQ or the Projects page. Anyone on GCSE work carries on in their HQ.", hq: true,
+    links: [["Projects", "/projects/"], ["Idea Lab", "/projects/ideas.html"]] },
+  aesthetic: { p: "A making slot. The lesson below sets it up." },
+  physical: { p: "Out and about, or looking at how places change. The lesson below sets it up." },
+  pfa: { p: "Half an hour of Preparation for Adulthood. The lesson below sets it up." },
+  trip: { p: "Trip day. Please check with the office who is going out with the group, as it needs the usual staffing." },
+  lunch: { quiet: true },
+  breatheout: { p: "Back to the present. \"What was alright about today?\" or nothing at all. Both are fine." }
+};
+var EDGE = { breathe: "var(--teal)", key: "var(--orange)", work: "var(--yellow)", make: "var(--plum)", plain: "var(--bright)", "break": "var(--line)" };
+
+var slots = T.slotsOn(week, key) || [];
+var along = T.alongsideOn ? T.alongsideOn(key) : [];
+var nowM = new Date().getHours() * 60 + new Date().getMinutes();
+var dayLine = (dd.line) || (T.dayLines && T.dayLines[key]) || "";
+document.getElementById("dayLine").textContent = dayLine + (week.cc ? " This week's Cultural Calendar theme: " + week.cc + "." : "");
+
+var shown = {};
+var rows = slots.map(function(s){
+  var k = s[2], ses = T.session(k, week, key), cv = COVER[k] || {};
+  var x = (k === "project" && key !== "thu") ? null : lessonFor(k);
+  var on = isToday && nowM >= T.mins(s[0]) && nowM < T.mins(s[1]);
+  var title = ses.heading || ses.title || k;
+  var body = "";
+  if(cv.quiet){
+    return '<div class="nj-row"><div class="nj-time">' + s[0] + ' to ' + s[1] + '</div><div class="nj-card quiet"><h3>' + esc(title) + '</h3></div></div>';
+  }
+  if(k === "project" && x){
+    body += '<p><b>First 45 minutes:</b> the lesson below, on the board, for anyone who fancies it.</p>' + lessonHTML(x) +
+      '<p style="margin-top:10px"><b>Then:</b> ' + esc(cv.p) + '</p>';
+  } else {
+    body += '<p>' + esc(cv.p || ses.line || "") + '</p>';
+    if(x) body += lessonHTML(x);
+  }
+  var al = along.filter(function(a){ return !shown[a.key] && T.mins(a.start) < T.mins(s[1]) && T.mins(a.end) > T.mins(s[0]); });
+  al.forEach(function(a){ shown[a.key] = true; });
+  if(al.length) body += '<p class="who">' + al.map(function(a){ return esc(T.whoList(a)) + " are at " + esc((T.session(a.key) || {}).title || a.key) + " from " + a.start + " to " + a.end; }).join(". ") + '.</p>';
+  var links = (cv.links || []).slice();
+  if(cv.hq) links = links.concat(HQS.map(function(h){ return [h[0] + "'s HQ", h[1]]; }));
+  if(links.length) body += '<div class="nj-links nj-printhide">' + links.map(function(l){ return '<a href="' + esc(l[1]) + '">' + esc(l[0]) + '</a>'; }).join(" &middot; ") + '</div>';
+  return '<div class="nj-row"><div class="nj-time">' + s[0] + ' to ' + s[1] + '<small>' + esc(T.length ? T.length(s[0], s[1]) : "") + '</small></div>' +
+    '<div class="nj-card' + (on ? ' now' : '') + '" style="--edge:' + (EDGE[ses.type] || "var(--teal)") + '"><h3>' + esc(title) + (on ? ' <span class="chip" style="font-size:.7rem;vertical-align:middle">On now</span>' : '') + '</h3>' + body + '</div></div>';
+});
+document.getElementById("day").innerHTML = rows.join("") || '<div class="nj-none">No sessions found for this day.</div>';
+
+/* ---------- printables ---------- */
+function dropsFor(who, a, b){ return D.items.filter(function(it){ return it.who === who && it.date >= a && it.date <= b; }); }
+var FILL = { EGW: ["var(--hq-egw-fill)", "var(--hq-egw-ink)"], LP: ["var(--hq-lp-fill)", "#fff"], LW: ["var(--hq-lw-fill)", "var(--hq-lw-ink)"],
+             LC: ["var(--hq-lc-fill)", "var(--hq-lc-ink)"], HK: ["var(--hq-hk-fill)", "var(--hq-hk-ink)"], JT: ["var(--hq-jt-fill)", "#fff"] };
+var weekLabel = parse(monday).getDate() + " to " + parse(friday).getDate() + " " + MON3[parse(friday).getMonth()];
+var kids = HQS.map(function(h){
+  var who = h[0], hq = h[1], f = FILL[who] || ["var(--teal)", "#fff"];
+  var td = dropsFor(who, date, date), wk = dropsFor(who, monday, friday);
+  var li = [];
+  if(td.length) li.push(['/paper/?who=' + who + '&from=' + date + '&to=' + date, "Today's new activities", td.length + (td.length === 1 ? " activity" : " activities")]);
+  if(wk.length) li.push(['/paper/?who=' + who + '&from=' + monday + '&to=' + friday, "This week's pack", weekLabel]);
+  li.push(['/paper/?who=' + who + '&core=1&title=' + encodeURIComponent("Maths and English"), "Maths and English", "their own targets"]);
+  var al = T.alongsideOn ? T.alongsideOn(key, who) : [];
+  return '<div class="nj-kid"><header style="--k-fill:' + f[0] + ';--k-ink:' + f[1] + '"><b>' + who + '</b><a class="nj-printhide" href="' + hq + '">Their HQ</a></header>' +
+    (al.length ? '<p class="alongside">' + al.map(function(a){ return esc((T.session(a.key) || {}).title || a.key) + " " + a.start + " to " + a.end; }).join(", ") + '</p>' : '') +
+    '<ul>' + li.map(function(x){ return '<li><a href="' + esc(x[0]) + '"><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em></a></li>'; }).join("") + '</ul></div>';
+});
+document.getElementById("kids").innerHTML = kids.join("");
+
+/* ---------- grab and go ---------- */
+var firstLesson = null;
+slots.some(function(s){ if(T.mins(s[1]) <= (isToday ? nowM : 0)) return false; var x = lessonFor(s[2]); if(x){ firstLesson = { x: x, s: s }; return true; } return false; });
+var grab = '<div class="nj-grab">';
+if(firstLesson){
+  grab += '<a class="nj-big t" href="' + esc(LS.presentHref(firstLesson.x)) + '"><b>Next lesson slides</b><span>' + esc(firstLesson.s[0]) + ': ' + esc(firstLesson.x.lesson.title) + (firstLesson.x.part ? " (" + esc(LS.partName(firstLesson.x.lesson, firstLesson.x.part).toLowerCase()) + ")" : "") + '</span></a>';
+} else {
+  grab += '<a class="nj-big t" href="/lessons/"><b>All the lessons</b><span>Every lesson for the pillar targets, ready for the board.</span></a>';
+}
+grab += '<a class="nj-big o" href="#kids"><b>Printables</b><span>Every student\'s sheets for today and this week, at their own level.</span></a>';
+grab += '<a class="nj-big p" href="/"><b>Base 5 home</b><span>The students know their way from here to their own HQ.</span></a>';
+grab += '</div>';
+document.getElementById("grab").innerHTML = grab;
+})();
+</script>
+</body>
+</html>
