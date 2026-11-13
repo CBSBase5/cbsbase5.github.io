@@ -144,7 +144,8 @@ var PX = (function(){
     opt = opt||{}; var c = cv.c, s = c._s, rw = c._rw, rh = c._rh, g = cv.g;
     g.save(); g.setTransform(1,0,0,1,0,0);
     function band(dx, dy, col, blur){ var t = HD.raw(rw, rh); HD.rd(t.g, c, 0, 0); t.g.globalCompositeOperation = 'destination-out'; HD.rd(t.g, c, dx, dy); t.g.globalCompositeOperation = 'source-in'; t.g.fillStyle = col; t.g.fillRect(0,0,rw,rh); g.globalCompositeOperation = 'source-atop'; g.filter = 'blur('+blur+'px)'; HD.rd(g, t.c, 0, 0); g.filter = 'none'; g.globalCompositeOperation = 'source-over'; }
-    if (opt.shade !== false){ band(-1.7*s, -1.9*s, 'rgba(12,18,44,.30)', 0.9*s); band(1.2*s, 1.3*s, 'rgba(255,255,255,.30)', 0.7*s); }
+    if (opt.cel){ band(-2.4*s, -2.2*s, 'rgba(26,22,80,.24)', 0.12*s); band(1.0*s, 1.1*s, 'rgba(255,255,255,.34)', 0.1*s); }
+    else if (opt.shade !== false){ band(-1.7*s, -1.9*s, 'rgba(12,18,44,.30)', 0.9*s); band(1.2*s, 1.3*s, 'rgba(255,255,255,.30)', 0.7*s); }
     if (opt.outline !== false){
       var ow = (opt.ow || 0.85)*s, t2 = HD.raw(rw, rh); HD.rd(t2.g, c, 0, 0); t2.g.globalCompositeOperation = 'source-in'; t2.g.fillStyle = opt.outlineCol || '#1b2630'; t2.g.fillRect(0,0,rw,rh);
       var o = HD.raw(rw, rh); for (var k=0;k<16;k++){ var a = k/16*TAU; HD.rd(o.g, t2.c, Math.cos(a)*ow, Math.sin(a)*ow); } HD.rd(o.g, c, 0, 0);
@@ -154,72 +155,111 @@ var PX = (function(){
   }
   /* cartoon eyes: x1,x2 are the old left pixel of each eye */
   var BLINK = false, HMOOD = '';
-  function eyes(g,x1,x2,y,col,lid){ col = col||'#13222c'; if (BLINK){ [x1,x2].forEach(function(x){ arcS(g,x+1,y+0.6,1.2,Math.PI*0.15,Math.PI*0.85,col,0.8); }); return; } [x1,x2].forEach(function(x){ O(g,x+1,y+1.1,1.05,1.35,col); O(g,x+0.62,y+0.55,0.42,0.42,'#ffffff'); if (lid){ g.fillStyle = lid; g.beginPath(); g.ellipse(x+1,y+0.4,1.6,1.1,0,Math.PI,TAU); g.fill(); } }); }
+  function eyes(g,x1,x2,y,col,lid){ col = col||'#13222c'; if (BLINK){ [x1,x2].forEach(function(x){ arcS(g,x+1,y+0.6,1.2,Math.PI*0.15,Math.PI*0.85,col,0.8); }); return; } [x1,x2].forEach(function(x){ O(g,x+1,y+1.1,1.6,1.9,'#ffffff'); O(g,x+1.15,y+1.4,1.1,1.35,col); O(g,x+0.75,y+0.95,0.42,0.42,'#ffffff'); if (lid){ g.fillStyle = lid; g.beginPath(); g.ellipse(x+1,y+0.4,1.6,1.1,0,Math.PI,TAU); g.fill(); } }); }
 
   /* ---------- people ---------- */
-  /* person(o) draws the whole character; person(o, part, face) draws one body part for the animator.
-     parts: back, hairback, legL, legR, armL, armR, body, head. face: '', blink, wince, happy */
-  function person(o, part, face){
-    var want = function(p){ return !part || part === p; };
-    var cv = make(40,46), g = cv.g, cx = 20, skin = o.skin||'#f2c8a0', top = o.top||'#007291', legs = o.legs||'#2d3a4a', shoes = o.shoes||'#222c36';
+  /* ---------- people: bold cartoon figures, each with their own body shape ----------
+     person(o) draws the whole character; person(o, part, face, turn) draws one part for the animator.
+     parts: back, hairback, legL, legR, armL, armR, body, head. face: '', blink, wince, happy.
+     turn = 1 draws them three-quarters on, facing right. o.body picks the shape. */
+  var BODIES = {
+    kid:   { head:9.8, leg:7.6,   legW:4.4, gap:1,   tw:15,  bw:14.5, th:11.5, arm:9.6,  armW:4,   neck:0.6, bulge:0.6 },
+    tall:  { head:7.8, leg:15,  legW:3.8, gap:1.4, tw:13.5,bw:12.5, th:14.5, arm:13,   armW:3.5, neck:2.2, bulge:0.3 },
+    round: { head:8.4, leg:6.4, legW:4.4, gap:2.4, tw:15,  bw:23,   th:15,   arm:9.6,  armW:4.2, neck:0.2, bulge:2.6 },
+    wide:  { head:7.9, leg:9,   legW:5.2, gap:2,   tw:23,  bw:18,   th:14,   arm:11.4, armW:4.8, neck:0.4, bulge:0.8 },
+    tiny:  { head:9.6, leg:5,   legW:3.6, gap:1.2, tw:12,  bw:12.5, th:9,    arm:7.4,  armW:3.3, neck:0.2, bulge:0.8 },
+    lanky: { head:7.4, leg:14.5,legW:3.3, gap:1.6, tw:12,  bw:10.5, th:14.5, arm:13.4, armW:3,   neck:2.8, bulge:0 },
+    broad: { head:7.2, leg:11,  legW:4.8, gap:1.6, tw:25,  bw:13,   th:15.5, arm:12.6, armW:5,   neck:0.8, bulge:0.4 }
+  };
+  /* where everything goes, in a 48 x 60 picture with the feet at y 58 */
+  function layout(o, turn){ var B = BODIES[o.body] || BODIES.kid, cx = 24, floor = 58, hipY = floor - 2.4 - B.leg, sY = hipY + 1.6 - B.th, k = B.head/7.2;
+    var hcy = sY - B.neck - 7.5*k + 1.4*k, a = B.tw/2;
+    var sL = turn ? cx - a*0.78 + 1 : cx - a + B.armW*0.42, sR = turn ? cx + a*0.8 : cx + a - B.armW*0.42, sy = sY + B.armW*0.45;
+    var lx = turn ? 0.7 : 0, hL = cx - B.gap/2 - B.legW/2 + lx, hR = cx + B.gap/2 + B.legW/2 + lx;
+    return { B:B, W:48, H:60, cx:cx, floor:floor, hipY:hipY, sY:sY, k:k, hcy:hcy, sL:sL, sR:sR, sy:sy, hL:hL, hR:hR, ny:sY - B.neck*0.5, arm:B.arm, top:hcy - 8*k }; }
+  function person(o, part, face, turn){
+    var want = function(p){ return !part || part === p; }; turn = turn ? 1 : 0;
+    var Ly = layout(o, turn), B = Ly.B, cv = make(48,60), g = cv.g, cx = Ly.cx, k = Ly.k;
+    var skin = o.skin||'#f2c8a0', top = o.top||'#007291', legs = o.legs||'#2d3a4a', shoes = o.shoes||'#222c36';
     var skinD = shade(skin,-0.16), skinL = shade(skin,0.16), topD = shade(top,-0.24), topL = shade(top,0.18);
-    var hc = o.hair||'#4a3020', hs = o.hairStyle||'short', hcL = shade(hc, 0.28), hcD = shade(hc,-0.25);
-    if (want('back') && o.back) o.back(g,cx);
-    /* hair that falls behind the body */
-    if (want('hairback')){ if (hs === 'long'){ RR(g,cx-8.8,8,17.6,21,6,hcD); } if (hs === 'bob'){ RR(g,cx-8.9,7,17.8,14.5,6,hcD); } }
-    /* legs and shoes */
-    if (want('legL')){ RR(g,cx-6,33,4.5,9.2,1.8,legs); R(g,cx-6,33,4.5,2,shade(legs,-0.25)); O(g,cx-4.4,42.4,3.5,1.8,shoes); O(g,cx-5.4,41.7,1.3,0.55,'rgba(255,255,255,.35)'); }
-    if (want('legR')){ RR(g,cx+1.5,33,4.5,9.2,1.8,legs); R(g,cx+1.5,33,4.5,2,shade(legs,-0.25)); O(g,cx+4.4,42.4,3.5,1.8,shoes); O(g,cx+3.4,41.7,1.3,0.55,'rgba(255,255,255,.35)'); }
-    /* arms */
-    var stripe = o.style === 'hivis' ? ['#dfe5ea',3.4,28.6,30] : o.style === 'tracksuit' ? ['#ffffff',0.8,26,31] : null;
-    if (want('armL')){ cap(g,cx-8.7,24.6,cx-9.5,32.2,3.6,topD); if (stripe) cap(g,cx-8.9,stripe[2],cx-9.2,stripe[3],stripe[1],stripe[0]); O(g,cx-9.6,33.4,1.95,1.95,skin); }
-    if (want('armR')){ cap(g,cx+8.7,24.6,cx+9.5,32.2,3.6,topD); if (stripe) cap(g,cx+8.9,stripe[2],cx+9.2,stripe[3],stripe[1],stripe[0]); O(g,cx+9.6,33.4,1.95,1.95,skin); }
+    var hc = o.hair||'#4a3020', hs = o.hairStyle||'short', hcL = shade(hc, 0.28), hcD = shade(hc,-0.25), st = o.style;
+    /* the old 40x46 drawing spaces, mapped onto this body */
+    function headSpace(){ g.translate(cx + turn*0.6, Ly.hcy); g.scale(k, k); g.translate(-20, -12.8); }
+    var bTop = Ly.sY, bBot = Ly.hipY + 1.6, sxB = ((B.tw + B.bw)/2)/15.6, syB = (bBot - bTop)/14.7;
+    function bodySpace(){ g.translate(cx, bTop); g.scale(sxB, syB); g.translate(-20, -21.3); }
+    function figureSpace(){ var kf = (Ly.floor - Ly.top)/40; g.translate(cx, Ly.floor); g.scale(kf, kf); g.translate(-20, -44); }
+    if (want('back') && o.back){ g.save(); figureSpace(); o.back(g, 20); g.restore(); }
+    if (want('hairback')){ g.save(); headSpace(); if (turn) g.translate(-1.2, 0); if (hs === 'long'){ RR(g,11.2,8,17.6,21,6,hcD); } if (hs === 'bob'){ RR(g,11.1,7,17.8,14.5,6,hcD); } g.restore(); }
+    /* legs and chunky shoes */
+    function leg(xc, far){ var lw = B.legW, x = xc - lw/2, col = far ? shade(legs,-0.14) : legs; RR(g, x, Ly.hipY - 1, lw, Ly.floor - Ly.hipY - 1, Math.min(2, lw/2), col); R(g, x, Ly.hipY - 1, lw, 1.8, shade(legs,-0.28));
+      var sx = xc + (turn ? 1.4 : (xc < cx ? -0.7 : 0.7)), sw = lw*0.62 + 1.4; O(g, sx, Ly.floor - 1.6, sw, 2.3, shoes); O(g, sx - sw*0.35, Ly.floor - 2.4, sw*0.32, 0.6, 'rgba(255,255,255,.35)'); R(g, sx - sw, Ly.floor - 1, sw*2, 0.7, shade(shoes, 0.25)); }
+    if (want('legL')) leg(Ly.hL, false);
+    if (want('legR')) leg(Ly.hR, !!turn);
+    /* arms: a sleeve and a round mitten hand */
+    var stripe = st === 'hivis' ? '#dfe5ea' : st === 'tracksuit' ? '#ffffff' : null;
+    function arm(sx, far, side){ var len = B.arm, ex = sx + side*(0.9 + Math.max(0, (B.bw - B.tw)/2 + B.bulge*0.6)*(turn ? 0.4 : 0.95)), ey = Ly.sy + len, col = far ? shade(topD,-0.12) : (turn ? topL : topD);
+      if (st === 'hivis') col = far ? '#b8c41e' : '#d8e83a';
+      cap(g, sx, Ly.sy, ex, ey, B.armW, col); if (stripe) cap(g, sx + side*0.4, Ly.sy + len*0.42, sx + side*0.55, Ly.sy + len*0.56, B.armW*0.95, stripe);
+      O(g, ex + side*0.2, ey + 1.6, B.armW*0.6 + 0.6, B.armW*0.6 + 0.6, far ? skinD : skin); }
+    if (want('armL')) arm(Ly.sL, false, -1);
+    if (want('armR')) arm(Ly.sR, !!turn, 1);
     if (want('body')){
-    if (o.skirt) poly(g,[[cx-7,31],[cx+7,31],[cx+8.6,37.5],[cx-8.6,37.5]],o.skirt);
-    /* body */
-    g.fillStyle = lin(g,0,21,0,36,[[0,topL],[0.35,top],[1,topD]]); g.beginPath(); g.moveTo(cx-7.4,35.6); g.lineTo(cx-7.8,25.2); g.quadraticCurveTo(cx-7.9,21.5,cx-4,21.3); g.lineTo(cx+4,21.3); g.quadraticCurveTo(cx+7.9,21.5,cx+7.8,25.2); g.lineTo(cx+7.4,35.6); g.quadraticCurveTo(cx,36.8,cx-7.4,35.6); g.fill();
-    var st = o.style;
-    if (st === 'apron'){ RR(g,cx-4.6,24.5,9.2,11.2,1.6,'#f6f2ea'); R(g,cx-4.6,24.5,9.2,1,'#d9d2c4'); RR(g,cx-2.4,29,4.8,2.6,0.8,'#ef7724'); LN(g,[[cx-4,24.6],[cx-2.6,21.4]],'#d9d2c4',0.8); LN(g,[[cx+4,24.6],[cx+2.6,21.4]],'#d9d2c4',0.8); }
-    if (st === 'hivis'){ g.fillStyle = lin(g,0,21,0,36,[[0,'#eef55a'],[1,'#c2d228']]); g.beginPath(); g.moveTo(cx-7.4,35.6); g.lineTo(cx-7.8,25.2); g.quadraticCurveTo(cx-7.9,21.5,cx-4,21.3); g.lineTo(cx+4,21.3); g.quadraticCurveTo(cx+7.9,21.5,cx+7.8,25.2); g.lineTo(cx+7.4,35.6); g.quadraticCurveTo(cx,36.8,cx-7.4,35.6); g.fill(); R(g,cx-7.7,28,15.4,1.8,'#dfe5ea'); R(g,cx-7.6,31.6,15.2,1.2,'#dfe5ea'); }
-    if (st === 'cardigan'){ LN(g,[[cx,21.6],[cx,35.8]],shade(top,-0.38),1.1); O(g,cx-1.6,26,0.6,0.6,'#f3d36b'); O(g,cx-1.6,29.4,0.6,0.6,'#f3d36b'); O(g,cx-1.6,32.8,0.6,0.6,'#f3d36b'); poly(g,[[cx-2.6,21.4],[cx+2.6,21.4],[cx,25]],'#f6f2ea'); }
-    if (st === 'tracksuit'){ LN(g,[[cx-7.2,22.6],[cx-7.2,35]],'#ffffff',0.9); LN(g,[[cx+7.2,22.6],[cx+7.2,35]],'#ffffff',0.9); LN(g,[[cx,21.6],[cx,28]],'#ffffff',0.7); }
-    if (st === 'hoodie'){ RR(g,cx-4.4,29.6,8.8,3.8,1.4,shade(top,-0.28)); O(g,cx,21.8,5.2,2.2,shade(top,-0.3)); LN(g,[[cx-1.8,22.6],[cx-2.1,27.2]],'#e9eef2',0.6); LN(g,[[cx+1.8,22.6],[cx+2.1,27.2]],'#e9eef2',0.6); O(g,cx-2.1,27.4,0.55,0.55,'#e9eef2'); O(g,cx+2.1,27.4,0.55,0.55,'#e9eef2'); }
-    if (st === 'lanyard'){ LN(g,[[cx-3.2,21.6],[cx,28]],'#ef7724',0.8); LN(g,[[cx+3.2,21.6],[cx,28]],'#ef7724',0.8); RR(g,cx-2.2,27.8,4.4,4.6,0.7,'#ffffff'); R(g,cx-1.4,29,2.8,1,'#20adca'); R(g,cx-1.4,30.6,1.8,0.6,'#9aa3ad'); }
-    if (st === 'shirt'){ poly(g,[[cx-3.4,21.4],[cx,24.6],[cx-1.2,21.4]],'#f6f2ea'); poly(g,[[cx+3.4,21.4],[cx,24.6],[cx+1.2,21.4]],'#f6f2ea'); poly(g,[[cx-0.9,23.6],[cx+0.9,23.6],[cx+1.4,30],[cx,31.4],[cx-1.4,30]],o.tie||'#c0392b'); O(g,cx,23.4,1,0.8,shade(o.tie||'#c0392b',-0.2)); }
-    /* neck */
-    RR(g,cx-1.9,18.6,3.8,4,1.2,skinD);
-    if (o.acc && part){ g.save(); g.beginPath(); g.rect(-5,20.6,50,30); g.clip(); o.acc(g,cx); g.restore(); }
+      g.save(); if (turn){ g.translate(cx + 0.8, 0); g.scale(0.88, 1); g.translate(-cx, 0); }
+      /* neck */
+      RR(g, cx - 1.7*k, Ly.sY - B.neck - 2.2, 3.4*k, B.neck + 3.4, 1.2, skinD);
+      if (o.skirt){ g.save(); bodySpace(); poly(g,[[13,31],[27,31],[28.6,37.5],[11.4,37.5]],o.skirt); g.restore(); }
+      /* the torso: its own shape for each body */
+      var a = B.tw/2, c = B.bw/2, r = Math.min(4, B.th*0.3), m = Math.max(a, c) + B.bulge, my = (bTop + bBot)/2;
+      g.fillStyle = st === 'hivis' ? lin(g,0,bTop,0,bBot,[[0,'#f4fa6a'],[1,'#c2d228']]) : lin(g,0,bTop,0,bBot,[[0,topL],[0.4,top],[1,topD]]);
+      g.beginPath(); g.moveTo(cx - a + r, bTop); g.lineTo(cx + a - r, bTop); g.quadraticCurveTo(cx + a, bTop, cx + a + 0.2, bTop + r);
+      g.quadraticCurveTo(cx + m, my, cx + c, bBot - r*0.7); g.quadraticCurveTo(cx + c, bBot, cx + c - r*0.7, bBot); g.lineTo(cx - c + r*0.7, bBot); g.quadraticCurveTo(cx - c, bBot, cx - c, bBot - r*0.7);
+      g.quadraticCurveTo(cx - m, my, cx - a - 0.2, bTop + r); g.quadraticCurveTo(cx - a, bTop, cx - a + r, bTop); g.closePath(); g.fill();
+      /* clothes details, drawn in the old body space */
+      g.save(); g.beginPath(); g.moveTo(cx - m - 1, bTop - 1); g.lineTo(cx + m + 1, bTop - 1); g.lineTo(cx + m + 1, bBot + 1); g.lineTo(cx - m - 1, bBot + 1); g.clip(); bodySpace(); var X = 20;
+      if (st === 'apron'){ RR(g,X-4.6,24.5,9.2,11.8,1.6,'#f6f2ea'); R(g,X-4.6,24.5,9.2,1,'#d9d2c4'); RR(g,X-2.4,29,4.8,2.6,0.8,'#ef7724'); LN(g,[[X-4,24.6],[X-2.6,21.4]],'#d9d2c4',0.8); LN(g,[[X+4,24.6],[X+2.6,21.4]],'#d9d2c4',0.8); }
+      if (st === 'hivis'){ R(g,X-9,28,18,1.8,'#dfe5ea'); R(g,X-9,31.6,18,1.2,'#dfe5ea'); }
+      if (st === 'cardigan'){ LN(g,[[X,21.6],[X,35.8]],shade(top,-0.38),1.1); O(g,X-1.6,26,0.65,0.65,'#f3d36b'); O(g,X-1.6,29.4,0.65,0.65,'#f3d36b'); O(g,X-1.6,32.8,0.65,0.65,'#f3d36b'); poly(g,[[X-2.6,21.4],[X+2.6,21.4],[X,25]],'#f6f2ea'); }
+      if (st === 'tracksuit'){ LN(g,[[X-7.2,22.6],[X-7.2,35]],'#ffffff',0.9); LN(g,[[X+7.2,22.6],[X+7.2,35]],'#ffffff',0.9); LN(g,[[X,21.6],[X,28]],'#ffffff',0.7); }
+      if (st === 'hoodie'){ RR(g,X-4.4,29.6,8.8,3.8,1.4,shade(top,-0.28)); O(g,X,21.8,5.2,2.2,shade(top,-0.3)); LN(g,[[X-1.8,22.6],[X-2.1,27.2]],'#e9eef2',0.7); LN(g,[[X+1.8,22.6],[X+2.1,27.2]],'#e9eef2',0.7); O(g,X-2.1,27.4,0.6,0.6,'#e9eef2'); O(g,X+2.1,27.4,0.6,0.6,'#e9eef2'); }
+      if (st === 'lanyard'){ LN(g,[[X-3.2,21.6],[X,28]],'#ef7724',0.9); LN(g,[[X+3.2,21.6],[X,28]],'#ef7724',0.9); RR(g,X-2.2,27.8,4.4,4.6,0.7,'#ffffff'); R(g,X-1.4,29,2.8,1,'#20adca'); R(g,X-1.4,30.6,1.8,0.6,'#9aa3ad'); }
+      if (st === 'shirt'){ poly(g,[[X-3.4,21.4],[X,24.6],[X-1.2,21.4]],'#f6f2ea'); poly(g,[[X+3.4,21.4],[X,24.6],[X+1.2,21.4]],'#f6f2ea'); poly(g,[[X-1,23.6],[X+1,23.6],[X+1.6,30],[X,31.6],[X-1.6,30]],o.tie||'#c0392b'); O(g,X,23.4,1.1,0.85,shade(o.tie||'#c0392b',-0.2)); }
+      g.restore();
+      if (o.acc){ g.save(); bodySpace(); g.beginPath(); g.rect(-5,20.6,50,30); g.clip(); o.acc(g, 20); g.restore(); }
+      g.restore();
     }
-    if (want('head')){
-    O(g,cx-7.3,13.6,1.6,2.1,skin); O(g,cx+7.3,13.6,1.6,2.1,skin); O(g,cx-7.3,13.6,0.7,1.1,skinD); O(g,cx+7.3,13.6,0.7,1.1,skinD);
-    g.fillStyle = rad(g,cx-2.4,10.2,0.5,10,[[0,skinL],[0.55,skin],[1,skinD]],cx,12.8); g.beginPath(); g.ellipse(cx,12.8,7.2,7.5,0,0,TAU); g.fill();
-    /* hair */
-    function capHair(cy, ry, fringeY, col){ g.fillStyle = col; g.beginPath(); g.moveTo(cx-7.6,14); g.ellipse(cx,cy,7.9,ry,0,Math.PI,TAU); g.lineTo(cx+7.6,14); g.quadraticCurveTo(cx+5.5,fringeY+0.4,cx+2.5,fringeY); g.quadraticCurveTo(cx,fringeY+1.6,cx-2.8,fringeY+0.6); g.quadraticCurveTo(cx-6,fringeY+1.2,cx-7.6,14); g.fill(); }
-    function shine(cy){ arcS(g,cx-1.8,cy+1.2,4.2,Math.PI*1.12,Math.PI*1.42,rgba(hcL,0.85),0.9); }
-    if (hs === 'short'){ capHair(11,6.9,9.2,hc); shine(8); }
-    if (hs === 'buzz'){ capHair(11.4,6.6,8.6,hc); }
-    if (hs === 'bob'){ capHair(11,7.2,9.6,hc); RR(g,cx-8.9,9.5,3.4,10.5,1.7,hc); RR(g,cx+5.5,9.5,3.4,10.5,1.7,hc); shine(8); }
-    if (hs === 'long'){ capHair(11,7.2,9.4,hc); RR(g,cx-8.9,9.5,3.2,17,1.6,hc); RR(g,cx+5.7,9.5,3.2,17,1.6,hc); shine(8); }
-    if (hs === 'bun'){ O(g,cx,3.8,3.4,3.1,hc); O(g,cx-0.8,3,1.2,0.8,rgba(hcL,0.8)); capHair(11,6.9,9,hc); shine(8); }
-    if (hs === 'curly' || hs === 'grey'){ var cc = hs === 'grey' ? '#d7dbe0' : hc, ccL = shade(cc, hs === 'grey' ? 0.4 : 0.3); [[-6.2,8.6],[-3.4,5.8],[0,5],[3.4,5.8],[6.2,8.6],[-7.2,11.8],[7.2,11.8],[-1.6,6.2],[1.8,6.4]].forEach(function(p, i){ O(g,cx+p[0],p[1],3.3,3.2,cc); }); [[-5.4,7.8],[-2.6,5.2],[0.8,4.4],[4,5.4]].forEach(function(p){ arcS(g,cx+p[0],p[1],1.4,Math.PI*1.1,Math.PI*1.8,ccL,0.7); }); }
-    if (hs === 'messy'){ capHair(11,6.9,9.4,hc); [[-6,6],[-3,3.6],[0.4,2.8],[3.6,3.8],[6.4,6.4]].forEach(function(p, i){ poly(g,[[cx+p[0]-2.4,p[1]+4],[cx+p[0]+(i%2?1.4:-1.2),p[1]-1.2],[cx+p[0]+2.4,p[1]+4]],hc); }); poly(g,[[cx-3.4,8.6],[cx+0.4,8.4],[cx-1,11.4]],hc); shine(8); }
-    if (hs === 'puffs'){ O(g,cx-8.2,6.6,3.6,3.5,hc); O(g,cx+8.2,6.6,3.6,3.5,hc); capHair(11.2,6.7,8.8,hc); }
-    /* face */
-    var ey = 13.6;
-    var brow = o.brows || (hs === 'grey' ? '#9aa3ad' : shade(hc, hs === 'grey' ? 0 : -0.1));
-    LN(g,[[cx-5.2,ey-2.6],[cx-3.6,ey-3.1],[cx-2.2,ey-2.7]],brow,o.brows ? 1 : 0.7); LN(g,[[cx+2.2,ey-2.7],[cx+3.6,ey-3.1],[cx+5.2,ey-2.6]],brow,o.brows ? 1 : 0.7);
-    if (face === 'blink' || face === 'happy'){ arcS(g,cx-3.6,ey-0.6,1.25,Math.PI*0.15,Math.PI*0.85,'#13222c',0.8); arcS(g,cx+3.6,ey-0.6,1.25,Math.PI*0.15,Math.PI*0.85,'#13222c',0.8); }
-    else if (face === 'wince'){ LN(g,[[cx-4.8,ey-1],[cx-2.6,ey],[cx-4.8,ey+1]],'#13222c',0.8); LN(g,[[cx+4.8,ey-1],[cx+2.6,ey],[cx+4.8,ey+1]],'#13222c',0.8); }
-    else { O(g,cx-3.6,ey,1.05,1.35,'#13222c'); O(g,cx+3.6,ey,1.05,1.35,'#13222c'); O(g,cx-3.95,ey-0.5,0.42,0.42,'#ffffff'); O(g,cx+3.25,ey-0.5,0.42,0.42,'#ffffff'); }
-    if (o.glasses){ g.strokeStyle = o.glasses; g.lineWidth = 0.75; g.beginPath(); rrPath(g,cx-6.4,ey-2,5,4.1,1.3); g.stroke(); g.beginPath(); rrPath(g,cx+1.4,ey-2,5,4.1,1.3); g.stroke(); LN(g,[[cx-1.4,ey-0.6],[cx+1.4,ey-0.6]],o.glasses,0.7); O(g,cx-5,ey-1.2,0.9,0.4,'rgba(255,255,255,.55)'); O(g,cx+2.8,ey-1.2,0.9,0.4,'rgba(255,255,255,.55)'); }
-    O(g,cx-5.4,ey+2.6,1.45,0.85,'rgba(241,110,110,.42)'); O(g,cx+5.4,ey+2.6,1.45,0.85,'rgba(241,110,110,.42)');
-    arcS(g,cx+0.3,ey+1.2,0.9,Math.PI*0.15,Math.PI*0.85,skinD,0.6);
-    if (face === 'happy'){ g.fillStyle = '#7a2e2e'; g.beginPath(); g.moveTo(cx-2.6,ey+3.2); g.quadraticCurveTo(cx,ey+7.4,cx+2.6,ey+3.2); g.closePath(); g.fill(); O(g,cx,ey+5,1.2,0.6,'#e57373'); }
-    else if (o.mouth === 'o' || face === 'wince'){ O(g,cx,ey+4.3,1.15,1.3,'#7a2e2e'); O(g,cx,ey+4.8,0.6,0.45,'#e57373'); }
-    else { g.fillStyle = '#7a2e2e'; g.beginPath(); g.moveTo(cx-2,ey+3.4); g.quadraticCurveTo(cx,ey+6,cx+2,ey+3.4); g.quadraticCurveTo(cx,ey+4.4,cx-2,ey+3.4); g.fill(); }
-    if (o.acc){ if (part){ g.save(); g.beginPath(); g.rect(-5,-5,50,25.6); g.clip(); o.acc(g,cx); g.restore(); } else o.acc(g,cx); }
+    if (want('head')){ g.save(); headSpace(); var cx0 = cx; cx = 20;
+      if (!turn){ O(g,cx-7.3,13.6,1.7,2.2,skin); O(g,cx+7.3,13.6,1.7,2.2,skin); O(g,cx-7.3,13.6,0.75,1.15,skinD); O(g,cx+7.3,13.6,0.75,1.15,skinD); }
+      g.fillStyle = rad(g,cx-2.4 + turn*2.6,10.2,0.5,10,[[0,skinL],[0.55,skin],[1,skinD]],cx,12.8); g.beginPath(); g.ellipse(cx,12.8,7.2,7.5,0,0,TAU); g.fill();
+      if (turn){ O(g,cx+7.2,15.1,1.3,1.2,skin); }
+      function capHair(cy, ry, fringeY, col){ g.fillStyle = col; g.beginPath(); g.moveTo(cx-7.6,14); g.ellipse(cx,cy,7.9,ry,0,Math.PI,TAU); g.lineTo(cx+7.6,14); g.quadraticCurveTo(cx+5.5,fringeY+0.4,cx+2.5,fringeY); g.quadraticCurveTo(cx,fringeY+1.6,cx-2.8,fringeY+0.6); g.quadraticCurveTo(cx-6,fringeY+1.2,cx-7.6,14); g.fill(); }
+      function shine(cy){ arcS(g,cx-1.8,cy+1.2,4.2,Math.PI*1.12,Math.PI*1.42,rgba(hcL,0.9),1.1); }
+      if (hs === 'short'){ capHair(11,6.9,9.2,hc); shine(8); }
+      if (hs === 'buzz'){ capHair(11.4,6.6,8.6,hc); }
+      if (hs === 'bob'){ capHair(11,7.2,9.6,hc); RR(g,cx-8.9,9.5,3.4,10.5,1.7,hc); RR(g,cx+5.5,9.5,3.4,10.5,1.7,hc); shine(8); }
+      if (hs === 'long'){ capHair(11,7.2,9.4,hc); RR(g,cx-8.9,9.5,3.2,17,1.6,hc); RR(g,cx+5.7,9.5,3.2,17,1.6,hc); shine(8); }
+      if (hs === 'bun'){ O(g,cx,3.4,3.8,3.5,hc); O(g,cx-0.8,2.6,1.3,0.9,rgba(hcL,0.85)); capHair(11,6.9,9,hc); shine(8); }
+      if (hs === 'curly' || hs === 'grey'){ var cc = hs === 'grey' ? '#d7dbe0' : hc, ccL = shade(cc, hs === 'grey' ? 0.4 : 0.3); [[-6.4,8.4],[-3.6,5.4],[0,4.6],[3.6,5.4],[6.4,8.4],[-7.4,11.8],[7.4,11.8],[-1.7,5.9],[1.9,6.1]].forEach(function(p){ O(g,cx+p[0],p[1],3.5,3.4,cc); }); [[-5.6,7.6],[-2.8,4.8],[0.8,4],[4.2,5.2]].forEach(function(p){ arcS(g,cx+p[0],p[1],1.5,Math.PI*1.1,Math.PI*1.8,ccL,0.9); }); }
+      if (hs === 'messy'){ capHair(11,6.9,9.4,hc); [[-6,6],[-3,3.4],[0.4,2.4],[3.6,3.6],[6.4,6.2]].forEach(function(p, i){ poly(g,[[cx+p[0]-2.6,p[1]+4],[cx+p[0]+(i%2?1.6:-1.4),p[1]-1.8],[cx+p[0]+2.6,p[1]+4]],hc); }); poly(g,[[cx-3.4,8.6],[cx+0.4,8.4],[cx-1,11.6]],hc); shine(8); }
+      if (hs === 'puffs'){ O(g,cx-8.4,6.4,3.9,3.8,hc); O(g,cx+8.4,6.4,3.9,3.8,hc); capHair(11.2,6.7,8.8,hc); }
+      if (turn){ if (hs !== 'buzz' && hs !== 'curly' && hs !== 'grey') O(g,cx-6.1,11.4,2.3,4,hc); O(g,cx-4.8,14.4,1.5,2,skin); O(g,cx-4.8,14.4,0.7,1.1,skinD); }
+      /* the face: big eyes with whites, so feelings read from across the room */
+      var ey = 13.4; g.save(); if (turn){ g.beginPath(); g.ellipse(cx,12.8,7.6,8,0,0,TAU); g.clip(); g.translate(2.1, 0); }
+      var brow = o.brows || (hs === 'grey' ? '#9aa3ad' : shade(hc, -0.1));
+      var bl = face === 'wince' ? 0.8 : 0; LN(g,[[cx-5.5,ey-3.1+bl],[cx-3.6,ey-3.8],[cx-1.9,ey-3.2-bl]],brow,o.brows ? 1.3 : 1); LN(g,[[cx+1.9,ey-3.2-bl],[cx+3.6,ey-3.8],[cx+5.5,ey-3.1+bl]],brow,o.brows ? 1.3 : 1);
+      if (face === 'blink' || face === 'happy'){ arcS(g,cx-3.5,ey-0.5,1.6,Math.PI*0.12,Math.PI*0.88,'#13222c',1); arcS(g,cx+3.5,ey-0.5,1.6,Math.PI*0.12,Math.PI*0.88,'#13222c',1); }
+      else if (face === 'wince'){ LN(g,[[cx-5.1,ey-1.2],[cx-2.5,ey],[cx-5.1,ey+1.2]],'#13222c',1); LN(g,[[cx+5.1,ey-1.2],[cx+2.5,ey],[cx+5.1,ey+1.2]],'#13222c',1); }
+      else { var px = turn ? 0.45 : 0; [-3.5, 3.5].forEach(function(ex){ O(g,cx+ex,ey,1.75,2.1,'#ffffff'); O(g,cx+ex+px,ey+0.35,1.2,1.5,'#13222c'); O(g,cx+ex+px-0.45,ey-0.35,0.5,0.5,'#ffffff'); O(g,cx+ex+px+0.4,ey+0.9,0.22,0.22,'rgba(255,255,255,.8)'); }); }
+      if (o.glasses){ g.strokeStyle = o.glasses; g.lineWidth = 0.85; g.beginPath(); rrPath(g,cx-6.6,ey-2.5,5.6,4.9,1.6); g.stroke(); g.beginPath(); rrPath(g,cx+1,ey-2.5,5.6,4.9,1.6); g.stroke(); LN(g,[[cx-1,ey-0.8],[cx+1,ey-0.8]],o.glasses,0.8); O(g,cx-5.1,ey-1.5,1,0.45,'rgba(255,255,255,.55)'); O(g,cx+2.5,ey-1.5,1,0.45,'rgba(255,255,255,.55)'); }
+      O(g,cx-5.5,ey+2.9,1.5,0.9,'rgba(241,110,110,.45)'); O(g,cx+5.5,ey+2.9,1.5,0.9,'rgba(241,110,110,.45)');
+      arcS(g,cx+0.3,ey+1.6,0.9,Math.PI*0.15,Math.PI*0.85,skinD,0.7);
+      if (face === 'happy'){ g.fillStyle = '#7a2e2e'; g.beginPath(); g.moveTo(cx-2.9,ey+3.5); g.quadraticCurveTo(cx,ey+8,cx+2.9,ey+3.5); g.closePath(); g.fill(); O(g,cx,ey+5.6,1.3,0.65,'#e57373'); }
+      else if (o.mouth === 'o' || face === 'wince'){ O(g,cx,ey+4.6,1.25,1.45,'#7a2e2e'); O(g,cx,ey+5.2,0.65,0.5,'#e57373'); }
+      else { g.fillStyle = '#7a2e2e'; g.beginPath(); g.moveTo(cx-2.3,ey+3.7); g.quadraticCurveTo(cx,ey+6.6,cx+2.3,ey+3.7); g.quadraticCurveTo(cx,ey+4.8,cx-2.3,ey+3.7); g.fill(); }
+      g.restore();
+      if (o.acc){ g.save(); g.beginPath(); g.rect(-5,-8,50,28.6); g.clip(); o.acc(g, 20); g.restore(); }
+      cx = cx0; g.restore();
     }
-    return finish(cv);
+    return finish(cv, { cel:true, ow:1.25, outlineCol:'#141a2c' });
   }
 
   /* ---------- creatures (40x40) ---------- */
@@ -258,7 +298,7 @@ var PX = (function(){
       RR(g,11.4,11.6,4.8,13,2.2,b2); O(g,12.5,9.4,6.4,5.4,b2); O(g,7.4,11.6,2.4,5.4,b); O(g,12.6,4.6,4.4,3.4,b2); eyes(g,9,14,8); O(g,4.6,12,1.6,1.1,'#1b2630');
       RR(g,10,15,6.2,2.2,1,'#20adca'); O(g,13.1,17.8,0.9,0.9,'#f3d36b'); poly(g,[[9.6,3],[10.6,0],[11.8,2.2],[12.8,-0.2],[13.8,2.2],[15,0],[15.6,3]],'#f3d36b'); }
   };
-  function creature(kind){ var cv = make(40,40); CRE[kind](cv.g); return finish(cv); }
+  function creature(kind){ var cv = make(40,40); CRE[kind](cv.g); return finish(cv, { cel:true, ow:1.15, outlineCol:'#141a2c' }); }
 
   /* the people: how each one looks (the animator draws them in parts) */
   var PEOPLE = {
@@ -277,6 +317,8 @@ var PX = (function(){
     friend: { skin:'#d9a07a', hair:'#2b1d14', hairStyle:'puffs', top:'#20adca', style:'hoodie' },
     teacher: { skin:'#f5d6b8', hair:'#8a5a3b', hairStyle:'bob', top:'#007291', style:'lanyard', glasses:'#1b2630' }
   };
+  /* everyone gets their own silhouette */
+  (function(){ var bt = { dot:'round', bev:'wide', lou:'tall', sam:'lanky', lin:'lanky', cal:'wide', gran:'tiny', cole:'broad', kit:'kid', nia:'kid', jay:'tall', friend:'kid', teacher:'tall', you:'kid' }; Object.keys(bt).forEach(function(k){ if (PEOPLE[k]) PEOPLE[k].body = bt[k]; }); })();
   /* ---------- the ally cast ---------- */
   var CAST = {
     dot: function(){ return person(PEOPLE.dot); },
@@ -300,7 +342,7 @@ var PX = (function(){
   /* trusted people for the end hand */
   CAST.friend = function(){ return person(PEOPLE.friend); };
   CAST.teacher = function(){ return person(PEOPLE.teacher); };
-  CAST.family = function(){ var cv = make(40,46), g = cv.g; var a = person({ skin:'#a86b48', hair:'#1b1b1b', hairStyle:'short', top:'#ef7724', style:'plain' }); var b = person({ skin:'#a86b48', hair:'#1b1b1b', hairStyle:'puffs', top:'#7e57c2', style:'plain' }); g.drawImage(b.c,-5,6.4,35,40.2); g.drawImage(a.c,8,3,37,42.6); return cv; };
+  CAST.family = function(){ var cv = make(48,60), g = cv.g; var a = person({ skin:'#a86b48', hair:'#1b1b1b', hairStyle:'short', top:'#ef7724', style:'plain', body:'tall' }); var b = person({ skin:'#a86b48', hair:'#1b1b1b', hairStyle:'puffs', top:'#7e57c2', style:'plain', body:'tiny' }); g.drawImage(a.c,6,0,44,55); g.drawImage(b.c,-6,8,40,50); return cv; };
   CAST.helpline = function(){ var cv = make(40,46), g = cv.g; g.fillStyle = lin(g,0,6,0,40,[[0,'#2a3a48'],[1,'#141c24']]); g.beginPath(); rrPath(g,10.5,5.5,19,35,3.4); g.fill(); g.fillStyle = lin(g,0,9,0,35,[[0,'#5fd0ea'],[1,'#1a8fa8']]); g.beginPath(); rrPath(g,12.8,9,14.4,26,1.6); g.fill();
     RR(g,14.6,11.6,8.6,4.4,2,'#ffffff'); poly(g,[[15.6,15.6],[15,17.6],[17.6,15.6]],'#ffffff'); RR(g,17,18.4,8.6,4,2,'#fef8f4'); RR(g,14.6,24.6,9.6,4.6,2,'#ffffff'); RR(g,17.6,36.6,4.8,1.6,0.8,'#5d6b7a'); O(g,20,7.4,1.6,0.5,'#5d6b7a'); return finish(cv); };
 
@@ -364,7 +406,7 @@ var PX = (function(){
       if (HMOOD === 'blink'){ g.fillStyle = '#6f7884'; g.beginPath(); g.ellipse(x,y+1,2.9,2.1,0,0,TAU); g.fill(); arcS(g,x,y+0.6,2.4,Math.PI*0.15,Math.PI*0.85,'#2a3038',0.9); return; }
       if (HMOOD === 'wide'){ O(g,x,y+0.8,2.5,2.6,'#ffffff'); O(g,x+(i?-0.4:0.4),y+1,1.3,1.5,'#1b2630'); O(g,x-0.2,y+0.4,0.5,0.5,'#ffffff'); LN(g,[[x-2.6,y-2.8],[x+2.6,y-3.4*1]],'#545d68',0.8); return; }
       if (HMOOD === 'narrow'){ O(g,x,y+1.5,2.1,1.1,'#1b2630'); O(g,x-0.6,y+1.3,0.45,0.35,'rgba(255,255,255,.8)'); poly(g,[[x-3.1,y-1.4+(side>0?-0.6:1.4)],[x+3.1,y-1.4+(side>0?1.4:-0.6)],[x+3.1,y+1.2+(side>0?1:0)],[x-3.1,y+1.2+(side>0?0:1)]],'#6f7884'); LN(g,[[x-3.1,y+1.2+(side>0?0:1)],[x+3.1,y+1.2+(side>0?1:0)]],'#3a4450',0.8); return; }
-      var lk = HMOOD === 'look' ? -0.9 : 0;
+      var lk = HMOOD === 'look' ? -1.1 : -0.45;
       O(g,x+lk,y+1,2.1,1.7,'#1b2630'); O(g,x-0.7+lk,y+1.5,0.55,0.45,'rgba(255,255,255,.8)'); g.fillStyle = '#6f7884'; g.beginPath(); g.ellipse(x,y+0.6,2.9,1.9,0,Math.PI*0.98,TAU+0.02); g.fill(); LN(g,[[x-2.9,y+0.8],[x+2.9,y+0.8]],'#545d68',0.7); }); if (sad){ g.fillStyle = '#7fd0f0'; g.beginPath(); g.moveTo(x1+4.2,y+3.2); g.quadraticCurveTo(x1+5.6,y+5.6,x1+4.2,y+6.2); g.quadraticCurveTo(x1+2.8,y+5.6,x1+4.2,y+3.2); g.fill(); } }
   function mouthFlat(g,x,y,w,col){ LN(g,[[x,y],[x+w,y+0.3]],col||'#545d68',1); }
   var HUSH = {
@@ -401,7 +443,7 @@ var PX = (function(){
     tiny: function(g,t){ var b = Math.sin(t*3)*2;
       cloud(g,40,38+b,10.6,8.6,GREY[4],GREY[2]); cloud(g,33.4,34+b,5.6,5.6,GREY[4],GREY[2]); cloud(g,46.6,34+b,5.6,5.6,GREY[4],GREY[2]); cloud(g,40,31+b,6.6,5.6,'#eef1f4',GREY[3]); lids(g,34,43,35+b,true); arcS(g,40,43.6+b,1.8,Math.PI*1.2,Math.PI*1.8,'#5b6672',0.8); }
   };
-  function hushFrame(kind, t){ var cv = make(80,60); (HUSH[kind]||HUSH.fog)(cv.g, t); return finish(cv, { outlineCol:'#3a4450', ow:0.8 }); }
+  function hushFrame(kind, t){ var cv = make(80,60); (HUSH[kind]||HUSH.fog)(cv.g, t); return finish(cv, { cel:true, outlineCol:'#2a3240', ow:1.05 }); }
   /* n frames of one loop; mood changes the face: '', blink, wide (hit), narrow (about to drain), look (glances at you) */
   function hushSet(kind, n, mood){ var key = 'hf_'+kind+'_'+n+'_'+(mood||''); var set = cache[key]; if (!set){ set = cache[key] = new Array(n); set.todo = n; set.kind = kind; set.mood = mood || ''; } return set; }
   function hushFill(set, i){ if (set[i]) return; HMOOD = set.mood; try { set[i] = hushFrame(set.kind, i/set.length*Math.PI*2/1.5).c; } finally { HMOOD = ''; } set.todo--; }
@@ -418,10 +460,10 @@ var PX = (function(){
   function castC(name){ var key = 'cc_'+name; if (cache[key]) return cache[key]; cache[key] = (CAST[name]||CAST.tinyhush)().c; return cache[key]; }
   function img(kind, name, cls){ var i = document.createElement('img'); i.src = url(kind, name); i.className = 'px '+(cls||''); i.alt = ''; i.draggable = false; return i; }
   /* ---------- parts for the animator ---------- */
-  function rigFrom(key, o){ var k = 'rig_'+key; if (cache[k]) return cache[k]; var parts = {}, hs = o.hairStyle||'short';
-    var r = { key:key, o:o, has:{ back:!!o.back, hairback:hs === 'long' || hs === 'bob' }, get:function(name){ if (parts[name] !== undefined) return parts[name]; var face = { blink:'blink', wince:'wince', happy:'happy' }[name]; parts[name] = person(o, face ? 'head' : name, face).c; return parts[name]; } };
+  function rigFrom(key, o, turn){ turn = turn ? 1 : 0; var k = 'rig_'+key+'_'+turn; if (cache[k]) return cache[k]; var parts = {}, hs = o.hairStyle||'short';
+    var r = { key:key, o:o, turn:turn, d:layout(o, turn), has:{ back:!!o.back, hairback:hs === 'long' || hs === 'bob' }, get:function(name){ if (parts[name] !== undefined) return parts[name]; var face = { blink:'blink', wince:'wince', happy:'happy' }[name]; parts[name] = person(o, face ? 'head' : name, face, turn).c; return parts[name]; } };
     cache[k] = r; return r; }
-  function rigFor(name){ return PEOPLE[name] ? rigFrom(name, PEOPLE[name]) : null; }
+  function rigFor(name, turn){ return PEOPLE[name] ? rigFrom(name, PEOPLE[name], turn) : null; }
   function castBlink(name){ var key = 'cb_'+name; if (cache[key]) return cache[key]; var c = null; if (CRE[name]){ BLINK = true; try { c = creature(name).c; } finally { BLINK = false; } } cache[key] = c; return c; }
   /* a white silhouette of any picture, for hit flashes */
   function whiteOf(c){ if (c._white) return c._white; var o = make(c._lw || c.width, c._lh || c.height, c._s || 1); o.g.save(); o.g.setTransform(1,0,0,1,0,0); HD.rd(o.g, c, 0, 0); o.g.globalCompositeOperation = 'source-in'; o.g.fillStyle = '#ffffff'; o.g.fillRect(0,0,o.c._rw,o.c._rh); o.g.restore(); c._white = o.c; return o.c; }
@@ -1315,7 +1357,7 @@ var ART = (function(){
     RR(g,ax-0.8,ay-0.8,aw+1.6,ah+1.6,3,ink);
     g.save(); g.beginPath(); PX.rrPath(g,ax,ay,aw,ah,2.4); g.clip();
     artScene(g, d, ax, ay, aw, ah, fc, up);
-    if (d.ally){ O(g,CW/2,ay+ah-1.6,13,3.4,'rgba(0,0,0,.16)'); var sp = PX.castC(d.cast); g.drawImage(sp, CW/2 - 16, ay + 1.4 - (sp.height > 42 ? 0 : -2), 32, sp.height*32/40); }
+    if (d.ally){ O(g,CW/2,ay+ah-1.6,13,3.4,'rgba(0,0,0,.16)'); var sp = PX.castC(d.cast), isP = sp.height > 50, cw2 = isP ? 36 : 32, ch2 = sp.height*cw2/sp.width; g.drawImage(sp, CW/2 - cw2/2, ay + (isP ? 0.6 : 3.4), cw2, ch2); }
     else { O(g,CW/2,ay+ah-3,11,2.4,'rgba(0,0,0,.14)'); PX.glow(g, CW/2, ay+ah/2, 12, '#ffffff', 0.7); var ic = PX.iconC(d.icon); g.drawImage(ic, CW/2 - 14, ay + ah/2 - 15.4, 28, 28); }
     g.restore();
     if (d.ally){ O(g,CW-8.6,ay+3.4,3.2,3.2,ink); O(g,CW-8.6,ay+3.4,2.5,2.5,'#f3d36b'); PX.star5(g,CW-8.6,ay+3.5,1.9,0.8,'#ffffff'); }
@@ -1416,7 +1458,9 @@ var ART = (function(){
      opt.flash  0..1 white hit flash
      opt.face   wince or happy to force a face
      opt.hop    lift off the floor
-     opt.still  no idle motion */
+     opt.still  no idle motion
+     opt.turn   1 = three-quarters on, facing the way of opt.dir
+     opt.dir    1 faces right, -1 faces left */
 var Puppet = (function(){
   var ST = {}, TAU = Math.PI*2;
   var POSES = {
@@ -1428,6 +1472,18 @@ var Puppet = (function(){
     slump:  { aL:-0.06, aR:0.06,  lean:0.14,  tilt:0.36,  drop:1.6, sq:0.08 },
     hurt:   { aL:0.55,  aR:-0.55, lean:-0.16, tilt:-0.12, drop:0.4, sq:0.06 }
   };
+  /* poses for people turned to face the Hush: arms reach forward, the near arm goes to the ear */
+  var TPOSES = {
+    idle:   { aL:0.1,   aR:-0.04, lean:0,     tilt:0,     drop:0,   sq:0 },
+    speak:  { aL:-0.7,  aR:-2.3,  lean:0.1,   tilt:0.08,  drop:0,   sq:0.04, prop:'megaphone' },
+    stand:  { aL:-1.35, aR:-1.5,  lean:0.06,  tilt:0,     drop:-0.5, sq:-0.03 },
+    listen: { aL:3.05,  aR:0.1,   lean:-0.02, tilt:-0.14, drop:0,   sq:0 },
+    cheer:  { aL:2.5,   aR:-2.5,  lean:0,     tilt:-0.05, drop:-0.5, sq:-0.04 },
+    slump:  { aL:-0.06, aR:0.06,  lean:0.16,  tilt:0.36,  drop:1.6, sq:0.08 },
+    hurt:   { aL:0.7,   aR:0.5,   lean:-0.2,  tilt:-0.14, drop:0.4, sq:0.06 }
+  };
+  /* creatures drawn looking left; flip them to face the other way */
+  var LOOKS_LEFT = { pigeon:1, duck:1, bonnie:1, bambi:1 }, LOOKS_RIGHT = { trainer:1 };
   function seedOf(k){ var h = 7; k = String(k); for (var i=0;i<k.length;i++) h = (h*31 + k.charCodeAt(i)) | 0; return (Math.abs(h) % 1000)/1000; }
   function state(key){ var s = ST[key]; if (!s){ s = ST[key] = { aL:0.07, aR:-0.07, lean:0, tilt:0, drop:0, sq:0, prop:0, pose:null, until:0, seed:seedOf(key), last:G.t }; } return s; }
   /* hold a pose for a while */
@@ -1435,7 +1491,9 @@ var Puppet = (function(){
   function poseNow(key, forced){ var s = state(key); if (forced) return forced; if (s.pose && G.t < s.until) return s.pose; s.pose = null; return 'idle'; }
 
   function draw(b, id, x, fy, opt){
-    opt = opt || {}; var key = opt.key || id, s = state(key), name = poseNow(key, opt.pose), P = POSES[name] || POSES.idle;
+    opt = opt || {}; var key = opt.key || id, s = state(key), name = poseNow(key, opt.pose), dir = opt.dir || 0;
+    var rig = opt.rig || (PX.rigFor ? PX.rigFor(id, opt.turn || (dir ? 1 : 0)) : null), turned = rig && rig.turn;
+    var P = (turned ? TPOSES[name] : POSES[name]) || POSES.idle;
     var dt = Math.min(0.05, Math.max(0, G.t - s.last)); s.last = G.t; var k = 1 - Math.exp(-16*dt);
     ['aL','aR','lean','tilt','drop','sq'].forEach(function(p){ s[p] += ((P[p] || 0) - s[p])*k; });
     s.prop += ((P.prop ? 1 : 0) - s.prop)*k;
@@ -1445,31 +1503,33 @@ var Puppet = (function(){
     if (walk !== undefined && walk !== null && !G.reduce){ legL = Math.sin(walk)*0.5; legR = -legL; armSwing = Math.sin(walk)*0.4; walkBob = Math.abs(Math.cos(walk))*1.4; }
     var period = 3.4 + s.seed*1.8, blinking = ((t*1.0) % period) < 0.13;
     var sc = opt.sc || 1, hop = (opt.hop || 0) + walkBob, flash = opt.flash || 0;
-    var rig = opt.rig || (PX.rigFor ? PX.rigFor(id) : null);
     b.save(); b.translate(x, fy - (bob + hop)*sc);
     if (opt.alpha !== undefined) b.globalAlpha *= opt.alpha;
     if (rig){
-      b.scale(sc, sc); b.translate(-20, -46);
+      var d = rig.d || { W:40, H:46, cx:20, floor:46, sL:11.3, sR:28.7, sy:24.6, hL:17.8, hR:22.2, hipY:33.6, ny:20.5, arm:8 };
+      b.scale(sc*(dir < 0 ? -1 : 1), sc); b.translate(-d.cx, -d.floor);
+      var pL = d.sL, pR = d.sR, hipL = d.hL, hipR = d.hR, sy0 = d.sy, hy0 = d.hipY, ny0 = d.ny;
       var face = opt.face || (blinking ? 'blink' : 'head');
-      function part(nm, px, py, ang){ var img = rig.get(nm); if (!img) return; if (ang){ b.save(); b.translate(px, py); b.rotate(ang); b.translate(-px, -py); } b.drawImage(img, 0, 0, 40, 46); if (flash > 0.01){ var a0 = b.globalAlpha; b.globalAlpha = a0*Math.min(1, flash); b.drawImage(PX.whiteOf(img), 0, 0, 40, 46); b.globalAlpha = a0; } if (ang) b.restore(); }
-      part('legL', 17.8, 33.6, legL); part('legR', 22.2, 33.6, legR);
-      b.save(); b.translate(20, 35); b.rotate(s.lean); b.scale(1 - breath*0.4 - s.sq*0.4, 1 + breath + s.sq*-1); b.translate(-20, -35 + s.drop);
+      function part(nm, px, py, ang){ var img = rig.get(nm); if (!img) return; if (ang){ b.save(); b.translate(px, py); b.rotate(ang); b.translate(-px, -py); } b.drawImage(img, 0, 0, d.W, d.H); if (flash > 0.01){ var a0 = b.globalAlpha; b.globalAlpha = a0*Math.min(1, flash); b.drawImage(PX.whiteOf(img), 0, 0, d.W, d.H); b.globalAlpha = a0; } if (ang) b.restore(); }
+      if (turned){ part('legR', hipR, hy0, legR); part('legL', hipL, hy0, legL); } else { part('legL', hipL, hy0, legL); part('legR', hipR, hy0, legR); }
+      b.save(); b.translate(d.cx, hy0); b.rotate(s.lean); b.scale(1 - breath*0.4 - s.sq*0.4, 1 + breath + s.sq*-1); b.translate(-d.cx, -hy0 + s.drop);
       if (rig.has.back) part('back');
       var htilt = s.tilt + sway;
-      if (rig.has.hairback){ b.save(); b.translate(20, 20.5); b.rotate(htilt); b.translate(-20, -20.5); part('hairback'); b.restore(); }
+      if (rig.has.hairback){ b.save(); b.translate(d.cx, ny0); b.rotate(htilt); b.translate(-d.cx, -ny0); part('hairback'); b.restore(); }
       var aL = s.aL + armSwing + (calm ? 0 : breath*1.5), aR = s.aR - armSwing - (calm ? 0 : breath*1.5);
-      part('armL', 11.3, 24.6, aL); part('armR', 28.7, 24.6, aR);
-      part('body');
-      b.save(); b.translate(20, 20.5); b.rotate(htilt); b.translate(-20, -20.5); part(face === 'head' ? 'head' : face); b.restore();
+      if (turned){ part('armR', pR, sy0, aR); part('body'); } else { part('armL', pL, sy0, aL); part('armR', pR, sy0, aR); part('body'); }
+      b.save(); b.translate(d.cx, ny0); b.rotate(htilt); b.translate(-d.cx, -ny0); part(face === 'head' ? 'head' : face); b.restore();
+      if (turned) part('armL', pL, sy0, aL);
       /* a little megaphone in the raised hand */
-      if (s.prop > 0.3){ var hx = 28.7 + -Math.sin(aR)*9.4, hy = 24.6 + Math.cos(aR)*9.4; b.save(); b.globalAlpha *= Math.min(1, (s.prop - 0.3)*2); b.translate(hx, hy); b.rotate(aR + Math.PI*0.9); b.drawImage(PX.iconC('megaphone'), -5, -5, 10, 10); b.restore(); }
+      if (s.prop > 0.3){ var hl = d.arm + 1.8, hx = pR + -Math.sin(aR)*hl, hy = sy0 + Math.cos(aR)*hl; b.save(); b.globalAlpha *= Math.min(1, (s.prop - 0.3)*2); b.translate(hx, hy); b.rotate(aR + Math.PI*0.9); b.drawImage(PX.iconC('megaphone'), -5, -5, 10, 10); b.restore(); }
       b.restore();
     } else {
       var img = (blinking && PX.castBlink && PX.castBlink(id)) || PX.castC(id), w = img.width, h = img.height;
       var tilt = sway*0.6 + (name === 'speak' ? 0.12 : name === 'listen' ? -0.14 : name === 'hurt' ? -0.12 : name === 'slump' ? 0.08 : 0) * Math.min(1, Math.abs(s.aR - 0.07) + 0.2);
       var sy = 1 + breath*1.3 + (name === 'stand' ? 0.06 : name === 'slump' ? -0.1 : 0), sx = 1 - breath*0.6 + (name === 'stand' ? 0.08 : 0);
       if (walk !== undefined && walk !== null && !G.reduce){ hop += Math.abs(Math.sin(walk))*3; }
-      b.translate(0, -hop*sc); b.rotate(tilt); b.scale(sc*sx, sc*sy); b.drawImage(img, -w/2, -h, w, h);
+      var flip = (dir > 0 && LOOKS_LEFT[id]) || (dir < 0 && LOOKS_RIGHT[id]) ? -1 : 1;
+      b.translate(0, -hop*sc); b.rotate(tilt*(dir < 0 ? -1 : 1)); b.scale(sc*sx*flip, sc*sy); b.drawImage(img, -w/2, -h, w, h);
       if (flash > 0.01){ b.globalAlpha *= Math.min(1, flash); b.drawImage(PX.whiteOf(img), -w/2, -h, w, h); }
     }
     b.restore();
@@ -1479,11 +1539,11 @@ var Puppet = (function(){
 
 /* "you": the character from your latest made card, or the hooded kid */
 var youRigCache = { key:null, r:null };
-function youRig(){ var code = (Meta.made && Meta.made[0]) || ''; if (youRigCache.key === code && youRigCache.r) return youRigCache.r; var r = null;
-  try { if (code && typeof mkParse === 'function'){ var m = mkParse(code); if (m && m.t === 'p') r = PX.rigFrom('made_'+code, { skin:MK_SKIN[m.s], hairStyle:MK_HS[m.hs], hair:MK_HAIR[m.h], top:MK_TOP[m.tp], style:MK_STYLE[m.st] }); } } catch(e){}
-  youRigCache.key = code; youRigCache.r = r || PX.rigFor('you'); return youRigCache.r; }
+function youRig(turn){ var code = ((Meta.made && Meta.made[0]) || '') + '|' + (turn ? 1 : 0); if (youRigCache.key === code && youRigCache.r) return youRigCache.r; var r = null;
+  try { var mc = Meta.made && Meta.made[0]; if (mc && typeof mkParse === 'function'){ var m = mkParse(mc); if (m && m.t === 'p') r = PX.rigFrom('made_'+mc, { skin:MK_SKIN[m.s], hairStyle:MK_HS[m.hs], hair:MK_HAIR[m.h], top:MK_TOP[m.tp], style:MK_STYLE[m.st] }, turn); } } catch(e){}
+  youRigCache.key = code; youRigCache.r = r || PX.rigFor('you', turn); return youRigCache.r; }
 /* draw any character by cast name, or "you" */
-function drawChar(b, id, x, fy, opt){ opt = opt || {}; if (id === 'you'){ opt.rig = youRig(); if (!opt.key) opt.key = 'you'; } Puppet.draw(b, id, x, fy, opt); }
+function drawChar(b, id, x, fy, opt){ opt = opt || {}; if (id === 'you'){ opt.rig = youRig(opt.dir ? 1 : 0); if (!opt.key) opt.key = 'you'; } Puppet.draw(b, id, x, fy, opt); }
 
 /* mystery stops */
 var EVENTS = [
@@ -1819,7 +1879,7 @@ var Battle = {
     /* the friend stuck in the fog */
     var r = S.rescue; if (r && r.x > -40){ var spr = PX.castC(ALLIES[r.id].cast), g2 = greyCast(r.id); var hop = r.free && !r.walk ? Math.abs(Math.sin(r.hop*10))*7 : 0; var bob = r.free ? 0 : (Math.sin(G.t*2)*1) + (Math.random() - 0.5)*0.4;
       if (!r.free){ ART.stepGlow(b, r.x, r.y - 20, 22, '#c3c9d1', 4, 0.35); }
-      if (r.free) Puppet.draw(b, ALLIES[r.id].cast, r.x, r.y, { key:'rescue', hop:hop, walk:r.walk ? r.walk*16 : null, pose:r.walk ? null : 'cheer', face:r.walk ? null : 'happy' }); else b.drawImage(g2, r.x - spr.width/2, r.y - spr.height + bob);
+      if (r.free) Puppet.draw(b, ALLIES[r.id].cast, r.x, r.y, { key:'rescue', dir:-1, hop:hop, walk:r.walk ? r.walk*16 : null, pose:r.walk ? null : 'cheer', face:r.walk ? null : 'happy' }); else b.drawImage(g2, r.x - spr.width/2, r.y - spr.height + bob);
       if (!r.free){ var qy = r.y - spr.height - 10 + Math.sin(G.t*3)*2; PX.poly(b, [[r.x-2, qy+7], [r.x+3, qy+7], [r.x+0.5, qy+11]], '#0a1020'); PX.RR(b, r.x-4.5, qy-1.5, 10, 10, 3, '#0a1020'); PX.RR(b, r.x-3.5, qy-0.5, 8, 8, 2.4, '#fef8f4'); G.text('?', r.x+0.5, qy+4, { size:6, col:'#0a1020', align:'center', base:'middle' }); }
       if (G.hover(r.x - 20, r.y - 46, 40, 46) && !r.free) S.tip = { x:r.x - 70, y:r.y - 76, title:'Someone is stuck in the Hush', text:'Break it to free them. They will join your deck.' };
     }
@@ -1897,14 +1957,14 @@ var Battle = {
       if (t !== undefined && t >= 0.7 && t < 0.8 && !S['cb'+o.id]){ S['cb'+o.id] = 1; G.burst(x, y - 20, ['#f3d36b','#ffffff','#20adca'], 14, 70, { life:0.5 }); }
       var hop = (S.crowdHop[o.id] || 0) > 0 ? Math.sin(S.crowdHop[o.id]*Math.PI)*7 : 0; if (ending === 'cheer') hop += Math.abs(Math.sin(G.t*7 + o.i))*5;
       PX.O(b, x, y + 0.5, 11*sc, 2.2*sc, 'rgba(10,16,32,.3)');
-      Puppet.draw(b, cast, x, y, { key:'ally_'+o.id, sc:sc, walk:walk, hop:hop, pose:ending });
+      Puppet.draw(b, cast, x, y, { key:'ally_'+o.id, sc:sc, walk:walk, hop:hop, pose:ending, dir:1 });
       if (G.hover(x - 14, y - 40, 28, 40)) S.tip = { x:x - 40, y:y - 70, title:CARDS[o.id] ? CARDS[o.id].name : 'A friend', text:'Standing with you this fight.' }; });
     var hop2 = S.youHop > 0 ? Math.sin(S.youHop*Math.PI) : 0, px = PLAYER_X + hop2*12 + S.youKnock;
     var jump = ending === 'cheer' ? Math.abs(Math.sin(G.t*6))*6 : hop2*5;
     PX.O(b, px, fl + 0.5, 13, 2.6, 'rgba(10,16,32,.32)');
     if (S.backShown > 0){ b.save(); b.globalAlpha = 0.3 + S.shield*0.4; ART.stepGlow(b, px, fl - 22, 30, '#20adca', 4, 0.6); b.restore(); }
     if (S.hurtT){ ART.stepGlow(b, px, fl - 22, 28, '#e84a5f', 4, S.hurtT*1.4); }
-    drawChar(b, 'you', px, fl, { key:'you', hop:jump, flash:S.youFlash, face:S.hurtT > 0.12 ? 'wince' : ending === 'cheer' ? 'happy' : null, pose:ending });
+    drawChar(b, 'you', px, fl, { key:'you', dir:1, hop:jump, flash:S.youFlash, face:S.hurtT > 0.12 ? 'wince' : ending === 'cheer' ? 'happy' : null, pose:ending });
     if (G.hover(PLAYER_X - 16, fl - 46, 32, 46) && !S.sel) S.tip = { x:PLAYER_X - 30, y:fl - 80, title:'You', text:'Speak up, stand together, and listen. Make a card to change how you look.' };
   },
   drawPlayer:function(b){
@@ -2282,7 +2342,7 @@ var Stop = {
       G.text((cam ? 'Legendary! Joined your deck.' : 'Secret card added to your deck.') + (ev.isNew ? ' New in your collection.' : ''), 192, 152, { size:5.5, col:'#f3d36b', align:'center', read:true });
       if (G.hover(192 - ART.CW/2, 68, ART.CW, ART.CH)){ var d = CARDS[ev.id]; S.tip = { x:192 + ART.CW/2 + 6, y:70, w:128, title:d.name, text:d.text(false), col:FAM[d.fam].col }; }
       S.carry(); return; }
-    var pic = ev.pic[0] === 'cast' ? PX.castC(ev.pic[1]) : PX.iconC(ev.pic[1]); var z = ev.pic[0] === 'cast' ? 2 : 3; if (ev.pic[0] === 'cast') Puppet.draw(b, ev.pic[1], 192, 84 + pic.height*z/2, { key:'mys_'+ev.pic[1], sc:z }); else b.drawImage(pic, 192 - pic.width*z/2, 84 - pic.height*z/2, pic.width*z, pic.height*z);
+    var pic = ev.pic[0] === 'cast' ? PX.castC(ev.pic[1]) : PX.iconC(ev.pic[1]); var z = ev.pic[0] === 'cast' ? (pic.height > 50 ? 1.6 : 2) : 3; if (ev.pic[0] === 'cast') Puppet.draw(b, ev.pic[1], 192, 84 + pic.height*z/2, { key:'mys_'+ev.pic[1], sc:z }); else b.drawImage(pic, 192 - pic.width*z/2, 84 - pic.height*z/2, pic.width*z, pic.height*z);
     G.text(ev.title, 192, 26, { size:9, col:'#ffffff', align:'center', outline:'#0a1020' });
     G.text(ev.text, 192, 124, { size:6, col:'#dfe6ff', align:'center', read:true, w:300, lh:7.5 });
     if (S.msg){ G.text(S.msg, 192, 146, { size:6, col:'#f3d36b', align:'center', read:true, w:300, lh:7.5 }); S.carry(); return; }
@@ -2330,7 +2390,7 @@ var Ending = {
       var ft = S.flipped[i] === undefined ? 0 : Math.min(1, (S.t - S.flipped[i])*3), ang = ft*Math.PI, sx = Math.abs(Math.cos(ang)), w = Math.max(2, Math.round(cw*sx)), cx = x + cw/2, front = ft < 0.5;
       var hov = G.hover(x, y, cw, chh); if (hov) G.cursor = 'pointer';
       if (w > 1){ var rr = Math.min(6, w/2); PX.RR(b, cx - w/2 + 2, y + 3, w, chh, rr, 'rgba(0,0,0,.32)'); PX.RR(b, cx - w/2 - 1, y - 1, w + 2, chh + 2, rr + 1, '#0a1020'); PX.RR(b, cx - w/2, y, w, chh, rr, front ? PX.lin(b, 0, y, 0, y + chh, [[0,'#ffffff'],[1,'#f3ebe2']]) : PX.lin(b, 0, y, 0, y + chh, [[0,'#f2fbfe'],[1,'#cdeef7']])); }
-      if (front){ if (sx > 0.9){ var sp = PX.castC(p.id); Puppet.draw(b, p.id, cx, y + 10 + sp.height*2 - (hov ? 2 : 0), { key:'tr_'+p.id, sc:2, pose:hov ? 'cheer' : null, face:hov ? 'happy' : null }); G.text(p.name, cx, y + chh - 16, { size:6.5, col:'#0a1020', align:'center', read:true, bold:true }); } }
+      if (front){ if (sx > 0.9){ var sp = PX.castC(p.id); Puppet.draw(b, p.id, cx, y + chh - 22 - (hov ? 2 : 0), { key:'tr_'+p.id, sc:Math.min(2, (chh - 34)/sp.height), pose:hov ? 'cheer' : null, face:hov ? 'happy' : null }); G.text(p.name, cx, y + chh - 16, { size:6.5, col:'#0a1020', align:'center', read:true, bold:true }); } }
       else if (sx > 0.9){ G.text(p.name, cx, y + 8, { size:6, col:'#0a1020', align:'center', read:true, bold:true }); G.text(p.tip, cx, y + 22, { size:5.3, col:'#24323a', align:'center', read:true, w:cw - 10, lh:6.6 }); }
       if (G.clicked(x, y, cw, chh)){ if (S.flipped[i] === undefined){ S.flipped[i] = S.t; Sound.sfx('flip'); } else { delete S.flipped[i]; Sound.sfx('flip'); } }
     });
