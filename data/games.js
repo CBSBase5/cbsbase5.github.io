@@ -102,6 +102,12 @@ window.B5GAMES = {
       tags:["make","learning"], added:"2026-10-12", art:"/practice/jump-lab-art/box.webp", fill:"bright", motif:"blocks", year:"Whenever you make it"
     },
     {
+      id:"the-hush", title:"The Hush", href:"/practice/the-hush.html",
+      blurb:"A card battler for Anti Bullying Week. Speak up, stand together and listen to break the Hush in each part of school, free your friends and turn the whole school back on.",
+      meta:"For Anti Bullying Week &middot; about 10 minutes a run &middot; 10 levels &middot; saves on this device",
+      tags:["cc","fun"], added:"2026-11-13", art:"/games/art/the-hush/box.webp", fill:"ink", motif:"wave", year:"This week"
+    },
+    {
       id:"pigeon-post", title:"Pigeon Post", href:"/practice/pigeon-post.html",
       blurb:"Hold to flap, let go to glide. Fly thank you notes to five people who help us, dodge kites, cats and seagulls, then meet Winkie, the real pigeon who saved four lives in 1942.",
       meta:"For Remembrance week &middot; five deliveries &middot; saves on this device",

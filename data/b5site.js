@@ -95,7 +95,7 @@ var B5ICON_MAP = [
   ["/projects/its-time.html", "its-time"], ["/projects/chilton-trail.html", "chilton-trail"], ["/projects/ideas.html", "idea-lab"], ["/projects/time-travel-tv.html", "time-travel-tv"], ["/games/timeline-tantrum/", "timeline-tantrum"],
   ["/practice/build-a-life.html", "build-a-life"], ["/practice/hooked.html", "hooked"],
   ["/practice/endorphin-house.html", "endorphin-house"], ["/practice/jump-lab.html", "jump-lab"],
-  ["/practice/deep-diya.html", "deep-diya"], ["/practice/pigeon-post.html", "pigeon-post"], ["/practice/sankofa.html", "sankofa"], ["/sankofa.html", "sankofa"],
+  ["/practice/deep-diya.html", "deep-diya"], ["/practice/pigeon-post.html", "pigeon-post"], ["/practice/the-hush.html", "the-hush"], ["/practice/sankofa.html", "sankofa"], ["/sankofa.html", "sankofa"],
   ["/practice/last-stand.html", "last-stand"], ["/practice/tiny-legends.html", "tiny-legends"],
   ["/practice/cue-the-sequence.html", "cue-the-sequence"], ["/practice/paragraphs.html", "paragraph-dash"],
   ["/practice/chip-run.html", "chip-run"], ["/practice/chess.html", "chess"],

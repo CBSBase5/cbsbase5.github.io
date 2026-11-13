@@ -7,6 +7,18 @@ function ext(col, n, dark){
 function T(txt, style){ return '<span style="display:inline-block;'+style+'">'+txt+'</span>'; }
 
 var COVERS = {
+  "the-hush": {
+    vars:{base:"#141a33",base2:"#0b0f22",accent:"#ef7724",sub:"#7fe0f8",ribbon:"#ef7724",ribbonInk:"#fffdf8",s1:"#ef7724",s2:"#20adca",s3:"#f3d36b"},
+    chip:"CARDS", shotStyle:"image-rendering:pixelated",
+    title:T("THE HUSH","font:700 112px/1 Silk;color:#e6eaf2;"+ext("#5b6672",8,"#000")),
+    sub:"TURN THE SCHOOL BACK ON",
+    ribbon:"SPEAK &middot; STAND &middot; LISTEN",
+    burst:["24","FRIENDS!"],
+    tag:"AN ANTI BULLYING WEEK GAME",
+    small:"Break the Hush, free your friends and light up the whole school.",
+    players:"1<br>PLAYER",
+    spine:T("THE HUSH","font:700 46px/1 Silk;color:#e6eaf2;"+ext("#5b6672",4,"#000"))
+  },
   "pigeon-post": {
     vars:{base:"#0d3340",base2:"#08222b",accent:"#ef7724",sub:"#ffd27a",ribbon:"#c8312f",ribbonInk:"#fffdf8",s1:"#ef7724",s2:"#20adca",s3:"#c8312f"},
     chip:"FLYING",
