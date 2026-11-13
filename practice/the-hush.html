@@ -267,6 +267,8 @@ var PX = (function(){
     modbot: function(){ return creature('modbot'); }, slime: function(){ return creature('slime'); }, duck: function(){ return creature('duck'); },
     trainer: function(){ return creature('trainer'); }, tinyhush: function(){ return creature('tinyhush'); }, bonnie: function(){ return creature('bonnie'); }, bambi: function(){ return creature('bambi'); }
   };
+  /* you: hood up, so anyone can be you (make a card to change it) */
+  CAST.you = function(){ return person({ skin:'#c8946c', hair:'#2b1d14', hairStyle:'buzz', top:'#007291', style:'hoodie', acc:function(g,cx){ g.save(); g.strokeStyle = '#007291'; g.lineWidth = 2.8; g.beginPath(); g.ellipse(cx, 12.6, 8.6, 9, 0, Math.PI*0.72, Math.PI*2.28); g.stroke(); g.strokeStyle = shade('#007291', -0.25); g.lineWidth = 0.8; g.beginPath(); g.ellipse(cx, 12.6, 7.4, 7.9, 0, Math.PI*0.8, Math.PI*2.2); g.stroke(); g.restore(); O(g,cx+3.6,22,1.1,0.9,'#ef7724'); } }); };
   /* trusted people for the end hand */
   CAST.friend = function(){ return person({ skin:'#d9a07a', hair:'#2b1d14', hairStyle:'puffs', top:'#20adca', style:'hoodie' }); };
   CAST.teacher = function(){ return person({ skin:'#f5d6b8', hair:'#8a5a3b', hairStyle:'bob', top:'#007291', style:'lanyard', glasses:'#1b2630' }); };
@@ -1448,7 +1450,12 @@ var WORDS = {
   lunchbox:'um... hi', bonnie:'WOOF!', china:'WHEN I WAS IN CHINA...', tinyhush:'thank you', kit:'...ok', slime:'1UP!', sam:'CUE!', mopghost:'swish', lin:'shh... oh, wait', checkin:'YOU OK?', breathe:'BREATHE...'
 };
 function wordFor(c){ var d = CARDS[c.id], w = WORDS.hasOwnProperty(c.id) ? WORDS[c.id] : null; if (typeof w === 'string') return w; var l = WORDS_FAM[d.fam] || WORDS_FAM.speak; return l[Math.floor(Math.random()*l.length)]; }
-var HUSH_X = 274, HUSH_FLOOR = 128, HAND_Y = 141, DECK_X = -70, DECK_Y = 200;
+var HUSH_X = 274, HUSH_FLOOR = 128, HAND_Y = 150, DECK_X = 18 - 27, DECK_Y = 202 - 38;
+/* the hand sits small in a fan; the card you point at grows. You and your friends stand on the left. */
+var HS = 0.8, HOVER_S = 1.3, PLAYER_X = 92, DRAW_PILE = { x:6, y:190 }, DISCARD_PILE = { x:356, y:190 };
+var CROWD_SPOTS = [[-30,-2,0.94],[-56,-4,0.88],[30,-3,0.92],[-80,-6,0.84],[54,-5,0.86],[-104,-7,0.8]];
+var youCache = { key:null, c:null };
+function youSprite(){ var code = (Meta.made && Meta.made[0]) || ''; if (youCache.key === code && youCache.c) return youCache.c; var c = null; try { if (code && typeof mkParse === 'function'){ var m = mkParse(code); if (m && m.t === 'p') c = mkSprite(m); } } catch(e){} youCache.key = code; youCache.c = c || PX.castC('you'); return youCache.c; }
 var Battle = {
   enter:function(){
     var node = this.node, S = this; S.leaving = false; S.shrinkT = -1; S.pairT = 0; S.tip = null; S.lastCards = {}; S.vis = {}; S.order = []; S.sel = null; S.drag = null; S.hoverUid = null; S.fxq = []; S.clock = 0; S.flights = []; S.prompt = null; S.promptDone = {};
@@ -1464,6 +1471,7 @@ var Battle = {
     S.banner = { text: node.t === 'boss' ? 'The Hall: the Big Hush' : node.t === 'guard' ? 'A tough Hush guards '+where : 'Bring back '+where, t:0, life:2.4, col: node.t === 'boss' ? '#8a5fb0' : '#ef7724' };
     S.dealHold = 0.9; S.layer = 1; S.windT = 0; S.volNum = Run.vol; S.tickAcc = 0; S.breathPop = 0; S.lastBreath = -1; S.lastHover = null; S.dragVX = 0; S.lastMX = 0; S.dealN = 0; Sound.setLayers(1);
     S.rain = node.place === 'busstop' && node.t !== 'boss'; S.place = node.t === 'boss' ? 'hall' : node.place;
+    S.youHop = 0; S.crowdT = {}; S.crowdHop = {}; S.hoverIdx = -1; S.pileTip = null;
   },
   /* ---------- engine hooks ---------- */
   fx:function(type, d){ var S = Battle, step = { noise:0.13, drain:0.42, junk:0.25, mute:0.25, fog:0.2, grow:0.2, steal:0.2, backup:0.06, heal:0.06 }[type] || 0; S.fxq.push({ at:S.clock + (UI.fxBase||0), type:type, d:d||{} }); UI.fxBase = (UI.fxBase||0) + step; },
@@ -1471,16 +1479,17 @@ var Battle = {
   locked:function(){ return !B || B.over || B.busy || this.fxq.length > 0 || this.dealing > 0 || this.winT >= 0 || this.loseT >= 0; },
   /* ---------- effects happen here, in time with the animation ---------- */
   run:function(e){
-    var S = this, d = e.d, hc = this.hushCentre(), vp = { x:44, y:150 };
+    var S = this, d = e.d, hc = this.hushCentre(), vp = { x:PLAYER_X, y:HUSH_FLOOR - 22 };
     switch(e.type){
-      case 'play': S.boost = Math.min(0.5, (S.boost||0) + 0.15); if (d.card){ var wd = wordFor(d.card); if (d.fam === 'speak' && B.phase !== 2){ G.word(wd, hc.x + (Math.random()*20-10), hc.y - 38, { col:'#ffffff', burst:'#ef7724', size:wd.length > 10 ? 8 : 10, jit:wd === 'OUTRAGEOUS!' ? 0.6 : 0 }); S.ripple = { t:0 }; } else if (d.fam === 'stand'){ G.word(wd, 60, 128, { col:'#ffffff', burst:'#20adca', size:wd.length > 10 ? 7 : 8, life:0.8 }); } else { G.word(wd, (d.fam === 'listen' && B.phase === 2) ? hc.x : 70, (d.fam === 'listen' && B.phase === 2) ? hc.y - 36 : 126, { col:'#7fe0f8', size:7, wave:1.2, rot:0, vy:-14, life:1.1, quiet:true }); } } if (d.fam === 'speak') { for (var r=0;r<10;r++) G.part({ x:hc.x, y:hc.y, vx:Math.cos(r/10*6.28)*90, vy:Math.sin(r/10*6.28)*90, life:0.35, col:'#ef7724', s:2, g:0, drag:2 }); } S.bumpMusic(); if (Run.tutorial) S.tut('play', d.fam); break;
+      case 'play': S.boost = Math.min(0.5, (S.boost||0) + 0.15); if (d.card){ var wd = wordFor(d.card); if (d.fam === 'speak' && B.phase !== 2){ G.word(wd, hc.x + (Math.random()*20-10), hc.y - 38, { col:'#ffffff', burst:'#ef7724', size:wd.length > 10 ? 8 : 10, jit:wd === 'OUTRAGEOUS!' ? 0.6 : 0 }); S.ripple = { t:0 }; } else if (d.fam === 'stand'){ G.word(wd, PLAYER_X, HUSH_FLOOR - 58, { col:'#ffffff', burst:'#20adca', size:wd.length > 10 ? 7 : 8, life:0.8 }); } else { G.word(wd, (d.fam === 'listen' && B.phase === 2) ? hc.x : PLAYER_X, (d.fam === 'listen' && B.phase === 2) ? hc.y - 36 : HUSH_FLOOR - 58, { col:'#7fe0f8', size:7, wave:1.2, rot:0, vy:-14, life:1.1, quiet:true }); } } if (d.fam === 'speak') { for (var r=0;r<10;r++) G.part({ x:hc.x, y:hc.y, vx:Math.cos(r/10*6.28)*90, vy:Math.sin(r/10*6.28)*90, life:0.35, col:'#ef7724', s:2, g:0, drag:2 }); } if (d.card && CARDS[d.card.id] && CARDS[d.card.id].ally) S.crowdHop[d.card.id] = 1; S.bumpMusic(); if (Run.tutorial) S.tut('play', d.fam); break;
+      case 'crowd': S.crowdT[d.id] = 0; Sound.sfx('pop'); break;
       case 'noise':
         if (d.dmg){ S.boost = Math.min(0.6, (S.boost||0) + 0.1 + d.dmg*0.01); var big = d.dmg >= 12; G.stop(big ? 0.1 : 0.05); G.shake(big ? 4 : 2, big ? 0.22 : 0.14); G.punch(Math.min(0.07, 0.012 + d.dmg*0.0025), hc.x, hc.y); S.hush.sqv += 8 + Math.min(14, d.dmg/1.5); G.burst(hc.x, hc.y, ['#ef7724','#f3d36b','#ffffff','#ffd27a'], 12 + Math.min(26, d.dmg), 80 + d.dmg*5, { life:0.6 }); for (var sp=0;sp<6;sp++) G.part({ x:hc.x, y:hc.y, vx:(Math.random()-0.5)*260, vy:(Math.random()-0.5)*160, life:0.18, col:'#ffffff', s:1, g:0, drag:0 }); G.float('-'+d.dmg, hc.x + (Math.random()*16-8), hc.y - 24, big ? '#ffe08a' : '#ffd27a', { z:d.dmg >= 15 ? 3 : 2 }); Sound.sfx('hit', d.dmg); }
         if (d.absorbed){ G.float('fog', hc.x + 18, hc.y - 6, '#c3c9d1', { size:6 }); G.burst(hc.x, hc.y, ['#b5bcc6','#dce0e5'], 8, 50); }
         S.hpShown = d.hp; break;
       case 'backup': S.backShown = d.total; S.shield = 1; G.punch(0.012, vp.x + 20, vp.y); G.float('+'+d.n, vp.x + 30, vp.y - 14, '#7fe0f8', { z:1 }); G.burst(vp.x+30, vp.y, ['#20adca','#e6f7fd'], 10, 60, { grav:0 }); Sound.sfx('backup'); break;
       case 'heal': if (d.n){ S.volShown = d.vol; G.float('+'+d.n, vp.x, vp.y - 14, '#7cf07c', { z:1 }); for (var h=0;h<10;h++) G.part({ x:vp.x - 20 + Math.random()*50, y:vp.y, vx:0, vy:-30 - Math.random()*30, life:0.9, col:h%2?'#7cf07c':'#c9f5c0', s:1, g:-20, drag:0.5 }); Sound.sfx('heal'); } break;
-      case 'breath': G.float('+'+d.n, 26, 166, '#7fe0f8', { z:1 }); break;
+      case 'breath': G.float('+'+d.n, 34, 152, '#7fe0f8', { z:1 }); break;
       case 'status': G.float(d.s === 'loud' ? 'Loud!' : 'Calm', vp.x, vp.y - 26, d.s === 'loud' ? '#ef7724' : '#7fe0f8', { size:6 }); Sound.sfx('backup'); break;
       case 'pop': G.word('POP!', 192, 130, { col:'#ffffff', burst:'#f3d36b', size:8, life:0.6 }); G.burst(192, 170, ['#8e98a4','#c3c9d1','#f3d36b'], 16, 80); Sound.sfx('pop'); break;
       case 'pair': G.word('TEAM UP!', 192, 92, { col:'#ffffff', burst:'#f3d36b', size:10, life:1 }); S.pairT = 1.6; S.pairText = (d.isNew ? 'New pair! ' : 'Pair bonus! ') + CARDS[d.a].name + ' + ' + CARDS[d.b].name; Sound.sfx('pair'); break;
@@ -1498,7 +1507,7 @@ var Battle = {
       case 'fog': G.word('hush...', hc.x + 30, hc.y - 20, { col:'#dce0e5', ink:'#3a4450', size:7, wave:1, rot:0, life:1, quiet:true }); G.burst(hc.x, hc.y, ['#b5bcc6','#dce0e5'], 14, 60, { grav:0 }); break;
       case 'grow': G.word('HUSHHH', hc.x + 26, hc.y - 22, { col:'#d7c2f0', ink:'#3a2a50', size:9, wave:1.5, rot:0.05, life:1, quiet:true }); S.hush.sqv -= 8; break;
       case 'mute': G.word('shh!', 192, 128, { col:'#dce0e5', ink:'#3a4450', size:9, life:0.9, quiet:true }); break;
-      case 'steal': G.float('-'+d.n+' breath next turn', 70, 170, '#dce0e5', { size:6 }); break;
+      case 'steal': G.float('-'+d.n+' breath next turn', 60, 150, '#dce0e5', { size:6 }); break;
       case 'junk': G.word(d.sticky ? 'psst... sticky' : 'psst', hc.x + 20, hc.y - 24, { col:'#dce0e5', ink:'#3a4450', size:8, wave:1, rot:0.1, life:1, quiet:true }); G.burst(hc.x, hc.y, ['#8e98a4','#b5bcc6'], 12, 70); Sound.sfx('junk'); break;
       case 'blocked': G.float(d.by === 'earmuffs' ? 'Earmuffs!' : 'Mod Bot blocks it!', vp.x + 40, vp.y - 30, '#7fe0f8', { size:6 }); break;
     }
@@ -1506,8 +1515,11 @@ var Battle = {
   bumpMusic:function(){ if (!B) return; var nl = B.phase === 2 ? 2 + Math.round(B.heard/B.heardMax*3) : Math.min(5, 1 + Math.floor((1 - B.en.hp/B.en.max)*4) + (B.crowd.length ? 1 : 0)); if (nl > this.layer){ this.layer = nl; Sound.setLayers(nl); } },
   hushCentre:function(){ var s = this.hush.scale; return { x:HUSH_X + (this.hush.lunge ? -18*Math.sin(this.hush.lunge*Math.PI) : 0), y:HUSH_FLOOR - 30*s }; },
   /* ---------- hand layout ---------- */
-  slot:function(i, n){ var span = Math.min(42, n > 1 ? 168/(n-1) : 0), w = span*(n-1) + ART.CW, x0 = 196 - w/2; var mid = (n-1)/2, off = i - mid; return { x:x0 + i*span, y:HAND_Y + Math.round(off*off*1.1), rot:off*0.035 }; },
-  cardAt:function(mx, my){ if (!B) return null; for (var i=B.hand.length-1;i>=0;i--){ var c = B.hand[i], v = this.vis[c.uid]; if (!v || v.delay > 0) continue; if (mx >= v.x && mx < v.x + ART.CW && my >= v.y - 2 && my < v.y + ART.CH) return c; } return null; },
+  slot:function(i, n){ var span = Math.min(38, n > 1 ? 196/(n-1) : 0), mid = (n-1)/2, off = i - mid, hi = this.hoverIdx; var push = (hi >= 0 && hi !== i && !this.drag) ? (i < hi ? -10 : 10) : 0; var cx = 192 + off*span + push, cy = 216 - ART.CH*HS/2 - 7 + off*off*0.6; return { x:cx - ART.CW/2, y:cy - ART.CH/2, rot:off*0.06 }; },
+  inCard:function(v, mx, my){ var s = v.s || HS, cx = v.x + ART.CW/2, cy = v.y + ART.CH/2; return Math.abs(mx - cx) < ART.CW*s/2 && Math.abs(my - cy) < ART.CH*s/2 + 1; },
+  cardAt:function(mx, my){ if (!B) return null; var S = this;
+    var cur = S.hoverUid || S.sel; if (cur){ var vc = S.vis[cur]; var hc0 = null; B.hand.forEach(function(c){ if (c.uid === cur) hc0 = c; }); if (hc0 && vc && vc.delay <= 0 && S.inCard(vc, mx, my)) return hc0; }
+    for (var i=B.hand.length-1;i>=0;i--){ var c = B.hand[i], v = S.vis[c.uid]; if (!v || v.delay > 0) continue; if (S.inCard(v, mx, my)) return c; } return null; },
   update:function(dt){
     var S = this; S.clock += dt;
     /* run due effects */
@@ -1539,33 +1551,34 @@ var Battle = {
     S.dealing = 0;
     if (B){
       S.dealHold = Math.max(0, S.dealHold - dt);
-      var n = B.hand.length, k = 0;
+      var n = B.hand.length, k = 0; S.hoverIdx = -1; B.hand.forEach(function(c, i2){ if (c.uid === (S.drag ? null : (S.hoverUid || S.sel))) S.hoverIdx = i2; });
       B.hand.forEach(function(c, idx){
         var v = S.vis[c.uid], sl = S.slot(idx, n);
-        if (!v){ if (S.fxq.length || S.dealHold > 0){ S.dealing++; return; } v = S.vis[c.uid] = { x:DECK_X, y:DECK_Y, rot:-0.6, delay:k*0.07, lift:0, pop:0, shake:0, k:k }; k++; }
+        if (!v){ if (S.fxq.length || S.dealHold > 0){ S.dealing++; return; } v = S.vis[c.uid] = { x:DECK_X, y:DECK_Y, rot:-0.6, delay:k*0.07, lift:0, pop:0, shake:0, k:k, s:0.3 }; k++; }
         if (v.delay > 0){ v.delay -= dt; S.dealing++; if (v.delay <= 0) Sound.sfx('deal', 0, 1 + v.k*0.06); return; }
         v.pop = Math.max(0, (v.pop||0) - dt*5); v.shake = Math.max(0, (v.shake||0) - dt);
         if (S.winT >= 0 || S.loseT >= 0){ v.y = G.damp(v.y, 260, 6, dt); return; }
-        var lift = 0; if (S.sel === c.uid) lift = -24; else if (S.hoverUid === c.uid && !S.drag) lift = -18;
-        v.lift = G.damp(v.lift, lift, 18, dt);
-        if (S.drag && S.drag.uid === c.uid){ var nx = G.mouse.x - S.drag.ox; S.dragVX = G.damp(S.dragVX, (nx - v.x)/Math.max(dt, 0.001), 12, dt); v.x = nx; v.y = G.mouse.y - S.drag.oy; v.rot = G.damp(v.rot, Math.max(-0.4, Math.min(0.4, S.dragVX*0.0025)), 16, dt); return; }
-        v.x = G.damp(v.x, sl.x, 14, dt); v.y = G.damp(v.y, sl.y + v.lift, 14, dt); v.rot = G.damp(v.rot, (S.sel === c.uid || S.hoverUid === c.uid) ? 0 : sl.rot, 14, dt);
+        var big = S.sel === c.uid || (S.hoverUid === c.uid && !S.drag), dragging = S.drag && S.drag.uid === c.uid;
+        v.s = G.damp(v.s || HS, dragging ? 1 : big ? HOVER_S : HS, 16, dt);
+        if (dragging){ var nx = G.mouse.x - S.drag.ox; S.dragVX = G.damp(S.dragVX, (nx - v.x)/Math.max(dt, 0.001), 12, dt); v.x = nx; v.y = G.mouse.y - S.drag.oy; v.rot = G.damp(v.rot, Math.max(-0.4, Math.min(0.4, S.dragVX*0.0025)), 16, dt); return; }
+        var ty = big ? (214 - ART.CH*HOVER_S/2 - ART.CH/2 - (S.sel === c.uid ? 5 : 0)) : sl.y; v.x = G.damp(v.x, sl.x, 16, dt); v.y = G.damp(v.y, ty, big ? 20 : 14, dt); v.rot = G.damp(v.rot, big ? 0 : sl.rot, 14, dt);
       });
       /* cards that left the hand fly to the used pile */
-      Object.keys(S.vis).forEach(function(uid){ if (!B.hand.some(function(c){ return c.uid === uid; })){ var v = S.vis[uid]; S.flights.push({ c:S.cardById(uid), x:v.x, y:v.y, tx:410, ty:200, t:0, dur:0.35, rot:v.rot, spin:0.8, play:false }); delete S.vis[uid]; } });
+      Object.keys(S.vis).forEach(function(uid){ if (!B.hand.some(function(c){ return c.uid === uid; })){ var v = S.vis[uid]; S.flights.push({ c:S.cardById(uid), x:v.x, y:v.y, tx:DISCARD_PILE.x + 11 - ART.CW/2, ty:DISCARD_PILE.y + 12 - ART.CH/2, t:0, dur:0.35, rot:v.rot, spin:0.8, play:false, s0:v.s || HS }); S.discardPop = 1; delete S.vis[uid]; } });
     }
     S.flights.forEach(function(f){ f.t += dt; }); S.flights = S.flights.filter(function(f){ return f.t < f.dur; });
     /* hover */
     S.hoverUid = null; if (!S.locked() || (B && !B.over)){ var hc = S.cardAt(G.mouse.x, G.mouse.y); if (hc){ S.hoverUid = hc.uid; G.cursor = 'pointer'; } }
     if (S.hoverUid !== S.lastHover){ if (S.hoverUid && !S.drag) Sound.sfx('hover'); S.lastHover = S.hoverUid; }
     if (S.sel && G.mouse.y < 140 && !S.locked()) G.cursor = 'pointer';
+    if (S.youHop > 0){ S.youHop += dt*3.2; if (S.youHop >= 1) S.youHop = 0; } Object.keys(S.crowdT).forEach(function(id){ S.crowdT[id] += dt; }); Object.keys(S.crowdHop).forEach(function(id){ S.crowdHop[id] = Math.max(0, S.crowdHop[id] - dt*3); }); S.discardPop = Math.max(0, (S.discardPop||0) - dt*4);
     /* ambient life */
     S.ambient(dt);
     /* win and lose timelines */
     if (S.winT >= 0){ S.winT += dt; S.winTimeline(dt); }
     if (S.loseT >= 0){ S.loseT += dt; if (S.loseT > 2.2 && !S.leaving){ S.leaving = true; Ending.mode = 'lose'; G.go(Ending); } }
     /* tutorial prompt for end turn */
-    if (Run.tutorial && B && !B.over && !S.locked() && !B.hand.some(canPlay)) S.showPrompt('end', 'Out of breath? End your turn.', 346, 180);
+    if (Run.tutorial && B && !B.over && !S.locked() && !B.hand.some(canPlay)) S.showPrompt('end', 'Out of breath? End your turn.', 347, 160);
   },
   cardById:function(uid){ var all = (B ? B.hand.concat(B.discard, B.exhaust, B.draw) : []); for (var i=0;i<all.length;i++) if (all[i].uid === uid) return all[i]; return this.lastCards && this.lastCards[uid] || { id:'speak', up:false, uid:uid }; },
   ambient:function(dt){
@@ -1583,8 +1596,8 @@ var Battle = {
     var S = this; if (S.locked()) return; var card = null; B.hand.forEach(function(c){ if (c.uid === uid) card = c; }); if (!card) return;
     if (!canPlay(card)){ var d0 = CARDS[card.id]; G.float(B.muted[card.uid] ? 'muted' : d0.fam === 'junk' ? 'can\'t play Shh' : 'not enough breath', 192, 120, '#dce0e5', { size:6 }); if (S.vis[uid]) S.vis[uid].shake = 0.3; if (d0.fam !== 'junk' && !B.muted[card.uid]) S.breathPop = 1; S.sel = null; S.drag = null; Sound.sfx('deny'); return; }
     var v = S.vis[uid] || { x:170, y:HAND_Y, rot:0 }, fam = CARDS[card.id].fam, hc = S.hushCentre();
-    var tx = fam === 'speak' || B.phase === 2 ? hc.x - ART.CW/2 : 20, ty = fam === 'speak' || B.phase === 2 ? hc.y - ART.CH/2 : 120;
-    S.flights.push({ c:card, x:v.x, y:v.y, tx:tx, ty:ty, t:0, dur:0.2, rot:v.rot, spin:fam === 'speak' ? -0.5 : 0.3, play:true });
+    var tx = fam === 'speak' || B.phase === 2 ? hc.x - ART.CW/2 : PLAYER_X - ART.CW/2, ty = fam === 'speak' || B.phase === 2 ? hc.y - ART.CH/2 : HUSH_FLOOR - 30 - ART.CH/2;
+    S.flights.push({ c:card, x:v.x, y:v.y, tx:tx, ty:ty, t:0, dur:0.2, rot:v.rot, spin:fam === 'speak' ? -0.5 : 0.3, play:true, s0:v.s || HS }); if (fam === 'speak') S.youHop = 0.001;
     S.lastCards = S.lastCards || {}; S.lastCards[uid] = card;
     delete S.vis[uid]; S.sel = null; S.drag = null;
     Sound.sfx('play'); if (card.up){ G.burst(v.x + ART.CW/2, v.y + 10, ['#f3d36b','#fff4c2','#ffffff'], 16, 80, { life:0.5, grav:0 }); } UI.fxBase = 0.2; playCard(uid); UI.fxBase = 0;
@@ -1639,6 +1652,8 @@ var Battle = {
       if (!r.free){ var qy = r.y - spr.height - 10 + Math.sin(G.t*3)*2; PX.poly(b, [[r.x-2, qy+7], [r.x+3, qy+7], [r.x+0.5, qy+11]], '#0a1020'); PX.RR(b, r.x-4.5, qy-1.5, 10, 10, 3, '#0a1020'); PX.RR(b, r.x-3.5, qy-0.5, 8, 8, 2.4, '#fef8f4'); G.text('?', r.x+0.5, qy+4, { size:6, col:'#0a1020', align:'center', base:'middle' }); }
       if (G.hover(r.x - 20, r.y - 46, 40, 46) && !r.free) S.tip = { x:r.x - 70, y:r.y - 76, title:'Someone is stuck in the Hush', text:'Break it to free them. They will join your deck.' };
     }
+    /* you and your friends */
+    if (B) S.drawStage(b);
     /* the Hush */
     if (!S.hush.gone && B){
       var fr = S.frames[S.fi % S.frames.length], sc = S.hush.scale, h = S.hush, w = fr.width*sc*(1 + h.sq), hh = fr.height*sc*(1 - h.sq);
@@ -1650,22 +1665,26 @@ var Battle = {
       S.drawMeter(b);
       if (G.hover(HUSH_X - w/2, HUSH_FLOOR - hh - 20, w, hh + 20) && !S.sel && !S.drag){ S.hushHover = (S.hushHover||0) + G.dt; if (S.hushHover > 0.45) S.tip = { x:HUSH_X - 130, y:HUSH_FLOOR - hh - 10, title:B.en.name, text:S.intentText() }; } else S.hushHover = 0;
     }
+    /* the hand sits on a soft dark band so cards pop */
+    b.fillStyle = PX.lin(b, 0, 140, 0, 216, [[0,'rgba(5,7,15,0)'],[1,'rgba(5,7,15,.6)']]); b.fillRect(0, 140, 384, 76);
     S.drawPlayer(b);
+    S.drawPiles(b);
     /* flights */
-    S.flights.forEach(function(f){ var k = f.play ? G.ease.inout(f.t/f.dur) : G.ease.out(f.t/f.dur); var x = G.lerp(f.x, f.tx, k), y = G.lerp(f.y, f.ty, k) - (f.play ? Math.sin(k*Math.PI)*24 : 0); ART.drawCard(b, f.c, x, y, { rot:f.rot + f.spin*k, noText:true, s:f.play ? 1 - 0.55*k : 1, alpha:f.play ? 1 - Math.max(0, k - 0.7)*3 : 1 }); });
+    S.flights.forEach(function(f){ var k = f.play ? G.ease.inout(f.t/f.dur) : G.ease.out(f.t/f.dur); var x = G.lerp(f.x, f.tx, k), y = G.lerp(f.y, f.ty, k) - (f.play ? Math.sin(k*Math.PI)*24 : 0); var s0 = f.s0 || 1; ART.drawCard(b, f.c, x, y, { rot:f.rot + f.spin*k, noText:true, s:f.play ? s0*(1 - 0.55*k) : G.lerp(s0, 0.3, k), alpha:f.play ? 1 - Math.max(0, k - 0.7)*3 : 1 - k*0.4 }); });
     S.drawAim(b);
     S.drawHand(b);
     /* End turn: the one big button */
-    if (B && S.winT < 0 && S.loseT < 0){ var none = !B.hand.some(canPlay) && !S.locked(); if (G.btn('End turn', 318, 186, 60, 20, { col: none ? '#007291' : '#ef7724', pulse:none, disabled:S.locked() && !B.busy ? false : !!B.busy })) S.endTurn(); if (G.hover(318,186,60,20)) S.tip = { x:250, y:150, title:'End turn', text:'The Hush makes its move, then you get a fresh hand and 3 breath.' }; }
+    if (B && S.winT < 0 && S.loseT < 0){ var none = !B.hand.some(canPlay) && !S.locked(); if (G.btn('End turn', 316, 162, 62, 21, { col: none ? '#007291' : '#ef7724', pulse:none, disabled:S.locked() && !B.busy ? false : !!B.busy })) S.endTurn(); if (G.hover(316,162,62,21)) S.tip = { x:250, y:124, title:'End turn', text:'The Hush makes its move, then you get a fresh hand and 3 breath.' }; }
   },
   drawTop:function(b){
     var S = this;
     if (S.banner) drawBanner(b, S.banner);
     if (S.pairT){ var a = Math.min(1, S.pairT*2); G.text(S.pairText, 192, 26, { size:6, col:'#f3d36b', align:'center', outline:'#0a1020', alpha:a }); }
     if (S.prompt && B && !B.over && !S.hoverUid) drawPrompt(b, S.prompt);
-    if (S.prompt === null && Run.tutorial && B && !B.over && !S.promptDone.speak && !S.dealing && !S.fxq.length && S.dealHold <= 0){ var sp = null; B.hand.forEach(function(c){ if (!sp && CARDS[c.id].fam === 'speak' && S.vis[c.uid]) sp = S.vis[c.uid]; }); if (sp) S.prompt = { id:'speak', text:'Tap a Speak card, then tap the Hush.', x:sp.x + ART.CW/2, y:sp.y - 4, follow:true }; }
-    if (S.prompt && S.prompt.id === 'speak'){ var spc = null; B && B.hand.forEach(function(c){ if (!spc && CARDS[c.id].fam === 'speak' && S.vis[c.uid]) spc = S.vis[c.uid]; }); if (spc){ S.prompt.x = spc.x + ART.CW/2; S.prompt.y = spc.y - 4; } }
-    if (S.tip){ drawTip(b, S.tip); S.tip = null; }
+    if (S.prompt === null && Run.tutorial && B && !B.over && !S.promptDone.speak && !S.dealing && !S.fxq.length && S.dealHold <= 0){ var sp = null; B.hand.forEach(function(c){ if (!sp && CARDS[c.id].fam === 'speak' && S.vis[c.uid]) sp = S.vis[c.uid]; }); if (sp) S.prompt = { id:'speak', text:'Tap a Speak card, then tap the Hush.', x:sp.x + ART.CW/2, y:sp.y + ART.CH/2 - ART.CH*(sp.s||HS)/2 - 4, follow:true }; }
+    if (S.prompt && S.prompt.id === 'speak'){ var spc = null; B && B.hand.forEach(function(c){ if (!spc && CARDS[c.id].fam === 'speak' && S.vis[c.uid]) spc = S.vis[c.uid]; }); if (spc){ S.prompt.x = spc.x + ART.CW/2; S.prompt.y = spc.y + ART.CH/2 - ART.CH*(spc.s||HS)/2 - 4; } }
+    if (Run && Run.trinkets && Run.trinkets.length){ Run.trinkets.forEach(function(t, i){ var tx = 24 + i*15, ty = 4; PX.O(b, tx + 7, ty + 7, 7.4, 7.4, 'rgba(10,16,32,.55)'); b.drawImage(PX.iconC(TRINKETS[t].icon), tx - 0.5, ty - 0.5, 15, 15); if (G.hover(tx, ty, 14, 14)) S.tip = { x:tx, y:ty + 18, title:TRINKETS[t].name, text:TRINKETS[t].text }; }); }
+    if (S.tip && !G.modal){ drawTip(b, S.tip); } S.tip = null;
     drawCorner(b, function(){ Pause.open(); });
   },
   intentText:function(){ var e = B.en; if (e.stun) return 'It will skip its next move.'; var mv = e.intent || [], out = []; for (var i=0;i<mv.length;i+=2){ var t = mv[i], n = mv[i+1]; if (t === 'drain') out.push('Drain '+(B.phase===2?n:drainAmount(n))+': takes your volume. Backup blocks it.'); if (t === 'fog') out.push('Fog: soaks up your noise.'); if (t === 'grow') out.push('Grow: its drains get bigger.'); if (t === 'mute') out.push('Mute: greys out cards in your next hand.'); if (t === 'steal') out.push('Steal: less breath next turn.'); if (t === 'junk') out.push('Shh: clogs your deck. Speak cards pop them.'); if (t === 'sticky') out.push('Sticky Shh: stays in your deck.'); } return out.join(' '); },
@@ -1678,41 +1697,82 @@ var Battle = {
     PX.RR(b, x+1.5, y+2.5, w, 15, 5, 'rgba(0,0,0,.3)'); PX.poly(b, [[HUSH_X-4.4, y+13], [HUSH_X+4.4, y+13], [HUSH_X, y+20.4]], '#0a1020'); PX.RR(b, x-1, y-1, w+2, 17, 5.4, '#0a1020'); PX.RR(b, x, y, w, 15, 4.6, '#fef8f4'); PX.poly(b, [[HUSH_X-2.8, y+14], [HUSH_X+2.8, y+14], [HUSH_X, y+18.2]], '#fef8f4');
     var cx = x + 3; items.forEach(function(it){ b.drawImage(ART.mini(it[0]), cx - 0.5, y + 1.5, 12, 12); cx += 12.5; var dg = it[1].replace(/[^-+x/0-9]/g,''); if (dg){ G.digits(dg, cx, y + 4, it[0] === 'drain' ? '#c0392b' : '#0a1020', 1, 'left', false); cx += G.digitsW(dg) + 4; } });
   },
+  /* a rounded bar with its numbers on it, like 23/40 */
+  bar:function(b, cx, y, w, cur, max, ghost, fill, edge){
+    var x = cx - w/2, h = 7;
+    PX.RR(b, x-1.2, y-1.2, w+2.4, h+2.4, 4.4, edge || '#0a1020'); PX.RR(b, x, y, w, h, 3.5, '#232a40');
+    function fillTo(f, col){ if (f <= 0) return; b.save(); b.beginPath(); b.rect(x, y-1, f, h+2); b.clip(); PX.RR(b, x, y, w, h, 3.5, col); b.restore(); }
+    fillTo(w*Math.min(1, ghost/max), '#f3d36b'); fillTo(w*Math.min(1, Math.max(0, cur)/max), fill);
+    PX.RR(b, x+2, y+0.8, w-4, 1.6, 0.8, 'rgba(255,255,255,.22)');
+    G.text(Math.max(0, Math.round(cur))+'/'+max, cx, y + h/2 + 0.3, { size:5.4, col:'#ffffff', align:'center', base:'middle', outline:'#0a1020', outlineW:1.6, bold:true });
+  },
+  /* status icons in a row under a bar */
+  statuses:function(b, cx, y, list){ var w = list.length*17 - 2, x = cx - w/2; list.forEach(function(st){ PX.RR(b, x-0.8, y-0.8, 16.6, 10.6, 3.6, '#0a1020'); PX.RR(b, x, y, 15, 9, 3, st[3] || '#2a3356'); b.drawImage(ART.mini(st[0]), x - 0.4, y - 0.6, 10, 10); G.digits(st[1], x + 12.4, y + 0.8, '#ffffff', 0.62, 'center'); if (G.hover(x, y, 15, 9)) Battle.tip = { x:x - 30, y:y + 12, title:st[2], text:st[4] }; x += 17; }); },
   drawMeter:function(b){
-    var S = this, w = 70, x = HUSH_X - w/2, y = HUSH_FLOOR + 6;
-    PX.RR(b, x-1.2, y-1.2, w+2.4, 7.4, 3.7, '#0a1020');
-    function fillTo(f, col){ if (f <= 0) return; b.save(); b.beginPath(); b.rect(x, y-1, f, 7); b.clip(); PX.RR(b, x, y, w, 5, 2.5, col); b.restore(); }
-    if (B.phase === 2){ PX.RR(b, x, y, w, 5, 2.5, '#123'); var f = w*S.heardShown/B.heardMax; fillTo(f, PX.lin(b, 0, y, 0, y+5, [[0,'#7fe0f8'],[1,'#20adca']])); for (var k=0;k<5;k++){ b.drawImage(ART.mini('heart'), x + k*15 + 2, y - 12); } return; }
-    var max = B.en.max; PX.RR(b, x, y, w, 5, 2.5, '#2a3044');
-    fillTo(w*S.hpGhost/max, '#f3d36b');
-    var fw = w*S.hpShown/max; fillTo(fw, PX.lin(b, 0, y, 0, y+5, [[0,'#dce0e5'],[0.5,'#a3acb7'],[1,'#7d8691']]));
-    if (B.en.fog){ b.drawImage(ART.mini('fog'), x - 13, y - 3); G.digits(B.en.fog, x - 14, y - 2, '#dce0e5', 1, 'right'); }
-    if (B.en.grow){ b.drawImage(ART.mini('grow'), x + w + 2, y - 3); G.digits(B.en.grow, x + w + 14, y - 2, '#b394d1', 1, 'left'); }
+    var S = this, w = 70, y = HUSH_FLOOR + 6;
+    if (B.phase === 2){ S.bar(b, HUSH_X, y, w, S.heardShown, B.heardMax, S.heardShown, PX.lin(b, 0, y, 0, y+7, [[0,'#7fe0f8'],[1,'#20adca']])); for (var k=0;k<5;k++){ b.drawImage(ART.mini('heart'), HUSH_X - w/2 + k*15 + 2, y - 12); } return; }
+    S.bar(b, HUSH_X, y, w, S.hpShown, B.en.max, S.hpGhost, PX.lin(b, 0, y, 0, y+7, [[0,'#f08a8a'],[0.5,'#d9534f'],[1,'#a83232']]));
+    var st = []; if (B.en.fog) st.push(['fog', B.en.fog, 'Fog', '#4a5568', 'Soaks up this much of your noise.']); if (B.en.grow) st.push(['grow', B.en.grow, 'Grow', '#4a3a6a', 'Its drains are this much bigger.']); if (B.en.stun) st.push(['sleep', 1, 'Asleep', '#2a4a5a', 'It skips its next move.']);
+    if (st.length) S.statuses(b, HUSH_X, y + 11, st);
+    if (G.hover(HUSH_X - w/2, y - 2, w, 11)) S.tip = { x:HUSH_X - 70, y:y + 12, title:'How loud the Hush is', text:'Make noise to break it. When it hits 0, this place comes back.' };
+  },
+  /* you and the friends you have played this fight, on the left of the stage */
+  drawStage:function(b){
+    var S = this, fl = HUSH_FLOOR;
+    var crowd = B.crowd.slice(-CROWD_SPOTS.length), order = crowd.map(function(id, i){ return { id:id, i:i, spot:CROWD_SPOTS[i] }; }).sort(function(a, c){ return a.spot[1] - c.spot[1]; });
+    order.forEach(function(o){ var sp = PX.castC(ALLIES[o.id] ? ALLIES[o.id].cast : o.id), t = S.crowdT[o.id], drop = (t !== undefined && t < 0.45) ? (1 - G.ease.back(t/0.45))*-30 : 0; var hop = (S.crowdHop[o.id] || 0) > 0 ? Math.sin(S.crowdHop[o.id]*Math.PI)*7 : 0; var sc = o.spot[2], x = PLAYER_X + o.spot[0], y = fl + o.spot[1];
+      var bob = G.dance(o.i + 2, 2.5) + Math.sin(G.t*2.4 + o.i)*0.4;
+      if (t !== undefined && t < 0.1 && !S['cb'+o.id]){ S['cb'+o.id] = 1; G.burst(x, y - 20, ['#f3d36b','#ffffff','#20adca'], 16, 80, { life:0.5 }); }
+      PX.O(b, x, y + 0.5, 11*sc, 2.2*sc, 'rgba(10,16,32,.3)'); b.drawImage(sp, x - sp.width*sc/2, y - sp.height*sc - hop - bob + drop, sp.width*sc, sp.height*sc);
+      if (G.hover(x - 14, y - 40, 28, 40)) S.tip = { x:x - 40, y:y - 70, title:CARDS[o.id] ? CARDS[o.id].name : 'A friend', text:'Standing with you this fight.' }; });
+    var you = youSprite(), hop2 = S.youHop > 0 ? Math.sin(S.youHop*Math.PI) : 0, shake = S.volHitT ? (Math.random()-0.5)*4 : 0;
+    var px = PLAYER_X + hop2*12 + shake, breathe = 1 + Math.sin(G.t*2.2)*0.014, hh = you.height*breathe, bob = G.dance(0, 2.5);
+    PX.O(b, PLAYER_X + hop2*12, fl + 0.5, 13, 2.6, 'rgba(10,16,32,.32)');
+    if (S.backShown > 0){ b.save(); b.globalAlpha = 0.3 + S.shield*0.4; ART.stepGlow(b, px, fl - 22, 30, '#20adca', 4, 0.6); b.restore(); }
+    if (S.hurtT){ ART.stepGlow(b, px, fl - 22, 28, '#e84a5f', 4, S.hurtT*1.4); }
+    b.drawImage(you, px - you.width/2, fl - hh - hop2*6 - bob, you.width, hh);
+    if (G.hover(PLAYER_X - 16, fl - 46, 32, 46) && !S.sel) S.tip = { x:PLAYER_X - 30, y:fl - 80, title:'You', text:'Speak up, stand together, and listen. Make a card to change how you look.' };
   },
   drawPlayer:function(b){
-    var S = this; if (!B) return; var x = 4, y = 166, w = 44;
-    var shake = S.volHitT ? ((Math.random()-0.5)*3) : 0;
-    b.drawImage(ART.mini('loud'), x, y - 2 + shake);
-    var bx = x + 13, by = y + shake; PX.RR(b, bx-1.2, by-1.2, w+2.4, 8.4, 3, '#0a1020'); PX.RR(b, bx, by, w, 6, 2.2, '#2a3044');
-    var gw = w*S.volGhost/Run.maxVol; if (gw > 0) PX.RR(b, bx, by, gw, 6, 2.2, '#f3d36b');
-    var vw = w*S.volShown/Run.maxVol; var bands = Sound.bands ? Sound.bands(12) : null; for (var sg=0; sg*4 < vw; sg++){ var segw = Math.min(3.2, vw - sg*4); var lvl = bands ? bands[sg % 12] : (Math.sin(G.t*9 + sg)*0.5 + 0.5); var hgt = lvl*G.L*(1 - Math.min(1,G.freeze))*5 + G.dance(sg, 1.5); PX.RR(b, bx + sg*4, by - hgt, segw, 6 + hgt, 1.2, PX.lin(b, 0, by - hgt, 0, by + 6, [[0,'#b8f5b8'],[0.3,'#5fd35f'],[1,'#3aa83a']])); }
-    G.digits(Math.round(S.volNum), bx + w + 4, by - 1, S.hurtT ? '#ffb0a0' : '#ffffff', 1, 'left');
-    if (G.hover(x, y - 4, w + 34, 14)) S.tip = { x:x, y:y - 40, title:'Your volume', text:'If it drops to nothing, you go quiet and the run ends.' };
-    /* backup and status sit just above */
-    var cx = x;
-    if (S.backShown > 0 || S.shield > 0){ var pop = S.shield*3; b.drawImage(PX.iconC('shield'), cx - 1 - pop/2, y - 24 - pop); G.digits(S.backShown, cx + 19, y - 18, '#7fe0f8', 1, 'left'); if (G.hover(cx, y - 24, 30, 18)) S.tip = { x:cx, y:y - 60, title:'Backup', text:'Blocks this much drain this turn.' }; cx += 32; }
-    [['loud', B.loudv, 'Loud', 'Every bit of noise is bigger.'], ['calm', B.calmv, 'Calm', 'Every backup is bigger.']].forEach(function(st){ if (!st[1]) return; b.drawImage(ART.mini(st[0]), cx, y - 20); G.digits('+'+st[1], cx + 12, y - 18, '#ffffff', 1, 'left'); if (G.hover(cx, y - 22, 26, 13)) S.tip = { x:cx, y:y - 56, title:st[2], text:st[3] }; cx += 28; });
-    /* breath orb */
-    var ox = 26, oy = 196, rr = 14 + S.breathPop*3, empty = B.breath <= 0; ART.stepGlow(b, ox, oy, 22, empty ? '#3a4566' : '#7fd0f0', 4, 0.35);
-    PX.E(b, ox, oy, rr+1, rr+1, '#0a1020'); PX.E(b, ox, oy, rr, rr, empty ? '#3a4566' : '#20adca'); PX.E(b, ox - 2, oy - 2, rr - 4, rr - 4, empty ? '#4a5578' : '#7fd0f0'); PX.E(b, ox - 6, oy - 6, 3, 2, '#e6f7fd');
-    var ring = G.dance(0, 4); if (ring > 0.3 && !empty){ b.save(); b.globalAlpha = 0.6; b.strokeStyle = '#7fd0f0'; b.lineWidth = 0.8; b.setLineDash([1.2, 2.4]); b.beginPath(); b.arc(ox + 0.5, oy + 0.5, rr + 3 + ring, 0, Math.PI*2); b.stroke(); b.restore(); }
-    G.digits(B.breath, ox, oy - 7 - (G.dance(1, 1.5)), empty ? '#8a95b8' : '#0a1020', 2, 'center', false);
-    if (G.hover(ox - rr, oy - rr, rr*2, rr*2)) S.tip = { x:4, y:140, title:'Breath', text:'Cards cost breath. You get 3 every turn.' };
+    var S = this; if (!B) return; var y = HUSH_FLOOR + 6, w = 64, x = PLAYER_X;
+    var gw = S.volGhost, back = S.backShown > 0;
+    S.bar(b, x, y, w, S.volNum, Run.maxVol, gw, PX.lin(b, 0, y, 0, y+7, [[0,'#b8f5b8'],[0.45,'#5fd35f'],[1,'#3aa83a']]), back ? '#20adca' : '#0a1020');
+    /* the bar hums with the music */
+    var bands = Sound.bands ? Sound.bands(12) : null, fw = w*Math.max(0, S.volShown)/Run.maxVol; b.save(); b.beginPath(); b.rect(x - w/2, y - 4, fw, 4); b.clip(); for (var sg=0; sg<16; sg++){ var lvl = bands ? bands[sg % 12] : 0.5; var hgt = lvl*G.L*(1 - Math.min(1, G.freeze))*3.4; PX.RR(b, x - w/2 + sg*4 + 0.4, y - hgt, 3.2, hgt + 1, 1, 'rgba(156,240,156,.75)'); } b.restore();
+    if (G.hover(x - w/2, y - 2, w, 11)) S.tip = { x:x - 40, y:y + 14, title:'Your volume', text:'If it drops to nothing, you go quiet and the run ends.' };
+    /* backup: a shield on the left end of your bar */
+    if (back || S.shield > 0){ var pop = S.shield*3, sx = x - w/2 - 3, sy = y + 3.5; b.drawImage(PX.iconC('shield'), sx - 9 - pop/2, sy - 9.6 - pop/2, 18 + pop, 18 + pop); G.digits(S.backShown, sx, sy - 3.4, '#ffffff', 0.8, 'center'); if (G.hover(sx - 9, sy - 9, 18, 18)) S.tip = { x:sx - 10, y:sy + 12, title:'Backup', text:'Blocks this much drain this turn.' }; }
+    var st = []; if (B.loudv) st.push(['loud', '+'+B.loudv, 'Loud', '#5a3a1e', 'Every bit of noise is bigger.']); if (B.calmv) st.push(['calm', '+'+B.calmv, 'Calm', '#1e4a5a', 'Every backup is bigger.']);
+    if (st.length) S.statuses(b, x, y + 11, st);
+    S.drawBreath(b);
+  },
+  drawBreath:function(b){
+    var S = this, ox = 34, oy = 168, rr = 14 + S.breathPop*3, empty = B.breath <= 0; ART.stepGlow(b, ox, oy, 24, empty ? '#3a4566' : '#7fd0f0', 4, 0.4);
+    PX.O(b, ox, oy, rr + 1.4, rr + 1.4, '#0a1020'); b.fillStyle = empty ? '#3a4566' : PX.rad(b, ox - 4, oy - 5, 1, rr*1.3, [[0,'#e6f7fd'],[0.45,'#7fd0f0'],[1,'#1a8fb0']], ox, oy); b.beginPath(); b.arc(ox, oy, rr, 0, Math.PI*2); b.fill(); PX.O(b, ox - 5, oy - 6, 3.6, 2.2, 'rgba(255,255,255,.6)');
+    var ring = G.dance(0, 4); if (ring > 0.3 && !empty){ b.save(); b.globalAlpha = 0.6; b.strokeStyle = '#7fd0f0'; b.lineWidth = 0.8; b.setLineDash([1.2, 2.4]); b.beginPath(); b.arc(ox, oy, rr + 3 + ring, 0, Math.PI*2); b.stroke(); b.restore(); }
+    G.digits(B.breath, ox, oy - 7 - G.dance(1, 1.5), empty ? '#8a95b8' : '#0a1020', 2, 'center', false);
+    if (G.hover(ox - rr, oy - rr, rr*2, rr*2)) S.tip = { x:4, y:112, title:'Breath', text:'Cards cost breath. You get 3 every turn.' };
+  },
+  /* draw pile bottom left, used pile bottom right: tap to look */
+  drawPiles:function(b){
+    var S = this;
+    function pile(p, n, label, back, pop){ var hov = G.hover(p.x - 2, p.y - 2, 26, 26); if (hov) G.cursor = 'pointer'; var lift = hov ? -1.5 : 0;
+      for (var i=Math.min(3, Math.max(1, n))-1;i>=0;i--){ b.save(); b.translate(p.x + 11 + i*1.4, p.y + 12 + lift - i*1.4 - (pop||0)*2); b.rotate(-0.08 + i*0.07); if (n > 0) b.drawImage(back, -9.5, -13.4, 19, 26.8); else { PX.RR(b, -9.5, -13.4, 19, 26.8, 3, 'rgba(255,255,255,.08)'); b.strokeStyle = 'rgba(255,255,255,.25)'; b.setLineDash([1.5, 1.5]); b.lineWidth = 0.6; b.beginPath(); PX.rrPath(b, -9.5, -13.4, 19, 26.8, 3); b.stroke(); } b.restore(); }
+      var bx = p.x + 21, by = p.y + 22 + lift; PX.O(b, bx, by, 6.4, 6.4, '#0a1020'); PX.O(b, bx, by, 5.4, 5.4, label === 'draw' ? '#ef7724' : '#3a4566'); G.digits(n, bx, by - 3.2, '#ffffff', 0.78, 'center', false);
+      return hov; }
+    var dh = pile(DRAW_PILE, B.draw.length, 'draw', ART.backCard(Meta.back || 'plain'));
+    var uh = pile(DISCARD_PILE, B.discard.length, 'used', ART.backCard('plain'), S.discardPop);
+    if (dh) S.tip = { x:4, y:142, w:110, title:'Draw pile: '+B.draw.length, text:'Your next cards come from here. Tap to see what is left.' };
+    if (uh) S.tip = { x:270, y:142, w:110, title:'Used pile: '+B.discard.length, text:'Played cards go here. They shuffle back when the draw pile runs out. Tap to see them.' };
+    if (!S.locked() || (B && !B.over)){
+      if (G.clicked(DRAW_PILE.x - 2, DRAW_PILE.y - 2, 26, 26)){ Sound.sfx('click'); Picker.open({ title:'Draw pile (shuffled)', list:B.draw.slice().sort(function(a, c){ return a.id < c.id ? -1 : a.id > c.id ? 1 : 0; }), view:true }); }
+      if (G.clicked(DISCARD_PILE.x - 2, DISCARD_PILE.y - 2, 26, 26)){ Sound.sfx('click'); Picker.open({ title:'Used pile', list:B.discard.slice(), view:true }); }
+    }
   },
   drawAim:function(b){
     var S = this; if (!B || S.locked() || B.over) return; var uid = S.drag ? S.drag.uid : S.sel; if (!uid) return; var v = S.vis[uid]; if (!v) return; var c = null; B.hand.forEach(function(h){ if (h.uid === uid) c = h; }); if (!c || !canPlay(c)) return;
     var fam = CARDS[c.id].fam, toHush = fam === 'speak' || B.phase === 2, hc = S.hushCentre();
-    var sx = v.x + ART.CW/2, sy = v.y + (S.drag ? 0 : 2), tx = toHush ? hc.x : 40, ty = toHush ? hc.y : 160;
+    var sx = v.x + ART.CW/2, sy = v.y + ART.CH/2 - ART.CH*(v.s || HS)/2 + 2, tx = toHush ? hc.x : PLAYER_X, ty = toHush ? hc.y : HUSH_FLOOR - 24;
     if (S.drag && G.mouse.y >= 136) return;
     var onTarget = toHush ? G.hover(hc.x - 40, hc.y - 34, 80, 68) : G.mouse.y < 136;
     var mx = (sx + tx)/2, my = Math.min(sy, ty) - 40, n = 22, off = (G.t*14) % 1;
@@ -1727,8 +1787,10 @@ var Battle = {
     function drawOne(c, isTop){ var v = S.vis[c.uid]; if (!v || v.delay > 0) return; var muted = !!B.muted[c.uid], ok = canPlay(c) && !S.locked(), paired = partnerInHand(c);
       var glow = S.sel === c.uid ? '#f3d36b' : paired ? '#f3d36b' : null; if (S.sel === c.uid) glow = '#ffffff';
       var shx = v.shake ? Math.sin(v.shake*60)*v.shake*10 : 0; var idx = B.hand.indexOf(c), dy = 0; if (!isTop || S.hoverUid !== c.uid) dy -= (G.dance(idx, 3)); if (S.ripple){ var rt = S.ripple.t - idx*0.06; if (rt > 0 && rt < 0.3) dy -= Math.sin(rt/0.3*Math.PI)*8; }
-      ART.drawCard(b, c, v.x + shx, v.y + dy, { tilt:!!(S.drag && S.drag.uid === c.uid), rot:v.rot, s:v.pop ? 1 + 0.1*Math.sin(v.pop*Math.PI) : undefined, muted:muted, dim:!canPlay(c) && !muted && !B.busy, cost:cardCost(c), cantAfford:cardCost(c) > B.breath, glow:glow });
-      if (isTop && S.hoverUid === c.uid && !S.drag){ var d = CARDS[c.id]; var tw = 128, tx = Math.max(4, Math.min(380 - tw, v.x + ART.CW/2 - tw/2)); var lines = G.wrap(d.text(c.up), { size:5, read:true }, tw - 8); var th = 14 + lines.length*6.2 + (paired ? 7 : 0); var ty = v.y - th - 6; S.tip = { x:tx, y:ty, w:tw, title:d.name + (c.up ? '+' : ''), text:d.text(c.up) + (paired ? '  Pair bonus: '+d.pairText+'!' : ''), col:FAM[d.fam].col }; }
+      var sc = (v.s || HS)*(v.pop ? 1 + 0.08*Math.sin(v.pop*Math.PI) : 1);
+      ART.drawCard(b, c, v.x + shx, v.y + dy, { tilt:!!(S.drag && S.drag.uid === c.uid), rot:v.rot, s:sc, muted:muted, dim:!canPlay(c) && !muted && !B.busy, cost:cardCost(c), cantAfford:cardCost(c) > B.breath, glow:glow });
+      /* a small note beside the big card, never over the stage */
+      if (isTop && (S.hoverUid === c.uid || S.sel === c.uid) && !S.drag && sc > 1.15){ var d = CARDS[c.id]; var tw = 92, cw = ART.CW*sc, left = v.x + ART.CW/2 - cw/2, right = left + cw; var tx = right + 4 + tw > 382 ? left - 4 - tw : right + 4; S.tip = { x:tx, y:v.y + ART.CH/2 - ART.CH*sc*0.05, w:tw, title:d.name + (c.up ? '+' : ''), text:d.text(c.up) + (paired ? '  Pair bonus: '+d.pairText+'!' : ''), col:FAM[d.fam].col }; }
     }
   }
 };
