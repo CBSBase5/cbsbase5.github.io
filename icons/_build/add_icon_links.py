@@ -32,6 +32,7 @@ ICON_MAP = [
     ("/practice/jump-lab.html", "/icons/jump-lab.svg"),
     ("/practice/deep-diya.html", "/icons/deep-diya.svg"),
     ("/practice/pigeon-post.html", "/icons/pigeon-post.svg"),
+    ("/practice/the-hush.html", "/icons/the-hush.svg"),
     ("/practice/sankofa.html", "/icons/sankofa.svg"),
     ("/sankofa.html", "/icons/sankofa.svg"),
     ("/practice/last-stand.html", "/icons/last-stand.svg"),

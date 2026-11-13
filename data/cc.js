@@ -462,7 +462,7 @@ window.B5CC = {
       ],
       link:["Anti-Bullying Alliance","https://anti-bullyingalliance.org.uk/"],
       jobs:["advocate","onlinesafe","psych","safeguard"],
-      game:null,
+      game:{ title:"The Hush", href:"/practice/the-hush.html", verb:"Play", blurb:"A card battler: break the Hush, free your friends and turn the whole school back on." },
       look:{ bg:"#0077b6", bg2:"#00b4d8", ink:"#ffffff", pop:"#ffd60a", pop2:"#ff006e", motif:"megaphone", pattern:"stripes", scene:"antibullying" }
     },
     {
