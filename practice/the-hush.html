@@ -1329,6 +1329,19 @@ var ART = (function(){
 
   /* ---------- cards 54x76: everything (cost, numbers, name) is drawn into one picture ---------- */
   var CW = 54, CH = 76;
+  /* rarity tiers: the frame, art border, name ribbon and gem all change, so rarity reads at a glance */
+  var TIER = {
+    common:    { metal:null, gem:'#aeb6c0', shape:'dot' },
+    rare:      { metal:['#e2f8ff','#6fd0ec','#1b86a8','#0d5a74'], ribbon:'#1b8fb0', ribbonD:'#0f6a86', text:'#ffffff', gem:'#4fd2f2', shape:'diamond', label:'RARE', paper:'#f4fafd' },
+    legendary: { metal:['#fff7cf','#f6cf55','#c48a1c','#7d5208'], ribbon:'#e9b432', ribbonD:'#a87414', text:'#3d2600', gem:'#ffd95a', shape:'star', label:'LEGENDARY', paper:'#fff6e2' }
+  };
+  function tierOf(d){ return d.rarity === 'legendary' ? 'legendary' : d.rarity === 'rare' ? 'rare' : d.fam === 'junk' ? 'junk' : 'common'; }
+  function metalFill(g, T, x, y, w, h){ return PX.lin(g, x, y, x + w, y + h, [[0, T.metal[0]], [0.28, T.metal[1]], [0.5, T.metal[0]], [0.72, T.metal[2]], [1, T.metal[1]]]); }
+  /* the rarity gem: a dot, a diamond or a star, so it reads without colour too */
+  function rarityGem(g, tier, x, y, r){ var T = TIER[tier]; if (!T) return; var ink = '#0a1020';
+    if (T.shape === 'dot'){ O(g, x, y, r*0.62, r*0.62, ink); O(g, x, y, r*0.42, r*0.42, T.gem); return; }
+    if (T.shape === 'diamond'){ PX.poly(g, [[x, y - r - 0.9], [x + r + 0.9, y], [x, y + r + 0.9], [x - r - 0.9, y]], ink); g.fillStyle = PX.lin(g, x - r, y - r, x + r, y + r, [[0, '#e8fbff'], [0.5, T.gem], [1, '#13708e']]); g.beginPath(); g.moveTo(x, y - r); g.lineTo(x + r, y); g.lineTo(x, y + r); g.lineTo(x - r, y); g.closePath(); g.fill(); PX.poly(g, [[x, y - r*0.7], [x + r*0.35, y - r*0.1], [x - r*0.25, y - r*0.1]], 'rgba(255,255,255,.75)'); return; }
+    O(g, x, y, r + 1.1, r + 1.1, ink); g.fillStyle = PX.rad(g, x - r*0.3, y - r*0.3, 0.3, r*1.3, [[0, '#fff7cf'], [1, '#c48a1c']]); g.beginPath(); g.arc(x, y, r + 0.3, 0, TAU); g.fill(); PX.star5(g, x, y + 0.15, r*0.9, r*0.4, '#ffffff'); }
   function wrapIn(g, text, maxW){ var words = text.split(' '), out = [], line = ''; words.forEach(function(w){ var t = line ? line+' '+w : w; if (g.measureText(t).width > maxW && line){ out.push(line); line = w; } else line = t; }); if (line) out.push(line); return out; }
   function costOf(c, opt){ var d = CARDS[c.id]; if (d.cost < 0) return ''; return String(opt && opt.cost !== undefined ? opt.cost : ((c.up && d.upCost !== undefined) ? d.upCost : d.cost)); }
   /* a little scene behind each card's picture, so the art fills its window */
@@ -1354,12 +1367,17 @@ var ART = (function(){
     opt = opt || {}; var d = CARDS[c.id], cost = costOf(c, opt), state = opt.muted ? 'muted' : '', cant = opt.cantAfford ? 1 : 0;
     var key = 'card_'+c.id+(c.up?'+':'')+'_'+cost+'_'+cant+'_'+state; if (cache[key]) return cache[key];
     var cv = make(CW, CH), g = cv.g, fc = FAM[d.fam].col, ink = '#0a1020', junk = d.fam === 'junk', up = !!c.up;
-    var rim = up ? '#f3d36b' : d.rarity === 'legendary' ? '#f3d36b' : d.rarity === 'rare' ? '#20adca' : ink;
-    /* frame */
+    var tier = tierOf(d), T = TIER[tier] || {};
+    /* frame: plain ink for common cards, polished metal for rare (blue) and legendary (gold) */
     RR(g,0,0,CW,CH,5,ink);
-    if (rim !== ink){ g.fillStyle = PX.lin(g,0,0,CW,CH,[[0,shade(rim,0.35)],[0.5,rim],[1,shade(rim,-0.25)]]); g.beginPath(); PX.rrPath(g,0.7,0.7,CW-1.4,CH-1.4,4.4); g.fill(); RR(g,2,2,CW-4,CH-4,3.6,ink); }
-    var paper = junk ? '#c3c9d1' : '#fef8f4';
+    if (T.metal){ g.fillStyle = metalFill(g, T, 0, 0, CW, CH); g.beginPath(); PX.rrPath(g,0.6,0.6,CW-1.2,CH-1.2,4.5); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 0.35; g.beginPath(); PX.rrPath(g,1.1,1.1,CW-2.2,CH-2.2,4.1); g.stroke();
+      RR(g,2.1,2.1,CW-4.2,CH-4.2,3.5,ink); }
+    var paper = junk ? '#c3c9d1' : (T.paper || '#fef8f4');
     g.fillStyle = PX.lin(g,0,0,0,CH,[[0,shade(paper,0.05)],[1,shade(paper,-0.06)]]); g.beginPath(); PX.rrPath(g,2.6,2.6,CW-5.2,CH-5.2,3.2); g.fill();
+    if (tier === 'legendary' || tier === 'rare'){ g.save(); g.beginPath(); PX.rrPath(g,2.6,2.6,CW-5.2,CH-5.2,3.2); g.clip(); var fcx = CW/2, fcy = 50;
+      for (var ri=0; ri<22; ri++){ if (ri%2) continue; var ra = ri/22*TAU; PX.poly(g, [[fcx, fcy], [fcx + Math.cos(ra)*80, fcy + Math.sin(ra)*80], [fcx + Math.cos(ra + 0.14)*80, fcy + Math.sin(ra + 0.14)*80]], tier === 'legendary' ? 'rgba(232,170,40,.08)' : 'rgba(40,160,210,.06)'); }
+      g.restore(); }
     /* header band */
     g.save(); g.beginPath(); PX.rrPath(g,2.6,2.6,CW-5.2,CH-5.2,3.2); g.clip();
     g.fillStyle = PX.lin(g,0,2,0,15,[[0,shade(fc,0.22)],[1,shade(fc,-0.12)]]); g.fillRect(2,2,CW-4,12.6);
@@ -1369,26 +1387,41 @@ var ART = (function(){
     g.font = '700 3.4px '+G.FONT_PX; g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillStyle = 'rgba(255,255,255,.92)'; g.fillText(FAM[d.fam].name.toUpperCase(), CW-5, 8.6);
     /* art window */
     var ax = 5, ay = 16.6, aw = CW-10, ah = 24.4;
-    RR(g,ax-0.8,ay-0.8,aw+1.6,ah+1.6,3,ink);
+    if (T.metal){ RR(g,ax-1.9,ay-1.9,aw+3.8,ah+3.8,3.8,ink); g.fillStyle = metalFill(g, T, ax, ay, aw, ah); g.beginPath(); PX.rrPath(g,ax-1.4,ay-1.4,aw+2.8,ah+2.8,3.4); g.fill(); RR(g,ax-0.5,ay-0.5,aw+1,ah+1,2.7,ink); }
+    else RR(g,ax-0.8,ay-0.8,aw+1.6,ah+1.6,3,ink);
     g.save(); g.beginPath(); PX.rrPath(g,ax,ay,aw,ah,2.4); g.clip();
     artScene(g, d, ax, ay, aw, ah, fc, up);
     if (d.ally){ O(g,CW/2,ay+ah-1.6,13,3.4,'rgba(0,0,0,.16)'); var sp = PX.castC(d.cast), span = PX.castSpan(d.cast); if (span){ var z = Math.min(1.05, (ah + 1)/(span.hip + 2 - span.top)); g.drawImage(sp, CW/2 - 24*z, ay + 1.4 - span.top*z, 48*z, 60*z); } else { var cw2 = 32, ch2 = sp.height*cw2/sp.width; g.drawImage(sp, CW/2 - cw2/2, ay + 3.4, cw2, ch2); } }
     else { O(g,CW/2,ay+ah-3,11,2.4,'rgba(0,0,0,.14)'); PX.glow(g, CW/2, ay+ah/2, 12, '#ffffff', 0.7); var ic = PX.iconC(d.icon); g.drawImage(ic, CW/2 - 14, ay + ah/2 - 15.4, 28, 28); }
     g.restore();
+    /* legendary corner studs on the art frame */
+    if (tier === 'legendary'){ [[ax-1.4,ay-1.4],[ax+aw+1.4,ay-1.4],[ax-1.4,ay+ah+1.4],[ax+aw+1.4,ay+ah+1.4]].forEach(function(p){ PX.poly(g,[[p[0],p[1]-2.2],[p[0]+2.2,p[1]],[p[0],p[1]+2.2],[p[0]-2.2,p[1]]],ink); PX.poly(g,[[p[0],p[1]-1.5],[p[0]+1.5,p[1]],[p[0],p[1]+1.5],[p[0]-1.5,p[1]]],'#ffe58a'); }); }
+    /* the rarity gem sits on the bottom edge of the picture */
     if (d.ally){ O(g,CW-8.6,ay+3.4,3.2,3.2,ink); O(g,CW-8.6,ay+3.4,2.5,2.5,'#f3d36b'); PX.star5(g,CW-8.6,ay+3.5,1.9,0.8,'#ffffff'); }
     /* name */
     var name = d.name + (up ? '+' : ''), fs = name.length > 26 ? 3.1 : name.length > 14 ? 3.7 : 4.5;
     g.font = '700 '+fs+'px '+G.FONT_READ; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = up ? '#7a5200' : ink;
-    var lines = wrapIn(g, name, CW-8).slice(0, 3), ly = 43 + (lines.length === 1 ? 1.6 : 0);
+    var lines = wrapIn(g, name, CW-(T.ribbon ? 12 : 8)).slice(0, 3), ly = (T.ribbon ? 45.6 : 44.2) + (lines.length === 1 ? 1.2 : 0), nLines = lines.length;
+    if (T.ribbon){ var rh = lines.length*fs*1.08 + 1.8, ry = ly - 1.1, rx0 = 3.4, rx1 = CW - 3.4, nt = 2;
+      /* a ribbon banner with notched tails behind the name */
+      PX.poly(g, [[rx0 - 0.6, ry + 1], [rx0 + 4.6, ry + 1], [rx0 + 4.6, ry + rh + 1.6], [rx0 - 0.6, ry + rh + 1.6], [rx0 + nt - 0.6, ry + rh/2 + 1.3]], ink);
+      PX.poly(g, [[rx1 + 0.6, ry + 1], [rx1 - 4.6, ry + 1], [rx1 - 4.6, ry + rh + 1.6], [rx1 + 0.6, ry + rh + 1.6], [rx1 - nt + 0.6, ry + rh/2 + 1.3]], ink);
+      PX.poly(g, [[rx0, ry + 1.6], [rx0 + 4.6, ry + 1.6], [rx0 + 4.6, ry + rh + 1], [rx0, ry + rh + 1], [rx0 + nt, ry + rh/2 + 1.3]], T.ribbonD);
+      PX.poly(g, [[rx1, ry + 1.6], [rx1 - 4.6, ry + 1.6], [rx1 - 4.6, ry + rh + 1], [rx1, ry + rh + 1], [rx1 - nt, ry + rh/2 + 1.3]], T.ribbonD);
+      RR(g, rx0 + 2.6, ry - 0.5, rx1 - rx0 - 5.2, rh + 1, 1, ink); g.fillStyle = PX.lin(g, 0, ry, 0, ry + rh, [[0, shade(T.ribbon, 0.25)], [1, T.ribbon]]); g.fillRect(rx0 + 3.1, ry, rx1 - rx0 - 6.2, rh); R(g, rx0 + 3.1, ry, rx1 - rx0 - 6.2, 0.5, 'rgba(255,255,255,.45)');
+      g.fillStyle = T.text; }
     lines.forEach(function(l, i){ g.fillText(l, CW/2, ly + i*fs*1.08); });
+    if (tier !== 'junk' && d.rarity !== 'starter') rarityGem(g, tier, CW/2, ay + ah + (T.metal ? 1 : 0.6), tier === 'common' ? 2.2 : 2.1);
+
     /* number chips */
     var fx = fxChips(d.text(c.up)).slice(0,2), chips = [], total = 0;
     g.font = '700 7.6px '+G.FONT_NUM;
     fx.forEach(function(f){ var label = f[1] || '', w = 11 + (label ? g.measureText(label).width + 2.2 : 0); chips.push([f, w, label]); total += w; });
-    total += Math.max(0, chips.length-1)*2.2; var cx = CW/2 - total/2, cy = 55.6;
+    total += Math.max(0, chips.length-1)*2.2; var cx = CW/2 - total/2, cy = nLines === 3 && T.ribbon ? 57 : 55.6;
     chips.forEach(function(ch){ var w = ch[1]; RR(g,cx-0.7,cy-0.7,w+1.4,11.4,3.4,ink); RR(g,cx,cy,w,10,2.8,up ? '#fff1c4' : '#ffffff'); g.drawImage(mini(ch[0][0]), cx + 0.4, cy - 0.4, 10.4, 10.4); if (ch[2]){ g.fillStyle = ink; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(ch[2], cx + 11.4, cy + 5.4); } cx += w + 2.2; });
     /* footer: gold LOUDER bar when upgraded */
     if (up){ RR(g,5,68.4,CW-10,4.6,2.3,'#f3d36b'); RR(g,5,68.4,CW-10,1.6,0.8,'#fff4c2'); g.font = '700 3.4px '+G.FONT_PX; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#6b4a00'; g.fillText('LOUDER', CW/2, 70.9); }
+    else if (T.label){ g.font = '700 3.2px '+G.FONT_PX; g.textAlign = 'center'; g.textBaseline = 'middle'; var lw = g.measureText(T.label).width + 6; RR(g, CW/2 - lw/2 - 0.5, 68.2, lw + 1, 5.2, 2.6, ink); g.fillStyle = metalFill(g, T, CW/2 - lw/2, 68.6, lw, 4.4); g.beginPath(); PX.rrPath(g, CW/2 - lw/2, 68.7, lw, 4.2, 2.1); g.fill(); g.fillStyle = tier === 'legendary' ? '#3d2600' : '#06344a'; g.fillText(T.label, CW/2, 70.9); }
     else { RR(g,14,70,CW-28,1.4,0.7,rgba(junk ? '#5d6b7a' : fc, 0.55)); }
     /* cost gem */
     if (cost !== ''){ O(g,8.4,8.6,6.4,6.4,ink); g.fillStyle = cant ? PX.rad(g,7,7,0.5,7,[[0,'#dfe5ea'],[1,'#8e98a4']]) : PX.rad(g,6.8,6.6,0.5,7,[[0,'#e6fbff'],[0.5,'#7fd0f0'],[1,'#2a9cc8']]); g.beginPath(); g.arc(8.4,8.6,5.5,0,TAU); g.fill(); O(g,6.6,6.4,1.8,1.1,'rgba(255,255,255,.6)');
@@ -1409,6 +1442,13 @@ var ART = (function(){
     if (opt.glow){ var gp = 0.55 + 0.3*Math.sin(G.t*6); b.save(); b.globalAlpha *= gp; RR(b,-w*sx/2-3.4,-h/2-3.4,w*sx+6.8,h+6.8,7,rgba(opt.glow.charAt(0) === '#' ? opt.glow : '#f3d36b',0.35)); RR(b,-w*sx/2-1.8,-h/2-1.8,w*sx+3.6,h+3.6,6,rgba(opt.glow.charAt(0) === '#' ? opt.glow : '#f3d36b',0.8)); b.restore(); }
     if (!opt.noShadow) RR(b,-w*sx/2+1.2*sc,-h/2+2.2*sc,w*sx,h,5*sc,'rgba(0,0,0,.28)');
     b.drawImage(img, -w*sx/2, -h/2, w*sx, h);
+    /* legendary cards shimmer like foil; rare cards glint now and then */
+    var dd = CARDS[c.id], tr = dd ? tierOf(dd) : 'common';
+    if ((tr === 'legendary' || tr === 'rare') && !opt.still && !G.reduce && !opt.muted){ var seed = (String(c.uid||c.id).length*0.53) % 1;
+      if (tr === 'legendary'){ var hp = ((G.t*0.32 + seed) % 1.6) - 0.3; b.save(); b.beginPath(); PX.rrPath(b,-w*sx/2,-h/2,w*sx,h,5*sc); b.clip(); b.globalCompositeOperation = 'overlay';
+        var hx = -w*sx/2 + hp*(w*sx + 40) - 20; b.fillStyle = PX.lin(b, hx - 22, -h/2, hx + 22, h/2, [[0,'rgba(255,80,160,0)'],[0.3,'rgba(255,120,200,.35)'],[0.45,'rgba(255,240,140,.5)'],[0.6,'rgba(120,230,255,.4)'],[0.8,'rgba(150,120,255,.3)'],[1,'rgba(150,120,255,0)']]); b.fillRect(-w*sx/2, -h/2, w*sx, h); b.restore();
+        for (var tw=0; tw<3; tw++){ var tph = (G.t*0.9 + tw*0.37 + seed) % 1, tx = (((tw*0.41 + seed*1.7 + Math.floor(G.t*0.9 + tw*0.37 + seed)*0.29) % 1) - 0.5)*w*sx*0.86, ty = (((tw*0.67 + seed + Math.floor(G.t*0.9 + tw*0.37 + seed)*0.53) % 1) - 0.5)*h*0.9, ts = Math.sin(tph*Math.PI)*2.2*sc; if (ts > 0.2){ b.save(); b.globalAlpha *= 0.9; PX.star5(b, tx, ty, ts, ts*0.32, '#fff7cf'); b.restore(); } } }
+      else { var gp = ((G.t*0.5 + seed*3) % 3); if (gp < 0.5){ var gk = Math.sin(gp/0.5*Math.PI), gx = w*sx/2 - 3*sc, gy = -h/2 + 3*sc; b.save(); b.globalAlpha *= gk; PX.star5(b, gx, gy, 3.2*sc*gk, 1*sc*gk, '#e2f8ff'); b.restore(); } } }
     /* upgraded cards catch the light */
     if (c.up && !opt.still && !G.reduce){ var ph = ((G.t*0.45 + (String(c.uid||'').length*0.37)) % 1.8) - 0.4; if (ph > -0.3 && ph < 1.1){ b.save(); b.beginPath(); PX.rrPath(b,-w*sx/2,-h/2,w*sx,h,5*sc); b.clip(); var bx = -w*sx/2 + ph*(w*sx + 30) - 15; b.fillStyle = PX.lin(b,bx-8,0,bx+8,0,[[0,'rgba(255,244,194,0)'],[0.5,'rgba(255,244,194,.45)'],[1,'rgba(255,244,194,0)']]); b.beginPath(); b.moveTo(bx-8,-h/2); b.lineTo(bx+8,-h/2); b.lineTo(bx+8-h*0.35,h/2); b.lineTo(bx-8-h*0.35,h/2); b.fill(); b.restore(); } }
     b.restore();
@@ -1458,7 +1498,7 @@ var ART = (function(){
   }
   /* forget card pictures (when the fonts arrive they get redrawn with the right letters) */
   function clearCards(){ Object.keys(cache).forEach(function(k){ if (k.indexOf('card_') === 0) delete cache[k]; }); }
-  return { grey:greyOf, W:W, H:H, CW:CW, CH:CH, place:place, school:school, drawWindow:drawWindow, WINDOWS:WINDOWS, mini:mini, cardBase:cardBase, cardImg:cardImg, drawCard:drawCard, cardFull:cardFull, backCard:backCard, placeTile:placeTile, stepGlow:stepGlow, glow:glow, make:make, clearCards:clearCards };
+  return { grey:greyOf, W:W, H:H, CW:CW, CH:CH, place:place, school:school, drawWindow:drawWindow, WINDOWS:WINDOWS, mini:mini, cardBase:cardBase, cardImg:cardImg, drawCard:drawCard, tierOf:tierOf, TIER:TIER, rarityGem:rarityGem, cardFull:cardFull, backCard:backCard, placeTile:placeTile, stepGlow:stepGlow, glow:glow, make:make, clearCards:clearCards };
 })();
 
 /* ===== The Hush: the animator =====
@@ -2294,8 +2334,8 @@ var Reward = {
     } else {
       G.text('Pick a card to add', 192, 16, { size:9, col:'#ffffff', align:'center', outline:'#0a1020', wave:1, waveSpeed:5 });
       var ch = r ? r.choices : [], x0 = 192 - (ch.length*(ART.CW + 18) - 18)/2;
-      ch.forEach(function(id, i){ var x = x0 + i*(ART.CW + 18), y = 56; if (r.rescue === id && t0ok(S, i)){ ART.stepGlow(b, x + ART.CW/2, y + ART.CH/2, 44, '#f3d36b', 4, 0.4); G.text('Your friend', x + ART.CW/2, y + ART.CH + 12, { size:5, col:'#f3d36b', align:'center' }); } var t = (S.flipStart - 0.15 - i*0.22)/0.35; if (t > 0 && t < 0.1 && !S['f'+i]){ S['f'+i] = 1; Sound.sfx('flip'); }
-        var shown = flipDraw(b, { id:id, up:false, uid:'p'+i }, x, y - (G.hover(x, y, ART.CW, ART.CH) && t >= 1 ? 4 : 0) - (G.dance(i, 3)), t, S.backs[i]); if (t > 1 && t < 1.08 && !S['w'+i]){ S['w'+i] = 1; G.word(['OOH!','NICE!','YES!'][i], x + ART.CW/2, y + 4, { col:'#ffffff', burst:'#f3d36b', size:7, life:0.6 }); }
+      ch.forEach(function(id, i){ var x = x0 + i*(ART.CW + 18), y = 56; if (r.rescue === id && t0ok(S, i)){ ART.stepGlow(b, x + ART.CW/2, y + ART.CH/2, 44, '#f3d36b', 4, 0.4); G.text('Your friend', x + ART.CW/2, y + ART.CH + 12, { size:5, col:'#f3d36b', align:'center' }); } var tr = ART.tierOf(CARDS[id]), tcol = tr === 'legendary' ? '#f3c94b' : '#4fd2f2'; if ((tr === 'rare' || tr === 'legendary') && t0ok(S, i)){ ART.stepGlow(b, x + ART.CW/2, y + ART.CH/2, tr === 'legendary' ? 58 + Math.sin(G.t*3)*4 : 46, tcol, 5, tr === 'legendary' ? 0.55 : 0.4); } var t = (S.flipStart - 0.15 - i*0.22)/0.35; if (t > 0 && t < 0.1 && !S['f'+i]){ S['f'+i] = 1; Sound.sfx('flip'); }
+        var shown = flipDraw(b, { id:id, up:false, uid:'p'+i }, x, y - (G.hover(x, y, ART.CW, ART.CH) && t >= 1 ? 4 : 0) - (G.dance(i, 3)), t, S.backs[i]); if (t > 1 && t < 1.08 && !S['w'+i]){ S['w'+i] = 1; if (tr === 'legendary' || tr === 'rare'){ G.word(tr === 'legendary' ? 'LEGENDARY!' : 'RARE!', x + ART.CW/2, y + 4, { col:'#ffffff', burst:tcol, size:tr === 'legendary' ? 8 : 7, life:0.9 }); G.burst(x + ART.CW/2, y + ART.CH/2, tr === 'legendary' ? ['#fff7cf','#f3c94b','#ffffff','#ff9ad5'] : ['#e2f8ff','#4fd2f2','#ffffff'], tr === 'legendary' ? 40 : 22, 110, { life:0.8 }); Sound.sfx('coin'); } else G.word(['OOH!','NICE!','YES!'][i], x + ART.CW/2, y + 4, { col:'#ffffff', burst:'#f3d36b', size:7, life:0.6 }); }
         if (shown){ if (G.hover(x, y, ART.CW, ART.CH)){ G.cursor = 'pointer'; var d = CARDS[id]; S.tip = { x:x - 37, y:y + ART.CH + 6, w:128, title:d.name, text:d.text(false), col:FAM[d.fam].col }; } if (G.clicked(x, y, ART.CW, ART.CH)){ Run.deck.push(cardInst(id)); Sound.sfx('coin'); G.burst(x + ART.CW/2, y + ART.CH/2, ['#f3d36b','#ffffff','#ef7724'], 30, 120); nodeDone(); } } });
       if (G.btn('Skip (+10 socks)', 142, 186, 100, 18, { col:'#3a4566', size:6 })){ Run.socks += 10; nodeDone(); }
     }
