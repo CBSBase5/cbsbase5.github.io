@@ -405,7 +405,8 @@ function setup3_(ss){
   var id = tab_(ss, "Ideas", ["Time", "Idea", "Status", "Link", "Plus", "Voters", "Hide", "Approved"]);
   if(!String(id.getRange(1, 8).getValue())) id.getRange(1, 8).setValue("Approved").setFontWeight("bold");
   id.getRange(2, 3, 300, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(["Thinking about it", "Building it", "Done", "Not this time"], true).build());
-  var wa = tab_(ss, "Wall", ["Time", "Who", "Text", "Approved", "Hide"]);
+  var wa = tab_(ss, "Wall", ["Time", "Who", "Text", "Approved", "Hide", "Board"]);
+  if(!String(wa.getRange(1, 6).getValue())) wa.getRange(1, 6).setValue("Board").setFontWeight("bold");
   wa.getRange(1, 7).setValue("Tick Approved to put a post on the wall. Who is never shown.");
   tab_(ss, "Scores", ["Who", "Game", "Best", "Public", "Updated"]);
   var ta = tab_(ss, "Targets", ["Pillar", "Id", "Title", "Statement"].concat(WHO));
@@ -744,19 +745,21 @@ function post_(r){
   var text = String(r.text || "").trim();
   if(!text) throw new Error("empty");
   var who = WHO.indexOf(String(r.who || "").toUpperCase()) >= 0 ? String(r.who).toUpperCase() : "";
-  sheet_("Wall").appendRow([new Date(), who, clean_(text, 280), false, false]);
+  /* board keeps walls apart: blank is the Base 5 Question Wall, "hush" is The Hush card wall */
+  var board = /^[a-z0-9-]{1,20}$/.test(String(r.board || "")) ? String(r.board) : "";
+  sheet_("Wall").appendRow([new Date(), who, clean_(text, 280), false, false, board]);
   return { ok: true };
 }
-function wall_(){
-  var v = rows_("Wall"), out = [];
-  for(var i = 1; i < v.length; i++) if(v[i][2] && ticked_(v[i][3]) && !ticked_(v[i][4])) out.push({ text: String(v[i][2]), t: v[i][0] instanceof Date ? v[i][0].getTime() : 0 });
+function wall_(r){
+  var v = rows_("Wall"), out = [], want = String((r && r.board) || "");
+  for(var i = 1; i < v.length; i++) if(v[i][2] && ticked_(v[i][3]) && !ticked_(v[i][4]) && String(v[i][5] || "") === want) out.push({ text: String(v[i][2]), t: v[i][0] instanceof Date ? v[i][0].getTime() : 0 });
   return { ok: true, posts: out.reverse() };
 }
 function pending_(name, textCol, whoCol){
   var v = rows_(name), out = [], ac = name === "Wall" ? 3 : 6;
   for(var i = 1; i < v.length; i++){
     if(!v[i][textCol] || ticked_(v[i][ac]) || (name === "Wall" && ticked_(v[i][4]))) continue;
-    out.push({ row: i + 1, who: String(v[i][whoCol] || ""), text: String(v[i][textCol]), answer: name === "Questions" ? String(v[i][5]) : "", subject: name === "Questions" ? String(v[i][2]) : "" });
+    out.push({ row: i + 1, board: name === "Wall" ? String(v[i][5] || "") : "", who: String(v[i][whoCol] || ""), text: String(v[i][textCol]), answer: name === "Questions" ? String(v[i][5]) : "", subject: name === "Questions" ? String(v[i][2]) : "" });
   }
   return out;
 }
@@ -1246,7 +1249,7 @@ function blinkDone_(r){
 
 var READ3 = {
   timeline: timeline_, shoutouts: shoutouts_, votes: votes_, fuel: function(){ return fuel_(); },
-  ideas: function(){ return { ok: true, items: ideasList_(false) }; }, wall: function(){ return wall_(); },
+  ideas: function(){ return { ok: true, items: ideasList_(false) }; }, wall: function(r){ return wall_(r); },
   fame: fame_, targets: targets_, picks: picks_, blink: blink_, questions: questions_, postcard: postcard_, board: function(){ return board_(); },
   showboard: showBoard_
 };
