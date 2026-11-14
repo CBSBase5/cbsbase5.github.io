@@ -75,6 +75,9 @@ button{ font:inherit; cursor:pointer; }
 @media print{ body *{ visibility:hidden; } #printArea, #printArea *{ visibility:visible; } #printArea{ position:absolute; left:0; top:0; display:flex !important; flex-wrap:wrap; gap:10mm; } html,body{ overflow:visible; background:#fff; } }
 #printArea{ display:none; }
 #printArea img{ width:63mm; }
+.detail .bio{ font-style:italic; color:#f3d36b; }
+.hushbio{ max-width:340px; text-align:center; }
+.hushbio h3{ font-family:'Fredoka','Atkinson Hyperlegible',sans-serif; margin:0 0 4px; font-size:22px; }
 
 </style>
 </head>
@@ -154,7 +157,7 @@ var PX = (function(){
     g.restore(); return cv;
   }
   /* cartoon eyes: x1,x2 are the old left pixel of each eye */
-  var BLINK = false, HMOOD = '';
+  var BLINK = false, HMOOD = '', BIGLOST = 0;
   function eyes(g,x1,x2,y,col,lid){ col = col||'#141a2c'; if (BLINK){ [x1,x2].forEach(function(x){ LN(g,[[x+0.1,y+1.1],[x+1.9,y+1.1]],col,0.75); }); return; } [x1,x2].forEach(function(x){ O(g,x+1,y+1.1,0.9,1.15,col); if (lid){ g.fillStyle = lid; g.beginPath(); g.ellipse(x+1,y+0.6,1.4,1.1,0,Math.PI,TAU); g.fill(); } }); }
 
   /* ---------- people: flat graphic figures ----------
@@ -377,6 +380,13 @@ var PX = (function(){
     sock: function(g){ g.fillStyle = '#ef7724'; g.beginPath(); g.moveTo(6,1); g.lineTo(11.4,1); g.lineTo(11.4,9.6); g.quadraticCurveTo(11.6,14.6,6.6,14.6); g.lineTo(4,14.6); g.quadraticCurveTo(1.6,14.4,1.8,12); g.quadraticCurveTo(2.2,9.8,6,9.4); g.closePath(); g.fill(); R(g,6,2.6,5.4,1.4,'#ffffff'); R(g,6,5.6,5.4,1.4,'#20adca'); O(g,3.4,12.6,1.8,1.6,'#ffffff'); },
     fog: function(g){ O(g,5.6,9.4,4,3.2,'#b5bcc6'); O(g,10.4,8.4,4.2,4,'#c3c9d1'); O(g,8,6.4,3.4,3.2,'#dce0e5'); RR(g,1.6,10.4,12.8,3,1.5,'#b5bcc6'); },
     drain: function(g){ LN(g,[[1.4,8],[4.4,4],[7.4,12],[10.4,6],[14,8.4]],'#8e98a4',1.4); O(g,12.6,12.4,2.6,0.9,'#e84a5f'); poly(g,[[11,10],[14.2,10],[12.6,13.4]],'#e84a5f'); },
+    /* place emblems for the map */
+    locker: function(g){ RR(g,3,0.6,10,15,1.4,'#20adca'); RR(g,4.4,2,7.2,5.4,0.8,'#178aa6'); RR(g,4.4,8.6,7.2,5.4,0.8,'#178aa6'); R(g,5.4,3.4,5.2,0.7,'#0d6a82'); R(g,5.4,4.8,5.2,0.7,'#0d6a82'); O(g,10.4,8,0.8,0.8,'#f3d36b'); },
+    tray: function(g){ RR(g,0.6,7,14.8,6.4,2,'#ef7724'); RR(g,2,8,5.4,4.2,1.2,'#f6a861'); RR(g,8.4,8,5.6,4.2,1.2,'#f6a861'); O(g,4.6,5.6,2.8,2.4,'#7cf07c'); O(g,11.2,5.4,2.6,2.6,'#e84a5f'); },
+    bussign: function(g){ R(g,7.2,6,1.6,10,'#5d6b7a'); O(g,8,5.4,5.2,5.2,'#ffffff'); O(g,8,5.4,4.2,4.2,'#c0392b'); R(g,5,4.6,6,1.6,'#ffffff'); },
+    ball: function(g){ O(g,8,8,7,7,'#ffffff'); poly(g,[[8,4.6],[11,6.8],[9.9,10.4],[6.1,10.4],[5,6.8]],'#1b2630'); LN(g,[[8,4.6],[8,1.2]],'#1b2630',0.8); LN(g,[[11,6.8],[14.4,5.6]],'#1b2630',0.8); LN(g,[[5,6.8],[1.6,5.6]],'#1b2630',0.8); LN(g,[[9.9,10.4],[11.8,13.6]],'#1b2630',0.8); LN(g,[[6.1,10.4],[4.2,13.6]],'#1b2630',0.8); },
+    phone: function(g){ RR(g,3.6,0.4,8.8,15.2,2,'#1b2630'); RR(g,4.6,2,6.8,10.6,1,'#20adca'); RR(g,5.4,3.2,4.6,2.4,1,'#ffffff'); RR(g,6.4,6.6,4.2,2.2,1,'#fef8f4'); O(g,8,14,0.8,0.8,'#5d6b7a'); },
+    pad: function(g){ RR(g,0.6,4.4,14.8,8.4,4,'#8a5fb0'); R(g,3.2,7.8,4.2,1.4,'#ffffff'); R(g,4.6,6.4,1.4,4.2,'#ffffff'); O(g,11,7.2,1.1,1.1,'#f3d36b'); O(g,12.8,9.2,1.1,1.1,'#7cf07c'); },
     sound: function(g){ speaker(g,1.2,2,'#20adca'); arcS(g,9.4,8,2.6,-0.9,0.9,'#20adca',1.4); arcS(g,9.4,8,5,-0.9,0.9,'#20adca',1.4); },
     mute: function(g){ speaker(g,1.2,2,'#5d6b7a'); LN(g,[[10,5],[14.4,11]],'#e84a5f',1.6); LN(g,[[14.4,5],[10,11]],'#e84a5f',1.6); },
     steal: function(g){ g.fillStyle = rad(g,6.6,6,0.5,7.4,[[0,'#e6f7fd'],[1,'#56b8e0']],8,8); g.beginPath(); g.arc(8,8,6.6,0,TAU); g.fill(); RR(g,3,7,10,2,1,'#1b2630'); },
@@ -449,12 +459,18 @@ var PX = (function(){
       g.fillStyle = lin(g,0,14,0,44,[[0,'#8e98a4'],[1,'#5b6672']]); g.beginPath(); rrPath(g,22+j,14,36,30,3); g.fill(); g.fillStyle = lin(g,0,16,0,42,[[0,'#c3c9d1'],[1,'#a3acb7']]); g.beginPath(); rrPath(g,24,16,32,26,2); g.fill();
       R(g,22-j,24,36,2.6,'#8a5fb0'); R(g,22+j,34,36,1.8,'#20adca'); lids(g,32,44,24); RR(g,35,32,10,2,1,'#1b2630'); RR(g,30,44,20,4.6,1.6,'#5b6672');
       RR(g,55.4,9.4,7.6,7.6,1.4,'#e84a5f'); LN(g,[[57.2,11.2],[61.2,15.2]],'#ffffff',1); LN(g,[[61.2,11.2],[57.2,15.2]],'#ffffff',1); },
-    big: function(g,t){ var b = Math.sin(t*1.5)*2;
-      for (var r=0;r<6;r++){ var y2 = 50+((t*24+r*5)%10), x2 = 12+r*3.2; g.fillStyle = '#7fd0f0'; g.beginPath(); g.moveTo(x2,y2); g.quadraticCurveTo(x2+1,y2+2.2,x2,y2+2.6); g.quadraticCurveTo(x2-1,y2+2.2,x2,y2); g.fill(); }
-      cloud(g,40,40+b,30.6,16.6,GREY[3],GREY[0]); cloud(g,26,28+b,12.6,10.6,'#f6efd4','#d9c79a'); cloud(g,54,28+b,12.6,10.6,GREY[4],GREY[2]);
-      g.save(); g.beginPath(); g.ellipse(54,28+b,11.6,9.6,0,0,TAU); g.clip(); for (var i=0;i<26;i++){ var x = 44+((i*17+Math.floor(t*10)*5)%20), y = 19+((i*11)%18); O(g,x,y+b,0.6,0.6,'rgba(255,255,255,.8)'); } g.restore();
-      g.fillStyle = lin(g,0,10,0,26,[[0,'#8e98a4'],[1,'#5b6672']]); g.beginPath(); rrPath(g,29.6,9.6+b,20.8,16.8,3); g.fill(); R(g,29.6,16+b,20.8,2,'#8a5fb0');
-      O(g,40,46.4+b,18.6,6.6,'#5b6672'); lids(g,32,45,18+b); RR(g,34,26+b,12,2.2,1,'#1b2630'); },
+    /* the Big Hush is a patchwork of every Hush; BIGLOST pieces have already broken off */
+    big: function(g,t){ var b = Math.sin(t*1.5)*2, L = BIGLOST;
+      if (L < 1) for (var r=0;r<6;r++){ var y2 = 50+((t*24+r*5)%10), x2 = 12+r*3.2; g.fillStyle = '#7fd0f0'; g.beginPath(); g.moveTo(x2,y2); g.quadraticCurveTo(x2+1,y2+2.2,x2,y2+2.6); g.quadraticCurveTo(x2-1,y2+2.2,x2,y2); g.fill(); }
+      cloud(g,40,40+b,30.6 - L*1.6,16.6 - L*0.8,GREY[3],GREY[0]); if (L < 3) cloud(g,26,28+b,12.6,10.6,'#f6efd4','#d9c79a'); if (L < 2) cloud(g,54,28+b,12.6,10.6,GREY[4],GREY[2]);
+      if (L < 2){ g.save(); g.beginPath(); g.ellipse(54,28+b,11.6,9.6,0,0,TAU); g.clip(); for (var i=0;i<26;i++){ var x = 44+((i*17+Math.floor(t*10)*5)%20), y = 19+((i*11)%18); O(g,x,y+b,0.6,0.6,'rgba(255,255,255,.8)'); } g.restore(); }
+      if (L < 4){ g.fillStyle = lin(g,0,10,0,26,[[0,'#8e98a4'],[1,'#5b6672']]); g.beginPath(); rrPath(g,29.6,9.6+b,20.8,16.8,3); g.fill(); R(g,29.6,16+b,20.8,2,'#8a5fb0'); }
+      O(g,40,46.4+b,18.6 - L,6.6,'#5b6672');
+      if (L < 4){ lids(g,32,45,18+b); RR(g,34,26+b,12,2.2,1,'#1b2630'); } else { lids(g,33,44,34+b); RR(g,36,42+b,8,2,1,'#1b2630'); } },
+    big1: function(g,t){ BIGLOST = 1; try { HUSH.big(g,t); } finally { BIGLOST = 0; } },
+    big2: function(g,t){ BIGLOST = 2; try { HUSH.big(g,t); } finally { BIGLOST = 0; } },
+    big3: function(g,t){ BIGLOST = 3; try { HUSH.big(g,t); } finally { BIGLOST = 0; } },
+    big4: function(g,t){ BIGLOST = 4; try { HUSH.big(g,t); } finally { BIGLOST = 0; } },
     tiny: function(g,t){ var b = Math.sin(t*3)*2;
       cloud(g,40,38+b,10.6,8.6,GREY[4],GREY[2]); cloud(g,33.4,34+b,5.6,5.6,GREY[4],GREY[2]); cloud(g,46.6,34+b,5.6,5.6,GREY[4],GREY[2]); cloud(g,40,31+b,6.6,5.6,'#eef1f4',GREY[3]); lids(g,34,43,35+b,true); arcS(g,40,43.6+b,1.8,Math.PI*1.2,Math.PI*1.8,'#5b6672',0.8); }
   };
@@ -500,6 +516,7 @@ var PLACES = {
   playground:{ name:'The Playground', hush:'puddle' }, groupchat:{ name:'The Group Chat', hush:'static' }, lobby:{ name:'The Game Lobby', hush:'glitch' }
 };
 var PLACE_IDS = ['corridor','canteen','busstop','playground','groupchat','lobby'];
+var PLACE_EMBLEM = { corridor:'locker', canteen:'tray', busstop:'bussign', playground:'ball', groupchat:'phone', lobby:'pad' };
 
 /* helper: pick upgraded or base value */
 function UV(u, a, b){ return u ? b : a; }
@@ -642,6 +659,39 @@ var BACKS = {
 };
 var BACK_ORDER = ['plain','l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','oddsocks'];
 
+/* what each friend says as they are freed: warm or funny, always short */
+var FRIEND_LINES = {
+  dot:'Nobody eats alone on my watch.', lunchbox:'um... thanks for sitting with me.', toaster:'I did it! I POPPED!', nia:'I thought nobody saw me.',
+  bev:'Everyone gets a seat on my bus.', duck:'QUACK. (That means thank you.)', lou:'Stop, look, listen. You did!', pigeon:'COO. (Thank you.)',
+  cole:'That is what a team does.', trainer:'Squeak! Squeak!', sam:'Cue the lights!', lin:'Thanks for noticing me.', bookworm:'Best plot twist ever.',
+  cal:'Sorted. Thanks, pal.', mopghost:'swish... (a happy swish)', kit:'...thank you. Really.', emoji:'A real smile this time.', modbot:'Kindness detected.',
+  gran:'GG. Good game, sweetheart.', slime:'Respawned and feeling great!'
+};
+/* one line about each friend, for the Collection */
+var BIOS = {
+  dot:'Knows everyone\'s favourite pudding.', lunchbox:'Shy, but always packed with something good.', toaster:'Gets stage fright, then goes POP.', nia:'New this term. Brave every single day.',
+  bev:'Knows every stop, and every name.', duck:'Lives in the bus stop puddle. Very smug.', lou:'Has never let anyone cross alone.', pigeon:'Nervous, but carries the messages anyway.',
+  cole:'Cheers loudest for whoever comes last.', trainer:'Lost in the playground. Squeaks when happy.', sam:'Runs the school show. Always has a cue.', lin:'Finds you the right book, and the right words.',
+  bookworm:'Has read every book in the library twice.', cal:'Fixes anything. Knows every corner of the school.', mopghost:'Haunts the corridor. Very tidy about it.', kit:'Quiet, not silent. Hears everything.',
+  emoji:'Lives in the group chat. Means every smile.', modbot:'Keeps the group chat kind.', gran:'Has never lost a game. Ever.', slime:'Always comes back for another go.',
+  jay:'Has one word for the Hush: Outrageous!', bonnie:'A small brown poodle with a very big heart.', bambi:'Long legs. Very elegant. Very loyal.', tinyhush:'Only ever wanted someone to listen.'
+};
+/* every Hush, with one line about the quiet it makes */
+var HUSH_BOOK = [
+  ['Corridor Fog','fog','The Corridor','Hangs about between lessons, so nobody stops to ask if you are OK.'],
+  ['Canteen Gloop','gloop','The Canteen','Makes it feel like there is no seat for you.'],
+  ['Drizzle','rain','The Bus Stop','Dampens the walk to the bus until everyone looks at their feet.'],
+  ['Shadow Puddle','puddle','The Playground','Spreads at the edge of the game, where people get left out.'],
+  ['Typing...','static','The Group Chat','Starts a message, then never sends it.'],
+  ['Lag Spike','glitch','The Game Lobby','Freezes the fun so someone gets left behind.'],
+  ['The Fog Bank','fog','The Corridor','So thick that nobody can see who needs help.'],
+  ['The Eye Roll','gloop','The Canteen','Says more than words, and none of it kind.'],
+  ['Downpour','rain','The Bus Stop','So loud you cannot hear a friend calling.'],
+  ['The Long Shadow','puddle','The Playground','Follows someone around the playground all day.'],
+  ['Read Receipt','static','The Group Chat','Seen. Not answered. Again.'],
+  ['Rage Quit','glitch','The Game Lobby','Leaves the game and takes the fun with it.'],
+  ['The Big Hush','big','The Hall','Every quiet moment, all stuck together.']
+];
 var TRUSTED = [
   { id:'friend', name:'A friend', tip:'Telling a friend means you are not on your own with it. They can come with you to tell an adult.' },
   { id:'teacher', name:'Your teacher', tip:'Any adult in school can help, any time, even with something small. You can write it down if saying it feels hard.' },
@@ -690,7 +740,9 @@ function shuffle(a){ for (var i=a.length-1;i>0;i--){ var j = rnd(i+1), t = a[i];
 function seeded(s){ return function(){ s |= 0; s = s + 0x6D2B79F5 | 0; var t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
 var META_DEFAULT = { v:1, lit:{}, introSeen:false, unlocked:{}, secrets:{}, pairs:{}, trinkets:{}, backs:{ plain:true }, back:'plain', beaten:-1, maxLevel:0, runs:0, wins:0, tutorialDone:false, music:0.55, sfx:0.8, muted:false, made:[] };
-var Meta = (function(){ var m = Store.get(Store.META) || {}; for (var k in META_DEFAULT) if (!(k in m)) m[k] = JSON.parse(JSON.stringify(META_DEFAULT[k])); return m; })();
+var Meta = (function(){ var m = Store.get(Store.META) || {}; for (var k in META_DEFAULT) if (!(k in m)) m[k] = JSON.parse(JSON.stringify(META_DEFAULT[k])); m.broken = m.broken || {}; return m; })();
+/* Hushes you broke before the Hush page existed: every place you lit had its Hush broken */
+(function(){ Object.keys(Meta.lit || {}).forEach(function(p){ if (ENEMIES[p]) Meta.broken[ENEMIES[p].name] = true; }); if (Meta.lit && Meta.lit.hall) Meta.broken['The Big Hush'] = true; })();
 function saveMeta(){ Store.set(Store.META, Meta); }
 
 var Run = null, B = null;
@@ -884,7 +936,7 @@ function playCard(uid){
 function checkWin(){
   if (B.over) return;
   if (B.phase === 1 && B.en.hp <= 0){
-    if (B.kind === 'boss'){ B.phase = 2; B.en.name = TINY.name; B.en.form = 'tiny'; B.en.fog = 0; B.en.grow = 0; B.en.stun = 0; B.en.mutePending = 0; B.heard = 0; chooseIntent(); UI.fx('shrink'); B.hand.push({ id:'hearyou', up:false, uid:'hy00' }); return; }
+    if (B.kind === 'boss'){ Meta.broken['The Big Hush'] = true; saveMeta(); B.phase = 2; B.en.name = TINY.name; B.en.form = 'tiny'; B.en.fog = 0; B.en.grow = 0; B.en.stun = 0; B.en.mutePending = 0; B.heard = 0; chooseIntent(); UI.fx('shrink'); B.hand.push({ id:'hearyou', up:false, uid:'hy00' }); return; }
     B.over = true; UI.fx('win'); return;
   }
   if (B.phase === 2 && B.heard >= B.heardMax){ B.over = true; UI.fx('win'); }
@@ -931,7 +983,7 @@ function battleRewards(){
   var r = { socks:0, rescue:null, rescueNew:false, choices:[], trinket:null };
   var base = B.kind === 'guard' ? 48+rnd(14) : B.kind === 'boss' ? 0 : 26+rnd(10);
   if (hasT('charm')) base = Math.round(base*1.5);
-  r.socks = base; Run.socks += base;
+  r.socks = base; Run.socks += base; Meta.broken[B.en.name] = true;
   if (hasT('glow')) Run.vol = Math.min(Run.maxVol, Run.vol+4);
   r.place = B.place; r.newLit = !Meta.lit[B.place]; Meta.lit[B.place] = true; Meta.litLv = Meta.litLv || {}; if (!(Meta.litLv[B.place] >= Run.level)) Meta.litLv[B.place] = Run.level; saveMeta(); Run.lit = Run.lit || []; if (Run.lit.indexOf(B.place) < 0) Run.lit.push(B.place);
   if (B.rescue){ r.rescue = B.rescue; r.rescueNew = unlockAlly(B.rescue); Run.rescued.push(B.rescue); }
@@ -976,6 +1028,7 @@ var Sound = (function(){
   var BPM = 108, STEP = 60/BPM/4;
   /* A minor pentatonic-ish, 4 bars x 16 steps */
   var ROOTS = [57, 53, 55, 52]; /* A, F, G, E (midi) */
+  var MODES = { normal:{ roots:[57, 53, 55, 52], shift:0 }, boss:{ roots:[57, 58, 55, 56], shift:-12 }, bright:{ roots:[60, 65, 67, 60], shift:3 } }, music = 'normal', ambBus = null, amb = null;
   var LEAD = [76,null,74,null,72,null,69,null,72,null,74,76,null,null,74,null, 72,null,69,null,67,null,69,null,72,null,null,69,null,null,null,null,
               74,null,76,null,79,null,76,null,74,null,72,null,74,null,null,null, 72,null,71,null,69,null,null,null,64,null,67,null,69,null,null,null];
   var ARP = [0,7,12,7, 0,7,12,15, 0,7,12,7, 0,7,12,19];
@@ -986,19 +1039,21 @@ var Sound = (function(){
     master = ctx.createGain(); master.connect(ctx.destination);
     musicBus = ctx.createGain(); musicBus.connect(master); try { analyser = ctx.createAnalyser(); analyser.fftSize = 64; analyser.smoothingTimeConstant = 0.6; musicBus.connect(analyser); freq = new Uint8Array(analyser.frequencyBinCount); } catch(e){ analyser = null; } sfxBus = ctx.createGain(); sfxBus.connect(master);
     for (var i=0;i<5;i++){ var g = ctx.createGain(); g.gain.value = 0; g.connect(musicBus); layers.push(g); }
+    ambBus = ctx.createGain(); ambBus.gain.value = 0; ambBus.connect(master);
     applyVol(); return true;
   }
-  function applyVol(){ if (!ctx) return; var m = Meta.muted ? 0 : 1; master.gain.setTargetAtTime(m, ctx.currentTime, 0.05); musicBus.gain.setTargetAtTime(Meta.music*0.5, ctx.currentTime, 0.1); sfxBus.gain.setTargetAtTime(Meta.sfx*0.6, ctx.currentTime, 0.05); }
+  function applyVol(){ if (!ctx) return; var m = Meta.muted ? 0 : 1; master.gain.setTargetAtTime(m, ctx.currentTime, 0.05); musicBus.gain.setTargetAtTime(Meta.music*0.5, ctx.currentTime, 0.1); sfxBus.gain.setTargetAtTime(Meta.sfx*0.6, ctx.currentTime, 0.05); if (ambBus) ambBus.gain.setTargetAtTime(amb ? Meta.sfx*0.5 : 0, ctx.currentTime, 0.1); }
   function noiseBuf(){ if (noiseBuf.b) return noiseBuf.b; var b = ctx.createBuffer(1, ctx.sampleRate*0.3, ctx.sampleRate), d = b.getChannelData(0); for (var i=0;i<d.length;i++) d[i] = Math.random()*2-1; noiseBuf.b = b; return b; }
   function tone(dest, type, f, t, dur, vol, slide){ var o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide), t+dur); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur); o.connect(g); g.connect(dest); o.start(t); o.stop(t+dur+0.02); }
   function noise(dest, t, dur, vol, hp){ var s = ctx.createBufferSource(); s.buffer = noiseBuf(); var f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hp||6000; var g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur); s.connect(f); f.connect(g); g.connect(dest); s.start(t); s.stop(t+dur+0.02); }
   function schedule(){
     while (nextT < ctx.currentTime + 0.12){
-      var bar = Math.floor(step/16)%4, s = step%16, root = ROOTS[bar], t = nextT; if (s % 4 === 0){ beatTimes.push(t); if (beatTimes.length > 8) beatTimes.shift(); }
+      var M = MODES[music] || MODES.normal, bar = Math.floor(step/16)%4, s = step%16, root = M.roots[bar], t = nextT; if (s % 4 === 0){ beatTimes.push(t); if (beatTimes.length > 8) beatTimes.shift(); }
       /* layer 0: soft hum */
       if (s === 0) tone(layers[0], 'triangle', hz(root-12), t, STEP*16, 0.18);
       /* layer 1: bass */
-      if (s % 4 === 0 || s === 6 || s === 14) tone(layers[1], 'square', hz(root-12), t, STEP*1.6, 0.12);
+      if (s % 4 === 0 || s === 6 || s === 14) tone(layers[1], 'square', hz(root-12 + (music === 'boss' && s % 8 === 0 ? -12 : 0)), t, STEP*1.6, 0.12);
+      if (music === 'boss' && s % 4 === 2) tone(layers[1], 'sawtooth', hz(root-24), t, STEP*0.8, 0.06);
       /* layer 2: drums */
       if (s % 8 === 0) tone(layers[2], 'sine', 120, t, 0.16, 0.5, 0.35);
       if (s % 8 === 4) noise(layers[2], t, 0.12, 0.25, 1800);
@@ -1006,12 +1061,34 @@ var Sound = (function(){
       /* layer 3: arp */
       tone(layers[3], 'square', hz(root+ARP[s]), t, STEP*0.9, 0.05);
       /* layer 4: lead */
-      var ln = LEAD[(step%64)]; if (ln) tone(layers[4], 'square', hz(ln), t, STEP*1.8, 0.07);
+      var ln = LEAD[(step%64)]; if (ln) tone(layers[4], music === 'bright' ? 'triangle' : 'square', hz(ln + M.shift), t, STEP*1.8, music === 'bright' ? 0.1 : 0.07);
+      ambTick(t);
       nextT += STEP; step++;
     }
   }
+  /* quiet background sound for each place: a filtered noise bed plus little events */
+  var AMB = {
+    corridor:{ bed:[500, 0.6, 0.05], ev:function(t){ if (Math.random() < 0.04) band(ambBus, t, 0.05, 0.18, 1400, 4); } },
+    canteen:{ bed:[700, 0.5, 0.07], ev:function(t){ if (Math.random() < 0.05) tone(ambBus, 'triangle', 2200 + Math.random()*1400, t, 0.08, 0.05); } },
+    busstop:{ bed:[3200, 0.3, 0.09], ev:function(t){ if (Math.random() < 0.08) band(ambBus, t, 0.03, 0.08, 5000, 2); } },
+    playground:{ bed:[900, 0.5, 0.05], ev:function(t){ if (Math.random() < 0.012) tone(ambBus, 'sine', 2600, t, 0.18, 0.04, 1.05); if (Math.random() < 0.03) band(ambBus, t, 0.12, 0.08, 1100, 3); } },
+    groupchat:{ bed:[1200, 0.8, 0.02], ev:function(t){ if (Math.random() < 0.12) band(ambBus, t, 0.02, 0.18, 3800 + Math.random()*800, 6); if (Math.random() < 0.01) tone(ambBus, 'sine', 1320, t, 0.12, 0.05); } },
+    lobby:{ bed:[300, 1.2, 0.04], ev:function(t){ if (Math.random() < 0.02) tone(ambBus, 'square', 880 + Math.floor(Math.random()*3)*220, t, 0.05, 0.03); } },
+    hall:{ bed:[450, 0.5, 0.06], ev:function(t){ if (Math.random() < 0.02) band(ambBus, t, 0.2, 0.06, 700, 2); } }
+  };
+  function ambTick(t){ if (amb && AMB[amb]) AMB[amb].ev(t); }
+  var bed = null;
+  var ambWant = null;
+  function ambience(name){ if (!started){ ambWant = name || null; return; } if (amb === (name || null)) return; amb = name || null; if (bed){ try { bed.g.gain.setTargetAtTime(0, ctx.currentTime, 0.4); bed.s.stop(ctx.currentTime + 1.5); } catch(e){} bed = null; }
+    var A = AMB[amb]; ambBus.gain.setTargetAtTime(A ? Meta.sfx*0.5 : 0, ctx.currentTime, 0.5); if (!A) return;
+    var src = ctx.createBufferSource(), len = ctx.sampleRate*2, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0); for (var i=0;i<len;i++) d[i] = Math.random()*2 - 1; src.buffer = buf; src.loop = true;
+    var f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = A.bed[0]; f.Q.value = A.bed[1]; var g = ctx.createGain(); g.gain.value = 0; g.gain.setTargetAtTime(A.bed[2], ctx.currentTime, 0.6);
+    src.connect(f); f.connect(g); g.connect(ambBus); src.start(); bed = { s:src, g:g }; }
+  function setMusic(m){ music = MODES[m] ? m : 'normal'; }
+  /* the Hush drains you: the music drops out for a moment, so you hear the silence */
+  function silence(sec){ if (!ctx || !started) return; var now = ctx.currentTime, v = Meta.muted ? 0 : Meta.music*0.5; musicBus.gain.cancelScheduledValues(now); musicBus.gain.setTargetAtTime(0, now, 0.03); musicBus.gain.setTargetAtTime(v, now + (sec || 0.5), 0.12); if (ambBus) { ambBus.gain.cancelScheduledValues(now); ambBus.gain.setTargetAtTime(0, now, 0.03); ambBus.gain.setTargetAtTime(amb ? Meta.sfx*0.5 : 0, now + (sec || 0.5), 0.2); } }
   function setLayers(n){ target = n; if (!ctx) return; for (var i=0;i<layers.length;i++){ layers[i].gain.setTargetAtTime(i < n ? 1 : 0, ctx.currentTime, i < n ? 0.4 : 0.8); } }
-  function start(){ if (!init()) return; if (ctx.state === 'suspended') ctx.resume(); if (started) return; started = true; nextT = ctx.currentTime+0.05; timer = setInterval(schedule, 25); setLayers(target); }
+  function start(){ if (!init()) return; if (ctx.state === 'suspended') ctx.resume(); if (started) return; started = true; nextT = ctx.currentTime+0.05; timer = setInterval(schedule, 25); setLayers(target); if (ambWant) ambience(ambWant); }
   function band(dest, t, dur, vol, f, q){ var src = ctx.createBufferSource(); src.buffer = noiseBuf(); var bf = ctx.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = f; bf.Q.value = q||1; var g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur); src.connect(bf); bf.connect(g); g.connect(dest); src.start(t); src.stop(t+dur+0.02); }
   /* every sound gets a little pitch wobble so repeats never sound copied */
   var SFX = {
@@ -1038,6 +1115,7 @@ var Sound = (function(){
     junk:function(t,p){ noise(sfxBus,t,0.25,0.15,400); tone(sfxBus,'triangle',180*p,t,0.2,0.12,0.6); },
     pair:function(t,p){ [784,988,1175].forEach(function(f,i){ tone(sfxBus,'triangle',f*p,t+i*0.06,0.12,0.15); }); },
     flip:function(t,p){ band(sfxBus,t,0.06,0.16,2500*p,0.8); },
+    babble:function(t,p){ for (var i=0;i<5;i++){ var f = (420 + Math.random()*380)*p; tone(sfxBus, i % 2 ? 'triangle' : 'square', f, t + i*0.07, 0.05, 0.06, 0.9 + Math.random()*0.3); } },
     shatter:function(t,p){ for (var i=0;i<6;i++) tone(sfxBus,'square',(900 + i*230)*p,t+i*0.025,0.06,0.07,0.6); noise(sfxBus,t,0.4,0.3,3000); tone(sfxBus,'sine',90,t,0.4,0.5,0.4); }
   };
   var lastAt = {};
@@ -1045,7 +1123,7 @@ var Sound = (function(){
   function beatInfo(){ if (!ctx || !started) return null; var now = ctx.currentTime, bt = null; for (var i=beatTimes.length-1;i>=0;i--) if (beatTimes[i] <= now){ bt = beatTimes[i]; break; } if (bt === null) return null; var per = 60/BPM, since = now - bt; return { pulse:Math.exp(-since*7), phase:(since/per) % 1 }; }
   function bands(n){ if (!analyser || !started) return null; analyser.getByteFrequencyData(freq); var out = [], m = freq.length; for (var i=0;i<n;i++){ var v = freq[Math.min(m-1, Math.floor(i*m/n*0.8))]/255; out.push(v); } return out; }
   function pause(on){ if (!ctx || !started) return; try { if (on) ctx.suspend(); else ctx.resume(); } catch(e){} }
-  return { pause:pause, beatInfo:beatInfo, bands:bands, start:start, setLayers:setLayers, sfx:sfx, applyVol:applyVol, get on(){ return started; } };
+  return { ambience:ambience, setMusic:setMusic, silence:silence, pause:pause, beatInfo:beatInfo, bands:bands, start:start, setLayers:setLayers, sfx:sfx, applyVol:applyVol, get on(){ return started; } };
 })();
 
 /* ===== The Hush: HD engine core =====
@@ -1771,10 +1849,11 @@ var Battle = {
     UI.delay = 200; UI.fxBase = 0; S.holdBreath = false; S.breathShown = 0;
     startBattle(node);
     S.bg = ART.place(node.t === 'boss' ? 'hall' : node.place);
+    Sound.ambience(node.t === 'boss' ? 'hall' : node.place); Sound.setMusic(node.t === 'boss' ? 'boss' : 'normal');
     PX.freeHush([B.en.form]); S.setForm(B.en.form); S.fi = 0; S.ft = 0; S.hMood = ''; S.hMoodT = 0; S.hFlash = 0; S.hKnock = 0; S.youFlash = 0; S.youKnock = 0; S.hBlinkAt = G.t + 2 + Math.random()*2;
     S.hush = { sq:0, sqv:0, lunge:0, alpha:0, scale:node.t === 'boss' ? 2 : STAGE_HUSH, gone:false, enter:0 };
     S.hpShown = B.en.hp; S.hpGhost = B.en.hp; S.volShown = Run.vol; S.volGhost = Run.vol; S.backShown = B.backupv; S.heardShown = 0;
-    S.colour = 0; S.flood = -1; S.winT = -1; S.loseT = -1; S.intentKey = ''; S.intentPop = 0; S.shield = 0;
+    S.colour = 0; S.say = null; S.bigLost = 0; S.flood = -1; S.winT = -1; S.loseT = -1; S.intentKey = ''; S.intentPop = 0; S.shield = 0;
     S.rescue = B.rescue ? { id:B.rescue, x:357, y:HUSH_FLOOR, free:false, walk:0, hop:0, alpha:1 } : null;
     var where = PLACES[node.place] ? PLACES[node.place].name : '';
     S.banner = { text: node.t === 'boss' ? 'The Hall: the Big Hush' : node.t === 'guard' ? 'A tough Hush guards '+where : 'Bring back '+where, t:0, life:2.4, col: node.t === 'boss' ? '#8a5fb0' : '#ef7724' };
@@ -1798,7 +1877,7 @@ var Battle = {
       case 'noise':
         if (d.dmg){ S.boost = Math.min(0.6, (S.boost||0) + 0.1 + d.dmg*0.01); var big = d.dmg >= 12; G.stop(big ? 0.1 : 0.05); G.shake(big ? 4 : 2, big ? 0.22 : 0.14); G.punch(Math.min(0.07, 0.012 + d.dmg*0.0025), hc.x, hc.y); S.hush.sqv += 8 + Math.min(14, d.dmg/1.5); S.hFlash = 1; S.hKnock = 5 + Math.min(10, d.dmg*0.45); S.hushFace('wide', 0.38); G.burst(hc.x, hc.y, ['#ef7724','#f3d36b','#ffffff','#ffd27a'], 12 + Math.min(26, d.dmg), 80 + d.dmg*5, { life:0.6 }); for (var sp=0;sp<6;sp++) G.part({ x:hc.x, y:hc.y, vx:(Math.random()-0.5)*260, vy:(Math.random()-0.5)*160, life:0.18, col:'#ffffff', s:1, g:0, drag:0 }); G.float('-'+d.dmg, hc.x + 14 + (Math.random()*10-5), hc.y - 4, big ? '#ffe08a' : '#ffd27a', { z:d.dmg >= 15 ? 4 : 3, vy:-20 }); Sound.sfx('hit', d.dmg); }
         if (d.absorbed){ G.float('fog', hc.x + 18, hc.y - 6, '#c3c9d1', { size:6 }); G.burst(hc.x, hc.y, ['#b5bcc6','#dce0e5'], 8, 50); }
-        S.hpShown = d.hp; break;
+        S.hpShown = d.hp; if (B.kind === 'boss' && B.phase === 1){ var lost = Math.min(4, Math.floor((1 - d.hp/B.en.max)*5)); if (lost > (S.bigLost || 0)){ S.bigLost = lost; S.setForm('big' + lost); var pc = [null, ['#7fd0f0','#ffffff'], ['#dce0e5','#ffffff'], ['#f6efd4','#d9c79a'], ['#8a5fb0','#8e98a4']][lost]; G.burst(hc.x + [0, -30, 22, -22, 0][lost], hc.y + [0, 30, -12, -12, -24][lost], pc, 36, 150, { life:0.9 }); G.stop(0.08); G.shake(4, 0.3); Sound.sfx('shatter'); } } break;
       case 'backup': S.backShown = d.total; S.shield = 1; G.punch(0.012, vp.x + 20, vp.y); G.float('+'+d.n, vp.x + 30, vp.y - 14, '#7fe0f8', { z:1 }); G.burst(vp.x+30, vp.y, ['#20adca','#e6f7fd'], 10, 60, { grav:0 }); Sound.sfx('backup'); break;
       case 'heal': if (d.n){ S.volShown = d.vol; G.float('+'+d.n, vp.x, vp.y - 14, '#7cf07c', { z:1 }); for (var h=0;h<10;h++) G.part({ x:vp.x - 20 + Math.random()*50, y:vp.y, vx:0, vy:-30 - Math.random()*30, life:0.9, col:h%2?'#7cf07c':'#c9f5c0', s:1, g:-20, drag:0.5 }); Sound.sfx('heal'); } break;
       case 'breath': G.float('+'+d.n, 34, 152, '#7fe0f8', { z:1 }); break;
@@ -1813,7 +1892,7 @@ var Battle = {
       case 'stunned': G.word('zzz', hc.x + 10, hc.y - 30, { col:'#7fe0f8', size:9, wave:2, rot:0, vy:-18, life:1.2, quiet:true }); for (var z=0;z<6;z++) G.part({ x:hc.x + Math.random()*20 - 10, y:hc.y - 20, vx:Math.random()*20 - 10, vy:-25, life:1.1, col:'#7fd0f0', s:2, g:0, drag:0.3 }); break;
       case 'nulled': G.float('My ears are not a toilet!', 120, 120, '#f3d36b', { size:6 }); break;
       case 'drain':
-        S.hush.lunge = 1; Sound.sfx('drain'); G.word('SHHHH', hc.x - 30, hc.y - 10, { col:'#c3c9d1', ink:'#3a4450', size:9, wave:1.5, rot:-0.08, vy:12, life:0.8, quiet:true });
+        S.hush.lunge = 1; Sound.sfx('drain'); if (d.hit) setTimeout(function(){ Sound.silence(0.5); }, 200); G.word('SHHHH', hc.x - 30, hc.y - 10, { col:'#c3c9d1', ink:'#3a4450', size:9, wave:1.5, rot:-0.08, vy:12, life:0.8, quiet:true });
         for (var w=0;w<18;w++){ (function(i){ var sx = hc.x - 20, sy = hc.y + 4; G.part({ x:sx, y:sy + Math.sin(i)*6, vx:(vp.x - sx)*2.6 + Math.random()*20, vy:(vp.y - sy)*2.6 + Math.sin(i*1.7)*30, life:0.36, col:i%2 ? '#8e98a4' : '#c3c9d1', s:2, g:0, drag:0 }); })(w); }
         setTimeout(function(){ if (d.hit){ S.youFlash = 1; S.youKnock = -(5 + Math.min(8, d.hit*0.5)); Puppet.pose('you', 'hurt', 0.42); G.shake(d.hit >= 10 ? 5 : 3, 0.24); G.stop(0.07); G.punch(0.035, vp.x, vp.y); S.volShown = d.vol; S.volHitT = 0.45; S.hurtT = 0.35; G.float('-'+d.hit, vp.x + 6, vp.y - 18, '#ffffff', { z:d.hit >= 10 ? 3 : 2 }); G.burst(vp.x, vp.y, ['#5b6672','#8e98a4','#c3c9d1'], 18, 100); Sound.sfx('hurt', d.hit); G.word(d.hit >= 10 ? 'OOF!' : 'oof', vp.x + 22, vp.y - 34, { col:'#dce0e5', ink:'#3a4450', size:d.hit >= 10 ? 9 : 7, life:0.7, quiet:true }); } if (d.blocked){ S.backShown = d.backup; G.float('blocked '+d.blocked, vp.x + 34, vp.y - 30, '#7fe0f8', { size:6 }); G.burst(vp.x + 26, vp.y - 14, ['#20adca','#ffffff','#7fe0f8'], 22, 120); Sound.sfx('block'); if (!d.hit) G.word('BLOCKED!', vp.x + 40, vp.y - 40, { col:'#ffffff', burst:'#20adca', size:8, life:0.8 }); } }, 200);
         break;
@@ -1948,7 +2027,8 @@ var Battle = {
   },
   winTimeline:function(dt){
     var S = this, r = S.rescue;
-    if (r && S.winT > 0.7 && !r.free){ r.free = true; Sound.sfx('pair'); }
+    if (r && S.winT > 0.7 && !r.free){ r.free = true; Sound.sfx('pair'); if (FRIEND_LINES[r.id]){ S.say = { text:FRIEND_LINES[r.id], t:0 }; setTimeout(function(){ Sound.sfx('babble'); }, 120); } }
+    if (S.say){ S.say.t += dt; if (S.say.t > 2.2) S.say = null; }
     if (r && r.free){ r.hop += dt; if (S.winT > 1.3){ r.walk += dt; r.x -= dt*120; } }
     if (S.winT > 2.6 && !S.leaving){ S.leaving = true; if (B.kind === 'boss'){ Ending.mode = 'win'; G.go(Ending); } else { Reward.result = S.result; Reward.place = S.place; G.go(Reward); } }
   },
@@ -1971,6 +2051,7 @@ var Battle = {
     }
     /* you and your friends */
     if (B) S.drawStage(b);
+    if (S.say && S.rescue && S.say.t < 2.2){ var rr = S.rescue, al = Math.min(1, S.say.t*5, (2.2 - S.say.t)*3), bw = Math.min(118, G.measure(S.say.text, { size:5.5, read:true, bold:true }) + 12), bx = Math.max(4, Math.min(380 - bw, rr.x - bw/2)), by = HUSH_FLOOR - 82; b.save(); b.globalAlpha = al; PX.RR(b, bx - 1, by - 1, bw + 2, 13, 5, '#0a1020'); PX.RR(b, bx, by, bw, 11, 4.4, '#ffffff'); var tx2 = Math.max(bx + 6, Math.min(bx + bw - 6, rr.x)); PX.poly(b, [[tx2 - 3, by + 10.5], [tx2 + 3, by + 10.5], [tx2, by + 15]], '#ffffff'); b.restore(); G.text(S.say.text, bx + bw/2, by + 5.8, { size:5.5, col:'#0a1020', align:'center', base:'middle', read:true, bold:true, alpha:al }); }
     /* the Hush */
     if (!S.hush.gone && B){
       var moodSet = S.hMoodT > 0 && S.moods && S.moods[S.hMood] && S.moods[S.hMood].todo <= 0 ? S.moods[S.hMood] : null, fr = moodSet ? moodSet[Math.floor(S.fi/4) % moodSet.length] : PX.pickFrame(S.frames, S.fi), fr2 = moodSet ? null : (S.frames[(S.fi + 1) % S.frames.length] || null), sc = S.hush.scale, h = S.hush, w = fr.width*sc*(1 + h.sq), hh = fr.height*sc*(1 - h.sq);
@@ -2029,6 +2110,7 @@ var Battle = {
     var S = this, w = 70, y = HUSH_FLOOR + 6;
     if (B.phase === 2){ S.bar(b, HUSH_X, y, w, S.heardShown, B.heardMax, S.heardShown, PX.lin(b, 0, y, 0, y+7, [[0,'#7fe0f8'],[1,'#20adca']])); for (var k=0;k<5;k++){ b.drawImage(ART.mini('heart'), HUSH_X - w/2 + k*15 + 2, y - 12); } return; }
     S.bar(b, HUSH_X, y, w, S.hpShown, B.en.max, S.hpGhost, PX.lin(b, 0, y, 0, y+7, [[0,'#f08a8a'],[0.5,'#d9534f'],[1,'#a83232']]));
+    G.text(B.en.name, HUSH_X, y - 8.5, { size:5.2, col:'#ffffff', align:'center', outline:'#0a1020', outlineW:1.4, bold:true });
     var st = []; if (B.en.fog) st.push(['fog', B.en.fog, 'Fog', '#4a5568', 'Soaks up this much of your noise.']); if (B.en.grow) st.push(['grow', B.en.grow, 'Grow', '#4a3a6a', 'Its drains are this much bigger.']); if (B.en.stun) st.push(['sleep', 1, 'Asleep', '#2a4a5a', 'It skips its next move.']);
     if (st.length) S.statuses(b, HUSH_X, y + 11, st);
     if (G.hover(HUSH_X - w/2, y - 2, w, 11)) S.tip = { x:HUSH_X - 70, y:y + 12, title:'How loud the Hush is', text:'Make noise to break it. When it hits 0, this place comes back.' };
@@ -2165,7 +2247,7 @@ function drawCorner(b, onPause){
 var LIGHTS = ['corridor','canteen','groupchat','lobby','busstop','playground','hall'];
 var Title = {
   go:function(){ Run = null; B = null; G.go(this); },
-  enter:function(){ this.moon = 0; this.pigeon = -1; this.saved = Store.get(Store.RUN); Sound.setLayers(2); if (Meta.maxLevel > 0 && this.level === undefined) this.level = 0; this.level = Math.min(this.level || 0, Meta.maxLevel);
+  enter:function(){ Sound.ambience(null); Sound.setMusic('normal'); this.moon = 0; this.pigeon = -1; this.saved = Store.get(Store.RUN); Sound.setLayers(2); if (Meta.maxLevel > 0 && this.level === undefined) this.level = 0; this.level = Math.min(this.level || 0, Meta.maxLevel);
     if (oddSocksWeek() && !Meta.backs.oddsocks){ Meta.backs.oddsocks = true; saveMeta(); this.oddToast = 3; } },
   update:function(dt){ var litN = LIGHTS.filter(function(k){ return Meta.lit[k]; }).length; G.Lt = 0.1 + litN/7*0.9; if (this.pigeon >= 0){ this.pigeon += dt; if (this.pigeon > 4) this.pigeon = -1; } if (this.oddToast) this.oddToast = Math.max(0, this.oddToast - dt);
  },
@@ -2184,6 +2266,7 @@ var Title = {
       G.text(ch, cx + G.measure(ch, { size:26 })/2, 34 - bob, { size:26, col:col, align:'center', base:'middle', shadow:on ? PX.shade(col, -0.5) : '#3a4450', shadowY:2, outline:'#0a1020', outlineW:2.2, rot:rot });
       if (on && G.bt.pulse > 0.85 && Math.random() < 0.3 && !G.reduce) G.part({ x:cx + 8, y:20, vx:(Math.random()-0.5)*20, vy:-25, life:0.9, col:col, s:2, g:0, drag:0.5 }); }
     var lit = LIGHTS.filter(function(k){ return Meta.lit[k]; }).length;
+    G.text('Anti-Bullying Week 2026: Break the Silence', 192, 4, { size:4.6, col:'#c9d4f0', align:'center', alpha:0.9 });
     G.text('Turn the school back on', 192, 56, { size:7, col:'#f3d36b', align:'center', outline:'#0a1020', wave:0.4 + G.L*0.8, waveSpeed:5 });
     /* menu */
     var y = 150;
@@ -2202,27 +2285,58 @@ var Title = {
   start:function(){ Sound.sfx('click'); var lvl = this.level || 0; newRun(lvl); Run.lit = []; saveRun(); if (!Meta.introSeen){ Meta.introSeen = true; saveMeta(); Intro.after = function(){ MapScene.go(); }; G.go(Intro); } else MapScene.go(); }
 };
 
-/* three wordless panels */
+/* four wordless panels: friends chatting; a hurtful message; the quiet spreads; you pick up your voice */
 var Intro = {
-  enter:function(){ this.t = 0; this.p = 0; Sound.setLayers(4); G.Lt = 1; this.said = {}; this.bg = ART.place('corridor'); this.kids = ['nia','kit','cole','dot','pigeon']; },
-  update:function(dt){ this.t += dt; if (this.t > 3.6){ this.next(); } },
-  next:function(){ this.p++; this.t = 0; if (this.p === 1){ Sound.setLayers(1); G.Lt = 0; } if (this.p === 2) Sound.setLayers(2); if (this.p > 2){ this.p = 2; this.t = 3.6; var a = this.after; this.after = null; if (a) a(); } },
+  PANEL:3.9, N:4,
+  enter:function(){ this.t = 0; this.p = 0; Sound.setLayers(4); Sound.ambience('corridor'); G.Lt = 1; this.said = {}; this.bg = ART.place('corridor'); this.kids = ['nia','kit','cole','dot','pigeon']; },
+  update:function(dt){ this.t += dt; if (this.t > this.PANEL) this.next(); },
+  next:function(){ this.p++; this.t = 0; if (this.p === 1) Sound.setLayers(3); if (this.p === 2){ Sound.setLayers(1); Sound.ambience(null); G.Lt = 0; } if (this.p === 3) Sound.setLayers(2); if (this.p > this.N - 1){ this.p = this.N - 1; this.t = this.PANEL; var a = this.after; this.after = null; if (a) a(); } },
   up:function(x, y, drag){ if (!drag && !(x > 330 && y > 196)) this.next(); },
+  kidX:function(i){ return 66 + i*62; },
+  /* a kid, chatting (coloured) or gone quiet (grey) */
+  kid:function(b, id, i, quiet, pose, face){ var x = this.kidX(i), dir = i === 4 ? -1 : (i % 2 ? -1 : 1);
+    if (quiet >= 1){ var g = greyCast(id); b.drawImage(g, x - g.width/2, 146 - g.height); return; }
+    Puppet.draw(b, id, x, 146, { key:'intro_'+id, dir:id === 'pigeon' ? 0 : dir, pose:pose, face:face, alpha:1 });
+    if (quiet > 0){ var g2 = greyCast(id); b.save(); b.globalAlpha = quiet; b.drawImage(g2, x - g2.width/2, 146 - g2.height); b.restore(); } },
+  dots:function(b, i){ var x = this.kidX(i) - 8, sp = PX.castC(this.kids[i]), qy = 146 - sp.height - 12; PX.RR(b, x, qy, 15, 8.4, 3.6, '#fef8f4'); PX.poly(b, [[x+3, qy+7.6], [x+2, qy+11], [x+6, qy+7.6]], '#fef8f4'); for (var d=0;d<3;d++) PX.O(b, x+4+d*3.6, qy+4.2, 0.95, 0.95, '#0a1020'); },
+  /* a phone with an unkind message on it: a jagged red bubble full of scribble */
+  phone:function(b, x, y, t){ var sh = G.reduce ? 0 : (t < 1.2 ? Math.sin(t*60)*1.2 : 0); b.save(); b.translate(x + sh, y); b.rotate(-0.12);
+    PX.RR(b, -7, -12, 14, 24, 3, '#0a1020'); PX.RR(b, -5.6, -10, 11.2, 18, 1.6, '#cfe9f2');
+    var pts = []; for (var k=0;k<12;k++){ var a = k/12*Math.PI*2, r = k%2 ? 3.4 : 4.8; pts.push([Math.cos(a)*r, -2 + Math.sin(a)*r*0.8]); } PX.poly(b, pts, '#e84a5f');
+    PX.LN(b, [[-2.6,-3],[-1.2,-1.4],[0,-3.2],[1.2,-1.2],[2.6,-3]], '#0a1020', 0.7); PX.LN(b, [[-2.2,-0.6],[2.2,-0.6]], '#0a1020', 0.6);
+    b.restore();
+    if (t < 1.2 && !G.reduce){ b.save(); b.strokeStyle = '#ffffff'; b.lineWidth = 0.8; [-1,1].forEach(function(s){ b.beginPath(); b.arc(x, y, 12 + (t*20 % 4), s > 0 ? -0.6 : Math.PI - 0.6, s > 0 ? 0.6 : Math.PI + 0.6); b.stroke(); }); b.restore(); } },
+  fog:function(b, cx, cy, r, a){ if (r <= 0) return; b.save(); b.globalAlpha = a; for (var f=0;f<26;f++){ var ang = f*2.39, rr = r*Math.sqrt((f + 0.5)/26), fx = cx + Math.cos(ang)*rr*1.3, fy = cy + Math.sin(ang)*rr*0.55 + Math.sin(G.t*1.6 + f)*2; PX.O(b, fx, fy, 14 + (f%5)*3, 9 + (f%3)*2, f%2 ? 'rgba(196,202,212,.6)' : 'rgba(170,178,190,.55)'); } b.restore(); },
   draw:function(b){
-    var S = this, t = S.t, bg = S.bg;
-    if (S.p === 0){ b.drawImage(bg.col, 0, 0); [[0.05,'HEY!',90,60,'#ef7724'],[0.8,'HAHA!',250,54,'#20adca'],[1.6,'COO!',330,80,'#f3d36b']].forEach(function(q){ if (t > q[0] && !S.said[q[1]]){ S.said[q[1]] = 1; G.word(q[1], q[2], q[3], { col:'#ffffff', burst:q[4], size:9, life:1.2 }); } }); S.kids.forEach(function(k, i){ var sp = PX.castC(k), x = 60 + i*62, bob = G.dance(i, 5) + 1; b.drawImage(sp, x, 146 - sp.height - bob); if (Math.random() < 0.06) G.part({ x:x + 20, y:146 - sp.height - 6, vx:(Math.random()-0.5)*10, vy:-22, life:1.4, col:['#ef7724','#20adca','#f3d36b'][i%3], s:2, g:0, drag:0 }); }); }
-    if (S.p === 1){ var k = Math.min(1, t/2.2); if (t > 0.6 && !S.said.shh){ S.said.shh = 1; G.word('shhhhh...', 300, 50, { col:'#c3c9d1', ink:'#3a4450', size:10, wave:2, rot:0, vy:6, life:2.4, quiet:true }); } b.drawImage(bg.grey, 0, 0); b.globalAlpha = 1 - k; b.drawImage(bg.col, 0, 0); b.globalAlpha = 1;
-      S.kids.forEach(function(kd, i){ var silent = k > (i+1)/6, sp = silent ? greyCast(kd) : PX.castC(kd), x = 60 + i*62; if (silent) b.drawImage(sp, x, 146 - sp.height); else Puppet.draw(b, kd, x + sp.width/2, 146, { key:'intro_'+kd, pose:(t*1.3 + i) % 3 < 0.6 ? 'cheer' : null, hop:Math.abs(Math.sin(t*5 + i))*2 }); if (k > (i+1)/6){ var qy = 146 - sp.height - 12; PX.RR(b, x+13, qy, 15, 8.4, 3.6, '#fef8f4'); PX.poly(b, [[x+16, qy+7.6], [x+15, qy+11], [x+19, qy+7.6]], '#fef8f4'); for (var d=0;d<3;d++) PX.O(b, x+17+d*3.6, qy+4.2, 0.95, 0.95, '#0a1020'); } });
-      var fx = 400 - k*460; for (var f=0;f<16;f++) PX.E(b, Math.round(fx + (f%4)*30 + Math.sin(G.t*2+f)*4), 40 + Math.floor(f/4)*40, 34, 22, 'rgba(180,188,200,.55)'); }
-    if (S.p === 2){ G.Lt = Math.min(1, t/2); b.fillStyle = '#05070f'; b.fillRect(0, 0, 384, 216); b.globalAlpha = 0.35; b.drawImage(bg.grey, 0, 0); b.globalAlpha = 1;
-      var rise = G.ease.out(Math.min(1, t/1.4)); var cy = 216 - rise*150;
-      for (var r=0;r<12;r++){ var a = r/12*Math.PI*2 + G.t*0.4; b.globalAlpha = 0.12 + 0.08*Math.sin(G.t*3 + r); PX.cap(b, 192, cy + 38, 192 + Math.cos(a)*70, cy + 38 + Math.sin(a)*70, 2.4, '#f3d36b'); } b.globalAlpha = 1;
-      ART.stepGlow(b, 192, cy + 38, 50, '#f3d36b', 6, 0.5);
-      ART.drawCard(b, { id:'speak', up:false, uid:'intro' }, 192 - ART.CW/2, cy, {});
-      if (t > 1.6) G.text('Turn the school back on', 192, 24, { size:9, col:'#f3d36b', align:'center', outline:'#0a1020', alpha:Math.min(1, (t-1.6)*2) }); }
+    var S = this, t = S.t, bg = S.bg, kids = S.kids, ki = 1, kx = S.kidX(ki);
+    /* 1: friends chatting in the corridor */
+    if (S.p === 0){ b.drawImage(bg.col, 0, 0);
+      [[0.1,'HEY!',kx - 50,64,'#ef7724'],[0.9,'HI!',S.kidX(2) + 4,58,'#20adca'],[1.7,'COO!',S.kidX(4),76,'#f3d36b']].forEach(function(q){ if (t > q[0] && !S.said[q[1]]){ S.said[q[1]] = 1; G.word(q[1], q[2], q[3], { col:'#ffffff', burst:q[4], size:9, life:1.2 }); Sound.sfx('babble'); } });
+      kids.forEach(function(k, i){ S.kid(b, k, i, 0, ((t*1.1 + i*0.7) % 2.4) < 0.7 ? (i % 2 ? 'cheer' : 'speak') : null, 'happy'); }); }
+    /* 2: a phone buzzes; one friend reads something unkind and goes quiet; the quiet starts with them */
+    if (S.p === 1){ b.drawImage(bg.col, 0, 0); if (t < 0.05 && !S.said.buzz){ S.said.buzz = 1; Sound.sfx('junk'); }
+      var q = Math.max(0, Math.min(1, (t - 1.4)/1.6));
+      kids.forEach(function(k, i){ if (i === ki) S.kid(b, k, i, q, t > 1 ? 'slump' : 'listen', t > 1 ? 'wince' : null); else S.kid(b, k, i, 0, ((t*1.1 + i*0.7) % 2.4) < 0.7 ? 'cheer' : null, 'happy'); });
+      S.phone(b, kx + 9, 100, t);
+      S.fog(b, kx, 118, Math.max(0, (t - 1.6)*14), Math.min(1, (t - 1.6)*1.5));
+      if (t > 2.4 && !S.said.shh0){ S.said.shh0 = 1; G.word('shh...', kx, 70, { col:'#c3c9d1', ink:'#3a4450', size:8, wave:2, rot:0, vy:6, life:1.6, quiet:true }); } }
+    /* 3: the quiet spreads to everyone */
+    if (S.p === 2){ var k2 = Math.min(1, t/2.6), reach = 30 + k2*260; b.drawImage(bg.grey, 0, 0); b.globalAlpha = 1 - k2; b.drawImage(bg.col, 0, 0); b.globalAlpha = 1;
+      if (t > 0.5 && !S.said.shh){ S.said.shh = 1; G.word('shhhhh...', 300, 50, { col:'#c3c9d1', ink:'#3a4450', size:10, wave:2, rot:0, vy:6, life:2.4, quiet:true }); }
+      kids.forEach(function(k, i){ var d = Math.abs(S.kidX(i) - kx), qq = i === ki ? 1 : Math.max(0, Math.min(1, (reach - d)/40)); S.kid(b, k, i, qq, null, null); if (qq >= 1) S.dots(b, i); });
+      S.fog(b, kx, 112, reach*0.55, 0.85); }
+    /* 4: out of the fog, you pick up your voice */
+    if (S.p === 3){ G.Lt = Math.min(1, t/2); b.fillStyle = '#05070f'; b.fillRect(0, 0, 384, 216); b.globalAlpha = 0.35; b.drawImage(bg.grey, 0, 0); b.globalAlpha = 1;
+      S.fog(b, 60, 120, 120, 0.4);
+      var walk = Math.min(1, t/1.3), yx = G.lerp(-20, 150, G.ease.out(walk)), lifted = t > 1.5;
+      var rise = G.ease.out(Math.max(0, Math.min(1, (t - 1.2)/0.9))), cx = 214, cy = 216 - rise*140;
+      if (rise > 0){ for (var r=0;r<12;r++){ var a = r/12*Math.PI*2 + G.t*0.4; b.globalAlpha = (0.12 + 0.08*Math.sin(G.t*3 + r))*rise; PX.cap(b, cx, cy + 38, cx + Math.cos(a)*70, cy + 38 + Math.sin(a)*70, 2.4, '#f3d36b'); } b.globalAlpha = 1; ART.stepGlow(b, cx, cy + 38, 50, '#f3d36b', 6, 0.5*rise); }
+      drawChar(b, 'you', yx, 168, { key:'intro_you', sc:1.6, dir:1, walk:walk < 1 ? t*14 : null, pose:lifted ? 'speak' : null, face:lifted ? 'happy' : null });
+      if (rise > 0) ART.drawCard(b, { id:'speak', up:false, uid:'intro' }, cx - ART.CW/2, cy, {});
+      if (t > 1.9){ if (!S.said.go){ S.said.go = 1; Sound.sfx('win'); } G.text('Turn the school back on', 192, 24, { size:9, col:'#f3d36b', align:'center', outline:'#0a1020', alpha:Math.min(1, (t-1.9)*2) }); } }
     /* letterbox and panel dots */
     b.fillStyle = '#05070f'; b.fillRect(0, 0, 384, 10); b.fillRect(0, 206, 384, 10);
-    for (var i=0;i<3;i++){ PX.O(b, 183 + i*10, 211, i === S.p ? 3.4 : 2.6, i === S.p ? 3.4 : 2.6, i === S.p ? '#f3d36b' : '#3a4566'); }
+    for (var i=0;i<S.N;i++){ PX.O(b, 177 + i*10, 211, i === S.p ? 3.4 : 2.6, i === S.p ? 3.4 : 2.6, i === S.p ? '#f3d36b' : '#3a4566'); }
     if (G.btn('Skip', 334, 196, 44, 16, { col:'#3a4566', size:6 })){ var a2 = S.after; S.after = null; if (a2) a2(); }
   },
   drawTop:function(b){ drawCorner(b, null); }
@@ -2232,7 +2346,7 @@ var Intro = {
 var MapScene = {
   go:function(){ saveRun(); G.go(this); },
   enter:function(){
-    var m = Run.map, S = this; S.rowH = 40; S.H = m.rows*S.rowH + 120; S.scroll = 0; S.target = 0;
+    var m = Run.map, S = this; Sound.ambience(null); Sound.setMusic('normal'); S.rowH = 40; S.H = m.rows*S.rowH + 120; S.scroll = 0; S.target = 0;
     var gk = S.H+'_'+Run.startedAt; if (!S.groundCache || S.groundCache.k !== gk){ S.groundCache = { k:gk, c:S.groundCanvas() }; } S.ground = S.groundCache.c; Sound.setLayers(3);
     var here = Run.row >= 0 && Run.row < m.rows ? S.pos(Run.row+'_'+Run.col) : { y:S.H - 30 };
     S.target = S.scroll = Math.max(0, Math.min(S.H - 216, here.y - 150));
@@ -2303,9 +2417,11 @@ var MapScene = {
       /* a lit place: the colour comes back like watercolour */
       if (done && isFight){ var col = ART.WINDOWS[n.place].col; ART.stepGlow(b, p.x, y, 20, col, 4, 0.55); }
       if (isOpen){ b.save(); b.translate(p.x, y + bob); b.rotate(G.t*0.8); b.strokeStyle = '#c75e14'; b.lineWidth = 0.9; b.setLineDash([2, 2.2]); b.beginPath(); b.arc(0, 0, size*0.7, 0, 6.2832); b.stroke(); b.restore(); }
+      if (isFight){ var pcol = ART.WINDOWS[n.place].col; b.save(); b.globalAlpha = done || isOpen ? 0.55 : 0.3; PX.O(b, p.x, y + bob + 1, size*0.62, size*0.5, pcol); b.restore(); }
       var img = (done || isOpen) ? PX.iconC(iname === 'mystery' ? 'mystery' : iname) : PX.inkIcon(iname, 18);
       if (!done && !isOpen){ b.globalAlpha = 0.9; b.globalCompositeOperation = 'multiply'; }
       b.drawImage(img, p.x - size/2, y - size/2 + bob, size, size); b.globalAlpha = 1; b.globalCompositeOperation = 'source-over';
+      if (isFight){ var em = PLACE_EMBLEM[n.place], es = 9*popS; PX.O(b, p.x + size*0.46, y + bob + size*0.34, es*0.62, es*0.62, '#0a1020'); PX.O(b, p.x + size*0.46, y + bob + size*0.34, es*0.55, es*0.55, '#fef8f4'); b.drawImage(PX.iconC(em), p.x + size*0.46 - es*0.42, y + bob + size*0.34 - es*0.42, es*0.84, es*0.84); }
       /* visited: circled in pen */
       if (done){ b.save(); b.strokeStyle = 'rgba(58,42,30,.85)'; b.lineWidth = 1; b.beginPath(); for (var a2=0; a2<=6.6; a2+=0.25){ var rr = 12 + Math.sin(a2*3 + idx)*0.8; var xx = p.x + Math.cos(a2 - 0.4)*rr, yy = y + Math.sin(a2 - 0.4)*rr*0.92; if (a2 === 0) b.moveTo(xx, yy); else b.lineTo(xx, yy); } b.stroke(); b.restore(); }
       if (k === here){ drawChar(b, 'you', p.x + 16, y + 6, { key:'mapyou', sc:0.5 }); }
@@ -2351,11 +2467,20 @@ function flipDraw(b, c, x, y, t, backId){ var k = Math.max(0, Math.min(1, t)); v
 function currentBackId(){ if (oddSocksDay()) return BACK_ORDER[Math.floor(G.t*10) % BACK_ORDER.length]; return Meta.back || 'plain'; }
 
 function t0ok(S, i){ return (S.flipStart - 0.15 - i*0.22)/0.35 >= 1; }
+/* who comes back to life in each place */
+var PLACE_PEOPLE = { corridor:['lin','mopghost','kit'], canteen:['dot','lunchbox','nia'], busstop:['bev','duck','lou'], playground:['cole','pigeon','trainer'], groupchat:['emoji','modbot','nia'], lobby:['gran','slime','kit'] };
 var Reward = {
-  enter:function(){ var r = this.result; this.t = 0; this.f0 = this.f1 = this.f2 = 0; this.w0 = this.w1 = this.w2 = 0; this.phase = 'loot'; this.pickSel = null; this.bg = ART.place(this.place); this.flipStart = -1; this.backs = [0,1,2].map(function(){ return oddSocksDay() ? pick(BACK_ORDER) : (Meta.back || 'plain'); }); this.socksShown = Run.socks - (r ? r.socks : 0); Sound.setLayers(4); this.hopT = 0; },
+  enter:function(){ var r = this.result; this.t = 0; this.f0 = this.f1 = this.f2 = 0; this.w0 = this.w1 = this.w2 = 0; this.phase = r && r.newLit ? 'light' : 'loot'; this.pickSel = null; this.bg = ART.place(this.place); this.flipStart = -1; this.backs = [0,1,2].map(function(){ return oddSocksDay() ? pick(BACK_ORDER) : (Meta.back || 'plain'); }); this.socksShown = Run.socks - (r ? r.socks : 0); Sound.setLayers(4); this.hopT = 0; },
   update:function(dt){ G.Lt = 1; this.t += dt; this.hopT += dt; var r = this.result; if (this.socksShown < Run.socks && this.t > 0.6){ this.socksShown = Math.min(Run.socks, this.socksShown + dt*40); if (Math.random() < dt*20) Sound.sfx('tick'); } if (this.phase === 'pick' && this.flipStart >= 0) this.flipStart += dt; },
   draw:function(b){
     var S = this, r = S.result; b.drawImage(S.bg.col, 0, 0); b.fillStyle = 'rgba(8,12,28,.55)'; b.fillRect(0, 0, 384, 216);
+    /* the first time a place comes back: two wordless seconds of it alive again */
+    if (S.phase === 'light'){ var lt = S.t, k = Math.min(1, lt/0.9), who = PLACE_PEOPLE[S.place] || ['nia','kit','cole'];
+      b.drawImage(S.bg.grey, 0, 0); floodDraw(b, S.bg.col, 192, 120, k*260); if (lt < 0.05 && !S.lightSnd){ S.lightSnd = 1; Sound.sfx('win'); }
+      who.forEach(function(id, i){ var x = 110 + i*82, on = lt > 0.5 + i*0.25; if (!on){ var gc = greyCast(id); b.drawImage(gc, x - gc.width/2, 178 - gc.height); return; } if (!S['lw'+i]){ S['lw'+i] = 1; Sound.sfx('babble'); G.burst(x, 150, ['#f3d36b','#ffffff','#7cf07c'], 14, 90); } Puppet.draw(b, id, x, 178, { key:'light_'+id, sc:1.3, dir:i === 0 ? 1 : i === 2 ? -1 : 0, pose:((lt*1.4 + i) % 1.6) < 0.6 ? 'cheer' : null, face:'happy', hop:Math.abs(Math.sin(lt*6 + i))*3 }); });
+      var wc = ART.WINDOWS[S.place] && ART.WINDOWS[S.place].col; if (wc) ART.stepGlow(b, 192, 90, 120*k, wc, 5, 0.25);
+      if (lt > 2.6 || (lt > 0.4 && G.clicked(0, 0, 384, 216))){ S.phase = 'loot'; S.t = 0.2; }
+      return; }
     if (S.phase === 'loot'){
       G.text((PLACES[S.place] ? PLACES[S.place].name : 'It') + ' is back!', 192, 14 - (G.dance(0, 2)), { size:10, col:'#ffffff', align:'center', outline:'#0a1020', wave:1.4, waveSpeed:6 });
       if (r && r.newLit) G.text('A new light in the school', 192, 30, { size:5.5, col:'#f3d36b', align:'center' });
@@ -2408,7 +2533,7 @@ function drawRestCorner(b, S){
   b.fillStyle = 'rgba(10,8,20,.35)'; b.fillRect(0, 182, 384, 34);
 }
 var Stop = {
-  enter:function(){ var S = this; S.bg = ART.place(S.node.place || 'corridor'); S.msg = null; S.t = 0; S.shopSel = null; Sound.setLayers(3);
+  enter:function(){ var S = this; S.bg = ART.place(S.node.place || 'corridor'); Sound.ambience(S.node.place || 'corridor'); Sound.setMusic('normal'); S.msg = null; S.t = 0; S.shopSel = null; Sound.setLayers(3);
     if (S.mode === 'shop' && (!Run.shop || Run.shop.key !== Run.current)){ Run.shop = shopStock(); Run.shop.key = Run.current; saveRun(); }
     if (S.mode === 'mystery'){ var se = Run.event && Run.event.key === Run.current ? Run.event : null;
       if (se){ S.ev = se.special ? se : (EVENTS.filter(function(e){ return e.id === se.id; })[0] || pick(EVENTS)); }
@@ -2478,32 +2603,48 @@ var Stop = {
 var Ending = {
   enter:function(){
     var S = this; S.t = 0; S.phase = 'result'; S.flipped = {}; S.res = null; S.loudWord = 0;
-    if (S.mode === 'win'){ S.res = finishRunWin(); S.bg = ART.place('hall'); Sound.setLayers(5); }
-    else { S.kept = Run ? Run.rescued.filter(function(v,i,a){ return a.indexOf(v) === i; }) : []; S.litRun = Run ? (Run.lit || []).slice() : []; endRunSave(); S.bg = ART.place('corridor'); Sound.setLayers(1); }
+    if (S.mode === 'win'){ S.res = finishRunWin(); S.bg = ART.place('hall'); Sound.setLayers(5); Sound.setMusic('bright'); Sound.ambience('hall'); }
+    else { S.kept = Run ? Run.rescued.filter(function(v,i,a){ return a.indexOf(v) === i; }) : []; S.litRun = Run ? (Run.lit || []).slice() : []; endRunSave(); S.bg = ART.place('corridor'); Sound.setLayers(1); Sound.setMusic('normal'); Sound.ambience(null); }
   },
   update:function(dt){ G.Lt = this.mode === 'win' || this.phase === 'trusted' ? 0.85 : 0.05; this.t += dt; if (this.mode === 'win' && this.phase === 'result' && !G.reduce && Math.random() < dt*10) G.part({ x:Math.random()*384, y:-4, vx:(Math.random()-0.5)*20, vy:30 + Math.random()*20, life:6, col:['#ef7724','#20adca','#f3d36b','#7cf07c','#e84a5f'][Math.floor(Math.random()*5)], s:2, g:10, drag:0.2 }); },
   draw:function(b){
     var S = this;
     if (S.phase === 'trusted') return S.drawTrusted(b);
+    if (S.phase === 'closing') return S.drawClosing(b);
     if (S.mode === 'win'){
       b.drawImage(S.bg.col, 0, 0); b.fillStyle = 'rgba(8,12,28,.18)'; b.fillRect(0, 0, 384, 216);
       /* the hall is lit: warm stage lights sweep in */
       var sw = G.reduce ? 0 : Math.sin(S.t*1.2)*30; ART.stepGlow(b, 150 + sw, 120, 120, '#ffe08a', 5, 0.45); ART.stepGlow(b, 260 - sw, 110, 110, '#7fe0f8', 5, 0.3);
-      G.text('The whole school can hear again', 192, 14, { size:9, col:'#ffffff', align:'center', outline:'#0a1020', wave:1.6, waveSpeed:6 }); if (S.t < 0.1 && !S.loudWord){ S.loudWord = 1; G.word('LOUD AND CLEAR!', 108, 96, { col:'#ffffff', burst:'#ef7724', size:11, life:1.8, wave:1.4 }); }
+      G.text('The whole school can hear again', 192, 14, { size:9, col:'#ffffff', align:'center', outline:'#0a1020', wave:1.6, waveSpeed:6 }); if (S.t < 0.1 && !S.loudWord){ S.loudWord = 1; G.word('LOUD AND CLEAR!', 100, 170, { col:'#ffffff', burst:'#ef7724', size:11, life:1.8, wave:1.4 }); }
       var sp = PX.castC('tinyhush'), hop = G.dance(0, 7) + 1; ART.stepGlow(b, 110, 110, 46, '#7fd0f0', 5, 0.4); Puppet.draw(b, 'tinyhush', 110, 146, { key:'endtiny', sc:2, hop:hop/2 });
-      G.text('The Big Hush was only ever a tiny Hush that needed someone to listen.', 250, 54, { size:6, col:'#dfe6ff', align:'center', read:true, w:220, lh:7.5 });
-      var y = 84; var r = S.res || {};
+      G.text('The Big Hush was only ever a tiny Hush that needed someone to listen.', 250, 44, { size:6, col:'#dfe6ff', align:'center', read:true, w:220, lh:7.5 });
+      G.text('The Hush is the quiet that grows when someone is treated unkindly and nobody says anything.', 250, 66, { size:5.4, col:'#f3d36b', align:'center', read:true, w:220, lh:7 });
+      var y = 92; var r = S.res || {};
       if (r.tiny){ G.text('Tiny Hush joined your collection', 250, y, { size:5.5, col:'#7fe0f8', align:'center' }); y += 12; }
       if (r.newLevel){ G.text('Level '+Meta.maxLevel+' unlocked', 250, y, { size:6, col:'#f3d36b', align:'center' }); G.text(LEVELS[Meta.maxLevel], 250, y + 9, { size:5, col:'#c9d4f0', align:'center', read:true, w:200 }); y += 26; }
       if (r.back){ b.drawImage(ART.backCard(r.back), 236, y, 27, 38); G.text('New card back', 270, y + 14, { size:5, col:'#ffffff' }); y += 44; }
-      if (G.btn('Next', 162, 186, 60, 20, { size:8, pulse:true })){ S.phase = 'trusted'; S.t = 0; Sound.sfx('click'); }
+      if (G.btn('Next', 162, 186, 60, 20, { size:8, pulse:true })){ S.phase = 'closing'; S.t = 0; Sound.sfx('click'); }
     } else {
-      b.drawImage(S.bg.grey, 0, 0); b.fillStyle = 'rgba(8,12,28,.6)'; b.fillRect(0, 0, 384, 216);
-      G.text('You went quiet for now', 192, 28, { size:10, col:'#ffffff', align:'center', outline:'#0a1020' });
-      G.text('That\'s okay. It happens. Every place you lit up stays lit.', 192, 50, { size:6, col:'#dfe6ff', align:'center', read:true, w:300 });
-      if (S.kept.length){ G.text('These friends stay in your collection:', 192, 76, { size:5.5, col:'#c9d4f0', align:'center', read:true }); var x0 = 192 - (S.kept.length*44)/2; S.kept.forEach(function(id, i){ var sp = PX.castC(ALLIES[id].cast); Puppet.draw(b, ALLIES[id].cast, x0 + i*44 + 2 + sp.width/2, 140, { key:'kept_'+id, hop:Math.abs(Math.sin(S.t*4 + i))*3 }); }); }
-      if (G.btn('Next', 162, 186, 60, 20, { size:8, pulse:true })){ S.phase = 'trusted'; S.t = 0; Sound.sfx('click'); }
+      b.drawImage(ART.school(), 0, 0); LIGHTS.forEach(function(k){ ART.drawWindow(b, k, G.t, !!Meta.lit[k]); });
+      /* places lit on this run twinkle */
+      S.litRun.forEach(function(k, i){ var w = ART.WINDOWS[k]; if (!w || G.reduce) return; var ph = (S.t*1.5 + i*0.4) % 1; PX.star5(b, w.x + w.w/2, w.y - 4 - ph*6, 2.4*(1 - ph), 0.9*(1 - ph), '#fff4c2'); });
+      b.fillStyle = 'rgba(8,12,28,.35)'; b.fillRect(0, 0, 384, 40);
+      G.text('You went quiet for now', 192, 8, { size:10, col:'#ffffff', align:'center', outline:'#0a1020' });
+      G.text('That\'s okay. It happens. Every place you lit up stays lit.', 192, 26, { size:6, col:'#dfe6ff', align:'center', read:true, w:300 });
+      if (S.kept.length){ var n = Math.min(6, S.kept.length), x0 = 192 - (n - 1)*24; S.kept.slice(0, n).forEach(function(id, i){ Puppet.draw(b, ALLIES[id].cast, x0 + i*48, 182, { key:'kept_'+id, sc:0.85, hop:Math.abs(Math.sin(S.t*4 + i))*3 }); }); }
+      if (G.btn('Next', 162, 192, 60, 18, { size:8, pulse:true })){ S.phase = 'trusted'; S.t = 0; Sound.sfx('click'); }
     }
+  },
+  drawClosing:function(b){
+    var S = this, t = S.t, bg = ART.place('corridor'); b.drawImage(bg.col, 0, 0); G.Lt = 1;
+    var crowd = ['nia','kit','cole','dot','lin','sam'].concat((Run && Run.rescued || []).filter(function(id){ return ALLIES[id] && id !== 'tinyhush'; })).filter(function(v, i, a){ return a.indexOf(v) === i; }).slice(0, 7);
+    crowd.forEach(function(id, i){ var x = 40 + i*(300/Math.max(1, crowd.length - 1)), dir = i % 2 ? -1 : 1; Puppet.draw(b, id, x, 176, { key:'close_'+id, dir:dir, sc:1.1, pose:((t*1.2 + i*0.6) % 2.2) < 0.6 ? (i % 2 ? 'cheer' : 'speak') : null, face:'happy' }); });
+    drawChar(b, 'you', 192, 182, { key:'close_you', sc:1.25, pose:((t*1.2) % 2.2) < 0.7 ? 'cheer' : null, face:'happy' });
+    if (!G.reduce && Math.random() < 0.08) G.word(['HEY!','HI!','HAHA, YES!','SAME!','OMG','COO!'][Math.floor(Math.random()*6)], 40 + Math.random()*300, 60 + Math.random()*30, { col:'#ffffff', burst:['#ef7724','#20adca','#f3d36b'][Math.floor(Math.random()*3)], size:7, life:0.9 });
+    b.fillStyle = 'rgba(8,12,28,.55)'; b.fillRect(0, 8, 384, 40);
+    G.text('Break the Silence', 192, 14, { size:12, col:'#f3d36b', align:'center', outline:'#0a1020', alpha:Math.min(1, t*1.5) });
+    G.text('Anti-Bullying Week 2026', 192, 34, { size:6, col:'#ffffff', align:'center', alpha:Math.min(1, Math.max(0, t - 0.4)*1.5) });
+    if (t > 1.2 && G.btn('Next', 162, 192, 60, 18, { size:8, pulse:true })){ S.phase = 'trusted'; S.t = 0; Sound.sfx('click'); }
   },
   drawTrusted:function(b){
     var S = this; b.fillStyle = '#141a33'; b.fillRect(0, 0, 384, 216); ART.stepGlow(b, 192, 120, 160, '#3a3270', 6, 0.5);
@@ -2554,14 +2695,20 @@ var binderTab = 'allies', binderSel = null;
 function openBinder(){
   var o = $('ovBinder'); o.innerHTML = '';
   o.appendChild(el('h2','ptitle','Collection'));
-  var tabs = el('div','tabs'); [['allies','Allies'],['secrets','Secret cards'],['trinkets','Trinkets'],['backs','Card backs']].forEach(function(t){ var b = el('button', binderTab === t[0] ? 'on' : '', t[1]); b.onclick = function(){ binderTab = t[0]; binderSel = null; openBinder(); }; tabs.appendChild(b); }); o.appendChild(tabs);
+  var tabs = el('div','tabs'); [['allies','Allies'],['hushes','Hushes'],['secrets','Secret cards'],['trinkets','Trinkets'],['backs','Card backs']].forEach(function(t){ var b = el('button', binderTab === t[0] ? 'on' : '', t[1]); b.onclick = function(){ binderTab = t[0]; binderSel = null; openBinder(); }; tabs.appendChild(b); }); o.appendChild(tabs);
   var box = el('div','panelbox'); var grid = el('div','pockets'); box.appendChild(grid); o.appendChild(box);
   var detail = el('div','detail');
   if (binderTab === 'allies'){
     var n = ALLY_ORDER.filter(function(id){ return Meta.unlocked[id]; }).length;
     o.insertBefore(el('p','psub', n+' of '+ALLY_ORDER.length+' found. Pairs glow when they are in your hand together.'), box);
     ALLY_ORDER.forEach(function(id){ var a = ALLIES[id], has = Meta.unlocked[id]; var p = el('button','pocket '+(a.rarity !== 'common' ? a.rarity : '')+(has?'':' locked')+(binderSel===id?' sel':'')); p.appendChild(PX.img('cast', a.cast)); p.appendChild(el('span','', has ? esc(a.name) : (a.minLevel ? 'Level '+a.minLevel+'+' : a.kind === 'cameo' ? 'A secret' : '?'))); p.onclick = function(){ if (!has) return; binderSel = id; openBinder(); }; grid.appendChild(p); });
-    if (binderSel){ var a2 = ALLIES[binderSel]; detail.appendChild(cardCanvas(binderSel, 3)); var pr = el('div','pairs'); if (a2.pair && a2.pair.length){ pr.appendChild(el('span','pxfont','Pairs:')); a2.pair.forEach(function(p){ var known = Meta.pairs[[binderSel,p].sort().join('+')]; var im = PX.img('cast', ALLIES[p].cast); if (!known) im.style.filter = 'brightness(0) opacity(.4)'; addTip(im, known ? ALLIES[p].name : 'Not found yet', known ? a2.pairText : 'Play them together to find out.'); pr.appendChild(im); }); } detail.appendChild(pr); }
+    if (binderSel){ var a2 = ALLIES[binderSel]; detail.appendChild(cardCanvas(binderSel, 3)); if (BIOS[binderSel]) detail.appendChild(el('p','note bio', esc(BIOS[binderSel]))); var pr = el('div','pairs'); if (a2.pair && a2.pair.length){ pr.appendChild(el('span','pxfont','Pairs:')); a2.pair.forEach(function(p){ var known = Meta.pairs[[binderSel,p].sort().join('+')]; var im = PX.img('cast', ALLIES[p].cast); if (!known) im.style.filter = 'brightness(0) opacity(.4)'; addTip(im, known ? ALLIES[p].name : 'Not found yet', known ? a2.pairText : 'Play them together to find out.'); pr.appendChild(im); }); } detail.appendChild(pr); }
+  }
+  if (binderTab === 'hushes'){
+    var nb = HUSH_BOOK.filter(function(h){ return Meta.broken[h[0]]; }).length;
+    o.insertBefore(el('p','psub', nb+' of '+HUSH_BOOK.length+' broken. Every Hush is a kind of quiet.'), box);
+    HUSH_BOOK.forEach(function(h, i){ var has = Meta.broken[h[0]]; var p = el('button','pocket'+(has?'':' locked')+(binderSel===h[0]?' sel':'')); var im = el('img','px'); im.src = hushPic(h[1]); im.style.width = '96px'; im.style.height = '72px'; if (!has) im.style.filter = 'brightness(0) opacity(.35)'; p.appendChild(im); p.appendChild(el('span','', has ? esc(h[0]) : '?')); p.onclick = function(){ if (has){ binderSel = h[0]; openBinder(); } }; grid.appendChild(p); });
+    var hs = HUSH_BOOK.filter(function(h){ return h[0] === binderSel; })[0]; if (hs){ var bx = el('div','hushbio'); bx.appendChild(el('h3','', esc(hs[0]))); bx.appendChild(el('p','note', esc(hs[2]))); bx.appendChild(el('p','note bio', esc(hs[3]))); detail.appendChild(bx); }
   }
   if (binderTab === 'secrets'){
     SECRET_CARDS.forEach(function(id){ var has = Meta.secrets[id]; var p = el('button','pocket legendary'+(has?'':' locked')); p.appendChild(PX.img('icon', CARDS[id].icon)); p.appendChild(el('span','', has ? esc(CARDS[id].name) : 'Hidden at a Mystery stop')); p.onclick = function(){ if (has){ binderSel = id; openBinder(); } }; grid.appendChild(p); });
@@ -2577,6 +2724,8 @@ function openBinder(){
   var b = el('button','pbtn teal','Back'); b.onclick = function(){ overlay('ovBinder', false); }; o.appendChild(b);
   overlay('ovBinder');
 }
+var hushPics = {};
+function hushPic(form){ if (!hushPics[form]){ try { hushPics[form] = PX.hushFrames(form, 1)[0].toDataURL(); } catch(e){ hushPics[form] = ''; } } return hushPics[form]; }
 /* ---------- card maker ---------- */
 var MK_SKIN = ['#f5d6b8','#f2c8a0','#d9a07a','#a86b48','#6e4430'];
 var MK_HS = ['short','bob','long','bun','curly','messy','buzz','puffs'];
