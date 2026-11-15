@@ -146,6 +146,8 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
 .pip{display:inline-block;width:15px;height:15px;border-radius:50%;border:2px solid var(--ink);background:var(--white);margin:0 1px;vertical-align:middle;box-sizing:border-box}
 .pip.s1{background:linear-gradient(90deg,var(--teal) 50%,var(--white) 50%)}
 .pip.s2{background:var(--teal)}
+.pip[data-tip]{cursor:pointer}
+.piptip{position:absolute;z-index:50;background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 11px;font-size:.85rem;line-height:1.4;box-shadow:var(--lift)}
 .key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--body-tint);margin:10px 0 0}
 .key span{display:inline-flex;align-items:center;gap:6px}
 .live{margin-left:auto;font-size:.85rem;color:var(--body-tint);display:inline-flex;align-items:center;gap:6px}
@@ -249,13 +251,14 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
 
   <section class="part" id="impact" data-t="impact">
     <div class="ph"><h2>Impact</h2><span>What the evidence says</span></div>
+    <p class="lead" id="impactLead"></p>
     <dl class="list" id="impactPts"></dl>
     <p class="msg" id="msg" aria-live="polite">Loading the figures from the Base 5 sheet...</p>
     <div id="impactView" hidden>
       <div class="ctl" id="range" role="group" aria-label="Range"></div>
       <div class="tiles" id="tiles"></div>
       <div class="box">
-        <h3>Hours of learning recorded, week by week</h3>
+        <h3>Hours of learning recorded each week, all students together</h3>
         <div class="chart" id="chart" role="img"></div>
         <div class="xax" id="xax"></div>
       </div>
@@ -307,19 +310,32 @@ $("intentLead").textContent = I.lead || "";
 $("intentPts").innerHTML = pts(I.points);
 $("implLead").textContent = M.lead || "";
 $("implPts").innerHTML = pts(M.points);
+$("impactLead").textContent = P.lead || P.short || "";
 $("impactPts").innerHTML = pts(P.points);
 $("impactPts").hidden = !(P.points && P.points.length);
 $("print").onclick = function(){ window.print(); };
+var wasShut = [];
+window.addEventListener("beforeprint", function(){ wasShut = [].filter.call(document.querySelectorAll("details:not([open])"), function(d){ d.open = true; return true; }); });
+window.addEventListener("afterprint", function(){ wasShut.forEach(function(d){ d.open = false; }); wasShut = []; });
 
 /* ---------- one section at a time ---------- */
 var TABS = ["summary", "intent", "timetable", "impact", "tracker", "holly"];
 function show(t){
   if(TABS.indexOf(t) < 0) t = "summary";
   [].forEach.call(document.querySelectorAll("section.part"), function(sec){ sec.hidden = sec.dataset.t !== t; });
-  [].forEach.call($("tabs").querySelectorAll("button"), function(b){ b.setAttribute("aria-selected", b.dataset.t === t); });
+  [].forEach.call($("tabs").querySelectorAll("button"), function(b){ b.setAttribute("aria-selected", b.dataset.t === t); b.tabIndex = b.dataset.t === t ? 0 : -1; });
   try{ history.replaceState(null, "", "#" + t); }catch(e){}
 }
-[].forEach.call($("tabs").querySelectorAll("button"), function(b){ b.onclick = function(){ show(b.dataset.t); window.scrollTo(0, 0); }; });
+[].forEach.call($("tabs").querySelectorAll("button"), function(b){
+  var sec = document.querySelector('section.part[data-t="' + b.dataset.t + '"]');
+  b.id = "tab-" + b.dataset.t; b.setAttribute("aria-controls", sec.id); sec.setAttribute("role", "tabpanel"); sec.setAttribute("aria-labelledby", b.id);
+  b.onclick = function(){ show(b.dataset.t); window.scrollTo(0, 0); };
+});
+$("tabs").addEventListener("keydown", function(e){
+  if(e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  var bs = [].slice.call($("tabs").querySelectorAll("button")), i = bs.indexOf(document.activeElement); if(i < 0) return;
+  var n = bs[(i + (e.key === "ArrowRight" ? 1 : bs.length - 1)) % bs.length]; show(n.dataset.t); n.focus();
+});
 document.addEventListener("click", function(e){ var a = e.target.closest && e.target.closest("[data-go]"); if(a){ e.preventDefault(); show(a.dataset.go); window.scrollTo(0, 0); } });
 show(location.hash.slice(1));
 
@@ -355,16 +371,16 @@ function drawSummary(){
   var upto = W.end < today ? W.end : today, mins = 0, fin = 0, ls = {}, done = 0, tot = 0;
   EV.forEach(function(r){
     var d = String(r.Day); if(d > upto) return;
-    mins += +r.Minutes || 0;
-    if(String(r.Finished) === "yes" && r.Kind !== "lesson") fin++;
+    mins += r._m;
+    if(r._fin) fin++;
     if(r.Kind === "lesson") ls[d + "|" + r.Activity] = 1;
   });
   if(TG) WHO.forEach(function(w){ (TG.targets || []).forEach(function(t){ if(hasStep(t, w)){ tot++; if(stateOf(t, w) === 2) done++; } }); });
   var tiles = [
-    [hours(mins) + '<small> hrs</small>', "of learning recorded"],
+    [hours(mins) + '<small> hrs</small>', "of learning recorded, all students together"],
     [fin, "activities finished"],
     [Object.keys(ls).length, "whole group lessons taught"],
-    [TG ? done + '<small> of ' + tot + '</small>' : "-", "milestone steps done across the group"]
+    [TG && tot ? done + '<small> of ' + tot + '</small>' : "-", "milestone steps done across the group"]
   ];
   $("sumTiles").innerHTML = tiles.map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + ', Autumn 2 so far</div></div>'; }).join("");
 }
@@ -385,7 +401,7 @@ function drawTimetable(){
     cols += '<div class="hd">' + T.dayNames[k] + '<small>' + d.getDate() + ' ' + d.toLocaleDateString("en-GB", { month: "short" }) + '</small></div>';
     var inner = "", li = "", rows = [];
     if(off.indexOf(k) < 0){
-      var line = (w.days && w.days[k] && w.days[k].line) || "No school";
+      var line = String((w.days && w.days[k] && w.days[k].line) || "No school").split(/\.\s/)[0].replace(/\.$/, "");
       inner = '<div class="blk off" style="top:0;height:100%"><b>' + esc(line) + '</b></div>';
       li = '<p>' + esc(line) + '</p>';
     } else {
@@ -420,14 +436,29 @@ function inRange(day){
   if(range === "week") return day >= W.start && day <= W.end;
   return day >= weeks[0].start && day <= (W.end < today ? W.end : today);
 }
+/* An Autumn 2 activity keeps a running total of its time, so each day's
+   Evidence row holds the total so far. Count only what was added that day,
+   and count an activity as finished once (on the day it was finished), so
+   coming back to it on another day never counts twice. Games, practice
+   pages and lessons record each day on its own already. */
+function prepEV(){
+  var last = {}, fin = {};
+  (EV || []).slice().sort(function(a, b){ return String(a.Day) < String(b.Day) ? -1 : String(a.Day) > String(b.Day) ? 1 : 0; }).forEach(function(r){
+    var m = +r.Minutes || 0, k = r.Who + "|" + r.Slug, kind = String(r.Kind || "activity");
+    if(kind === "activity"){ r._m = Math.max(0, m - (last[k] || 0)); last[k] = Math.max(last[k] || 0, m); }
+    else r._m = m;
+    r._fin = kind !== "lesson" && String(r.Finished) === "yes" && !fin[k];
+    if(r._fin) fin[k] = 1;
+  });
+}
 function weekOf(day){ for(var i = 0; i < weeks.length; i++){ if(day >= weeks[i].start && day <= weeks[i].end) return weeks[i]; } return null; }
 function drawImpact(){
   if(!EV) return;
   var rows = EV.filter(function(r){ return inRange(String(r.Day)); });
   var mins = 0, fin = 0, who = {}, notes = 0, lessons = {};
   rows.forEach(function(r){
-    mins += +r.Minutes || 0;
-    if(String(r.Finished) === "yes" && r.Kind !== "lesson") fin++;
+    mins += r._m;
+    if(r._fin) fin++;
     who[r.Who] = 1;
     if(/^(sent|updated)/.test(String(r["Buddy note"] || ""))) notes++;
     if(r.Kind === "lesson") (lessons[r.Day + "|" + r.Activity] = lessons[r.Day + "|" + r.Activity] || { day: r.Day, title: String(r.Activity).replace(/^Whole group lesson: /, ""), here: [] }).here.push(r.Who);
@@ -436,7 +467,7 @@ function drawImpact(){
   var label = range === "week" ? "in week " + W.n : "this half term";
   var tiles = [
     [Object.keys(who).length + '<small> of ' + WHO.length + '</small>', "students with recorded learning " + label],
-    [hours(mins) + '<small> hrs</small>', "learning time recorded " + label],
+    [hours(mins) + '<small> hrs</small>', "learning recorded " + label + ", all students together"],
     [fin, "activities finished " + label],
     [ls.length, "whole group lessons taught " + label]
   ];
@@ -446,7 +477,7 @@ function drawImpact(){
 
   /* week by week bars (single series, so no legend: the title names it) */
   var per = weeks.map(function(w){ return { w: w, m: 0, who: {} }; });
-  EV.forEach(function(r){ var w = weekOf(String(r.Day)); if(!w) return; per[w.n - 1].m += +r.Minutes || 0; per[w.n - 1].who[r.Who] = 1; });
+  EV.forEach(function(r){ var w = weekOf(String(r.Day)); if(!w) return; per[w.n - 1].m += r._m; per[w.n - 1].who[r.Who] = 1; });
   var max = Math.max.apply(null, per.map(function(p){ return p.m; }).concat([60]));
   $("chart").innerHTML = per.map(function(p){
     var h = Math.round(p.m / max * 100), fut = isFuture(p.w);
@@ -513,17 +544,21 @@ function buddyState(t, w){
   var s = String(((t.jay || {})[w]) || "").toLowerCase();
   if(s){
     if(/\bnot\b|none|^no\b/.test(s)) return 0;
+    if(/partial|progress|emerg|develop|working|having|start|some|nearly|towards/.test(s)) return 1;
     if(/secure|achiev|got it|complete|met\b|done|yes/.test(s)) return 2;
-    if(/progress|emerg|develop|working|having|start|partial|some/.test(s)) return 1;
     return 0;
   }
+  /* My targets ticks can be the student's own "Got it", so on their own
+     they count as working on it, never done: done comes from Buddy or a
+     finished activity */
   var k = (((TG.ticks || {})[w]) || {})[t.id];
-  return k ? +k.state || 0 : 0;
+  return k && +k.state ? 1 : 0;
 }
 /* the step's state: whichever is further on, the activity or Buddy */
 function stateOf(t, w){ var a = actOf(t, w); return Math.max(buddyState(t, w), a ? a.state : 0); }
 function whyOf(t, w){
-  var a = actOf(t, w), st = (t.jay || {})[w], bits = [];
+  var a = actOf(t, w), st = (t.jay || {})[w], bits = [], k = (((TG.ticks || {})[w]) || {})[t.id];
+  if(!st && k && +k.state) bits.push("Ticked on My targets");
   if(a) bits.push((a.kind === "lesson" ? "Was in " : a.state === 2 ? "Finished " : "Started ") + a.title + (a.day ? ", " + nice(a.day) : ""));
   if(st) bits.push("In Buddy: " + st);
   return bits.join(". ");
@@ -537,7 +572,19 @@ function groups(){
   return order.map(function(k){ return g[k]; });
 }
 function titleOf(k){ k = TNAME[String(k).toLowerCase()] || k; var t = ((TG && TG.targets) || []).filter(function(x){ return keyOf(x) === k || x.title === k; })[0]; return t ? t.title : k; }
-function pip(s, tip, key){ return '<span class="pip s' + s + (key && FLASH[key] ? " flash" : "") + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"></span>'; }
+function pip(s, tip, key){ return '<span class="pip s' + s + (key && FLASH[key] ? " flash" : "") + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"' + (key ? ' tabindex="0" role="button" data-tip="' + esc(tip) + '"' : '') + '></span>'; }
+(function(){
+  var box = document.createElement("div"); box.className = "piptip"; box.hidden = true; box.setAttribute("role", "status"); document.body.appendChild(box);
+  function open(el){
+    box.textContent = el.getAttribute("data-tip"); box.hidden = false;
+    var r = el.getBoundingClientRect(), bw = Math.min(300, window.innerWidth - 24);
+    box.style.width = bw + "px";
+    box.style.left = Math.max(12, Math.min(window.innerWidth - bw - 12, r.left + r.width / 2 - bw / 2)) + window.scrollX + "px";
+    box.style.top = r.bottom + 8 + window.scrollY + "px";
+  }
+  document.addEventListener("click", function(e){ var el = e.target.closest && e.target.closest("[data-tip]"); if(el) open(el); else box.hidden = true; });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") box.hidden = true; if((e.key === "Enter" || e.key === " ") && e.target.getAttribute && e.target.getAttribute("data-tip")){ e.preventDefault(); open(e.target); } });
+})();
 var FLASH = {}, SEEN = null;
 function drawTracker(){
   if(!TG) return;
@@ -557,7 +604,7 @@ function drawTracker(){
       }).join("") + '</td>';
     }).join("") + '</tr>';
   }).join("");
-  (EV || []).forEach(function(r){ if(inRange(String(r.Day)) && mins[r.Who] != null) mins[r.Who] += +r.Minutes || 0; });
+  (EV || []).forEach(function(r){ if(inRange(String(r.Day)) && mins[r.Who] != null) mins[r.Who] += r._m; });
   $("trk").innerHTML = '<thead><tr><th>Target</th>' + WHO.map(function(w){ return '<th class="w">' + w + '</th>'; }).join("") + '</tr></thead><tbody>' + body +
     '<tr class="sum"><td>Steps done<small>and working on it</small></td>' + WHO.map(function(w){ return '<td class="w">' + sec[w] + ' of ' + tot[w] + '<small>' + wk[w] + ' working on it</small></td>'; }).join("") + '</tr>' +
 '</tbody>';
@@ -581,11 +628,11 @@ function drawOne(){
   }).join("") + '</ul>';
   var core = (TG.core || []).filter(function(c){ return c.who === w; });
   var mine = (EV || []).filter(function(r){ return r.Who === w && inRange(String(r.Day)); }).sort(function(a, b){ return a.Day < b.Day ? 1 : a.Day > b.Day ? -1 : 0; });
-  var m = 0, f = 0; mine.forEach(function(r){ m += +r.Minutes || 0; if(String(r.Finished) === "yes" && r.Kind !== "lesson") f++; });
+  var m = 0, f = 0; mine.forEach(function(r){ m += r._m; if(r._fin) f++; });
   $("oneSide").innerHTML = (core.length ? '<div class="core"><h4>Core targets</h4>' + core.map(function(c){ return '<p><small>' + esc(c.level || "Core target") + '</small>' + esc(c.target) + '</p>'; }).join("") + '</div>' : '<p class="none">No core targets in BridgeLink Buddy yet.</p>') +
     '<h3>' + (range === "week" ? "Week " + W.n : "Half term so far") + ': ' + hours(m) + ' hours, ' + f + ' finished</h3>' +
     (mine.length ? '<ul class="recent">' + mine.slice(0, 12).map(function(r){
-      var bits = [nice(String(r.Day))]; if(+r.Minutes) bits.push(r.Minutes + " min"); if(String(r.Finished) === "yes") bits.push("finished"); if(r.Target) bits.push(titleOf(String(r.Target)) + (+r.Step ? ", step " + r.Step : ""));
+      var bits = [nice(String(r.Day))]; if(r._m) bits.push(r._m + " min"); if(String(r.Finished) === "yes") bits.push("finished"); if(r.Target) bits.push(titleOf(String(r.Target)) + (+r.Step ? ", step " + r.Step : ""));
       return '<li>' + esc(String(r.Activity || r.Slug)) + '<em>' + esc(bits.join(", ")) + '</em></li>';
     }).join("") + '</ul>' + (mine.length > 12 ? '<p class="none">And ' + (mine.length - 12) + ' more in the Evidence page.</p>' : '') : '<p class="none">Nothing recorded for ' + w + ' in this range.</p>');
 }
@@ -671,10 +718,15 @@ function refresh(){
     busy = false;
     var e = r[0] || {}, t = r[1], ov = r[2];
     if(ov && ov.ok && ov.students) PR = ov.students;
-    if(first && !e.ok && !(t && t.ok)){ $("msg").textContent = "The sheet said: " + (e.error || (t && t.error) || "nothing") + "."; return; }
+    if(first && !e.ok && !(t && t.ok)){
+      var why = e.error || (t && t.error) || "nothing";
+      var line = why === "staff key" ? "This school account is not listed as Staff in the People tab of the Base 5 sheet, so the figures stay closed." : "The sheet said: " + why + ".";
+      $("msg").textContent = line; $("sumTiles").innerHTML = '<p class="none">' + esc(line) + '</p>'; $("trackMsg").textContent = line;
+      return;
+    }
     var before = SEEN;
     if(e.ok){
-      EV = e.items || [];
+      EV = e.items || []; prepEV();
       if(first && range === "week" && !EV.some(function(x){ return String(x.Day) >= W.start && String(x.Day) <= W.end; })) range = "term";
       $("msg").hidden = true; $("impactView").hidden = false;
     } else if(first) $("msg").textContent = "The evidence did not load: " + e.error + ".";
@@ -682,11 +734,12 @@ function refresh(){
     buildAct();
     SEEN = snapshot(); FLASH = {};
     if(before) Object.keys(SEEN).forEach(function(k){ if(SEEN[k] > (before[k] || 0)) FLASH[k] = 1; });
+    setTimeout(function(){ FLASH = {}; }, 3000);
     first = false;
     stampNow(); drawImpact(); drawTracker(); drawSummary();
   }).catch(function(){
     busy = false;
-    if(first){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; }
+    if(first){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; $("sumTiles").innerHTML = '<p class="none">' + esc($("msg").textContent) + '</p>'; }
     else $("live").textContent = "Could not reach the sheet just now; trying again in a minute.";
   });
 }
