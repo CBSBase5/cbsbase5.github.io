@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base 5 overview - line management</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/staff.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=13">
+<script src="/data/b5site.js?v=8"></script>
+<script src="/data/b5staff.js?v=1"></script>
+<script src="/data/term.js?v=11"></script>
+<script src="/lessons/plan.js?v=11"></script>
+<script src="/data/overview.js?v=1"></script>
+<style>
+/* The line management overview: intent, implementation, impact, the
+   timetable and a tracker of each student's progress. Staff only (the
+   B5Staff gate); every figure comes from the Base 5 sheet. Initials only,
+   nothing red, no marks in a colour beside a name. ASCII only. */
+.wrap{max-width:1180px}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.jump a,.jump button{font:inherit;font-size:.92rem;font-weight:700;padding:7px 15px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);text-decoration:none;cursor:pointer}
+.jump a:hover,.jump button:hover{background:var(--ink);color:var(--paper)}
+.weekpick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 26px}
+.weekpick b{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;margin-right:4px}
+.weekpick button{font:inherit;font-size:.9rem;padding:6px 13px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.weekpick button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.weekpick button.future{border-style:dashed;color:var(--body-tint)}
+section.part{margin:0 0 40px;scroll-margin-top:16px}
+.ph{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding-bottom:8px;border-bottom:3px solid var(--ink)}
+.ph h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:clamp(1.5rem,3.4vw,2.1rem);margin:0;text-transform:uppercase;letter-spacing:.02em}
+.ph h2 .n{color:var(--teal)}
+.ph span{font-size:.93rem;color:var(--body-tint)}
+.lead{font-size:1.06rem;line-height:1.55;max-width:78ch;margin:0 0 16px}
+.points{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0}
+@media (max-width:980px){.points{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.points{grid-template-columns:1fr}}
+.pt{background:var(--white);border:2px solid var(--ink);border-top:8px solid var(--edge,var(--teal));border-radius:14px;padding:12px 14px}
+.pt b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;margin:0 0 4px}
+.pt p{margin:0;font-size:.94rem;line-height:1.5}
+.box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:18px 20px;margin:16px 0 0;box-shadow:var(--lift)}
+.box h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.15rem;margin:0 0 10px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 18px;margin:0}
+@media (max-width:900px){.facts{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.facts{grid-template-columns:1fr}}
+.facts div{border-left:5px solid var(--edge,var(--teal));padding:2px 0 2px 10px}
+.facts dt{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--body-tint)}
+.facts dd{margin:2px 0 0;font-size:.95rem;line-height:1.4}
+.slotlist{margin:14px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px;font-size:.93rem}
+@media (max-width:700px){.slotlist{grid-template-columns:1fr}}
+.slotlist li{padding:6px 0;border-top:1px dashed rgba(10,47,56,.2)}
+.slotlist li b{display:block}
+.slotlist li span{color:var(--body-tint)}
+/* timetable */
+.tt{display:grid;grid-template-columns:54px repeat(5,1fr);gap:0 8px;margin:6px 0 0}
+.tt .hd{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;text-align:center;padding:0 0 6px;font-size:.98rem}
+.tt .hd small{display:block;font-family:var(--font,inherit);font-variation-settings:normal;font-weight:400;font-size:.8rem;color:var(--body-tint)}
+.tt .col,.tt .times{position:relative;height:calc(var(--mins) * 1.75px)}
+.tt .times span{position:absolute;right:6px;font-size:.75rem;color:var(--body-tint);transform:translateY(-50%)}
+.tt .col{border-left:1px dashed rgba(10,47,56,.15)}
+.blk{position:absolute;left:0;right:0;box-sizing:border-box;border:2px solid var(--ink);border-left:7px solid var(--edge,var(--teal));border-radius:9px;background:var(--white);padding:3px 7px;overflow:hidden;font-size:.82rem;line-height:1.25}
+.blk b{display:block;font-size:.86rem}
+.blk em{font-style:normal;color:var(--body-tint);font-size:.74rem}
+.blk.quiet{background:var(--paper);border-style:dashed;border-left-width:2px;color:var(--body-tint)}
+.blk.side{left:auto;width:34%;right:0;background:#eef7f9;border-style:dashed;z-index:2}
+.blk.hasside{right:36%}
+.blk.off{background:transparent;border-style:dashed;border-left-width:2px;color:var(--body-tint)}
+.ttnote{font-size:.88rem;color:var(--body-tint);margin:10px 0 0}
+.ttlist{display:none}
+@media (max-width:760px){.tt{display:none}.ttlist{display:block}}
+.ttday{margin:0 0 12px;border:2px solid var(--ink);border-radius:12px;background:var(--white);padding:10px 12px}
+.ttday h4{margin:0 0 6px;font-size:1rem}
+.ttday p{margin:2px 0;font-size:.9rem}
+.ttday p span{display:inline-block;min-width:7.5em;color:var(--body-tint)}
+/* impact */
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+.ctl button{font:inherit;font-size:.9rem;padding:6px 14px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.ctl button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:0 0 16px}
+@media (max-width:980px){.tiles{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:var(--white);border:2px solid var(--ink);border-radius:14px;padding:12px 14px}
+.tile .v{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:2rem;line-height:1.05;color:var(--ink)}
+.tile .v small{font-size:1rem;font-variation-settings:"wdth" 110,"wght" 700;color:var(--body-tint)}
+.tile .k{font-size:.85rem;color:var(--body-tint);margin-top:4px;line-height:1.35}
+.chart{position:relative;display:flex;align-items:flex-end;gap:10px;height:170px;padding:22px 0 0;border-bottom:2px solid var(--ink);margin:6px 0 0}
+.bar{flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:default}
+.bar i{display:block;width:62%;max-width:58px;background:var(--teal);border-radius:4px 4px 0 0;min-height:0}
+.bar.sel i{background:var(--ink)}
+.bar.future i{background:transparent}
+.bar .lab{position:absolute;bottom:calc(var(--h) + 4px);font-size:.8rem;font-weight:700;color:var(--ink);opacity:0;transition:opacity .12s}
+.bar.sel .lab,.bar:hover .lab,.bar:focus .lab{opacity:1}
+.xax{display:flex;gap:10px;margin:4px 0 0}
+.xax span{flex:1;text-align:center;font-size:.8rem;color:var(--body-tint)}
+.chartnote{font-size:.85rem;color:var(--body-tint);margin:8px 0 0}
+.gridwrap{overflow-x:auto;margin:6px 0 0}
+table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+.trk th,.trk td{padding:7px 8px;border-bottom:1px dashed rgba(10,47,56,.2);text-align:left;vertical-align:middle}
+.trk thead th{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;border-bottom:2px solid var(--ink)}
+.trk th.w,.trk td.w{text-align:center;white-space:nowrap}
+.trk td small{display:block;color:var(--body-tint);font-size:.78rem}
+.trk tr.sum td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
+.trk tr.sum td small{font-weight:400}
+.pip{display:inline-block;width:15px;height:15px;border-radius:50%;border:2px solid var(--ink);background:var(--white);margin:0 1px;vertical-align:middle;box-sizing:border-box}
+.pip.s1{background:linear-gradient(90deg,var(--teal) 50%,var(--white) 50%)}
+.pip.s2{background:var(--teal)}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--body-tint);margin:10px 0 0}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.whos{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.whos button{font:inherit;font-weight:700;font-size:.95rem;padding:7px 15px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.whos button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.two{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.steps{margin:0;padding:0;list-style:none}
+.steps li{display:grid;grid-template-columns:62px 1fr;gap:8px;padding:8px 0;border-top:1px dashed rgba(10,47,56,.2);font-size:.92rem}
+.steps li > span{white-space:nowrap;padding-top:2px}
+.steps li small{display:block}
+.steps li b{display:block}
+.steps li small{color:var(--body-tint)}
+.core{margin:0 0 14px;padding:10px 12px;border:2px solid var(--ink);border-left:8px solid var(--yellow);border-radius:12px;background:#fff8e6}
+.core h4{margin:0 0 6px;font-size:.98rem}
+.core p{margin:4px 0;font-size:.9rem}
+.core p small{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--body-tint)}
+.recent{margin:0;padding:0;list-style:none;font-size:.9rem}
+.recent li{padding:7px 0;border-top:1px dashed rgba(10,47,56,.2)}
+.recent li em{font-style:normal;color:var(--body-tint);font-size:.82rem;display:block}
+.none{color:var(--body-tint);font-size:.92rem}
+.msg{font-size:.95rem;color:var(--body-tint);margin:0 0 12px}
+.asof{font-size:.85rem;color:var(--body-tint);margin:6px 0 0}
+@media print{
+  .grain,.jump,.weekpick,.ctl,.whos button:not([aria-pressed=true]),footer,#b5gate{display:none !important}
+  body{background:#fff}
+  .box,.tile,.pt{box-shadow:none}
+  section.part{break-inside:auto;margin-bottom:22px}
+  .tt{display:grid !important}.ttlist{display:none !important}
+  .bar .lab{opacity:1}
+  .wrap{max-width:none;padding:0}
+  .ph{break-after:avoid;page-break-after:avoid}
+  .gridwrap{overflow:visible}
+  table.trk{min-width:0;font-size:.78rem}
+  .trk th,.trk td{padding:5px 4px}
+  .pip{width:12px;height:12px}
+  .pt,.box,.tile,.ttday,.steps li,.trk tr{break-inside:avoid}
+  #tracker{break-before:page}
+}
+@media (prefers-reduced-motion:reduce){.bar .lab{transition:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<header class="hero hero-sm">
+  <div class="wrap">
+    <div class="toprow">
+      <h1 class="echo" data-echo="BASE 5 OVERVIEW">BASE 5 <span class="accent">OVERVIEW</span></h1>
+      <span class="badge" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fffdf8" stroke="#0a2f38" stroke-width="6"/><circle cx="38" cy="50" r="12" fill="#ffc247" stroke="#0a2f38" stroke-width="4"/><path d="M50 50h24M66 50v8M72 50v6" stroke="#0a2f38" stroke-width="4" stroke-linecap="round"/><circle cx="38" cy="50" r="4" fill="#0a2f38"/></svg></span>
+    </div>
+    <div class="line">
+      <span class="chip">For line management</span>
+      <p id="intro"></p>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="jump" aria-label="On this page">
+    <a href="#intent">Intent</a><a href="#implementation">Implementation</a><a href="#timetable">Timetable</a><a href="#impact">Impact</a><a href="#tracker">Progress tracker</a>
+    <button type="button" id="print">Print or save as PDF</button>
+  </nav>
+  <div class="weekpick" id="weekpick" aria-label="Week"></div>
+
+  <section class="part" id="intent">
+    <div class="ph"><h2><span class="n">1</span> Intent</h2><span>What Base 5 is for</span></div>
+    <p class="lead" id="intentLead"></p>
+    <div class="points" id="intentPts"></div>
+  </section>
+
+  <section class="part" id="implementation">
+    <div class="ph"><h2><span class="n">2</span> Implementation</h2><span>How it happens</span></div>
+    <p class="lead" id="implLead"></p>
+    <div class="points" id="implPts"></div>
+    <div class="box" id="weekBox"></div>
+  </section>
+
+  <section class="part" id="timetable">
+    <div class="ph"><h2><span class="n">3</span> Timetable</h2><span id="ttSub"></span></div>
+    <div class="tt" id="tt"></div>
+    <div class="ttlist" id="ttList"></div>
+    <p class="ttnote" id="ttNote"></p>
+  </section>
+
+  <section class="part" id="impact">
+    <div class="ph"><h2><span class="n">4</span> Impact</h2><span>What the evidence says</span></div>
+    <p class="lead" id="impactLead"></p>
+    <div class="points" id="impactPts"></div>
+    <p class="msg" id="msg" aria-live="polite">Loading the figures from the Base 5 sheet...</p>
+    <div id="impactView" hidden>
+      <div class="ctl" id="range" role="group" aria-label="Range"></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="box">
+        <h3>Learning time recorded, week by week</h3>
+        <div class="chart" id="chart" role="img"></div>
+        <div class="xax" id="xax"></div>
+        <p class="chartnote">Hours of recorded learning across the group: activities, practice, project games and whole group lessons. Hover or tap a bar for the figures.</p>
+      </div>
+      <div class="box" id="taughtBox"></div>
+    </div>
+  </section>
+
+  <section class="part" id="tracker">
+    <div class="ph"><h2><span class="n">5</span> Progress tracker</h2><span>Autumn 2 milestone steps, as marked in BridgeLink Buddy</span></div>
+    <div id="trackView" hidden>
+      <div class="gridwrap"><table class="trk" id="trk"></table></div>
+      <div class="key" id="key"></div>
+      <div class="box">
+        <h3>One student at a time</h3>
+        <div class="whos" id="whos"></div>
+        <div class="two"><div id="oneSteps"></div><div id="oneSide"></div></div>
+      </div>
+    </div>
+    <p class="none" id="trackMsg"></p>
+  </section>
+  <p class="asof" id="stamp"></p>
+</div>
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Staff room</a>
+  </div>
+</footer>
+<script>
+(function(){
+"use strict";
+var T = window.B5TERM, L = window.B5LESSONS, O = window.B5OVERVIEW || {};
+var WHO = ["EGW", "LP", "LW", "LC", "HK", "JT"], KEY = "b5.staffkey.v1";
+var STATE = ["Not yet", "Working on it", "Secure"];
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function pts(list, edges){
+  return (list || []).map(function(p, i){ return '<div class="pt" style="--edge:' + edges[i % edges.length] + '"><b>' + esc(p[0]) + '</b><p>' + esc(p[1]) + '</p></div>'; }).join("");
+}
+function nice(iso, opt){ return new Date(iso + "T12:00:00").toLocaleDateString("en-GB", opt || { weekday: "short", day: "numeric", month: "short" }); }
+function hours(m){ var h = m / 60; return h >= 10 ? Math.round(h) : Math.round(h * 10) / 10; }
+
+/* ---------- the words ---------- */
+$("intro").textContent = O.intro || "";
+var I = O.intent || {}, M = O.implementation || {}, P = O.impact || {};
+$("intentLead").textContent = I.lead || "";
+$("intentPts").innerHTML = pts(I.points, ["var(--teal)", "var(--orange)", "var(--plum)"]);
+$("implLead").textContent = M.lead || "";
+$("implPts").innerHTML = pts(M.points, ["var(--orange)", "var(--plum)", "var(--teal)"]);
+$("impactLead").textContent = P.lead || "";
+$("impactPts").innerHTML = pts(P.points, ["var(--teal)", "var(--plum)", "var(--orange)"]);
+$("impactPts").hidden = !(P.points && P.points.length);
+$("print").onclick = function(){ window.print(); };
+
+/* ---------- the week ---------- */
+var weeks = T.weeks, today = T.todayIso(), cur = T.currentWeek(), W = cur;
+function isFuture(w){ return w.start > today; }
+function drawWeekPick(){
+  $("weekpick").innerHTML = '<b>Autumn 2</b>' + weeks.map(function(w){
+    return '<button type="button" data-n="' + w.n + '" aria-pressed="' + (w === W) + '"' + (isFuture(w) && w !== cur ? ' class="future"' : '') + '>Week ' + w.n + ' <small>' + esc(T.shortRange(w)) + '</small></button>';
+  }).join("");
+  [].forEach.call($("weekpick").querySelectorAll("button"), function(b){
+    b.onclick = function(){ W = weeks[+b.dataset.n - 1]; if(W.start > today) range = "term"; drawAll(); };
+  });
+}
+
+function relFor(w){
+  var s = L && L.bySeries ? L.bySeries["rel-assert"] : null, out = null;
+  ((s && s.lessons) || []).forEach(function(l){ if(l.from && l.from <= w.end && l.to >= w.start) out = l; });
+  return out;
+}
+function seriesTitle(id){ var s = L && L.bySeries ? L.bySeries[id] : null; return s ? s.title : id; }
+function drawWeek(){
+  var w = W, rel = relFor(w), trip = T.tripDay(w), days = T.schoolDays(w);
+  var facts = [
+    ["Week", "Week " + w.n + " of " + weeks.length + ", " + T.shortRange(w) + (w.theme ? ". " + w.theme : ""), "var(--teal)"],
+    ["School days", days.length + (days.length < 5 ? " (" + T.dayKeys.filter(function(k){ return days.indexOf(k) < 0; }).map(function(k){ return T.dayNames[k]; }).join(", ") + " off)" : ""), "var(--teal)"],
+    ["Cultural Calendar", w.cc || "No theme set this week", "var(--orange)"],
+    ["PHSE", rel ? (rel.theme ? rel.theme + ": " : "") + rel.title : "Assertiveness in relationships", "var(--plum)"],
+    ["Trip", trip ? T.dayNames[trip] + ", 10:30 to 2:00" : "No trip this week", "var(--orange)"],
+    ["Time travel era", w.era ? w.era.year + ", " + w.era.label : "", "var(--plum)"],
+    ["Project", "ELP Explore: \"If we could time travel, should we?\"", "var(--teal)"],
+    ["Horizon", "Two students, Mon, Tue and Thu, 10:00 to 12:15", "var(--teal)"]
+  ];
+  var slots = ((L && L.slots) || []).filter(function(s){ return !s.byWeek; });
+  $("weekBox").innerHTML = '<h3>Week ' + w.n + ' at a glance</h3><dl class="facts">' + facts.map(function(f){
+    return '<div style="--edge:' + f[2] + '"><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>';
+  }).join("") + '</dl>' +
+  '<ul class="slotlist">' + slots.map(function(s){
+    return '<li><b>' + esc(s.label) + '</b><span>' + esc(s.series.map(seriesTitle).join(" and ")) + ', ' + s.mins + ' minutes</span></li>';
+  }).join("") + '</ul>';
+}
+
+/* ---------- the timetable ---------- */
+var EDGE = { breathe: "var(--plum)", break: "var(--paper)", key: "var(--orange)", work: "var(--teal)", make: "var(--yellow)", plain: "var(--teal)" };
+var START = T.mins("9:30"), END = T.mins("2:30"), SPAN = END - START;
+function lead(key){
+  return { forest: "Vernon", hort: "Kara", digital: "Andy" }[key] || "";
+}
+function drawTimetable(){
+  var w = W, cols = '<div class="hd"></div>', times = "", list = "";
+  for(var m = START; m <= END; m += 30){ var h = Math.floor(m / 60), mm = m % 60; times += '<span style="top:' + ((m - START) / SPAN * 100) + '%">' + (h > 12 ? h - 12 : h) + ':' + ("0" + mm).slice(-2) + '</span>'; }
+  var body = '<div class="times" style="--mins:' + SPAN + '">' + times + '</div>';
+  var off = T.schoolDays(w);
+  T.dayKeys.forEach(function(k){
+    var d = T.dateOf(w, k);
+    cols += '<div class="hd">' + T.dayNames[k] + '<small>' + d.getDate() + ' ' + d.toLocaleDateString("en-GB", { month: "short" }) + '</small></div>';
+    var inner = "", li = "", rows = [];
+    if(off.indexOf(k) < 0){
+      var line = (w.days && w.days[k] && w.days[k].line) || "No school";
+      inner = '<div class="blk off" style="top:0;height:100%"><b>' + esc(line) + '</b></div>';
+      li = '<p>' + esc(line) + '</p>';
+    } else {
+      var side = T.alongsideOn(k);
+      (T.slotsOn(w, k) || []).forEach(function(s){
+        var a = T.mins(s[0]), b = T.mins(s[1]), ses = T.session(s[2], w, k), quiet = ses.type === "break" || ses.type === "breathe";
+        var overlap = side.some(function(x){ return T.mins(x.start) < b && T.mins(x.end) > a; });
+        var title = ses.title || s[2], ld = lead(s[2]);
+        inner += '<div class="blk' + (quiet ? " quiet" : "") + (overlap ? " hasside" : "") + '" style="top:' + ((a - START) / SPAN * 100) + '%;height:' + ((b - a) / SPAN * 100) + '%;--edge:' + (EDGE[ses.type] || "var(--teal)") + '" title="' + esc(s[0] + " to " + s[1] + ", " + title) + '">' +
+          '<b>' + esc(title) + '</b>' + (b - a >= 45 ? '<em>' + esc(s[0]) + ' to ' + esc(s[1]) + '</em>' : '') + '</div>';
+        rows.push([a, '<p><span>' + esc(s[0]) + ' to ' + esc(s[1]) + '</span>' + esc(title) + (ld && title.indexOf(ld) < 0 ? ' (' + ld + ')' : '') + '</p>']);
+      });
+      side.forEach(function(x){
+        var a = T.mins(x.start), b = T.mins(x.end), ses = T.session(x.key, w, k);
+        inner += '<div class="blk side" style="top:' + ((a - START) / SPAN * 100) + '%;height:' + ((b - a) / SPAN * 100) + '%" title="' + esc(ses.title || x.key) + ', two students"><b>' + esc(ses.title || "Horizon") + '</b><em>Two students</em></div>';
+        rows.push([a + 0.5, '<p><span>' + esc(x.start) + ' to ' + esc(x.end) + '</span>' + esc(ses.title || "Horizon") + ', two students, alongside</p>']);
+      });
+      li = rows.sort(function(p, q){ return p[0] - q[0]; }).map(function(r){ return r[1]; }).join("");
+    }
+    body += '<div class="col" style="--mins:' + SPAN + '">' + inner + '</div>';
+    list += '<div class="ttday"><h4>' + esc(T.niceDate(d)) + '</h4>' + li + '</div>';
+  });
+  $("tt").innerHTML = cols + body;
+  $("ttList").innerHTML = list;
+  $("ttSub").textContent = "Week " + w.n + ", " + T.shortRange(w);
+  $("ttNote").textContent = "The same shape every week. Horizon (the dashed lane) runs alongside for two students while the group carries on. Trip details go to families from school, so they are not listed here.";
+}
+
+/* ---------- impact and the tracker: from the sheet ---------- */
+var EV = null, TG = null, range = W.start > today ? "term" : "week", one = "EGW";
+function inRange(day){
+  if(range === "week") return day >= W.start && day <= W.end;
+  return day >= weeks[0].start && day <= (W.end < today ? W.end : today);
+}
+function weekOf(day){ for(var i = 0; i < weeks.length; i++){ if(day >= weeks[i].start && day <= weeks[i].end) return weeks[i]; } return null; }
+function drawImpact(){
+  if(!EV) return;
+  var rows = EV.filter(function(r){ return inRange(String(r.Day)); });
+  var mins = 0, fin = 0, who = {}, notes = 0, lessons = {};
+  rows.forEach(function(r){
+    mins += +r.Minutes || 0;
+    if(String(r.Finished) === "yes" && r.Kind !== "lesson") fin++;
+    who[r.Who] = 1;
+    if(/^(sent|updated)/.test(String(r["Buddy note"] || ""))) notes++;
+    if(r.Kind === "lesson") (lessons[r.Day + "|" + r.Activity] = lessons[r.Day + "|" + r.Activity] || { day: r.Day, title: String(r.Activity).replace(/^Whole group lesson: /, ""), here: [] }).here.push(r.Who);
+  });
+  var ls = Object.keys(lessons).map(function(k){ return lessons[k]; }).sort(function(a, b){ return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
+  var label = range === "week" ? "in week " + W.n : "this half term";
+  var tiles = [
+    [Object.keys(who).length + '<small> of ' + WHO.length + '</small>', "students with recorded learning " + label],
+    [hours(mins) + '<small> hrs</small>', "learning time recorded " + label],
+    [fin, "activities finished " + label],
+    [ls.length, "whole group lessons taught " + label],
+    [notes, "learning notes into BridgeLink Buddy " + label]
+  ];
+  $("tiles").innerHTML = range === "week" && W.start > today ? '<p class="none">Week ' + W.n + ' starts on ' + esc(nice(W.start, { weekday: "long", day: "numeric", month: "long" })) + ', so there is nothing recorded for it yet.</p>' : tiles.map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + '</div></div>'; }).join("");
+  $("range").innerHTML = '<button type="button" data-r="week" aria-pressed="' + (range === "week") + '">Week ' + W.n + '</button><button type="button" data-r="term" aria-pressed="' + (range === "term") + '">Half term so far</button>';
+  [].forEach.call($("range").querySelectorAll("button"), function(b){ b.onclick = function(){ range = b.dataset.r; drawImpact(); drawTracker(); }; });
+
+  /* week by week bars (single series, so no legend: the title names it) */
+  var per = weeks.map(function(w){ return { w: w, m: 0, who: {} }; });
+  EV.forEach(function(r){ var w = weekOf(String(r.Day)); if(!w) return; per[w.n - 1].m += +r.Minutes || 0; per[w.n - 1].who[r.Who] = 1; });
+  var max = Math.max.apply(null, per.map(function(p){ return p.m; }).concat([60]));
+  $("chart").innerHTML = per.map(function(p){
+    var h = Math.round(p.m / max * 100), fut = isFuture(p.w);
+    var tip = "Week " + p.w.n + ": " + (fut ? "still to come" : hours(p.m) + " hours, " + Object.keys(p.who).length + " of " + WHO.length + " students");
+    return '<div class="bar' + (p.w === W ? " sel" : "") + (fut ? " future" : "") + '" style="--h:' + h + '%" tabindex="0" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"><span class="lab">' + (fut ? "" : hours(p.m) + " h") + '</span><i style="height:' + h + '%"></i></div>';
+  }).join("");
+  $("chart").setAttribute("aria-label", "Hours of recorded learning per week: " + per.map(function(p){ return "week " + p.w.n + " " + (isFuture(p.w) ? "to come" : hours(p.m)); }).join(", "));
+  $("xax").innerHTML = per.map(function(p){ return '<span>Wk ' + p.w.n + '</span>'; }).join("");
+
+  $("taughtBox").innerHTML = '<h3>Whole group lessons taught ' + esc(label) + '</h3>' + (ls.length ? '<ul class="recent">' + ls.map(function(l){
+    return '<li>' + esc(l.title) + '<em>' + esc(nice(l.day)) + ', ' + l.here.length + ' of ' + WHO.length + ' students there</em></li>';
+  }).join("") + '</ul>' : '<p class="none">None sent to Buddy ' + esc(label) + ' yet.</p>');
+}
+
+/* steps: Buddy's own status for each step, falling back to the ticks */
+function stateOf(t, w){
+  var s = String(((t.jay || {})[w]) || "").toLowerCase();
+  if(s){
+    if(/\bnot\b|none|^no\b/.test(s)) return 0;
+    if(/secure|achiev|got it|complete|met\b|done|yes/.test(s)) return 2;
+    if(/progress|emerg|develop|working|having|start|partial|some/.test(s)) return 1;
+    return 0;
+  }
+  var k = (((TG.ticks || {})[w]) || {})[t.id];
+  return k ? +k.state || 0 : 0;
+}
+function keyOf(t){ var m = /^(.*)\.(\d+)$/.exec(t.id); return m ? m[1] : t.id; }
+function stepOf(t){ var m = /\.(\d+)$/.exec(t.id); return m ? +m[1] : 0; }
+function hasStep(t, w){ return !stepOf(t) || !!((t.ms || {})[w]); }
+function groups(){
+  var g = {}, order = [];
+  (TG.targets || []).forEach(function(t){ var k = keyOf(t); if(!g[k]){ g[k] = { key: k, title: t.title, pillar: t.pillar, steps: [] }; order.push(k); } g[k].steps.push(t); });
+  return order.map(function(k){ return g[k]; });
+}
+function titleOf(k){ var t = ((TG && TG.targets) || []).filter(function(x){ return keyOf(x) === k || x.title === k; })[0]; return t ? t.title : k; }
+function pip(s, tip){ return '<span class="pip s' + s + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"></span>'; }
+function drawTracker(){
+  if(!TG) return;
+  var G = groups();
+  if(!G.length){ $("trackView").hidden = true; $("trackMsg").textContent = "No Autumn 2 targets came back from the sheet yet. Once BridgeLink Buddy is linked in the Settings tab, every student's steps show here."; return; }
+  $("trackView").hidden = false; $("trackMsg").textContent = "";
+  var tot = {}, sec = {}, wk = {}, mins = {};
+  WHO.forEach(function(w){ tot[w] = 0; sec[w] = 0; wk[w] = 0; mins[w] = 0; });
+  var body = G.map(function(g){
+    return '<tr><td>' + esc(g.title) + (g.pillar ? '<small>' + esc(g.pillar) + '</small>' : '') + '</td>' + WHO.map(function(w){
+      var mine = g.steps.filter(function(t){ return hasStep(t, w); });
+      if(!mine.length) return '<td class="w"><span class="none">-</span></td>';
+      return '<td class="w">' + mine.map(function(t){
+        var s = stateOf(t, w); tot[w]++; if(s === 2) sec[w]++; if(s === 1) wk[w]++;
+        return pip(s, w + ", " + g.title + (stepOf(t) ? ", step " + stepOf(t) : "") + ": " + STATE[s]);
+      }).join("") + '</td>';
+    }).join("") + '</tr>';
+  }).join("");
+  (EV || []).forEach(function(r){ if(inRange(String(r.Day)) && mins[r.Who] != null) mins[r.Who] += +r.Minutes || 0; });
+  $("trk").innerHTML = '<thead><tr><th>Target</th>' + WHO.map(function(w){ return '<th class="w">' + w + '</th>'; }).join("") + '</tr></thead><tbody>' + body +
+    '<tr class="sum"><td>Steps secure<small>and working on it</small></td>' + WHO.map(function(w){ return '<td class="w">' + sec[w] + ' of ' + tot[w] + '<small>' + wk[w] + ' working on it</small></td>'; }).join("") + '</tr>' +
+    '<tr class="sum"><td>Learning time<small>' + (range === "week" ? "week " + W.n : "half term so far") + '</small></td>' + WHO.map(function(w){ return '<td class="w">' + hours(mins[w]) + ' h</td>'; }).join("") + '</tr></tbody>';
+  $("key").innerHTML = '<span>' + pip(0, STATE[0]) + ' Not yet</span><span>' + pip(1, STATE[1]) + ' Working on it</span><span>' + pip(2, STATE[2]) + ' Secure</span><span>One circle per milestone step that student has. A dash means the target has no step for them this half term.</span>';
+  drawOne();
+}
+function drawOne(){
+  $("whos").innerHTML = WHO.map(function(w){ return '<button type="button" data-w="' + w + '" aria-pressed="' + (w === one) + '">' + w + '</button>'; }).join("");
+  [].forEach.call($("whos").querySelectorAll("button"), function(b){ b.onclick = function(){ one = b.dataset.w; drawOne(); }; });
+  var w = one, G = groups();
+  $("oneSteps").innerHTML = '<ul class="steps">' + G.map(function(g){
+    var mine = g.steps.filter(function(t){ return hasStep(t, w); });
+    if(!mine.length) return "";
+    var now = mine.filter(function(t){ return stateOf(t, w) < 2; })[0], all = !now;
+    var t = now || mine[mine.length - 1], s = stateOf(t, w), st = (t.jay || {})[w];
+    return '<li><span>' + mine.map(function(x){ var y = stateOf(x, w); return pip(y, (stepOf(x) ? "Step " + stepOf(x) + ": " : "") + STATE[y]); }).join("") + '</span><div><b>' + esc(g.title) + '</b>' +
+      '<small>' + (all ? "Every step secure. Last step: " : (stepOf(t) ? "Now on step " + stepOf(t) + " of " + mine.length + ": " : "")) + '</small>' + esc((t.ms || {})[w] || t.statement || "") +
+      (st ? '<br><small>In Buddy: ' + esc(st) + '</small>' : '') + '</div></li>';
+  }).join("") + '</ul>';
+  var core = (TG.core || []).filter(function(c){ return c.who === w; });
+  var mine = (EV || []).filter(function(r){ return r.Who === w && inRange(String(r.Day)); }).sort(function(a, b){ return a.Day < b.Day ? 1 : a.Day > b.Day ? -1 : 0; });
+  var m = 0, f = 0; mine.forEach(function(r){ m += +r.Minutes || 0; if(String(r.Finished) === "yes" && r.Kind !== "lesson") f++; });
+  $("oneSide").innerHTML = (core.length ? '<div class="core"><h4>Core targets</h4>' + core.map(function(c){ return '<p><small>' + esc(c.level || "Core target") + '</small>' + esc(c.target) + '</p>'; }).join("") + '</div>' : '<p class="none">No core targets in BridgeLink Buddy yet.</p>') +
+    '<h3>' + (range === "week" ? "Week " + W.n : "Half term so far") + ': ' + hours(m) + ' hours, ' + f + ' finished</h3>' +
+    (mine.length ? '<ul class="recent">' + mine.slice(0, 12).map(function(r){
+      var bits = [nice(String(r.Day))]; if(+r.Minutes) bits.push(r.Minutes + " min"); if(String(r.Finished) === "yes") bits.push("finished"); if(r.Target) bits.push(titleOf(String(r.Target)) + (+r.Step ? ", step " + r.Step : ""));
+      return '<li>' + esc(String(r.Activity || r.Slug)) + '<em>' + esc(bits.join(", ")) + '</em></li>';
+    }).join("") + '</ul>' + (mine.length > 12 ? '<p class="none">And ' + (mine.length - 12) + ' more in the Evidence page.</p>' : '') : '<p class="none">Nothing recorded for ' + w + ' in this range.</p>');
+}
+
+function drawAll(){ drawWeekPick(); drawWeek(); drawTimetable(); drawImpact(); drawTracker(); }
+drawAll();
+
+function load(){
+  var k = ""; try{ k = localStorage.getItem(KEY) || ""; }catch(e){}
+  if(!window.B5Site || !B5Site.call){ $("msg").textContent = "The Base 5 sheet is not switched on, so the figures cannot load."; return; }
+  Promise.all([
+    B5Site.call("evidence", { key: k, from: weeks[0].start, to: weeks[weeks.length - 1].end }),
+    B5Site.call("targets", { key: k })
+  ]).then(function(r){
+    var e = r[0] || {}, t = r[1] || {};
+    if(!e.ok && !t.ok){ $("msg").textContent = "The sheet said: " + (e.error || t.error || "nothing") + "."; return; }
+    if(e.ok){ EV = e.items || []; if(range === "week" && !EV.some(function(x){ return String(x.Day) >= W.start && String(x.Day) <= W.end; })) range = "term"; $("msg").hidden = true; $("impactView").hidden = false; } else $("msg").textContent = "The evidence did not load: " + e.error + ".";
+    if(t.ok) TG = t; else $("trackMsg").textContent = "The targets did not load: " + t.error + ".";
+    $("stamp").textContent = "Figures as of " + new Date().toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) + ". Words last updated " + nice(O.updated || today, { day: "numeric", month: "long", year: "numeric" }) + ".";
+    drawImpact(); drawTracker();
+  }).catch(function(){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; });
+}
+if(window.B5Staff && B5Staff.ready) B5Staff.ready.then(load); else load();
+})();
+</script>
+</body>
+</html>
