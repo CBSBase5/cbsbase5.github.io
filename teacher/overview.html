@@ -55,6 +55,23 @@ section.part{margin:0 0 40px;scroll-margin-top:16px}
 .slotlist li{padding:6px 0;border-top:1px dashed rgba(10,47,56,.2)}
 .slotlist li b{display:block}
 .slotlist li span{color:var(--body-tint)}
+/* deployment: the plan from Buddy, and our notes */
+.dep{width:100%;border-collapse:separate;border-spacing:6px;margin:0 -6px;font-size:.9rem;table-layout:fixed}
+.dep th{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;text-align:left;font-size:.88rem;padding:0 2px}
+.dep th.b{width:7.5em}
+.dep td{background:#eef7f9;border:2px solid var(--ink);border-radius:10px;padding:7px 9px;vertical-align:top;line-height:1.3}
+.dep td.empty{background:transparent;border-style:dashed;color:var(--body-tint)}
+.dep td.off{background:var(--paper);border-style:dashed;color:var(--body-tint)}
+.dep td b{display:block;font-size:.95rem}
+.depsum{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.9rem;margin:10px 0 0;color:var(--body-tint)}
+.depsum b{color:var(--ink)}
+.depnotes{margin:14px 0 0;padding:0;list-style:none}
+.depnotes li{display:grid;grid-template-columns:9.5em 1fr;gap:4px 12px;padding:8px 0;border-top:1px dashed rgba(10,47,56,.2);font-size:.92rem}
+.depnotes li .w{color:var(--body-tint);font-size:.85rem}
+.depnotes li .w b{display:block;color:var(--ink);font-size:.9rem}
+.depnotes li small{display:block;color:var(--body-tint);font-size:.8rem;margin-top:2px}
+.deph{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;margin:18px 0 0}
+@media (max-width:700px){.depwrap{overflow-x:auto}.dep{min-width:560px}.depnotes li{grid-template-columns:1fr}}
 /* timetable */
 .tt{display:grid;grid-template-columns:54px repeat(5,1fr);gap:0 8px;margin:6px 0 0}
 .tt .hd{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;text-align:center;padding:0 0 6px;font-size:.98rem}
@@ -144,7 +161,7 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
   table.trk{min-width:0;font-size:.78rem}
   .trk th,.trk td{padding:5px 4px}
   .pip{width:12px;height:12px}
-  .pt,.box,.tile,.ttday,.steps li,.trk tr{break-inside:avoid}
+  .pt,.box,.tile,.ttday,.steps li,.trk tr,.dep,.depnotes li{break-inside:avoid}
   #tracker{break-before:page}
 }
 @media (prefers-reduced-motion:reduce){.bar .lab{transition:none}}
@@ -182,6 +199,7 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
     <p class="lead" id="implLead"></p>
     <div class="points" id="implPts"></div>
     <div class="box" id="weekBox"></div>
+    <div class="box" id="deployBox"><h3>How Holly is deployed</h3><p class="none" id="deployMsg">Loading the plan from BridgeLink Buddy...</p><div id="deployView"></div></div>
   </section>
 
   <section class="part" id="timetable">
@@ -458,7 +476,57 @@ function drawOne(){
     }).join("") + '</ul>' + (mine.length > 12 ? '<p class="none">And ' + (mine.length - 12) + ' more in the Evidence page.</p>' : '') : '<p class="none">Nothing recorded for ' + w + ' in this range.</p>');
 }
 
-function drawAll(){ drawWeekPick(); drawWeek(); drawTimetable(); drawImpact(); drawTracker(); }
+/* ---------- how Holly is deployed: Buddy's Staff plan and our shared notes ---------- */
+var DP = null, BLOCKS = ["Morning 1", "Morning 2", "Afternoon"];
+function staffName(i){ return i === "HB" ? "Holly" : i; }
+function together(list){ return list.length > 1 ? list.slice(0, -1).join(", ") + " + " + list[list.length - 1] : (list[0] || ""); }
+function drawDeploy(){
+  if(!DP) return;
+  var box = $("deployView");
+  if(!DP.linked){ $("deployMsg").textContent = "Link BridgeLink Buddy in the Settings tab of the Base 5 sheet and Holly's plan shows here."; box.innerHTML = ""; return; }
+  var want = String(DP.term || "").toLowerCase(), terms = {};
+  DP.plan.forEach(function(p){ terms[p.term] = (terms[p.term] || 0) + 1; });
+  var term = Object.keys(terms).filter(function(t){ return t.toLowerCase() === want; })[0] ||
+    Object.keys(terms).sort(function(a, b){ return terms[b] - terms[a]; })[0] || "";
+  var plan = DP.plan.filter(function(p){ return p.term === term; }), staff = {};
+  plan.forEach(function(p){ staff[p.staff] = 1; });
+  var people = Object.keys(staff).sort(function(a, b){ return (a === "HB" ? -1 : 0) - (b === "HB" ? -1 : 0) || (a < b ? -1 : 1); });
+  if(!people.length){ $("deployMsg").textContent = "No plan for " + (DP.term || "this term") + " in BridgeLink Buddy's Staff plan yet."; box.innerHTML = ""; return; }
+  $("deployMsg").hidden = true;
+  var days = T.schoolDays(W), html = "";
+  people.forEach(function(st){
+    var mine = plan.filter(function(p){ return p.staff === st; }), per = {}, n = 0;
+    WHO.forEach(function(w){ per[w] = 0; });
+    html += (people.length > 1 ? '<p class="deph">' + esc(staffName(st)) + '</p>' : '') +
+      '<p class="none">Our plan for ' + esc(staffName(st)) + '\'s week in ' + esc(term) + ': one fixed week for the term, planned together in BridgeLink Buddy.' + (days.length < 5 ? ' Dashed grey days are not school days in week ' + W.n + '.' : '') + '</p>' +
+      '<div class="depwrap"><table class="dep"><thead><tr><th class="b"></th>' + T.dayKeys.map(function(k){ return '<th>' + T.dayNames[k] + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      BLOCKS.map(function(b){
+        return '<tr><th class="b">' + b + '</th>' + T.dayKeys.map(function(k){
+          var row = mine.filter(function(p){ return p.day === k && p.block.toLowerCase() === b.toLowerCase(); })[0];
+          var off = days.indexOf(k) < 0;
+          if(!row || !row.students.length) return '<td class="' + (off ? "off" : "empty") + '">Not planned</td>';
+          n++; row.students.forEach(function(w){ if(per[w] != null) per[w]++; });
+          return '<td' + (off ? ' class="off"' : '') + '><b>Supporting ' + esc(together(row.students)) + '</b></td>';
+        }).join("") + '</tr>';
+      }).join("") + '</tbody></table></div>' +
+      '<div class="depsum"><span><b>' + n + ' of 15</b> sessions planned</span><span>Planned sessions a week: ' + WHO.map(function(w){ return '<b>' + w + '</b> ' + per[w]; }).join(", ") + '</span></div>';
+    var notes = (DP.notes || []).filter(function(x){ return x.staff === st && x.date >= W.start && x.date <= W.end; })
+      .sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : BLOCKS.indexOf(a.block) - BLOCKS.indexOf(b.block); });
+    html += '<p class="deph">Our notes, week ' + W.n + '</p>' + (notes.length ? '<ul class="depnotes">' + notes.map(function(x){
+      var k = new Date(x.date + "T12:00:00"), key = T.dayKeys[(k.getDay() + 6) % 7];
+      var row = mine.filter(function(p){ return p.day === key && p.block.toLowerCase() === String(x.block).toLowerCase(); })[0];
+      var head = x.kind === "extra" ? "Extra support for " + together(x.students) + (x.minutes ? ", about " + x.minutes + " min" : "") :
+        x.kind === "changed" ? "We adapted: supporting " + together(x.students) + " instead" :
+        x.kind === "off" ? "We adapted: the session did not run" :
+        (row && row.students.length ? "Supporting " + together(row.students) : "");
+      return '<li><span class="w"><b>' + esc(nice(x.date)) + '</b>' + esc(x.block) + '</span><div>' + (head ? '<b>' + esc(head) + '</b><br>' : '') + esc(x.note || x.reason || "") +
+        (x.reason && x.note && x.kind !== "note" ? '<small>Why: ' + esc(x.reason) + '</small>' : '') + (x.by ? '<small>Last written by ' + esc(x.by) + '</small>' : '') + '</div></li>';
+    }).join("") + '</ul>' : '<p class="none">No session notes for week ' + W.n + (W.start > today ? " yet: it has not started." : " in BridgeLink Buddy.") + '</p>');
+  });
+  box.innerHTML = html;
+}
+
+function drawAll(){ drawWeekPick(); drawWeek(); drawDeploy(); drawTimetable(); drawImpact(); drawTracker(); }
 drawAll();
 
 function load(){
@@ -476,7 +544,16 @@ function load(){
     drawImpact(); drawTracker();
   }).catch(function(){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; });
 }
-if(window.B5Staff && B5Staff.ready) B5Staff.ready.then(load); else load();
+function loadDeploy(){
+  var k = ""; try{ k = localStorage.getItem(KEY) || ""; }catch(e){}
+  if(!window.B5Site || !B5Site.call) return;
+  B5Site.call("deploy", { key: k, from: weeks[0].start, to: weeks[weeks.length - 1].end }).then(function(o){
+    if(o && o.ok){ DP = o; drawDeploy(); return; }
+    $("deployMsg").textContent = o && /unknown action/.test(o.error || "") ? "Holly's plan shows here once the Base 5 sheet has the latest script (Staff room, Shared memory)." : "The plan did not load: " + ((o && o.error) || "no answer") + ".";
+  }).catch(function(){ $("deployMsg").textContent = "Could not reach the Base 5 sheet for Holly's plan."; });
+}
+function start(){ load(); loadDeploy(); }
+if(window.B5Staff && B5Staff.ready) B5Staff.ready.then(start); else start();
 })();
 </script>
 </body>

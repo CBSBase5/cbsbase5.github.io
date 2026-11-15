@@ -1816,3 +1816,38 @@ function ccTick_(r){
 }
 READ3.cccounts = ccCounts_;
 WRITE3.cctick = ccTick_;
+
+/* ---------- learning mentor deployment, from BridgeLink Buddy ----------
+   Staff only, for the line management overview (/teacher/overview.html).
+   Reads Buddy's "Staff plan" tab (one fixed week a term: who each helper
+   supports in Morning 1, Morning 2 and Afternoon) and its "Staff record"
+   tab (the shared note for each session, plus any older changed or
+   unplanned rows) between from and to. Read only: nothing is written to
+   Buddy. Needs "BridgeLink Buddy sheet" in Settings. */
+function deploy_(r){
+  staff_(r.key);
+  var B = buddyBook_();
+  if(!B) return { ok: true, linked: false, plan: [], notes: [] };
+  var gone = function(o){ var d = bcol_(o, ["deleted"]); return !!d && !/^(false|no|0)$/i.test(d); };
+  var plan = [];
+  B("Staff plan").forEach(function(o){
+    if(gone(o)) return;
+    var day = bcol_(o, ["day"]).slice(0, 3).toLowerCase(), block = bcol_(o, ["block"]), st = bcol_(o, ["students"]);
+    if(!day || !block) return;
+    plan.push({ term: bcol_(o, ["term"]), staff: bcol_(o, ["staff"]).toUpperCase(), day: day, block: block,
+      students: st.split(/[,+ ]+/).map(function(x){ return x.trim().toUpperCase(); }).filter(String) });
+  });
+  var from = /^\d{4}-\d{2}-\d{2}$/.test(String(r.from || "")) ? String(r.from) : "0000-00-00";
+  var to = /^\d{4}-\d{2}-\d{2}$/.test(String(r.to || "")) ? String(r.to) : "9999-99-99";
+  var notes = [];
+  B("Staff record").forEach(function(o){
+    if(gone(o)) return;
+    var d = o["date"], day = d instanceof Date ? day_(d) : String(d || "").slice(0, 10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(day) || day < from || day > to) return;
+    notes.push({ date: day, staff: bcol_(o, ["staff"]).toUpperCase(), block: bcol_(o, ["block"]), kind: bcol_(o, ["what happened", "kind"]) || "note",
+      students: bcol_(o, ["students"]).split(/[,+ ]+/).map(function(x){ return x.trim().toUpperCase(); }).filter(String),
+      minutes: +bcol_(o, ["minutes"]) || 0, reason: bcol_(o, ["reason"]), note: oneLine_(bcol_(o, ["note"])).slice(0, 1500), by: bcol_(o, ["logged by", "by"]) });
+  });
+  return { ok: true, linked: true, term: String(setting_("Targets term") || "Autumn 2").trim(), plan: plan, notes: notes };
+}
+READ3.deploy = deploy_;
