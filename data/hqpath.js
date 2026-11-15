@@ -89,12 +89,62 @@ function coreItems(){
   return C && C.items ? C.items.filter(function(it){ return it.ready !== false && (it.who || []).indexOf(w) >= 0; })
     .map(function(it){ return { id: "a2-" + it.slug, title: it.title, subject: it.subject, group: it.group, href: (it.href || {})[w] || HQ.base + "a2-" + it.slug + ".html", chunks: it.chunks || 0, kind: "core" }; }) : [];
 }
-/* started ones first (in path order), then the first not yet finished */
+/* ---------- what is on right now (15 Nov 2026) ----------
+   The Start button follows the timetable in /data/term.js, with this
+   student's alongside sessions (Horizon) dropped in:
+     maths / Maths and English    their next maths (or english) step
+     a pillar session              their next drop for that pillar
+     Project / GCSE                their project book
+     Brain games, CC               the game vault, the CC page
+     Breathe in, Breathe out,      something calm (the fidget shelf),
+     lunch                         with their next step still a tap away
+   Anything else (trips, Forest School, out of hours, weekends) keeps
+   the plain path. Test with ?hqtest&pday=mon&ptime=10:50 */
+var SESSION_SUBJ = { maths: ["maths"], core: ["maths", "english"], aesthetic: ["aesthetic and creative"],
+  physical: ["physical world", "human and social"], pfa: ["preparation for adulthood"], phse: ["relational"], digital: ["digital media"] };
+var CALM = { breathein: 1, breatheout: 1, lunch: 1 };
+function termReady(){ return script("/data/term.js?v=11", function(){ return !!window.B5TERM; }); }
+function testNow(){
+  var q = location.search;
+  if(!/[?&]hqtest(=|&|$)/.test(q)) return null;
+  var t = q.match(/[?&]ptime=(\d{1,2}):?(\d{2})/), dd = (q.match(/[?&]pday=(mon|tue|wed|thu|fri)/) || [])[1];
+  if(!t && !dd) return null;
+  var hh = t ? +t[1] : 0; if(t && hh < 8) hh += 12;
+  return { mins: t ? hh * 60 + +t[2] : null, day: dd || null };
+}
+function now(){
+  var T = window.B5TERM;
+  if(!T || !T.slotsFor || !T.weeks) return null;
+  var d = new Date(), key = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d.getDay()], m = d.getHours() * 60 + d.getMinutes();
+  var tn = testNow(), wk;
+  if(tn){ if(tn.day) key = tn.day; if(tn.mins != null) m = tn.mins; wk = T.currentWeek(); }
+  else { var iso = T.iso(d); wk = T.weeks.filter(function(w){ return iso >= w.start && iso <= w.end; })[0]; }
+  if(!wk || T.dayKeys.indexOf(key) < 0 || ((wk.days || {})[key] || {}).off) return null;
+  var slots = T.slotsFor(key, String(HQ.who || "").toUpperCase(), wk) || [];
+  for(var i = 0; i < slots.length; i++){
+    var s = slots[i];
+    if(m >= T.mins(s[0]) && m < T.mins(s[1])){
+      var ses = T.session(s[2], wk, key) || {};
+      return { key: s[2], start: s[0], end: s[1], title: ses.title || s[2] };
+    }
+  }
+  return null;
+}
+/* started ones first (in path order), then the first not yet finished;
+   in a session with a subject, the first of that subject if there is one */
 function next(skip){
-  return list().then(function(all){
+  return Promise.all([list(), termReady()]).then(function(r){
+    var all = r[0];
     var left = all.filter(function(x){ return !x.finished && x.id !== skip; });
     var started = left.filter(function(x){ return x.started; });
-    return { item: started[0] || left[0] || null, all: all, done: all.filter(function(x){ return x.finished; }).length };
+    var n = null; try{ n = now(); }catch(e){}
+    var want = n && SESSION_SUBJ[n.key], item = null;
+    if(want){
+      var fits = function(x){ return want.indexOf(String(x.subject || "").toLowerCase()) >= 0; };
+      item = started.filter(fits)[0] || left.filter(fits)[0] || null;
+    }
+    var plain = started[0] || left[0] || null;
+    return { item: item || plain, plain: plain, matched: !!item, now: n, all: all, done: all.filter(function(x){ return x.finished; }).length };
   });
 }
 
@@ -170,6 +220,7 @@ function button(host){
       var line = it.title + (it.chunks ? ", chunk " + it.at + " of " + it.chunks : "");
       go.querySelector("small").textContent = line + (/[.?!]$/.test(line) ? "" : ".") + small;
     }
+    if(!guest) session(r, go, wrap);
     var pct = n ? Math.round(r.done / n * 100) : 0;
     meta.innerHTML = '<span>Step ' + Math.min(r.done + 1, n) + ' of ' + n + '</span><span class="hp-bar"><span style="width:' + pct + '%"></span></span><button type="button">See the whole path</button>';
     meta.querySelector("button").onclick = function(){
@@ -183,5 +234,54 @@ function button(host){
   });
 }
 
-window.HQPath = { list: list, next: next, button: button };
+/* the button follows what is on right now (see now() above) */
+function session(r, go, wrap){
+  var n = r.now, it = r.item;
+  if(!n) return;
+  var b = go.querySelector("b"), sm = go.querySelector("small");
+  var alt = null;   /* the plain next step, one quiet tap away, so it is always their choice */
+  var also = function(x){
+    x = x || it;
+    if(!x) return;
+    alt = document.createElement("a");
+    alt.className = "hp-alt"; alt.href = x.go;
+    alt.textContent = (x.started ? "Or carry on with " : "Or go on to ") + x.title;
+    wrap.insertBefore(alt, wrap.querySelector(".hp-meta"));
+  };
+  if(CALM[n.key]){
+    b.textContent = n.key === "lunch" ? "Lunch" : n.title;
+    sm.textContent = n.key === "lunch" ? "Go and eat. Nothing here needs you yet." : "Nothing needed right now. Tap for something calm.";
+    go.href = "#";
+    go.onclick = function(e){
+      e.preventDefault();
+      if(window.HQFidget) window.HQFidget.open(); else if(window.HQCorner) window.HQCorner.calm();
+    };
+    also();
+  }else if(n.key === "project"){
+    b.textContent = "Project time";
+    sm.textContent = "Open your project book. It keeps your place.";
+    go.href = HQ.base + "project-book.html";
+    also();
+  }else if(n.key === "brain"){
+    b.textContent = "Brain games";
+    sm.textContent = "A quick puzzle to wake up. Pick one from the vault.";
+    go.href = "/games/";
+    also();
+  }else if(n.key === "cc"){
+    b.textContent = "Cultural calendar";
+    sm.textContent = "What the calendar is marking this week.";
+    go.href = "/cc/";
+    also();
+  }else if(r.matched && it){
+    b.textContent = n.title.replace(/\s+with\s+\w+$/, "") + " now";
+    var line = it.title + (it.chunks ? ", chunk " + it.at + " of " + it.chunks : "");
+    sm.textContent = line + (/[.?!]$/.test(line) ? "" : ".");
+    if(r.plain && r.plain.id !== it.id) also(r.plain);
+  }
+}
+var css2 = document.createElement("style");
+css2.textContent = ".hp-alt{align-self:flex-start;color:var(--moon,#fff);font-size:.95rem;text-decoration:underline;padding:2px 4px;opacity:.9}";
+document.head.appendChild(css2);
+
+window.HQPath = { list: list, next: next, button: button, now: now };
 })();

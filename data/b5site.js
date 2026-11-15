@@ -290,7 +290,102 @@ function call(action, data, url){
   return bridgeFor(url).send(req);
 }
 
+/* ---------- who's driving (15 Nov 2026) ----------
+   Jay's laptop is a staff device (b5.sync.off), so a student's HQ
+   opened there never saves to their real HQ. When a student is
+   working with Jay on the laptop, the bar at the top of their HQ
+   lets Jay hand it over: "EGW is driving". Then:
+     1. their latest HQ is fetched from the sheet and replaces this
+        laptop's copy (anything Jay had been trying is held aside in
+        b5.drvheld.<key>, never deleted)
+     2. sync runs as it does on the student's own device, so the work
+        lands in their HQ
+     3. "Done, back to Jay" sends anything left and stops syncing
+   It ends by itself at the end of the day (the next load sends what
+   is left, then stops). b5.drive.v1 = { "<prefix>": { who, d, at } } */
+var DKEY = "b5.drive.v1";
+function dToday(){ var x = new Date(); return x.getFullYear() + "-" + ("0" + (x.getMonth() + 1)).slice(-2) + "-" + ("0" + x.getDate()).slice(-2); }
+function driveAll(){ try{ var v = JSON.parse(localStorage.getItem(DKEY) || "{}"); return v && typeof v === "object" ? v : {}; }catch(e){ return {}; } }
+function driveGet(p){ var v = p ? driveAll()[p] : null; return v && v.who ? { who: v.who, d: v.d, at: v.at, stale: v.d !== dToday() } : null; }
+function driveClear(p){ var all = driveAll(); delete all[p]; try{ localStorage.setItem(DKEY, JSON.stringify(all)); }catch(e){} }
+function driveStart(who, p){
+  return window.B5Site.call("load", { who: who, since: 0 }).then(function(o){
+    if(!o || !o.ok) throw new Error("no answer");
+    var LSD = window.localStorage, keys = [], meta = {}, newest = 0, items = o.items || {};
+    for(var i = 0; i < LSD.length; i++){ var k = LSD.key(i); if(k && k.indexOf(p) === 0) keys.push(k); }
+    keys.forEach(function(k){
+      var v = LSD.getItem(k);
+      if(k.indexOf(p + "sync.") !== 0 && v != null) LSD.setItem("b5.drvheld." + k, v);
+      LSD.removeItem(k);
+    });
+    Object.keys(items).forEach(function(k){
+      if(k.indexOf(p) !== 0 || k.indexOf(p + "sync.") === 0) return;
+      var it = items[k], t = +it.t || 0;
+      if(t > newest) newest = t;
+      if(it.v === "" || it.v == null) return;
+      LSD.setItem(k, String(it.v)); meta[k] = t;
+    });
+    LSD.setItem(p + "sync.meta", JSON.stringify(meta));
+    LSD.setItem(p + "sync.dirty", "{}");
+    LSD.setItem(p + "sync.since", String(newest));
+    var all = driveAll(); all[p] = { who: who, d: dToday(), at: Date.now() };
+    LSD.setItem(DKEY, JSON.stringify(all));
+    return true;
+  });
+}
+function driveStop(p){
+  var Y = window.B5Sync;
+  var send = Y && Y.on && Y.pushNow ? Y.pushNow() : Promise.resolve(true);
+  return send.then(function(ok){ if(!ok) throw new Error("not sent"); driveClear(p); return true; });
+}
+function driveBar(){
+  var p = hq && hq.prefix, who = hq && hq.who;
+  if(!p || GUEST || /teacher\.html$/.test(path)) return;
+  var staffDev = false; try{ staffDev = localStorage.getItem("b5.sync.off") === "1"; }catch(e){}
+  if(!staffDev || !SYNC_URL || document.getElementById("b5Drive")) return;
+  var dv = driveGet(p), on = !!(dv && !dv.stale && window.B5Sync && window.B5Sync.on);
+  /* the project book has its own "Who is writing?" bar when nobody is driving */
+  if(!on && /\/project-book\.html$/.test(path)) return;
+  var css = document.createElement("style");
+  css.textContent =
+    "#b5Drive{position:relative;z-index:2147482200;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 12px;padding:8px 14px;background:#0a2f38;color:#fff;font:600 .92rem/1.3 'Atkinson Hyperlegible',Arial,sans-serif;border-bottom:3px solid #ef7724}" +
+    "#b5Drive.on{background:#1e7a4a;border-bottom-color:#ffd23f}" +
+    "#b5Drive button{font:inherit;font-weight:800;border:2px solid #fff;border-radius:999px;padding:4px 14px;cursor:pointer;background:transparent;color:#fff}" +
+    "#b5Drive button[aria-pressed=true]{background:#fff;color:#0a2f38}" +
+    "#b5Drive small{font-weight:500;opacity:.9}" +
+    "@media print{#b5Drive{display:none}}";
+  document.head.appendChild(css);
+  var bar = document.createElement("div");
+  bar.id = "b5Drive"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Who is driving this laptop");
+  function draw(note){
+    bar.className = on ? "on" : "";
+    bar.innerHTML = on
+      ? "<span>" + who + " is driving.</span><small>" + (note || "Their work saves to their own HQ, as on their own device.") + "</small><button type='button' data-d='jay'>Done, back to Jay</button>"
+      : "<span>Staff device. Who is driving?</span><span role='group' aria-label='Who is driving' style='display:inline-flex;gap:6px'>" +
+        "<button type='button' aria-pressed='true' data-d='jay'>Jay, just looking</button><button type='button' aria-pressed='false' data-d='s'>" + who + "</button></span>" +
+        "<small>" + (note || "Just looking: nothing here changes " + who + "'s HQ.") + "</small>";
+  }
+  bar.addEventListener("click", function(e){
+    var b = e.target.closest("[data-d]"); if(!b || bar.dataset.busy) return;
+    if(!on && b.dataset.d === "s"){
+      bar.dataset.busy = "1"; draw("Fetching " + who + "'s latest HQ...");
+      driveStart(who, p).then(function(){ location.reload(); }).catch(function(){
+        delete bar.dataset.busy; draw("Could not reach the sheet, so it is not safe to hand over yet. Try again in a minute.");
+      });
+    }else if(on && b.dataset.d === "jay"){
+      bar.dataset.busy = "1"; draw("Sending the last of " + who + "'s work...");
+      driveStop(p).then(function(){ location.reload(); }).catch(function(){
+        delete bar.dataset.busy; draw("Some of " + who + "'s work has not reached the sheet yet. Give it a minute, then tap Done again.");
+      });
+    }
+  });
+  draw();
+  document.body.insertBefore(bar, document.body.firstChild);
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", driveBar); else setTimeout(driveBar, 0);
+
 window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST, call: call, bridgeDown: bridgeDown, retryBridge: retryBridge, bridgeWait: 0,
+  drive: { get: driveGet, start: driveStart, stop: driveStop, clear: driveClear },
   syncWho: hq ? hq.who : (PROJECTS[path] || {}).who || null,
   syncPrefix: hq ? hq.prefix : (PROJECTS[path] || {}).prefix || null };
 /* a student's own pages (their HQ and project page) open for their school account, staff, or their code */
@@ -340,7 +435,15 @@ var S = window.B5Site || {};
 var URL = S.syncUrl, WHO = S.syncWho, P = S.syncPrefix;
 if(!URL || !WHO || !P) return;
 if(/teacher\.html$/.test(location.pathname)) return;
-try{ if(localStorage.getItem("b5.sync.off") === "1") return; }catch(e){ return; }
+/* a staff device only syncs while a student is driving it (the Who's driving bar) */
+var STAFFDEV = false, DRIVE = null;
+try{ STAFFDEV = localStorage.getItem("b5.sync.off") === "1"; }catch(e){ return; }
+if(STAFFDEV){
+  if(S.guest || !S.drive || S.hq !== WHO) return;
+  DRIVE = S.drive.get(P);
+  if(!DRIVE || !rawMetaThere()) return;
+}
+function rawMetaThere(){ try{ return localStorage.getItem(P + "sync.meta") != null; }catch(e){ return false; } }
 
 var META = P + "sync.meta", DIRTY = P + "sync.dirty", SINCE = P + "sync.since";
 var LS = window.localStorage, proto = Object.getPrototypeOf(LS);
@@ -351,6 +454,14 @@ function mine(k){ return typeof k === "string" && k.indexOf(P) === 0 && k.indexO
 function readJ(k, d){ try{ var v = JSON.parse(rawGet.call(LS, k) || "null"); return v && typeof v === "object" ? v : d; }catch(e){ return d; } }
 function writeJ(k, v){ try{ rawSet.call(LS, k, JSON.stringify(v)); }catch(e){} }
 var meta = readJ(META, {}), dirty = readJ(DIRTY, {});
+
+/* a drive left on from another day: send what is left, then stop (nothing new is watched) */
+if(DRIVE && DRIVE.stale){
+  var left0 = batch();
+  if(!left0){ S.drive.clear(P); return; }
+  S.call("save", { who: WHO, items: left0 }).then(function(o){ if(o && o.ok){ writeJ(DIRTY, {}); S.drive.clear(P); } }).catch(function(){});
+  return;
+}
 
 /* first time on this device: everything already here counts as changed now */
 if(!rawGet.call(LS, META)){
@@ -477,5 +588,17 @@ function toast(){
 
 pull().then(function(){ if(Object.keys(dirty).length) push(); });
 
-window.B5Sync = { push: push, pull: pull, on: true };
+/* send everything not yet in the Sheet now; resolves true once nothing is left */
+function pushNow(){
+  clearTimeout(timer); timer = null;
+  var items = batch(); if(!items) return Promise.resolve(true);
+  return S.call("save", { who: WHO, items: items }).then(function(o){
+    if(!o || !o.ok) return false;
+    Object.keys(items).forEach(function(k){ if(items[k].t === (meta[k] || 0)) delete dirty[k]; });
+    writeJ(DIRTY, dirty);
+    return !Object.keys(dirty).length;
+  }).catch(function(){ return false; });
+}
+
+window.B5Sync = { push: push, pull: pull, pushNow: pushNow, on: true, driving: !!DRIVE };
 })();

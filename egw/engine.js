@@ -802,6 +802,7 @@ function chunkDone(k){
   confetti($("stampNum"), 26);
   state.pos = chunks[nk].from; save();
   if(P() && !cfg.escape) try{ P().chunkEnd($("chunkCard"), { k: k, n: chunks.length }); }catch(e){}
+  if(F() && !cfg.review) try{ F().chunkEnd($("chunkCard"), { k: k, n: chunks.length, subject: cfg.subject || "", id: cfg.id, topic: stripTags(c.topic || "") }); }catch(e){}
 }
 
 function confetti(from, n){
@@ -877,7 +878,9 @@ function go(i){
   cur = null;
   sureNow = null;
   var renderer = R[s.type];
-  renderer(s, body, i);
+  /* step types from the fun layer (/egw/fun.js): draw, find */
+  if(!renderer && F() && F().types && F().types[s.type]) cur = F().types[s.type](s, body, i, funApi());
+  else if(renderer) renderer(s, body, i);
   if(reads()) addReader(body, body);
   if(EASY) autoRead(body);
   if(a2() && cfg.sure && scored(s) && s.type !== "widget" && !resolved(i) && !(state.answers[i] && state.answers[i].tries)){
@@ -912,6 +915,11 @@ function go(i){
   }
   if(a2() && a && (a.status === "right1" || a.status === "right2") && s.explain) a2Explain(s, i);
   if(P()) try{ P().step($("qCard"), { learn: s.type === "learn", boss: isBoss(i), body: body, i: i, k: k }); }catch(e){}
+  if(F()) try{
+    var sts = [];
+    for(var q2 = c.from; q2 <= c.to; q2++) sts.push({ learn: steps[q2].type === "learn", status: (state.answers[q2] || {}).status || "", boss: isBoss(q2) });
+    F().step({ s: s, i: i, k: k, from: c.from, to: c.to, steps: sts, body: body, card: $("qCard"), resolved: resolved(i), boss: isBoss(i), api: funApi() });
+  }catch(e){}
 }
 /* "How did you get that?" now and then, never required */
 function a2Explain(s, i){
@@ -1616,6 +1624,7 @@ function check(giveUp){
       (a.flag ? '<br><span class="tiny">You were sure about that one, so it will come back for a second look. Being sure and slipping is how brains learn fastest.</span>' : '') +
       '<br><span class="tiny">Change your answer and press Check again, or tap Show me.</span>';
     setButtons(s, i);
+    if(F()) try{ F().miss({ s: s, i: i, card: $("qCard") }); }catch(e){}
     return;
   }
   cur.mark(a.status === "shown");
@@ -1631,6 +1640,7 @@ function check(giveUp){
   }
   bump(a.status, $("checkBtn"));
   if(P()) try{ P().result({ status: a.status, boss: boss, combo: combo || (a.status === "right1" && state.streak === 3) }); }catch(e){}
+  if(F()) try{ F().result({ status: a.status, s: s, i: i, card: $("qCard") }); }catch(e){}
   showFeedback(s, a.status, false);
   if(slip && a.status === "shown") $("qFb").insertAdjacentHTML("beforeend", '<p class="tiny a2slip">The likely slip: ' + slip + '</p>');
   if(a2() && (a.status === "right1" || a.status === "right2") && s.explain) a2Explain(s, i);
@@ -2005,6 +2015,19 @@ function buildReviewStart(){
    only decoration: if it does not arrive within 2.5 seconds the
    activity starts as before. */
 function P(){ return window.HQPlay || null; }
+/* the fun layer (15 Nov 2026): /egw/fun.js adds play modes (tap, fling,
+   arcade), funny fails, the trail map, a silly answer, drawing on the
+   picture and Find it. Also only decoration, apart from its two step
+   types (draw, find), which need it. */
+function F(){ return window.HQFun || null; }
+function funApi(){
+  return {
+    check: function(){ var b = $("checkBtn"); if(b && !b.classList.contains("hidden")) check(false); },
+    resolved: function(){ return resolved(state.pos); },
+    easy: EASY, id: cfg && cfg.id, subject: cfg && cfg.subject || "",
+    review: !!(cfg && cfg.review), escape: !!(cfg && cfg.escape)
+  };
+}
 function unitWord(){ var p = P(); return p && p.unit ? p.unit() : "Chunk"; }
 function unitsWord(){ var u = unitWord().toLowerCase(); return u === "chunk" ? "chunks" : u + "s"; }
 /* the boss round: the last marked question of a chunk with at least two */
@@ -2021,12 +2044,17 @@ function isBoss(i){
 function run(c){
   if(!window.HQPlay && !run.asked){
     run.asked = true;
-    var sc = document.createElement("script"), started = false;
+    var sc = document.createElement("script"), started = false, left = 2;
     var start = function(){ if(started) return; started = true; run(c); };
+    var one = function(){ if(--left <= 0) start(); };
     sc.src = "/egw/play.js?v=1";
-    sc.onload = sc.onerror = start;
+    sc.onload = sc.onerror = one;
+    var fs = document.createElement("script");
+    fs.src = "/egw/fun.js?v=1";
+    fs.onload = fs.onerror = one;
     setTimeout(start, 2500);
     document.head.appendChild(sc);
+    document.head.appendChild(fs);
     return;
   }
   var reviewMode = (location.hash || "") === "#review";
