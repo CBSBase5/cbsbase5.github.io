@@ -15,6 +15,7 @@
 <script src="/data/b5staff.js?v=1"></script>
 <script src="/data/term.js?v=11"></script>
 <script src="/lessons/plan.js?v=11"></script>
+<script src="/data/a2/drops.js"></script>
 <script src="/data/overview.js?v=1"></script>
 <style>
 /* The line management overview: intent, implementation, impact, the
@@ -127,6 +128,12 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
 .pip.s2{background:var(--teal)}
 .key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--body-tint);margin:10px 0 0}
 .key span{display:inline-flex;align-items:center;gap:6px}
+.live{margin-left:auto;font-size:.85rem;color:var(--body-tint);display:inline-flex;align-items:center;gap:6px}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--teal);display:inline-block;animation:livep 1.6s ease-in-out infinite alternate}
+@keyframes livep{from{opacity:.35}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.live i{animation:none}}
+.pip.flash{animation:pipf 1.2s ease-out 2}
+@keyframes pipf{0%{box-shadow:0 0 0 0 rgba(0,114,145,.6)}100%{box-shadow:0 0 0 8px rgba(0,114,145,0)}}
 .whos{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 .whos button{font:inherit;font-weight:700;font-size:.95rem;padding:7px 15px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
 .whos button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
@@ -149,6 +156,7 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
 .msg{font-size:.95rem;color:var(--body-tint);margin:0 0 12px}
 .asof{font-size:.85rem;color:var(--body-tint);margin:6px 0 0}
 @media print{
+  .live,
   .grain,.jump,.weekpick,.ctl,.whos button:not([aria-pressed=true]),footer,#b5gate{display:none !important}
   body{background:#fff}
   .box,.tile,.pt{box-shadow:none}
@@ -228,7 +236,7 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
   </section>
 
   <section class="part" id="tracker">
-    <div class="ph"><h2><span class="n">5</span> Progress tracker</h2><span>Autumn 2 milestone steps, as marked in BridgeLink Buddy</span></div>
+    <div class="ph"><h2><span class="n">5</span> Progress tracker</h2><span>Autumn 2 milestone steps: updates by itself as students start and finish activities</span><span class="live" id="live"></span></div>
     <div id="trackView" hidden>
       <div class="gridwrap"><table class="trk" id="trk"></table></div>
       <div class="key" id="key"></div>
@@ -253,7 +261,7 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
 "use strict";
 var T = window.B5TERM, L = window.B5LESSONS, O = window.B5OVERVIEW || {};
 var WHO = ["EGW", "LP", "LW", "LC", "HK", "JT"], KEY = "b5.staffkey.v1";
-var STATE = ["Not yet", "Working on it", "Secure"];
+var STATE = ["Not yet", "Working on it", "Done"];
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function pts(list, edges){
@@ -406,8 +414,36 @@ function drawImpact(){
   }).join("") + '</ul>' : '<p class="none">None sent to Buddy ' + esc(label) + ' yet.</p>');
 }
 
-/* steps: Buddy's own status for each step, falling back to the ticks */
-function stateOf(t, w){
+/* activities: every Evidence row is a student's day on an activity. The
+   drops list says which milestone steps that activity was built for, so
+   starting it (a first chunk done) makes those steps "working on it" and
+   finishing it makes them "done", without anyone marking anything. */
+var DROPS = {}, TNAME = {};
+(function(){
+  var D = window.B5DROPS || {};
+  (D.items || []).forEach(function(it){ DROPS[it.who + "|a2-" + it.slug] = it.covers || []; });
+  Object.keys(D.targets || {}).forEach(function(k){ TNAME[String(D.targets[k]).toLowerCase()] = k; });
+})();
+var ACT = {};
+function buildAct(){
+  ACT = {};
+  (EV || []).forEach(function(r){
+    if(r.Kind && r.Kind !== "activity") return;
+    var who = String(r.Who), cov = DROPS[who + "|" + String(r.Slug || "")];
+    if(!cov || !cov.length){
+      var k = TNAME[String(r.Target || "").toLowerCase()];
+      cov = k && +r.Step ? [[k, +r.Step]] : [];
+    }
+    var st = String(r.Finished) === "yes" ? 2 : 1, day = String(r.Day);
+    cov.forEach(function(c){
+      var id = c[0] + "." + c[1], m = ACT[who] = ACT[who] || {}, cur = m[id];
+      if(!cur || st > cur.state || (st === cur.state && day > cur.day)) m[id] = { state: Math.max(st, cur ? cur.state : 0), day: day, title: String(r.Activity || r.Slug || "") };
+    });
+  });
+}
+function actOf(t, w){ return ((ACT[w] || {})[t.id]) || null; }
+/* Buddy's own status for a step, falling back to the ticks */
+function buddyState(t, w){
   var s = String(((t.jay || {})[w]) || "").toLowerCase();
   if(s){
     if(/\bnot\b|none|^no\b/.test(s)) return 0;
@@ -418,6 +454,14 @@ function stateOf(t, w){
   var k = (((TG.ticks || {})[w]) || {})[t.id];
   return k ? +k.state || 0 : 0;
 }
+/* the step's state: whichever is further on, the activity or Buddy */
+function stateOf(t, w){ var a = actOf(t, w); return Math.max(buddyState(t, w), a ? a.state : 0); }
+function whyOf(t, w){
+  var a = actOf(t, w), st = (t.jay || {})[w], bits = [];
+  if(a) bits.push((a.state === 2 ? "Finished " : "Started ") + a.title + ", " + nice(a.day));
+  if(st) bits.push("In Buddy: " + st);
+  return bits.join(". ");
+}
 function keyOf(t){ var m = /^(.*)\.(\d+)$/.exec(t.id); return m ? m[1] : t.id; }
 function stepOf(t){ var m = /\.(\d+)$/.exec(t.id); return m ? +m[1] : 0; }
 function hasStep(t, w){ return !stepOf(t) || !!((t.ms || {})[w]); }
@@ -426,8 +470,9 @@ function groups(){
   (TG.targets || []).forEach(function(t){ var k = keyOf(t); if(!g[k]){ g[k] = { key: k, title: t.title, pillar: t.pillar, steps: [] }; order.push(k); } g[k].steps.push(t); });
   return order.map(function(k){ return g[k]; });
 }
-function titleOf(k){ var t = ((TG && TG.targets) || []).filter(function(x){ return keyOf(x) === k || x.title === k; })[0]; return t ? t.title : k; }
-function pip(s, tip){ return '<span class="pip s' + s + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"></span>'; }
+function titleOf(k){ k = TNAME[String(k).toLowerCase()] || k; var t = ((TG && TG.targets) || []).filter(function(x){ return keyOf(x) === k || x.title === k; })[0]; return t ? t.title : k; }
+function pip(s, tip, key){ return '<span class="pip s' + s + (key && FLASH[key] ? " flash" : "") + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"></span>'; }
+var FLASH = {}, SEEN = null;
 function drawTracker(){
   if(!TG) return;
   var G = groups();
@@ -441,15 +486,16 @@ function drawTracker(){
       if(!mine.length) return '<td class="w"><span class="none">-</span></td>';
       return '<td class="w">' + mine.map(function(t){
         var s = stateOf(t, w); tot[w]++; if(s === 2) sec[w]++; if(s === 1) wk[w]++;
-        return pip(s, w + ", " + g.title + (stepOf(t) ? ", step " + stepOf(t) : "") + ": " + STATE[s]);
+        var why = whyOf(t, w);
+        return pip(s, w + ", " + g.title + (stepOf(t) ? ", step " + stepOf(t) : "") + ": " + STATE[s] + (why ? ". " + why : ""), w + "|" + t.id);
       }).join("") + '</td>';
     }).join("") + '</tr>';
   }).join("");
   (EV || []).forEach(function(r){ if(inRange(String(r.Day)) && mins[r.Who] != null) mins[r.Who] += +r.Minutes || 0; });
   $("trk").innerHTML = '<thead><tr><th>Target</th>' + WHO.map(function(w){ return '<th class="w">' + w + '</th>'; }).join("") + '</tr></thead><tbody>' + body +
-    '<tr class="sum"><td>Steps secure<small>and working on it</small></td>' + WHO.map(function(w){ return '<td class="w">' + sec[w] + ' of ' + tot[w] + '<small>' + wk[w] + ' working on it</small></td>'; }).join("") + '</tr>' +
+    '<tr class="sum"><td>Steps done<small>and working on it</small></td>' + WHO.map(function(w){ return '<td class="w">' + sec[w] + ' of ' + tot[w] + '<small>' + wk[w] + ' working on it</small></td>'; }).join("") + '</tr>' +
     '<tr class="sum"><td>Learning time<small>' + (range === "week" ? "week " + W.n : "half term so far") + '</small></td>' + WHO.map(function(w){ return '<td class="w">' + hours(mins[w]) + ' h</td>'; }).join("") + '</tr></tbody>';
-  $("key").innerHTML = '<span>' + pip(0, STATE[0]) + ' Not yet</span><span>' + pip(1, STATE[1]) + ' Working on it</span><span>' + pip(2, STATE[2]) + ' Secure</span><span>One circle per milestone step that student has. A dash means the target has no step for them this half term.</span>';
+  $("key").innerHTML = '<span>' + pip(0, STATE[0]) + ' Not yet</span><span>' + pip(1, STATE[1]) + ' Working on it</span><span>' + pip(2, STATE[2]) + ' Done</span><span>One circle per milestone step. A step fills in by itself: half when the student starts an activity built for it, full when they finish it. A step marked secure in BridgeLink Buddy is full too. Hover or tap a circle to see why. A dash means no step for them this half term.</span>';
   drawOne();
 }
 function drawOne(){
@@ -460,10 +506,10 @@ function drawOne(){
     var mine = g.steps.filter(function(t){ return hasStep(t, w); });
     if(!mine.length) return "";
     var now = mine.filter(function(t){ return stateOf(t, w) < 2; })[0], all = !now;
-    var t = now || mine[mine.length - 1], s = stateOf(t, w), st = (t.jay || {})[w];
-    return '<li><span>' + mine.map(function(x){ var y = stateOf(x, w); return pip(y, (stepOf(x) ? "Step " + stepOf(x) + ": " : "") + STATE[y]); }).join("") + '</span><div><b>' + esc(g.title) + '</b>' +
-      '<small>' + (all ? "Every step secure. Last step: " : (stepOf(t) ? "Now on step " + stepOf(t) + " of " + mine.length + ": " : "")) + '</small>' + esc((t.ms || {})[w] || t.statement || "") +
-      (st ? '<br><small>In Buddy: ' + esc(st) + '</small>' : '') + '</div></li>';
+    var t = now || mine[mine.length - 1], s = stateOf(t, w), why = whyOf(t, w);
+    return '<li><span>' + mine.map(function(x){ var y = stateOf(x, w), wy = whyOf(x, w); return pip(y, (stepOf(x) ? "Step " + stepOf(x) + ": " : "") + STATE[y] + (wy ? ". " + wy : ""), w + "|" + x.id); }).join("") + '</span><div><b>' + esc(g.title) + '</b>' +
+      '<small>' + (all ? "Every step done. Last step: " : (stepOf(t) ? "Now on step " + stepOf(t) + " of " + mine.length + ": " : "")) + '</small>' + esc((t.ms || {})[w] || t.statement || "") +
+      (why ? '<br><small>' + esc(why) + '</small>' : '') + '</div></li>';
   }).join("") + '</ul>';
   var core = (TG.core || []).filter(function(c){ return c.who === w; });
   var mine = (EV || []).filter(function(r){ return r.Who === w && inRange(String(r.Day)); }).sort(function(a, b){ return a.Day < b.Day ? 1 : a.Day > b.Day ? -1 : 0; });
@@ -529,20 +575,56 @@ function drawDeploy(){
 function drawAll(){ drawWeekPick(); drawWeek(); drawDeploy(); drawTimetable(); drawImpact(); drawTracker(); }
 drawAll();
 
-function load(){
-  var k = ""; try{ k = localStorage.getItem(KEY) || ""; }catch(e){}
-  if(!window.B5Site || !B5Site.call){ $("msg").textContent = "The Base 5 sheet is not switched on, so the figures cannot load."; return; }
+/* ---------- loading, then keeping up: the tracker checks the sheet every
+   minute while the page is open (and as soon as it is looked at again), so
+   a step fills in shortly after a student starts or finishes an activity.
+   Steps that just moved pulse twice. ---------- */
+function snapshot(){
+  var o = {};
+  WHO.forEach(function(w){ ((TG && TG.targets) || []).forEach(function(t){ if(hasStep(t, w)) o[w + "|" + t.id] = stateOf(t, w); }); });
+  return o;
+}
+function stampNow(){
+  var t = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  $("live").innerHTML = '<i aria-hidden="true"></i>Live, checked ' + t;
+  $("stamp").textContent = "Figures as of " + new Date().toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) + ". Words last updated " + nice(O.updated || today, { day: "numeric", month: "long", year: "numeric" }) + ".";
+}
+function key(){ var k = ""; try{ k = localStorage.getItem(KEY) || ""; }catch(e){} return k; }
+var first = true, busy = false, lastTargets = 0;
+function refresh(){
+  if(busy || !window.B5Site || !B5Site.call) return;
+  busy = true;
+  var wantTargets = !TG || Date.now() - lastTargets > 5 * 60000;
   Promise.all([
-    B5Site.call("evidence", { key: k, from: weeks[0].start, to: weeks[weeks.length - 1].end }),
-    B5Site.call("targets", { key: k })
+    B5Site.call("evidence", { key: key(), from: weeks[0].start, to: weeks[weeks.length - 1].end }),
+    wantTargets ? B5Site.call("targets", { key: key() }) : Promise.resolve(null)
   ]).then(function(r){
-    var e = r[0] || {}, t = r[1] || {};
-    if(!e.ok && !t.ok){ $("msg").textContent = "The sheet said: " + (e.error || t.error || "nothing") + "."; return; }
-    if(e.ok){ EV = e.items || []; if(range === "week" && !EV.some(function(x){ return String(x.Day) >= W.start && String(x.Day) <= W.end; })) range = "term"; $("msg").hidden = true; $("impactView").hidden = false; } else $("msg").textContent = "The evidence did not load: " + e.error + ".";
-    if(t.ok) TG = t; else $("trackMsg").textContent = "The targets did not load: " + t.error + ".";
-    $("stamp").textContent = "Figures as of " + new Date().toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) + ". Words last updated " + nice(O.updated || today, { day: "numeric", month: "long", year: "numeric" }) + ".";
-    drawImpact(); drawTracker();
-  }).catch(function(){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; });
+    busy = false;
+    var e = r[0] || {}, t = r[1];
+    if(first && !e.ok && !(t && t.ok)){ $("msg").textContent = "The sheet said: " + (e.error || (t && t.error) || "nothing") + "."; return; }
+    var before = SEEN;
+    if(e.ok){
+      EV = e.items || [];
+      if(first && range === "week" && !EV.some(function(x){ return String(x.Day) >= W.start && String(x.Day) <= W.end; })) range = "term";
+      $("msg").hidden = true; $("impactView").hidden = false;
+    } else if(first) $("msg").textContent = "The evidence did not load: " + e.error + ".";
+    if(t){ if(t.ok){ TG = t; lastTargets = Date.now(); } else if(first) $("trackMsg").textContent = "The targets did not load: " + t.error + "."; }
+    buildAct();
+    SEEN = snapshot(); FLASH = {};
+    if(before) Object.keys(SEEN).forEach(function(k){ if(SEEN[k] > (before[k] || 0)) FLASH[k] = 1; });
+    first = false;
+    stampNow(); drawImpact(); drawTracker();
+  }).catch(function(){
+    busy = false;
+    if(first){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; }
+    else $("live").textContent = "Could not reach the sheet just now; trying again in a minute.";
+  });
+}
+function load(){
+  if(!window.B5Site || !B5Site.call){ $("msg").textContent = "The Base 5 sheet is not switched on, so the figures cannot load."; return; }
+  refresh();
+  setInterval(function(){ if(!document.hidden) refresh(); }, 60000);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) refresh(); });
 }
 function loadDeploy(){
   var k = ""; try{ k = localStorage.getItem(KEY) || ""; }catch(e){}
