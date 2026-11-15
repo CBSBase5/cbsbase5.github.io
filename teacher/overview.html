@@ -43,6 +43,21 @@ dl.list dd{margin:0;padding:9px 0;border-top:1px dashed rgba(10,47,56,.2);line-h
 .threes p{margin:0;line-height:1.5;font-size:.95rem}
 .threes a{font-weight:700;font-size:.9rem}
 details.more{margin:16px 0 0}
+.tiles.five{grid-template-columns:repeat(5,1fr)}
+@media (max-width:980px){.tiles.five{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.tiles.five{grid-template-columns:repeat(2,1fr)}}
+.ph3{margin-top:18px}.ph3 h2{font-size:1.2rem}
+.trk.num td.w,.trk.num th.w{font-variant-numeric:tabular-nums}
+.trk.num td small{display:inline;margin-left:4px}
+.heat td.w{border-bottom:2px solid var(--white)}
+.tbar{display:grid;grid-template-columns:minmax(10em,16em) 1fr 7.5em;gap:6px 12px;align-items:center;padding:7px 0;border-top:1px dashed rgba(10,47,56,.2);font-size:.9rem}
+.tbar small{display:block;color:var(--body-tint);font-size:.78rem}
+.tbar .b{display:flex;gap:2px;height:14px;background:var(--paper);border-radius:4px;overflow:hidden;border:1px solid rgba(10,47,56,.25)}
+.tbar .b i{display:block;height:100%}
+.tbar .b i.d{background:var(--teal)}
+.tbar .b i.h{background:repeating-linear-gradient(45deg,var(--teal) 0 3px,#b9dde6 3px 6px)}
+.tbar .n{text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:600px){.tbar{grid-template-columns:1fr 6.5em}.tbar .b{grid-column:1/-1;order:3}}
 details.more summary{cursor:pointer;font-weight:700}
 .jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
 .jump a,.jump button{font:inherit;font-size:.92rem;font-weight:700;padding:7px 15px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);text-decoration:none;cursor:pointer}
@@ -217,29 +232,30 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
   <div class="topbar">
     <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
       <button type="button" role="tab" data-t="summary">Summary</button>
-      <button type="button" role="tab" data-t="intent">Intent and implementation</button>
-      <button type="button" role="tab" data-t="timetable">Timetable</button>
       <button type="button" role="tab" data-t="impact">Impact</button>
       <button type="button" role="tab" data-t="tracker">Progress</button>
       <button type="button" role="tab" data-t="holly">Holly's week</button>
+      <button type="button" role="tab" data-t="timetable">Timetable</button>
     </nav>
     <div class="tools"><label>Week <select id="weeksel"></select></label><button type="button" id="print">Print</button></div>
   </div>
 
   <section class="part" id="summary" data-t="summary">
     <div class="ph"><h2>Summary</h2><span id="sumSub"></span></div>
-    <div class="tiles" id="sumTiles"><p class="none">Loading the figures from the Base 5 sheet...</p></div>
+    <div class="tiles five" id="sumTiles"><p class="none">Loading the figures from the Base 5 sheet...</p></div>
+    <div class="box">
+      <h3>By student</h3>
+      <div class="gridwrap"><table class="trk num" id="byStudent"></table></div>
+      <p class="chartnote" id="byNote"></p>
+    </div>
     <dl class="facts" id="sumFacts"></dl>
-    <div class="threes" id="threes"></div>
-  </section>
-
-  <section class="part" id="intent" data-t="intent">
-    <div class="ph"><h2>Intent</h2><span>What Base 5 is for</span></div>
-    <p class="lead" id="intentLead"></p>
-    <dl class="list" id="intentPts"></dl>
-    <div class="ph ph2"><h2>Implementation</h2><span>How it happens</span></div>
-    <p class="lead" id="implLead"></p>
-    <dl class="list" id="implPts"></dl>
+    <details class="more" id="words">
+      <summary>Intent and implementation</summary>
+      <div class="ph ph3"><h2>Intent</h2></div>
+      <dl class="list" id="intentPts"></dl>
+      <div class="ph ph3"><h2>Implementation</h2></div>
+      <dl class="list" id="implPts"></dl>
+    </details>
   </section>
 
   <section class="part" id="timetable" data-t="timetable">
@@ -251,7 +267,6 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
 
   <section class="part" id="impact" data-t="impact">
     <div class="ph"><h2>Impact</h2><span>What the evidence says</span></div>
-    <p class="lead" id="impactLead"></p>
     <dl class="list" id="impactPts"></dl>
     <p class="msg" id="msg" aria-live="polite">Loading the figures from the Base 5 sheet...</p>
     <div id="impactView" hidden>
@@ -261,6 +276,15 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
         <h3>Hours of learning recorded each week, all students together</h3>
         <div class="chart" id="chart" role="img"></div>
         <div class="xax" id="xax"></div>
+      </div>
+      <div class="box">
+        <h3>Hours by student, week by week</h3>
+        <div class="gridwrap"><table class="trk num heat" id="heat"></table></div>
+        <p class="chartnote">Darker means more time recorded that week. All figures are hours.</p>
+      </div>
+      <div class="box">
+        <h3>By target, across the group</h3>
+        <div id="byTarget"></div>
       </div>
       <details class="more" id="taughtBox"></details>
     </div>
@@ -306,11 +330,8 @@ function hours(m){ var h = m / 60; return h >= 10 ? Math.round(h) : Math.round(h
 /* ---------- the words ---------- */
 $("intro").textContent = O.intro || "";
 var I = O.intent || {}, M = O.implementation || {}, P = O.impact || {};
-$("intentLead").textContent = I.lead || "";
 $("intentPts").innerHTML = pts(I.points);
-$("implLead").textContent = M.lead || "";
 $("implPts").innerHTML = pts(M.points);
-$("impactLead").textContent = P.lead || P.short || "";
 $("impactPts").innerHTML = pts(P.points);
 $("impactPts").hidden = !(P.points && P.points.length);
 $("print").onclick = function(){ window.print(); };
@@ -319,7 +340,7 @@ window.addEventListener("beforeprint", function(){ wasShut = [].filter.call(docu
 window.addEventListener("afterprint", function(){ wasShut.forEach(function(d){ d.open = false; }); wasShut = []; });
 
 /* ---------- one section at a time ---------- */
-var TABS = ["summary", "intent", "timetable", "impact", "tracker", "holly"];
+var TABS = ["summary", "impact", "tracker", "holly", "timetable"];
 function show(t){
   if(TABS.indexOf(t) < 0) t = "summary";
   [].forEach.call(document.querySelectorAll("section.part"), function(sec){ sec.hidden = sec.dataset.t !== t; });
@@ -362,27 +383,52 @@ function drawWeek(){
     ["Trip", trip ? T.dayNames[trip] : "No trip this week", "var(--teal)"]
   ];
   $("sumFacts").innerHTML = facts.map(function(f){ return '<div style="--edge:' + f[2] + '"><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>'; }).join("");
-  $("threes").innerHTML = [["Intent", I.short || I.lead, "intent", "var(--teal)"], ["Implementation", M.short || M.lead, "intent", "var(--orange)"], ["Impact", P.short || P.lead, "impact", "var(--plum)"]].map(function(x){
-    return '<div style="--edge:' + x[3] + '"><b>' + x[0] + '</b><p>' + esc(x[1] || "") + '</p><a href="#' + x[2] + '" data-go="' + x[2] + '">More</a></div>';
-  }).join("");
 }
+/* per student figures between two days (inclusive) */
+function statsFor(from, to){
+  var out = {};
+  WHO.forEach(function(w){ out[w] = { mins: 0, fin: 0, lessons: {}, act: {} }; });
+  (EV || []).forEach(function(r){
+    var d = String(r.Day), o = out[r.Who]; if(!o || d < from || d > to) return;
+    o.mins += r._m; if(r._fin) o.fin++;
+    if(r.Kind === "lesson") o.lessons[d + "|" + r.Activity] = 1; else o.act[r.Slug] = 1;
+  });
+  return out;
+}
+function lastOn(w){
+  var t = 0;
+  (EV || []).forEach(function(r){ if(r.Who === w){ var x = new Date(String(r.Day) + "T12:00:00").getTime(); if(x > t) t = x; } });
+  var p = ((PR || {})[w] || {}).last || 0; if(+p > t) t = +p;
+  return t ? nice(T.iso(new Date(t))) : "-";
+}
+function stepsOf(w){
+  var d = 0, h = 0, n = 0;
+  ((TG && TG.targets) || []).forEach(function(t){ if(hasStep(t, w)){ n++; var s = stateOf(t, w); if(s === 2) d++; else if(s === 1) h++; } });
+  return { done: d, half: h, of: n };
+}
+function pct(a, b){ return b ? Math.round(a / b * 100) + "%" : "-"; }
 function drawSummary(){
   if(!EV){ return; }
-  var upto = W.end < today ? W.end : today, mins = 0, fin = 0, ls = {}, done = 0, tot = 0;
-  EV.forEach(function(r){
-    var d = String(r.Day); if(d > upto) return;
-    mins += r._m;
-    if(r._fin) fin++;
-    if(r.Kind === "lesson") ls[d + "|" + r.Activity] = 1;
-  });
-  if(TG) WHO.forEach(function(w){ (TG.targets || []).forEach(function(t){ if(hasStep(t, w)){ tot++; if(stateOf(t, w) === 2) done++; } }); });
+  var upto = W.end < today ? W.end : today, term = statsFor(weeks[0].start, upto), wk = statsFor(W.start, W.end < today ? W.end : today);
+  var mins = 0, fin = 0, ls = {}, active = 0, done = 0, tot = 0;
+  (EV || []).forEach(function(r){ var d = String(r.Day); if(d > upto) return; mins += r._m; if(r._fin) fin++; if(r.Kind === "lesson") ls[d + "|" + r.Activity] = 1; });
+  WHO.forEach(function(w){ if(wk[w].mins || Object.keys(wk[w].act).length) active++; var st = stepsOf(w); done += st.done; tot += st.of; });
+  var started = W.start <= today;
   var tiles = [
-    [hours(mins) + '<small> hrs</small>', "of learning recorded, all students together"],
+    [hours(mins) + '<small> hrs</small>', "learning recorded, all students together"],
     [fin, "activities finished"],
     [Object.keys(ls).length, "whole group lessons taught"],
-    [TG && tot ? done + '<small> of ' + tot + '</small>' : "-", "milestone steps done across the group"]
+    [TG && tot ? pct(done, tot) : "-", TG && tot ? "of milestone steps done (" + done + " of " + tot + ")" : "of milestone steps done"],
+    [started ? active + '<small> of ' + WHO.length + '</small>' : "-", started ? "students with recorded learning in week " + W.n : "week " + W.n + " has not started"]
   ];
-  $("sumTiles").innerHTML = tiles.map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + ', Autumn 2 so far</div></div>'; }).join("");
+  $("sumTiles").innerHTML = tiles.map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + '</div></div>'; }).join("");
+  $("byStudent").innerHTML = '<thead><tr><th>Student</th><th class="w">Steps done</th><th class="w">Working on</th><th class="w">Hours, week ' + W.n + '</th><th class="w">Hours, half term</th><th class="w">Activities finished</th><th class="w">Lessons in</th><th class="w">Last on the site</th></tr></thead><tbody>' +
+    WHO.map(function(w){
+      var st = stepsOf(w), a = term[w], b = wk[w];
+      return '<tr><td><b>' + w + '</b></td><td class="w">' + (TG ? st.done + '<small>of ' + st.of + '</small>' : "-") + '</td><td class="w">' + (TG ? st.half : "-") + '</td>' +
+        '<td class="w">' + (started ? hours(b.mins) : "-") + '</td><td class="w">' + hours(a.mins) + '</td><td class="w">' + a.fin + '</td><td class="w">' + Object.keys(a.lessons).length + '</td><td class="w">' + esc(lastOn(w)) + '</td></tr>';
+    }).join("") + '</tbody>';
+  $("byNote").textContent = "Half term figures run from " + nice(weeks[0].start) + " to " + nice(upto) + ". Steps include everything done so far; hours count only time added each day.";
 }
 
 /* ---------- the timetable ---------- */
@@ -486,6 +532,30 @@ function drawImpact(){
   }).join("");
   $("chart").setAttribute("aria-label", "Hours of recorded learning per week: " + per.map(function(p){ return "week " + p.w.n + " " + (isFuture(p.w) ? "to come" : hours(p.m)); }).join(", "));
   $("xax").innerHTML = per.map(function(p){ return '<span>Wk ' + p.w.n + '</span>'; }).join("");
+
+  /* hours by student, week by week: one hue, darker for more */
+  var shown = weeks.filter(function(w){ return !isFuture(w); }), cell = {}, hmax = 0;
+  WHO.forEach(function(w){ cell[w] = {}; });
+  EV.forEach(function(r){ var w = weekOf(String(r.Day)); if(!w || !cell[r.Who]) return; cell[r.Who][w.n] = (cell[r.Who][w.n] || 0) + r._m; if(cell[r.Who][w.n] > hmax) hmax = cell[r.Who][w.n]; });
+  $("heat").innerHTML = '<thead><tr><th>Student</th>' + shown.map(function(w){ return '<th class="w">Wk ' + w.n + '</th>'; }).join("") + '<th class="w">Total</th></tr></thead><tbody>' +
+    WHO.map(function(w){
+      var tot = 0;
+      return '<tr><td><b>' + w + '</b></td>' + shown.map(function(x){
+        var m = cell[w][x.n] || 0, a = hmax ? m / hmax : 0; tot += m;
+        return '<td class="w" style="background:rgba(0,114,145,' + (0.06 + a * 0.8).toFixed(2) + ');color:' + (a > 0.55 ? "#fff" : "var(--ink)") + '" title="' + esc(w + ", week " + x.n + ": " + hours(m) + " hours") + '">' + (m ? hours(m) : "0") + '</td>';
+      }).join("") + '<td class="w"><b>' + hours(tot) + '</b></td></tr>';
+    }).join("") + '</tbody>';
+  /* by target: how much of each target is done across the group */
+  if(TG){
+    var G = groups();
+    $("byTarget").innerHTML = G.map(function(g){
+      var d = 0, h = 0, n = 0;
+      WHO.forEach(function(w){ g.steps.forEach(function(t){ if(hasStep(t, w)){ n++; var s = stateOf(t, w); if(s === 2) d++; else if(s === 1) h++; } }); });
+      return '<div class="tbar"><div>' + esc(g.title) + (g.pillar ? '<small>' + esc(g.pillar) + '</small>' : '') + '</div>' +
+        '<div class="b" title="' + esc(d + " done, " + h + " working on it, of " + n + " steps") + '"><i class="d" style="width:' + (n ? d / n * 100 : 0) + '%"></i><i class="h" style="width:' + (n ? h / n * 100 : 0) + '%"></i></div>' +
+        '<div class="n"><b>' + d + '</b> of ' + n + ' done<small>' + h + ' working on it</small></div></div>';
+    }).join("") + '<div class="key"><span><i class="pip s2"></i> Done</span><span><i class="pip s1"></i> Working on it (striped bar)</span><span>Every student\'s steps for that target, added together. Not affected by the week picked.</span></div>';
+  } else $("byTarget").innerHTML = '<p class="none">The targets have not loaded yet.</p>';
 
   $("taughtBox").innerHTML = '<summary>Whole group lessons taught ' + esc(label) + ' (' + ls.length + ')</summary>' + (ls.length ? '<ul class="recent">' + ls.map(function(l){
     return '<li>' + esc(l.title) + '<em>' + esc(nice(l.day)) + ', ' + l.here.length + ' of ' + WHO.length + ' students there</em></li>';
@@ -670,7 +740,13 @@ function drawDeploy(){
           return '<td' + (off ? ' class="off"' : '') + '><b>Supporting ' + esc(together(row.students)) + '</b></td>';
         }).join("") + '</tr>';
       }).join("") + '</tbody></table></div>' +
-      '<div class="depsum"><span><b>' + n + ' of 15</b> sessions planned</span><span>Planned sessions a week: ' + WHO.map(function(w){ return '<b>' + w + '</b> ' + per[w]; }).join(", ") + '</span></div>';
+      '<div class="depsum"><span>Planned sessions a week: ' + WHO.map(function(w){ return '<b>' + w + '</b> ' + per[w]; }).join(", ") + '</span></div>';
+    var all = (DP.notes || []).filter(function(x){ return x.staff === st && x.date <= today; }), nn = 0, ad = 0, ex = 0, exm = 0;
+    all.forEach(function(x){ if(x.kind === "extra"){ ex++; exm += x.minutes || 0; } else if(x.kind === "changed" || x.kind === "off") ad++; else if(x.note) nn++; });
+    html += '<div class="tiles" style="margin-top:16px"><div class="tile"><div class="v">' + n + '<small> of 15</small></div><div class="k">sessions planned each week</div></div>' +
+      '<div class="tile"><div class="v">' + nn + '</div><div class="k">session notes written this half term</div></div>' +
+      '<div class="tile"><div class="v">' + ad + '</div><div class="k">sessions adapted on the day</div></div>' +
+      '<div class="tile"><div class="v">' + ex + (exm ? '<small> (' + exm + ' min)</small>' : '') + '</div><div class="k">times of extra support outside the plan</div></div></div>';
     var notes = (DP.notes || []).filter(function(x){ return x.staff === st && x.date >= W.start && x.date <= W.end; })
       .sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : BLOCKS.indexOf(a.block) - BLOCKS.indexOf(b.block); });
     html += '<details class="more"><summary>Our notes, week ' + W.n + ' (' + notes.length + ')</summary>' + (notes.length ? '<ul class="depnotes">' + notes.map(function(x){
