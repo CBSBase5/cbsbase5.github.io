@@ -1401,11 +1401,11 @@ function evToRow_(e){
 }
 function evidenceNote_(e){
   var bits = [];
-  var kindWord = e.kind === "game" ? "project game" : e.kind === "practice" ? "practice" : e.kind === "lesson" ? "whole group lesson" : "";
+  var kindWord = e.kind === "game" ? "project game" : e.kind === "cc" ? "Cultural Calendar game" : e.kind === "practice" ? "practice" : e.kind === "lesson" ? "whole group lesson" : "";
   var bracket = [e.subject || kindWord, e.level ? e.level.replace(/^(.+?)(?: \((.*)\))?$/, function(m, a, b){ return a + " level" + (b ? ", " + b : ""); }) : "", e.theme ? e.theme + " theme" : ""].filter(String);
   bits.push(e.activity + (bracket.length ? " (" + bracket.join(", ") + ")" : "") + ".");
   var did = [];
-  if(e.minutes) did.push("about " + e.minutes + " minute" + (e.minutes === 1 ? "" : "s") + (e.kind === "game" ? " of play" : " on task"));
+  if(e.minutes) did.push("about " + e.minutes + " minute" + (e.minutes === 1 ? "" : "s") + (e.kind === "game" || e.kind === "cc" ? " of play" : " on task"));
   if(e.chunks) did.push((e.finished ? "finished all " : e.chunksDone + " of ") + e.chunks + " chunks");
   if(e.tried) did.push(e.tried + " question" + (e.tried === 1 ? "" : "s") + " tried");
   if(e.got1) did.push(e.got1 + " right first go");
@@ -1490,12 +1490,12 @@ function evidence_(who, id, n, review){
 function activity_(r){
   var me = signedIn_(); if(!me.who || WHO.indexOf(me.who) < 0) return { ok: false, error: "not a student" };
   var slug = String(r.slug || "").toLowerCase();
-  if(!/^(game|practice)-[a-z0-9\-]{1,60}$/.test(slug)) return { ok: false, error: "bad slug" };
-  var kind = slug.indexOf("game-") === 0 ? "game" : "practice";
+  if(!/^(game|practice|cc)-[a-z0-9\-]{1,60}$/.test(slug)) return { ok: false, error: "bad slug" };
+  var kind = slug.indexOf("game-") === 0 ? "game" : slug.indexOf("cc-") === 0 ? "cc" : "practice";
   var R = evRow_(me.who, slug, day_()); if(!R) return { ok: false, error: "no Evidence tab" };
   var e = R.e, old = JSON.parse(JSON.stringify(e));
-  e.kind = kind; e.activity = clean_(r.title || nice_(slug.replace(/^(game|practice)-/, "")), 120);
-  e.subject = clean_(r.subject || (kind === "game" ? "Project" : "Practice"), 60);
+  e.kind = kind; e.activity = clean_(r.title || nice_(slug.replace(/^(game|practice|cc)-/, "")), 120);
+  e.subject = clean_(r.subject || (kind === "game" ? "Project" : kind === "cc" ? "Cultural Calendar" : "Practice"), 60);
   e.minutes = Math.max(e.minutes, Math.round((+r.secs || 0) / 60));
   e.line = clean_(r.line || "", 300);
   /* something they made or decided (the Idea Lab sends the idea they picked), so a note goes even before three minutes */
@@ -1851,3 +1851,37 @@ function deploy_(r){
   return { ok: true, linked: true, term: String(setting_("Targets term") || "Autumn 2").trim(), plan: plan, notes: notes };
 }
 READ3.deploy = deploy_;
+
+/* ---------- the rest of the site, for the line management overview ----------
+   Staff only, read only. For each student between from and to: how often
+   they checked in, sent something to Jay, made something and made a question
+   (from the Events tab; moods are not returned). And, for every week of the
+   Cultural Calendar, how many people across the whole school took part and
+   how many things they ticked (from the CC counts tab; the person tags stay
+   in the sheet, so nobody is named). */
+function lmextra_(r){
+  staff_(r.key);
+  var from = /^\d{4}-\d{2}-\d{2}$/.test(String(r.from || "")) ? String(r.from) : "0000-00-00";
+  var to = /^\d{4}-\d{2}-\d{2}$/.test(String(r.to || "")) ? String(r.to) : "9999-99-99";
+  var per = {}, KIND = { "Check-in": "checkins", "Sent to Jay": "sends", "Made": "made", "Made a question": "questions" };
+  WHO.forEach(function(w){ per[w] = { checkins: 0, sends: 0, made: 0, questions: 0, days: {} }; });
+  var ev = rows_("Events");
+  for(var i = 1; i < ev.length; i++){
+    var t = ev[i][0], o = per[String(ev[i][1])]; if(!o || !(t instanceof Date)) continue;
+    var d = day_(t); if(d < from || d > to) continue;
+    o.days[d] = 1;
+    var k = KIND[String(ev[i][2])]; if(k) o[k]++;
+  }
+  WHO.forEach(function(w){ per[w].days = Object.keys(per[w].days).length; });
+  var cc = {}, v = rows_("CC counts");
+  for(var j = 1; j < v.length; j++){
+    if(!ticked_(v[j][3])) continue;
+    var wk = String(v[j][0]); if(!wk) continue;
+    var c = cc[wk] = cc[wk] || { ticks: 0, game: 0, people: {} };
+    if(String(v[j][1]) === "game") c.game++; else c.ticks++;
+    c.people[String(v[j][2])] = 1;
+  }
+  Object.keys(cc).forEach(function(k){ cc[k].people = Object.keys(cc[k].people).length; });
+  return { ok: true, students: per, cc: cc };
+}
+READ3.lmextra = lmextra_;

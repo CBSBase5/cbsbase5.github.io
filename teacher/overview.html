@@ -16,6 +16,7 @@
 <script src="/data/term.js?v=11"></script>
 <script src="/lessons/plan.js?v=11"></script>
 <script src="/data/a2/drops.js"></script>
+<script src="/data/cc.js?v=7"></script>
 <script src="/data/overview.js?v=2"></script>
 <style>
 /* The line management overview: intent, implementation, impact, the
@@ -234,6 +235,8 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
       <button type="button" role="tab" data-t="summary">Summary</button>
       <button type="button" role="tab" data-t="impact">Impact</button>
       <button type="button" role="tab" data-t="tracker">Progress</button>
+      <button type="button" role="tab" data-t="project">Project</button>
+      <button type="button" role="tab" data-t="cc">Cultural Calendar</button>
       <button type="button" role="tab" data-t="holly">Holly's week</button>
       <button type="button" role="tab" data-t="timetable">Timetable</button>
     </nav>
@@ -247,6 +250,11 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
       <h3>By student</h3>
       <div class="gridwrap"><table class="trk num" id="byStudent"></table></div>
       <p class="chartnote" id="byNote"></p>
+    </div>
+    <div class="box">
+      <h3>Where the time went, half term so far</h3>
+      <div class="gridwrap"><table class="trk num" id="byArea"></table></div>
+      <p class="chartnote">Hours in each part of the site. HQ activities are the Autumn 2 activities in each student's HQ; Project is the project games and Idea Lab; Cultural Calendar is its lessons and games.</p>
     </div>
     <dl class="facts" id="sumFacts"></dl>
     <details class="more" id="words">
@@ -301,6 +309,31 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
     <p class="none" id="trackMsg"></p>
   </section>
 
+  <section class="part" id="project" data-t="project">
+    <div class="ph"><h2>Project</h2><span>ELP Explore: "If we could time travel, should we?"</span></div>
+    <div class="tiles" id="pjTiles"><p class="none">Loading...</p></div>
+    <div class="box">
+      <h3>By student</h3>
+      <div class="gridwrap"><table class="trk num" id="pjTable"></table></div>
+      <p class="chartnote">Idea Lab: ideas kept in the jar and whether one has been picked. Project book: the trust's 21 step ELP workbook in each HQ; pages written by the student, and steps Jay has stamped. Project games: It's Time, Time Travel TV, The Chilton Trail, The Long Game and the Idea Lab.</p>
+    </div>
+  </section>
+
+  <section class="part" id="cc" data-t="cc">
+    <div class="ph"><h2>Cultural Calendar</h2><span>Whole school, every week</span></div>
+    <div class="tiles" id="ccTiles"><p class="none">Loading...</p></div>
+    <div class="box">
+      <h3>Across the school, week by week</h3>
+      <div class="gridwrap"><table class="trk num" id="ccSchool"></table></div>
+      <p class="chartnote" id="ccNote"></p>
+    </div>
+    <div class="box">
+      <h3>Base 5</h3>
+      <div class="gridwrap"><table class="trk num" id="ccBase"></table></div>
+      <p class="chartnote">Lessons are the daily Cultural Calendar lesson parts each student was in. Game time counts from 16 November, when the Cultural Calendar games started recording it.</p>
+    </div>
+  </section>
+
   <section class="part" id="holly" data-t="holly">
     <div class="ph"><h2>Holly's week</h2><span>Planned together in BridgeLink Buddy</span></div>
     <p class="none" id="deployMsg">Loading the plan from BridgeLink Buddy...</p><div id="deployView"></div>
@@ -340,7 +373,7 @@ window.addEventListener("beforeprint", function(){ wasShut = [].filter.call(docu
 window.addEventListener("afterprint", function(){ wasShut.forEach(function(d){ d.open = false; }); wasShut = []; });
 
 /* ---------- one section at a time ---------- */
-var TABS = ["summary", "impact", "tracker", "holly", "timetable"];
+var TABS = ["summary", "impact", "tracker", "project", "cc", "holly", "timetable"];
 function show(t){
   if(TABS.indexOf(t) < 0) t = "summary";
   [].forEach.call(document.querySelectorAll("section.part"), function(sec){ sec.hidden = sec.dataset.t !== t; });
@@ -406,12 +439,25 @@ function stepsOf(w){
   ((TG && TG.targets) || []).forEach(function(t){ if(hasStep(t, w)){ n++; var s = stateOf(t, w); if(s === 2) d++; else if(s === 1) h++; } });
   return { done: d, half: h, of: n };
 }
+/* the rest of the site (Events tab), from the lmextra action */
+var XT = null, XTerr = "";
+function xcell(w, k){ return '<td class="w">' + (XT && XT.students && XT.students[w] ? XT.students[w][k] : "-") + '</td>'; }
+/* which part of the site an Evidence row belongs to */
+function areaOf(r){
+  var k = String(r.Kind || "activity"), sl = String(r.Slug || "");
+  if(k === "lesson") return sl.indexOf("lesson-cc-") === 0 ? "cc" : "lessons";
+  if(k === "cc") return "cc";
+  if(k === "game") return "project";
+  if(k === "practice") return "practice";
+  return "hq";
+}
+var AREAS = [["hq", "HQ activities"], ["practice", "Practice"], ["lessons", "Whole group lessons"], ["project", "Project"], ["cc", "Cultural Calendar"]];
 function pct(a, b){ return b ? Math.round(a / b * 100) + "%" : "-"; }
 function drawSummary(){
   if(!EV){ return; }
   var upto = W.end < today ? W.end : today, term = statsFor(weeks[0].start, upto), wk = statsFor(W.start, W.end < today ? W.end : today);
   var mins = 0, fin = 0, ls = {}, active = 0, done = 0, tot = 0;
-  (EV || []).forEach(function(r){ var d = String(r.Day); if(d > upto) return; mins += r._m; if(r._fin) fin++; if(r.Kind === "lesson") ls[d + "|" + r.Activity] = 1; });
+  (EV || []).forEach(function(r){ var d = String(r.Day); if(d > upto) return; mins += r._m; if(r._fin) fin++; if(r.Kind === "lesson" && areaOf(r) === "lessons") ls[d + "|" + r.Activity] = 1; });
   WHO.forEach(function(w){ if(wk[w].mins || Object.keys(wk[w].act).length) active++; var st = stepsOf(w); done += st.done; tot += st.of; });
   var started = W.start <= today;
   var tiles = [
@@ -422,13 +468,88 @@ function drawSummary(){
     [started ? active + '<small> of ' + WHO.length + '</small>' : "-", started ? "students with recorded learning in week " + W.n : "week " + W.n + " has not started"]
   ];
   $("sumTiles").innerHTML = tiles.map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + '</div></div>'; }).join("");
-  $("byStudent").innerHTML = '<thead><tr><th>Student</th><th class="w">Steps done</th><th class="w">Working on</th><th class="w">Hours, week ' + W.n + '</th><th class="w">Hours, half term</th><th class="w">Activities finished</th><th class="w">Lessons in</th><th class="w">Last on the site</th></tr></thead><tbody>' +
+  $("byStudent").innerHTML = '<thead><tr><th>Student</th><th class="w">Steps done</th><th class="w">Working on</th><th class="w">Hours, week ' + W.n + '</th><th class="w">Hours, half term</th><th class="w">Activities finished</th><th class="w">Days on the site</th><th class="w">Check-ins</th><th class="w">Sent to Jay</th><th class="w">Last on the site</th></tr></thead><tbody>' +
     WHO.map(function(w){
       var st = stepsOf(w), a = term[w], b = wk[w];
       return '<tr><td><b>' + w + '</b></td><td class="w">' + (TG ? st.done + '<small>of ' + st.of + '</small>' : "-") + '</td><td class="w">' + (TG ? st.half : "-") + '</td>' +
-        '<td class="w">' + (started ? hours(b.mins) : "-") + '</td><td class="w">' + hours(a.mins) + '</td><td class="w">' + a.fin + '</td><td class="w">' + Object.keys(a.lessons).length + '</td><td class="w">' + esc(lastOn(w)) + '</td></tr>';
+        '<td class="w">' + (started ? hours(b.mins) : "-") + '</td><td class="w">' + hours(a.mins) + '</td><td class="w">' + a.fin + '</td>' + xcell(w, "days") + xcell(w, "checkins") + xcell(w, "sends") + '<td class="w">' + esc(lastOn(w)) + '</td></tr>';
     }).join("") + '</tbody>';
-  $("byNote").textContent = "Half term figures run from " + nice(weeks[0].start) + " to " + nice(upto) + ". Steps include everything done so far; hours count only time added each day.";
+  var ar = {}; WHO.forEach(function(w){ ar[w] = {}; });
+  EV.forEach(function(r){ var d = String(r.Day); if(d > upto || !ar[r.Who]) return; var a = areaOf(r); ar[r.Who][a] = (ar[r.Who][a] || 0) + r._m; });
+  var colTot = {};
+  $("byArea").innerHTML = '<thead><tr><th>Student</th>' + AREAS.map(function(a){ return '<th class="w">' + a[1] + '</th>'; }).join("") + '<th class="w">Total</th></tr></thead><tbody>' +
+    WHO.map(function(w){
+      var t = 0;
+      return '<tr><td><b>' + w + '</b></td>' + AREAS.map(function(a){ var m = ar[w][a[0]] || 0; t += m; colTot[a[0]] = (colTot[a[0]] || 0) + m; return '<td class="w">' + hours(m) + '</td>'; }).join("") + '<td class="w"><b>' + hours(t) + '</b></td></tr>';
+    }).join("") +
+    '<tr class="sum"><td>Base 5</td>' + AREAS.map(function(a){ return '<td class="w">' + hours(colTot[a[0]] || 0) + '</td>'; }).join("") + '<td class="w">' + hours(AREAS.reduce(function(x, a){ return x + (colTot[a[0]] || 0); }, 0)) + '</td></tr></tbody>';
+  $("byNote").textContent = "Half term figures run from " + nice(weeks[0].start) + " to " + nice(upto) + ". Steps include everything done so far; hours count only time added each day." + (XTerr ? " " + XTerr : "");
+}
+
+/* ---------- the project: Idea Lab, the ELP project book, project games ---------- */
+var BOOKSTEPS = 21;
+function itemsOf(w){ return ((PR || {})[w] || {}).items || {}; }
+function jsonOf(x){ try{ return JSON.parse(x && x.v); }catch(e){ return null; } }
+function projectOf(w){
+  var it = itemsOf(w), P = PREFIX[w], out = { jar: 0, picked: false, pages: 0, stamped: 0, of: BOOKSTEPS, next: "", mins: 0, games: {} };
+  Object.keys(it).forEach(function(k){
+    if(/(^b5\.project\.[a-z]+\.|^b5-project-[a-z]+\.)lab\.v1$/.test(k)){
+      var lab = jsonOf(it[k]); if(lab){ out.jar = Math.max(out.jar, (lab.jar || []).length); if(lab.pick) out.picked = true; }
+    }
+    if(k.indexOf(P + "pb.") === 0 && /\.s\.\d+\.\d+$/.test(k)){ var pg = jsonOf(it[k]); if(pg && Object.keys(pg).some(function(f){ var v = pg[f]; return v && (typeof v !== "object" || (Array.isArray(v) ? v.length : Object.keys(v).length)); })) out.pages++; }
+  });
+  var now = jsonOf(it[P + "pb.now"]);
+  if(now){ out.stamped = +now.stamped || 0; out.of = +now.of || BOOKSTEPS; out.next = String(now.next || ""); }
+  (EV || []).forEach(function(r){ if(r.Who === w && areaOf(r) === "project"){ out.mins += r._m; out.games[String(r.Activity || r.Slug)] = 1; } });
+  return out;
+}
+function drawProject(){
+  if(!EV){ return; }
+  var rows = WHO.map(function(w){ return [w, projectOf(w)]; }), picked = 0, st = 0, of = 0, pages = 0, mins = 0;
+  rows.forEach(function(x){ var o = x[1]; if(o.picked) picked++; st += o.stamped; of += o.of; pages += o.pages; mins += o.mins; });
+  var noPR = !PR;
+  $("pjTiles").innerHTML = [
+    [noPR ? "-" : picked + '<small> of ' + WHO.length + '</small>', "students have picked their project idea"],
+    [noPR ? "-" : pages, "project book pages written"],
+    [noPR ? "-" : st + '<small> of ' + of + '</small>', "project book steps stamped by Jay"],
+    [hours(mins) + '<small> hrs</small>', "in the project games, all students together"]
+  ].map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + '</div></div>'; }).join("");
+  $("pjTable").innerHTML = '<thead><tr><th>Student</th><th class="w">Idea picked</th><th class="w">Ideas in jar</th><th class="w">Book pages written</th><th class="w">Steps stamped</th><th>Next step in the book</th><th class="w">Project game hours</th><th>Games played</th></tr></thead><tbody>' +
+    rows.map(function(x){
+      var w = x[0], o = x[1];
+      return '<tr><td><b>' + w + '</b></td><td class="w">' + (noPR ? "-" : o.picked ? "Yes" : "Not yet") + '</td><td class="w">' + (noPR ? "-" : o.jar) + '</td><td class="w">' + (noPR ? "-" : o.pages) + '</td>' +
+        '<td class="w">' + (noPR ? "-" : o.stamped + '<small>of ' + o.of + '</small>') + '</td><td>' + esc(o.next || (noPR ? "-" : "Not started")) + '</td><td class="w">' + hours(o.mins) + '</td><td>' + esc(Object.keys(o.games).join(", ") || "-") + '</td></tr>';
+    }).join("") + '</tbody>';
+}
+
+/* ---------- the Cultural Calendar: whole school ticks, and Base 5's lessons and games ---------- */
+function drawCC(){
+  var C = window.B5CC || {}, upto = W.end < today ? W.end : today;
+  var cw = (C.weeks || []).filter(function(x){ return x.half === "a2" && x.start <= upto; });
+  var tot = { people: 0, ticks: 0, game: 0 };
+  $("ccSchool").innerHTML = '<thead><tr><th>Week</th><th>Theme</th><th class="w">People taking part</th><th class="w">Things tried</th><th class="w">Game ticks</th></tr></thead><tbody>' +
+    (cw.length ? cw.map(function(x){
+      var c = XT && XT.cc ? XT.cc[x.id] || { people: 0, ticks: 0, game: 0 } : null;
+      if(c){ tot.people += c.people; tot.ticks += c.ticks; tot.game += c.game; }
+      return '<tr><td>' + esc(nice(x.start, { day: "numeric", month: "short" })) + '</td><td>' + esc(x.title || x.id) + '</td><td class="w">' + (c ? c.people : "-") + '</td><td class="w">' + (c ? c.ticks : "-") + '</td><td class="w">' + (c ? c.game : "-") + '</td></tr>';
+    }).join("") : '<tr><td colspan="5" class="none">No Autumn 2 weeks yet.</td></tr>') + '</tbody>';
+  $("ccNote").textContent = XT ? "People are counted once a week, without names: the Cultural Calendar page keeps a scrambled tag, never who ticked what. Things tried are the week's activities ticked off; game ticks are people saying they played the week's game." : (XTerr || "Loading...");
+  if(!EV) return;
+  var per = {}, lessons = {}, gm = 0, gp = {};
+  WHO.forEach(function(w){ per[w] = { lessons: {}, mins: 0, games: {} }; });
+  EV.forEach(function(r){
+    var d = String(r.Day); if(d > upto || !per[r.Who] || areaOf(r) !== "cc") return;
+    if(r.Kind === "lesson"){ per[r.Who].lessons[d + "|" + r.Slug] = 1; lessons[d + "|" + r.Slug] = 1; }
+    else { per[r.Who].mins += r._m; per[r.Who].games[String(r.Activity || r.Slug)] = 1; gm += r._m; gp[r.Who] = 1; }
+  });
+  $("ccTiles").innerHTML = [
+    [XT ? tot.people : "-", "people across the school taking part, Autumn 2 (counted each week)"],
+    [XT ? tot.ticks : "-", "Cultural Calendar activities tried across the school"],
+    [Object.keys(lessons).length, "Cultural Calendar lesson parts taught in Base 5"],
+    [hours(gm) + '<small> hrs</small>', "Base 5 time in the Cultural Calendar games (" + Object.keys(gp).length + " of " + WHO.length + " students)"]
+  ].map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + '</div></div>'; }).join("");
+  $("ccBase").innerHTML = '<thead><tr><th>Student</th><th class="w">Lesson parts in</th><th class="w">Game hours</th><th>Games played</th></tr></thead><tbody>' +
+    WHO.map(function(w){ var o = per[w]; return '<tr><td><b>' + w + '</b></td><td class="w">' + Object.keys(o.lessons).length + '</td><td class="w">' + hours(o.mins) + '</td><td>' + esc(Object.keys(o.games).join(", ") || "-") + '</td></tr>'; }).join("") + '</tbody>';
 }
 
 /* ---------- the timetable ---------- */
@@ -507,7 +628,7 @@ function drawImpact(){
     if(r._fin) fin++;
     who[r.Who] = 1;
     if(/^(sent|updated)/.test(String(r["Buddy note"] || ""))) notes++;
-    if(r.Kind === "lesson") (lessons[r.Day + "|" + r.Activity] = lessons[r.Day + "|" + r.Activity] || { day: r.Day, title: String(r.Activity).replace(/^Whole group lesson: /, ""), here: [] }).here.push(r.Who);
+    if(r.Kind === "lesson" && areaOf(r) === "lessons") (lessons[r.Day + "|" + r.Activity] = lessons[r.Day + "|" + r.Activity] || { day: r.Day, title: String(r.Activity).replace(/^Whole group lesson: /, ""), here: [] }).here.push(r.Who);
   });
   var ls = Object.keys(lessons).map(function(k){ return lessons[k]; }).sort(function(a, b){ return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
   var label = range === "week" ? "in week " + W.n : "this half term";
@@ -763,7 +884,7 @@ function drawDeploy(){
   box.innerHTML = html;
 }
 
-function drawAll(){ drawWeekPick(); drawWeek(); drawDeploy(); drawTimetable(); drawImpact(); drawTracker(); drawSummary(); }
+function drawAll(){ drawWeekPick(); drawWeek(); drawDeploy(); drawTimetable(); drawImpact(); drawTracker(); drawSummary(); drawProject(); drawCC(); }
 drawAll();
 
 /* ---------- loading, then keeping up: the tracker checks the sheet every
@@ -789,10 +910,12 @@ function refresh(){
   Promise.all([
     B5Site.call("evidence", { key: key(), from: weeks[0].start, to: weeks[weeks.length - 1].end }),
     wantTargets ? B5Site.call("targets", { key: key() }) : Promise.resolve(null),
-    wantTargets ? B5Site.call("overview", { key: key() }) : Promise.resolve(null)
+    wantTargets ? B5Site.call("overview", { key: key() }) : Promise.resolve(null),
+    wantTargets ? B5Site.call("lmextra", { key: key(), from: weeks[0].start, to: weeks[weeks.length - 1].end }) : Promise.resolve(null)
   ]).then(function(r){
     busy = false;
-    var e = r[0] || {}, t = r[1], ov = r[2];
+    var e = r[0] || {}, t = r[1], ov = r[2], xt = r[3];
+    if(xt){ if(xt.ok){ XT = xt; XTerr = ""; } else XTerr = /unknown action/.test(xt.error || "") ? "Days on the site, check-ins, sends and the whole school Cultural Calendar figures show once the Base 5 sheet has the latest script." : "The rest of the site did not load: " + xt.error + "."; }
     if(ov && ov.ok && ov.students) PR = ov.students;
     if(first && !e.ok && !(t && t.ok)){
       var why = e.error || (t && t.error) || "nothing";
@@ -812,7 +935,7 @@ function refresh(){
     if(before) Object.keys(SEEN).forEach(function(k){ if(SEEN[k] > (before[k] || 0)) FLASH[k] = 1; });
     setTimeout(function(){ FLASH = {}; }, 3000);
     first = false;
-    stampNow(); drawImpact(); drawTracker(); drawSummary();
+    stampNow(); drawImpact(); drawTracker(); drawSummary(); drawProject(); drawCC();
   }).catch(function(){
     busy = false;
     if(first){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; $("sumTiles").innerHTML = '<p class="none">' + esc($("msg").textContent) + '</p>'; }

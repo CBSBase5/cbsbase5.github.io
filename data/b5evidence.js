@@ -38,7 +38,7 @@ function flush(force){
   sending = true;
   var at = secs;
   window.B5Site.call("activity", { slug: cfg.slug, title: cfg.title, subject: cfg.subject || "", kind: cfg.kind || "game", secs: secs, line: line.slice(0, 300), from: cfg.from || "" })
-    .then(function(r){ sending = false; if(r && r.ok) sentSecs = at; else if(r && (r.error === "not a student" || r.error === "unknown action")) cfg = null; })
+    .then(function(r){ sending = false; if(r && r.ok) sentSecs = at; else if(r && (r.error === "not a student" || r.error === "unknown action" || r.error === "bad slug")) cfg = null; })
     .catch(function(){ sending = false; });
 }
 function start(c){
