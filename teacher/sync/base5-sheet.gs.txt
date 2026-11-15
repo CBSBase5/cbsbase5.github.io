@@ -1882,6 +1882,39 @@ function lmextra_(r){
     c.people[String(v[j][2])] = 1;
   }
   Object.keys(cc).forEach(function(k){ cc[k].people = Object.keys(cc[k].people).length; });
-  return { ok: true, students: per, cc: cc };
+  var pr = [], pv = rows_("Printed");
+  for(var q = 1; q < pv.length; q++){
+    var pd = pv[q][0] instanceof Date ? day_(pv[q][0]) : String(pv[q][0] || "");
+    if(WHO.indexOf(String(pv[q][1])) >= 0 && pd >= from && pd <= to) pr.push({ who: String(pv[q][1]), slug: String(pv[q][2]), day: pd });
+  }
+  return { ok: true, students: per, cc: cc, printed: pr };
 }
 READ3.lmextra = lmextra_;
+
+/* ---------- activities printed for a student (/paper/) ----------
+   When an Autumn 2 activity is printed for a student it is recorded here
+   (the Printed tab: Day, Who, Slug, Updated), so the line management
+   overview can show it as unconfirmed progress until the work turns up as
+   evidence or in Buddy. Anyone signed in to a school account that is not
+   a student's can record a print (cover staff included); students cannot.
+   One row per student, activity and day. rows: [{ who, slug, day }] */
+function printed_(r){
+  var email = "";
+  try{ email = String(Session.getActiveUser().getEmail() || "").trim(); }catch(e){}
+  if(!email) throw new Error("not signed in");
+  if(signedIn_().who) throw new Error("students cannot record prints");
+  var rows = Array.isArray(r.rows) ? r.rows.slice(0, 200) : [], today = day_(), oldest = day_(new Date(Date.now() - 120 * 86400000));
+  var sh = sheet_("Printed");
+  if(!sh){ sh = SpreadsheetApp.getActive().insertSheet("Printed"); sh.getRange(1, 1, 1, 4).setValues([["Day", "Who", "Slug", "Updated"]]).setFontWeight("bold"); sh.getRange("A:A").setNumberFormat("@"); }
+  var v = sh.getDataRange().getValues(), have = {}, add = [];
+  for(var i = 1; i < v.length; i++) have[String(v[i][1]) + "|" + String(v[i][2]) + "|" + (v[i][0] instanceof Date ? day_(v[i][0]) : String(v[i][0]))] = 1;
+  rows.forEach(function(x){
+    var who = String(x.who || "").toUpperCase(), slug = String(x.slug || "").toLowerCase(), day = String(x.day || today);
+    if(WHO.indexOf(who) < 0 || !/^[a-z0-9\-]{2,60}$/.test(slug) || !/^\d{4}-\d{2}-\d{2}$/.test(day) || day > today || day < oldest) return;
+    var k = who + "|" + slug + "|" + day; if(have[k]) return; have[k] = 1;
+    add.push([day, who, slug, new Date()]);
+  });
+  if(add.length) sh.getRange(sh.getLastRow() + 1, 1, add.length, 4).setValues(add);
+  return { ok: true, added: add.length };
+}
+WRITE3.printed = printed_;

@@ -43,6 +43,8 @@
 </div>
 <main class="pdoc" id="doc"></main>
 
+<script src="/data/b5site.js?v=8"></script>
+<script src="/data/b5printed.js?v=1"></script>
 <script src="/data/a2/art.js?v=1"></script>
 <script src="/data/a2/drops.js"></script>
 <script src="/data/a2/core.js"></script>
@@ -109,6 +111,14 @@ function build(){
   ready.then(function(){ go.disabled = false; window.__paperReady = true; if(Q.print === "1") setTimeout(function(){ window.print(); }, 300); });
 }
 go.addEventListener("click", function(){ window.print(); });
+/* printing for a student counts as unconfirmed progress on the line management
+   overview (Ctrl+P too); staff and cover staff only, the sheet checks */
+var told = false;
+window.addEventListener("beforeprint", function(){
+  if(told || !who || !window.__paperReady || !window.B5Printed) return;
+  told = true;
+  B5Printed.record(want.filter(function(w){ return !/^core-/.test(w.slug); }).map(function(w){ return { who: who, slug: w.slug }; }));
+});
 })();
 </script>
 </body>

@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="/style.css?v=13">
 <script src="/data/b5site.js?v=8"></script>
 <script src="/data/b5staff.js?v=1"></script>
+<script src="/data/b5printed.js?v=1"></script>
 <script src="/data/a2/drops.js"></script>
 <script src="/data/a2/core.js"></script>
 <script src="/data/a2/library.js"></script>
@@ -195,6 +196,13 @@ $("oneAct").innerHTML = L.items.slice().sort(function(a, b){ return a.title < b.
 $("oneGo").addEventListener("click", function(){ open([{ slug: $("oneAct").value, level: $("oneLv").value }], ""); });
 
 drawWho(); drawWeeks(); drawRows();
+/* the "opened" marks this desk already keeps go to the sheet too, so the
+   line management overview can show them as unconfirmed progress */
+if(window.B5Printed){
+  var back = [];
+  Object.keys(S.printed).forEach(function(w){ Object.keys(S.printed[w] || {}).forEach(function(sl){ if(!/^core-/.test(sl)) back.push({ who: w, slug: sl, day: S.printed[w][sl] }); }); });
+  try{ if(back.length && localStorage.getItem("b5.printsent.v1") !== String(back.length)){ B5Printed.record(back); localStorage.setItem("b5.printsent.v1", String(back.length)); } }catch(e){}
+}
 })();
 </script>
 </body>

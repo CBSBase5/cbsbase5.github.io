@@ -162,6 +162,7 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
 .pip{display:inline-block;width:15px;height:15px;border-radius:50%;border:2px solid var(--ink);background:var(--white);margin:0 1px;vertical-align:middle;box-sizing:border-box}
 .pip.s1{background:linear-gradient(90deg,var(--teal) 50%,var(--white) 50%)}
 .pip.s2{background:var(--teal)}
+.pip.sp{border-style:dashed;background:radial-gradient(circle,var(--teal) 0 2px,var(--white) 2.5px)}
 .pip[data-tip]{cursor:pointer}
 .piptip{position:absolute;z-index:50;background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 11px;font-size:.85rem;line-height:1.4;box-shadow:var(--lift)}
 .key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--body-tint);margin:10px 0 0}
@@ -435,9 +436,9 @@ function lastOn(w){
   return t ? nice(T.iso(new Date(t))) : "-";
 }
 function stepsOf(w){
-  var d = 0, h = 0, n = 0;
-  ((TG && TG.targets) || []).forEach(function(t){ if(hasStep(t, w)){ n++; var s = stateOf(t, w); if(s === 2) d++; else if(s === 1) h++; } });
-  return { done: d, half: h, of: n };
+  var d = 0, h = 0, n = 0, p = 0;
+  ((TG && TG.targets) || []).forEach(function(t){ if(hasStep(t, w)){ n++; var s = stateOf(t, w); if(s === 2) d++; else if(s === 1) h++; else if(printedOf(t, w)) p++; } });
+  return { done: d, half: h, of: n, printed: p };
 }
 /* the rest of the site (Events tab), from the lmextra action */
 var XT = null, XTerr = "";
@@ -468,10 +469,10 @@ function drawSummary(){
     [started ? active + '<small> of ' + WHO.length + '</small>' : "-", started ? "students with recorded learning in week " + W.n : "week " + W.n + " has not started"]
   ];
   $("sumTiles").innerHTML = tiles.map(function(t){ return '<div class="tile"><div class="v">' + t[0] + '</div><div class="k">' + esc(t[1]) + '</div></div>'; }).join("");
-  $("byStudent").innerHTML = '<thead><tr><th>Student</th><th class="w">Steps done</th><th class="w">Working on</th><th class="w">Hours, week ' + W.n + '</th><th class="w">Hours, half term</th><th class="w">Activities finished</th><th class="w">Days on the site</th><th class="w">Check-ins</th><th class="w">Sent to Jay</th><th class="w">Last on the site</th></tr></thead><tbody>' +
+  $("byStudent").innerHTML = '<thead><tr><th>Student</th><th class="w">Steps done</th><th class="w">Working on</th><th class="w">Printed, unconfirmed</th><th class="w">Hours, week ' + W.n + '</th><th class="w">Hours, half term</th><th class="w">Activities finished</th><th class="w">Days on the site</th><th class="w">Check-ins</th><th class="w">Sent to Jay</th><th class="w">Last on the site</th></tr></thead><tbody>' +
     WHO.map(function(w){
       var st = stepsOf(w), a = term[w], b = wk[w];
-      return '<tr><td><b>' + w + '</b></td><td class="w">' + (TG ? st.done + '<small>of ' + st.of + '</small>' : "-") + '</td><td class="w">' + (TG ? st.half : "-") + '</td>' +
+      return '<tr><td><b>' + w + '</b></td><td class="w">' + (TG ? st.done + '<small>of ' + st.of + '</small>' : "-") + '</td><td class="w">' + (TG ? st.half : "-") + '</td><td class="w">' + (TG && XT ? st.printed : "-") + '</td>' +
         '<td class="w">' + (started ? hours(b.mins) : "-") + '</td><td class="w">' + hours(a.mins) + '</td><td class="w">' + a.fin + '</td>' + xcell(w, "days") + xcell(w, "checkins") + xcell(w, "sends") + '<td class="w">' + esc(lastOn(w)) + '</td></tr>';
     }).join("") + '</tbody>';
   var ar = {}; WHO.forEach(function(w){ ar[w] = {}; });
@@ -671,10 +672,11 @@ function drawImpact(){
     var G = groups();
     $("byTarget").innerHTML = G.map(function(g){
       var d = 0, h = 0, n = 0;
-      WHO.forEach(function(w){ g.steps.forEach(function(t){ if(hasStep(t, w)){ n++; var s = stateOf(t, w); if(s === 2) d++; else if(s === 1) h++; } }); });
+      var pz = 0;
+      WHO.forEach(function(w){ g.steps.forEach(function(t){ if(hasStep(t, w)){ n++; var s = stateOf(t, w); if(s === 2) d++; else if(s === 1) h++; else if(printedOf(t, w)) pz++; } }); });
       return '<div class="tbar"><div>' + esc(g.title) + (g.pillar ? '<small>' + esc(g.pillar) + '</small>' : '') + '</div>' +
         '<div class="b" title="' + esc(d + " done, " + h + " working on it, of " + n + " steps") + '"><i class="d" style="width:' + (n ? d / n * 100 : 0) + '%"></i><i class="h" style="width:' + (n ? h / n * 100 : 0) + '%"></i></div>' +
-        '<div class="n"><b>' + d + '</b> of ' + n + ' done<small>' + h + ' working on it</small></div></div>';
+        '<div class="n"><b>' + d + '</b> of ' + n + ' done<small>' + h + ' working on it' + (pz ? ', ' + pz + ' printed' : '') + '</small></div></div>';
     }).join("") + '<div class="key"><span><i class="pip s2"></i> Done</span><span><i class="pip s1"></i> Working on it (striped bar)</span><span>Every student\'s steps for that target, added together. Not affected by the week picked.</span></div>';
   } else $("byTarget").innerHTML = '<p class="none">The targets have not loaded yet.</p>';
 
@@ -730,6 +732,19 @@ function buildAct(){
   });
 }
 function actOf(t, w){ return ((ACT[w] || {})[t.id]) || null; }
+/* printed on paper (the Printed tab): unconfirmed until it turns up as
+   evidence or in Buddy, so it never counts as working on it or done */
+var PRN = {};
+function buildPrinted(){
+  PRN = {};
+  ((XT && XT.printed) || []).forEach(function(p){
+    (DROPS[p.who + "|a2-" + p.slug] || []).forEach(function(c){
+      var m = PRN[p.who] = PRN[p.who] || {}, id = c[0] + "." + c[1];
+      if(!m[id] || p.day > m[id].day) m[id] = { day: p.day, slug: p.slug };
+    });
+  });
+}
+function printedOf(t, w){ return stateOf(t, w) ? null : ((PRN[w] || {})[t.id] || null); }
 /* Buddy's own status for a step, falling back to the ticks */
 function buddyState(t, w){
   var s = String(((t.jay || {})[w]) || "").toLowerCase();
@@ -748,7 +763,8 @@ function buddyState(t, w){
 /* the step's state: whichever is further on, the activity or Buddy */
 function stateOf(t, w){ var a = actOf(t, w); return Math.max(buddyState(t, w), a ? a.state : 0); }
 function whyOf(t, w){
-  var a = actOf(t, w), st = (t.jay || {})[w], bits = [], k = (((TG.ticks || {})[w]) || {})[t.id];
+  var a = actOf(t, w), st = (t.jay || {})[w], bits = [], k = (((TG.ticks || {})[w]) || {})[t.id], pr = printedOf(t, w);
+  if(pr) bits.push("Printed on paper " + nice(pr.day) + ", not confirmed yet");
   if(!st && k && +k.state) bits.push("Ticked on My targets");
   if(a) bits.push((a.kind === "lesson" ? "Was in " : a.state === 2 ? "Finished " : "Started ") + a.title + (a.day ? ", " + nice(a.day) : ""));
   if(st) bits.push("In Buddy: " + st);
@@ -763,7 +779,7 @@ function groups(){
   return order.map(function(k){ return g[k]; });
 }
 function titleOf(k){ k = TNAME[String(k).toLowerCase()] || k; var t = ((TG && TG.targets) || []).filter(function(x){ return keyOf(x) === k || x.title === k; })[0]; return t ? t.title : k; }
-function pip(s, tip, key){ return '<span class="pip s' + s + (key && FLASH[key] ? " flash" : "") + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"' + (key ? ' tabindex="0" role="button" data-tip="' + esc(tip) + '"' : '') + '></span>'; }
+function pip(s, tip, key){ return '<span class="pip s' + s + (s === 0 && key && PRN[key.split("|")[0]] && PRN[key.split("|")[0]][key.split("|")[1]] ? " sp" : "") + (key && FLASH[key] ? " flash" : "") + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"' + (key ? ' tabindex="0" role="button" data-tip="' + esc(tip) + '"' : '') + '></span>'; }
 (function(){
   var box = document.createElement("div"); box.className = "piptip"; box.hidden = true; box.setAttribute("role", "status"); document.body.appendChild(box);
   function open(el){
@@ -782,24 +798,24 @@ function drawTracker(){
   var G = groups();
   if(!G.length){ $("trackView").hidden = true; $("trackMsg").textContent = "No Autumn 2 targets came back from the sheet yet. Once BridgeLink Buddy is linked in the Settings tab, every student's steps show here."; return; }
   $("trackView").hidden = false; $("trackMsg").textContent = "";
-  var tot = {}, sec = {}, wk = {}, mins = {};
-  WHO.forEach(function(w){ tot[w] = 0; sec[w] = 0; wk[w] = 0; mins[w] = 0; });
+  var tot = {}, sec = {}, wk = {}, mins = {}, pp = {};
+  WHO.forEach(function(w){ tot[w] = 0; sec[w] = 0; wk[w] = 0; mins[w] = 0; pp[w] = 0; });
   var body = G.map(function(g){
     return '<tr><td>' + esc(g.title) + (g.pillar ? '<small>' + esc(g.pillar) + '</small>' : '') + '</td>' + WHO.map(function(w){
       var mine = g.steps.filter(function(t){ return hasStep(t, w); });
       if(!mine.length) return '<td class="w"><span class="none">-</span></td>';
       return '<td class="w">' + mine.map(function(t){
-        var s = stateOf(t, w); tot[w]++; if(s === 2) sec[w]++; if(s === 1) wk[w]++;
+        var s = stateOf(t, w); tot[w]++; if(s === 2) sec[w]++; if(s === 1) wk[w]++; if(printedOf(t, w)) pp[w]++;
         var why = whyOf(t, w);
-        return pip(s, w + ", " + g.title + (stepOf(t) ? ", step " + stepOf(t) : "") + ": " + STATE[s] + (why ? ". " + why : ""), w + "|" + t.id);
+        return pip(s, w + ", " + g.title + (stepOf(t) ? ", step " + stepOf(t) : "") + ": " + (printedOf(t, w) ? "Unconfirmed" : STATE[s]) + (why ? ". " + why : ""), w + "|" + t.id);
       }).join("") + '</td>';
     }).join("") + '</tr>';
   }).join("");
   (EV || []).forEach(function(r){ if(inRange(String(r.Day)) && mins[r.Who] != null) mins[r.Who] += r._m; });
   $("trk").innerHTML = '<thead><tr><th>Target</th>' + WHO.map(function(w){ return '<th class="w">' + w + '</th>'; }).join("") + '</tr></thead><tbody>' + body +
-    '<tr class="sum"><td>Steps done<small>and working on it</small></td>' + WHO.map(function(w){ return '<td class="w">' + sec[w] + ' of ' + tot[w] + '<small>' + wk[w] + ' working on it</small></td>'; }).join("") + '</tr>' +
+    '<tr class="sum"><td>Steps done<small>and working on it</small></td>' + WHO.map(function(w){ return '<td class="w">' + sec[w] + ' of ' + tot[w] + '<small>' + wk[w] + ' working on it' + (pp[w] ? ', ' + pp[w] + ' printed' : '') + '</small></td>'; }).join("") + '</tr>' +
 '</tbody>';
-  $("key").innerHTML = '<span>' + pip(0, STATE[0]) + ' Not yet</span><span>' + pip(1, STATE[1]) + ' Working on it</span><span>' + pip(2, STATE[2]) + ' Done</span><span>Half when a student starts an activity or lesson for that step, full when they finish it or it is secure in Buddy. Tap a circle to see why.</span>';
+  $("key").innerHTML = '<span>' + pip(0, STATE[0]) + ' Not yet</span><span>' + pip(1, STATE[1]) + ' Working on it</span><span>' + pip(2, STATE[2]) + ' Done</span><span><i class="pip sp"></i> Printed, not confirmed</span><span>Half when a student starts an activity or lesson for that step, full when they finish it or it is secure in Buddy. Tap a circle to see why.</span>';
   drawOne();
 }
 function drawOne(){
@@ -813,7 +829,7 @@ function drawOne(){
     if(!mine.length) return "";
     var now = mine.filter(function(t){ return stateOf(t, w) < 2; })[0], all = !now;
     var t = now || mine[mine.length - 1], s = stateOf(t, w), why = whyOf(t, w);
-    return '<li><span>' + mine.map(function(x){ var y = stateOf(x, w), wy = whyOf(x, w); return pip(y, (stepOf(x) ? "Step " + stepOf(x) + ": " : "") + STATE[y] + (wy ? ". " + wy : ""), w + "|" + x.id); }).join("") + '</span><div><b>' + esc(g.title) + '</b>' +
+    return '<li><span>' + mine.map(function(x){ var y = stateOf(x, w), wy = whyOf(x, w); return pip(y, (stepOf(x) ? "Step " + stepOf(x) + ": " : "") + (printedOf(x, w) ? "Unconfirmed" : STATE[y]) + (wy ? ". " + wy : ""), w + "|" + x.id); }).join("") + '</span><div><b>' + esc(g.title) + '</b>' +
       '<small>' + (all ? "Every step done. Last step: " : (stepOf(t) ? "Now on step " + stepOf(t) + " of " + mine.length + ": " : "")) + '</small>' + esc((t.ms || {})[w] || t.statement || "") +
       (why ? '<br><small>' + esc(why) + '</small>' : '') + '</div></li>';
   }).join("") + '</ul>';
@@ -930,7 +946,7 @@ function refresh(){
       $("msg").hidden = true; $("impactView").hidden = false;
     } else if(first) $("msg").textContent = "The evidence did not load: " + e.error + ".";
     if(t){ if(t.ok){ TG = t; lastTargets = Date.now(); } else if(first) $("trackMsg").textContent = "The targets did not load: " + t.error + "."; }
-    buildAct();
+    buildAct(); buildPrinted();
     SEEN = snapshot(); FLASH = {};
     if(before) Object.keys(SEEN).forEach(function(k){ if(SEEN[k] > (before[k] || 0)) FLASH[k] = 1; });
     setTimeout(function(){ FLASH = {}; }, 3000);
