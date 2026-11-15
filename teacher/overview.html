@@ -17,6 +17,7 @@
 <script src="/lessons/plan.js?v=11"></script>
 <script src="/data/a2/drops.js"></script>
 <script src="/data/cc.js?v=7"></script>
+<script src="/data/bookplan.js"></script>
 <script src="/data/overview.js?v=2"></script>
 <style>
 /* The line management overview: intent, implementation, impact, the
@@ -109,6 +110,28 @@ section.part{margin:0 0 40px;scroll-margin-top:16px}
 .depnotes li small{display:block;color:var(--body-tint);font-size:.8rem;margin-top:2px}
 .deph{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;margin:18px 0 0}
 @media (max-width:700px){.depwrap{overflow-x:auto}.dep{min-width:560px}.depnotes li{grid-template-columns:1fr}}
+/* timetable: day by day */
+.dday{border:2px solid var(--ink);border-radius:14px;background:var(--white);margin:0 0 10px;scroll-margin-top:16px}
+.dday>summary{cursor:pointer;padding:11px 14px;font-weight:700;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.dday>summary small{font-weight:400;color:var(--body-tint)}
+.dday .in{padding:0 14px 12px}
+.ses{display:grid;grid-template-columns:7.5em 11em 1fr;gap:4px 14px;padding:9px 0;border-top:1px dashed rgba(10,47,56,.2);font-size:.92rem}
+.ses .t{color:var(--body-tint)}
+.ses b{display:block}
+.ses .ms{display:inline-block;font-size:.78rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--edge,#e1edf5);margin:3px 6px 0 0}
+.ses .lk{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ses .lk a{font-size:.82rem;font-weight:700;padding:3px 10px;border-radius:999px;border:2px solid var(--ink);color:var(--ink);text-decoration:none;background:var(--paper)}
+.ses .lk a:hover{background:var(--ink);color:var(--paper)}
+.ses .done{font-size:.82rem;color:var(--teal);font-weight:700;margin-right:10px}
+.ses .ms + .none{margin-right:10px}
+.ses .none{font-size:.85rem}
+.land{width:100%;border-collapse:collapse;font-size:.88rem;margin:6px 0 0}
+.land th,.land td{text-align:left;padding:6px 8px;border-top:1px dashed rgba(10,47,56,.2);vertical-align:top}
+.land th{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;border-top:2px solid var(--ink)}
+.land a{font-weight:700;color:var(--ink)}
+.land small{color:var(--body-tint)}
+.blk[data-day]{cursor:pointer}
+@media (max-width:700px){.ses{grid-template-columns:1fr}.land{display:block;overflow-x:auto}}
 /* timetable */
 .tt{display:grid;grid-template-columns:54px repeat(5,1fr);gap:0 8px;margin:6px 0 0}
 .tt .hd{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;text-align:center;padding:0 0 6px;font-size:.98rem}
@@ -272,6 +295,8 @@ table.trk{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
     <div class="tt" id="tt"></div>
     <div class="ttlist" id="ttList"></div>
     <p class="ttnote" id="ttNote"></p>
+    <div class="ph ph3"><h2>Day by day</h2><span>What each session teaches, its milestone step, and the activities landing in each HQ</span></div>
+    <div id="ttDays"></div>
   </section>
 
   <section class="part" id="impact" data-t="impact">
@@ -578,7 +603,7 @@ function drawTimetable(){
         var a = T.mins(s[0]), b = T.mins(s[1]), ses = T.session(s[2], w, k), quiet = ses.type === "break" || ses.type === "breathe";
         var overlap = side.some(function(x){ return T.mins(x.start) < b && T.mins(x.end) > a; });
         var title = ses.title || s[2], ld = lead(s[2]);
-        inner += '<div class="blk' + (quiet ? " quiet" : "") + (overlap ? " hasside" : "") + '" style="top:' + ((a - START) / SPAN * 100) + '%;height:' + ((b - a) / SPAN * 100) + '%;--edge:' + (EDGE[ses.type] || "var(--teal)") + '" title="' + esc(s[0] + " to " + s[1] + ", " + title) + '">' +
+        inner += '<div data-day="' + k + '" class="blk' + (quiet ? " quiet" : "") + (overlap ? " hasside" : "") + '" style="top:' + ((a - START) / SPAN * 100) + '%;height:' + ((b - a) / SPAN * 100) + '%;--edge:' + (EDGE[ses.type] || "var(--teal)") + '" title="' + esc(s[0] + " to " + s[1] + ", " + title) + '">' +
           '<b>' + esc(title) + '</b>' + (b - a >= 45 ? '<em>' + esc(s[0]) + ' to ' + esc(s[1]) + '</em>' : '') + '</div>';
         rows.push([a, '<p><span>' + esc(s[0]) + ' to ' + esc(s[1]) + '</span>' + esc(title) + (ld && title.indexOf(ld) < 0 ? ' (' + ld + ')' : '') + '</p>']);
       });
@@ -595,8 +620,97 @@ function drawTimetable(){
   $("tt").innerHTML = cols + body;
   $("ttList").innerHTML = list;
   $("ttSub").textContent = "Week " + w.n + ", " + T.shortRange(w);
-  $("ttNote").textContent = "The same shape every week. Horizon (the dashed lane) runs alongside for two students while the group carries on. Trip details go to families from school, so they are not listed here.";
+  $("ttNote").textContent = "The same shape every week. Horizon (the dashed lane) runs alongside for two students while the group carries on. Tap a session to open its day below. Trip details go to families from school, so they are not listed here.";
 }
+
+/* ---------- the timetable, day by day: lessons, milestone steps, activities ---------- */
+var QUIET = { breathein: 1, breatheout: 1, lunch: 1, brain: 1 };
+var DROPLIST = (window.B5DROPS || {}).items || [], TNAMES = (window.B5DROPS || {}).targets || {};
+var HQBASE = { EGW: "/egw/", LP: "/lp/", LW: "/lw/", LC: "/lc/", HK: "/hk/", JT: "/jt-hq/" };
+function lessonFor(w, k, sesKey, date){
+  if(!L || !L.slotFor) return null;
+  var slot = L.slotFor(k, sesKey); if(!slot) return null;
+  var out = [];
+  slot.series.forEach(function(t){
+    ((L.bySeries[t] || {}).lessons || []).forEach(function(l){
+      if(l.old) return;
+      if(slot.byWeek){
+        if(!(l.from && l.from <= w.end && l.to >= w.start)) return;
+        var n = L.nParts(l), days = slot.days.filter(function(d){ return T.schoolDays(w).indexOf(d) >= 0; }), use = days.slice(Math.max(0, days.length - n)), i = use.indexOf(k);
+        if(n && i < 0) return;
+        out.push({ lesson: l, part: n ? i + 1 : 0, slot: slot });
+      } else if(L.planned(l.id) === date) out.push({ lesson: l, part: 0, slot: slot });
+    });
+  });
+  return out[0] || { slot: slot, none: true };
+}
+function milestoneOf(l){
+  var pil = (L.pillars || {})[l.pillar] || {}, ser = (L.bySeries || {})[l.target] || {};
+  if(l.pillar === "cc") return { text: "Cultural Calendar: no milestone step", colour: pil.wash };
+  return { text: (pil.name ? pil.name + ": " : "") + (ser.title || l.target) + (l.step ? ", step " + l.step : ""), colour: pil.wash };
+}
+function taughtOf(x){
+  var slug = "lesson-" + x.lesson.id + (x.part ? "-p" + x.part : ""), days = {}, n = {};
+  (EV || []).forEach(function(r){ if(r.Kind === "lesson" && String(r.Slug) === slug){ days[String(r.Day)] = 1; n[r.Who] = 1; } });
+  var d = Object.keys(days).sort();
+  return d.length ? { day: d[d.length - 1], n: Object.keys(n).length } : null;
+}
+function drawDays(){
+  var w = W, html = "", bp = window.B5BOOKPLAN && B5BOOKPLAN.weeks ? B5BOOKPLAN.weeks.filter(function(x){ return x.n === w.n; })[0] : null;
+  var openDay = T.schoolDays(w).filter(function(k){ return T.iso(T.dateOf(w, k)) === today; })[0] || "";
+  T.dayKeys.forEach(function(k){
+    var d = T.dateOf(w, k), date = T.iso(d), school = T.schoolDays(w).indexOf(k) >= 0;
+    var land = DROPLIST.filter(function(it){ return it.date === date; });
+    var rows = "", nl = 0;
+    if(school){
+      var slots = (T.slotsOn(w, k) || []).map(function(x){ return [x[0], x[1], x[2]]; }).concat(T.alongsideOn(k).map(function(a){ return [a.start, a.end, a.key, 1]; }));
+      slots.sort(function(a, b){ return T.mins(a[0]) - T.mins(b[0]); });
+      slots.forEach(function(sl){
+        if(QUIET[sl[2]]) return;
+        var ses = T.session(sl[2], w, k), x = lessonFor(w, k, sl[2], date), bits = "";
+        if(x && x.lesson){
+          nl++;
+          var ms = milestoneOf(x.lesson), tg = taughtOf(x);
+          bits += '<b>' + esc(L.label(x)) + '</b><span class="ms" style="--edge:' + (ms.colour || "#e1edf5") + '">' + esc(ms.text) + '</span>' +
+            (tg ? '<span class="done">Taught ' + esc(nice(tg.day)) + ', ' + tg.n + ' of ' + WHO.length + ' students</span>' : (date <= today ? '<span class="none">Not recorded as taught yet</span>' : '<span class="none">Planned</span>')) +
+            '<span class="lk"><a href="' + esc(L.presentHref(x) + "&preview=1") + '" target="_blank" rel="noopener">Slides (preview)</a>' + (x.lesson.notes ? '<a href="/lessons/notes.html?l=' + esc(x.lesson.id) + '" target="_blank" rel="noopener">Staff notes</a>' : '') + '</span>';
+        } else if(x && x.none){
+          bits += '<span class="none">' + (x.slot.byWeek ? "No lesson in this slot today." : "No lesson planned for today: this slot rolls on from whatever was last taught.") + '</span>';
+        }
+        if(sl[2] === "project" && bp){
+          bits += '<span class="ms" style="--edge:#efe3f4">Project book this week: ' + esc(bp.steps.map(function(id){ return (B5BOOKPLAN.names || {})[id] || id; }).join(", ")) + '</span>';
+        }
+        if(sl[2] === "core" || sl[2] === "maths" || sl[2] === "english" || sl[3]){
+          var subj = land.filter(function(it){ return /english|maths/i.test(it.subject); });
+          bits += '<span class="none">' + (sl[3] ? "Two students, alongside the group." : "In each student's HQ, at their own level.") + (subj.length ? " " + subj.length + " English and maths activities land today (below)." : "") + '</span>';
+        }
+        var links = (ses.links || []).filter(function(a){ return a && a[1]; });
+        if(sl[2] === "cc"){
+          var cw = ((window.B5CC || {}).weeks || []).filter(function(c){ return c.start <= date && c.end >= date; })[0];
+          if(cw && cw.game) links = links.concat([[cw.game.title, cw.game.href]]);
+        }
+        if(sl[2] === "project") links = links.concat([["Projects", "/projects/"], ["Idea Lab", "/projects/ideas.html"]]);
+        var seenL = {}; links = links.filter(function(a){ if(seenL[a[1]]) return false; seenL[a[1]] = 1; return true; });
+        if(links.length) bits += '<span class="lk">' + links.map(function(a){ return '<a href="' + esc(a[1]) + '" target="_blank" rel="noopener">' + esc(a[0]) + '</a>'; }).join("") + '</span>';
+        rows += '<div class="ses"><span class="t">' + esc(sl[0]) + ' to ' + esc(sl[1]) + '</span><span><b>' + esc(ses.title || sl[2]) + '</b></span><div>' + (bits || '<span class="none">-</span>') + '</div></div>';
+      });
+    } else rows = '<p class="none">' + esc(String((w.days && w.days[k] && w.days[k].line) || "No school").split(/\.\s/)[0].replace(/\.$/, "")) + '</p>';
+    var landHtml = land.length ? '<table class="land"><thead><tr><th>Student</th><th>Activity landing in their folder</th><th>Milestone step</th><th>So far</th></tr></thead><tbody>' +
+      land.sort(function(a, b){ return WHO.indexOf(a.who) - WHO.indexOf(b.who); }).map(function(it){
+        var st = SLUG[it.who + "|a2-" + it.slug], pr = ((XT && XT.printed) || []).filter(function(p){ return p.who === it.who && p.slug === it.slug; })[0];
+        var so = st ? (st.state === 2 ? "Finished " : "Started ") + nice(st.day) : pr ? "Printed " + nice(pr.day) + ", not confirmed" : date <= today ? "Not started" : "Lands " + nice(date);
+        return '<tr><td><b>' + esc(it.who) + '</b></td><td><a href="' + esc(it.href) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a><br><small>' + esc(it.subject) + '</small></td><td>' +
+          esc((it.covers || []).map(function(c){ return (TNAMES[c[0]] || c[0]) + ", step " + c[1]; }).join("; ") || "-") + '</td><td>' + esc(so) + '</td></tr>';
+      }).join("") + '</tbody></table>' : (school ? '<p class="none">No HQ activities land today.</p>' : '');
+    html += '<details class="dday" id="day-' + k + '"' + (k === openDay ? " open" : "") + '><summary>' + esc(T.niceDate(d)) + '<small>' + (school ? nl + (nl === 1 ? " lesson" : " lessons") + ", " + land.length + (land.length === 1 ? " activity" : " activities") + " landing" : "No school") + '</small></summary><div class="in">' + rows + landHtml + '</div></details>';
+  });
+  $("ttDays").innerHTML = html;
+}
+$("tt").addEventListener("click", function(e){
+  var b = e.target.closest && e.target.closest("[data-day]"); if(!b) return;
+  var d = $("day-" + b.getAttribute("data-day")); if(!d) return;
+  d.open = true; d.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 /* ---------- impact and the tracker: from the sheet ---------- */
 var EV = null, TG = null, range = W.start > today ? "term" : "week", one = "";
@@ -708,8 +822,10 @@ function mark(who, cov, st, day, title, kind){
     if(!cur || st > cur.state || (st === cur.state && day > cur.day)) m[id] = { state: st, day: day, title: title, kind: kind };
   });
 }
+var SLUG = {};
+function slugMark(who, slug, st, day){ var k = who + "|" + slug, c = SLUG[k]; if(!c || st > c.state || (st === c.state && day > c.day)) SLUG[k] = { state: st, day: day }; }
 function buildAct(){
-  ACT = {};
+  ACT = {}; SLUG = {};
   WHO.forEach(function(who){
     var items = ((PR || {})[who] || {}).items || {}, P = PREFIX[who];
     Object.keys(items).forEach(function(k){
@@ -720,6 +836,7 @@ function buildAct(){
       var st = sm.finished ? 2 : (sm.chunksDone || sm.done || sm.made) ? 1 : 0;
       var day = items[k].t ? T.iso(new Date(+items[k].t)) : "";
       mark(who, DROPS[who + "|" + m[1]], st, day, String(sm.title || m[1].replace(/^a2-/, "").replace(/-/g, " ")), "activity");
+      if(st) slugMark(who, m[1], st, day);
     });
   });
   (EV || []).forEach(function(r){
@@ -728,6 +845,7 @@ function buildAct(){
     var cov = kind === "activity" ? DROPS[who + "|" + String(r.Slug || "")] : null;
     if(!cov || !cov.length){ var k = TNAME[String(r.Target || "").toLowerCase()]; cov = k && +r.Step ? [[k, +r.Step]] : []; }
     var st = kind === "lesson" ? 1 : String(r.Finished) === "yes" ? 2 : 1;
+    if(kind === "activity") slugMark(who, String(r.Slug || ""), st, String(r.Day));
     mark(who, cov, st, String(r.Day), String(r.Activity || r.Slug || "").replace(/^Whole group lesson: /, "the lesson "), kind);
   });
 }
@@ -900,7 +1018,7 @@ function drawDeploy(){
   box.innerHTML = html;
 }
 
-function drawAll(){ drawWeekPick(); drawWeek(); drawDeploy(); drawTimetable(); drawImpact(); drawTracker(); drawSummary(); drawProject(); drawCC(); }
+function drawAll(){ drawWeekPick(); drawWeek(); drawDeploy(); drawTimetable(); drawDays(); drawImpact(); drawTracker(); drawSummary(); drawProject(); drawCC(); }
 drawAll();
 
 /* ---------- loading, then keeping up: the tracker checks the sheet every
@@ -951,7 +1069,7 @@ function refresh(){
     if(before) Object.keys(SEEN).forEach(function(k){ if(SEEN[k] > (before[k] || 0)) FLASH[k] = 1; });
     setTimeout(function(){ FLASH = {}; }, 3000);
     first = false;
-    stampNow(); drawImpact(); drawTracker(); drawSummary(); drawProject(); drawCC();
+    stampNow(); drawImpact(); drawTracker(); drawSummary(); drawProject(); drawCC(); drawDays();
   }).catch(function(){
     busy = false;
     if(first){ $("msg").textContent = "Could not reach the Base 5 sheet. Check this browser is signed in to a school Google account."; $("sumTiles").innerHTML = '<p class="none">' + esc($("msg").textContent) + '</p>'; }
