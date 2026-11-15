@@ -424,21 +424,40 @@ var DROPS = {}, TNAME = {};
   (D.items || []).forEach(function(it){ DROPS[it.who + "|a2-" + it.slug] = it.covers || []; });
   Object.keys(D.targets || {}).forEach(function(k){ TNAME[String(D.targets[k]).toLowerCase()] = k; });
 })();
-var ACT = {};
+/* Two sources, so nothing done so far is missed: each activity's own saved
+   progress as it stands now (the Progress tab, kept by sync from every
+   device the student has used), and the day by day Evidence rows. Whole
+   group lessons a student was in count as working on the lesson's step. */
+var ACT = {}, PR = null;
+var PREFIX = { EGW: "b5.egw.", LP: "b5.lp.", LW: "b5.lw.", LC: "b5.lc.", HK: "b5.hk.", JT: "b5.jthq." };
+function mark(who, cov, st, day, title, kind){
+  if(!st) return;
+  (cov || []).forEach(function(c){
+    var id = c[0] + "." + c[1], m = ACT[who] = ACT[who] || {}, cur = m[id];
+    if(!cur || st > cur.state || (st === cur.state && day > cur.day)) m[id] = { state: st, day: day, title: title, kind: kind };
+  });
+}
 function buildAct(){
   ACT = {};
-  (EV || []).forEach(function(r){
-    if(r.Kind && r.Kind !== "activity") return;
-    var who = String(r.Who), cov = DROPS[who + "|" + String(r.Slug || "")];
-    if(!cov || !cov.length){
-      var k = TNAME[String(r.Target || "").toLowerCase()];
-      cov = k && +r.Step ? [[k, +r.Step]] : [];
-    }
-    var st = String(r.Finished) === "yes" ? 2 : 1, day = String(r.Day);
-    cov.forEach(function(c){
-      var id = c[0] + "." + c[1], m = ACT[who] = ACT[who] || {}, cur = m[id];
-      if(!cur || st > cur.state || (st === cur.state && day > cur.day)) m[id] = { state: Math.max(st, cur ? cur.state : 0), day: day, title: String(r.Activity || r.Slug || "") };
+  WHO.forEach(function(who){
+    var items = ((PR || {})[who] || {}).items || {}, P = PREFIX[who];
+    Object.keys(items).forEach(function(k){
+      if(k.indexOf(P) !== 0) return;
+      var m = k.slice(P.length).match(/^(a2-[a-z0-9\-]+?)\.v1$/); if(!m) return;
+      var n = null; try{ n = JSON.parse(items[k].v); }catch(e){}
+      var sm = n && n.summary; if(!sm || !sm.chunks) return;
+      var st = sm.finished ? 2 : (sm.chunksDone || sm.done || sm.made) ? 1 : 0;
+      var day = items[k].t ? T.iso(new Date(+items[k].t)) : "";
+      mark(who, DROPS[who + "|" + m[1]], st, day, String(sm.title || m[1].replace(/^a2-/, "").replace(/-/g, " ")), "activity");
     });
+  });
+  (EV || []).forEach(function(r){
+    var kind = String(r.Kind || "activity"), who = String(r.Who);
+    if(kind !== "activity" && kind !== "lesson") return;
+    var cov = kind === "activity" ? DROPS[who + "|" + String(r.Slug || "")] : null;
+    if(!cov || !cov.length){ var k = TNAME[String(r.Target || "").toLowerCase()]; cov = k && +r.Step ? [[k, +r.Step]] : []; }
+    var st = kind === "lesson" ? 1 : String(r.Finished) === "yes" ? 2 : 1;
+    mark(who, cov, st, String(r.Day), String(r.Activity || r.Slug || "").replace(/^Whole group lesson: /, "the lesson "), kind);
   });
 }
 function actOf(t, w){ return ((ACT[w] || {})[t.id]) || null; }
@@ -458,7 +477,7 @@ function buddyState(t, w){
 function stateOf(t, w){ var a = actOf(t, w); return Math.max(buddyState(t, w), a ? a.state : 0); }
 function whyOf(t, w){
   var a = actOf(t, w), st = (t.jay || {})[w], bits = [];
-  if(a) bits.push((a.state === 2 ? "Finished " : "Started ") + a.title + ", " + nice(a.day));
+  if(a) bits.push((a.kind === "lesson" ? "Was in " : a.state === 2 ? "Finished " : "Started ") + a.title + (a.day ? ", " + nice(a.day) : ""));
   if(st) bits.push("In Buddy: " + st);
   return bits.join(". ");
 }
@@ -495,7 +514,7 @@ function drawTracker(){
   $("trk").innerHTML = '<thead><tr><th>Target</th>' + WHO.map(function(w){ return '<th class="w">' + w + '</th>'; }).join("") + '</tr></thead><tbody>' + body +
     '<tr class="sum"><td>Steps done<small>and working on it</small></td>' + WHO.map(function(w){ return '<td class="w">' + sec[w] + ' of ' + tot[w] + '<small>' + wk[w] + ' working on it</small></td>'; }).join("") + '</tr>' +
     '<tr class="sum"><td>Learning time<small>' + (range === "week" ? "week " + W.n : "half term so far") + '</small></td>' + WHO.map(function(w){ return '<td class="w">' + hours(mins[w]) + ' h</td>'; }).join("") + '</tr></tbody>';
-  $("key").innerHTML = '<span>' + pip(0, STATE[0]) + ' Not yet</span><span>' + pip(1, STATE[1]) + ' Working on it</span><span>' + pip(2, STATE[2]) + ' Done</span><span>One circle per milestone step. A step fills in by itself: half when the student starts an activity built for it, full when they finish it. A step marked secure in BridgeLink Buddy is full too. Hover or tap a circle to see why. A dash means no step for them this half term.</span>';
+  $("key").innerHTML = '<span>' + pip(0, STATE[0]) + ' Not yet</span><span>' + pip(1, STATE[1]) + ' Working on it</span><span>' + pip(2, STATE[2]) + ' Done</span><span>One circle per milestone step. A step fills in by itself from everything done so far this half term: half when the student starts an activity built for it (or was in its whole group lesson), full when they finish the activity. A step marked secure in BridgeLink Buddy is full too. Hover or tap a circle to see why. A dash means no step for them this half term.</span>';
   drawOne();
 }
 function drawOne(){
@@ -597,10 +616,12 @@ function refresh(){
   var wantTargets = !TG || Date.now() - lastTargets > 5 * 60000;
   Promise.all([
     B5Site.call("evidence", { key: key(), from: weeks[0].start, to: weeks[weeks.length - 1].end }),
-    wantTargets ? B5Site.call("targets", { key: key() }) : Promise.resolve(null)
+    wantTargets ? B5Site.call("targets", { key: key() }) : Promise.resolve(null),
+    wantTargets ? B5Site.call("overview", { key: key() }) : Promise.resolve(null)
   ]).then(function(r){
     busy = false;
-    var e = r[0] || {}, t = r[1];
+    var e = r[0] || {}, t = r[1], ov = r[2];
+    if(ov && ov.ok && ov.students) PR = ov.students;
     if(first && !e.ok && !(t && t.ok)){ $("msg").textContent = "The sheet said: " + (e.error || (t && t.error) || "nothing") + "."; return; }
     var before = SEEN;
     if(e.ok){
