@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Relational (PSHE and RSE)
    Autumn 2 Week 2 (9 to 13 Nov 2026): Supportive Relationships
-   From the trust plan (26/27 SB Relational Pillar), Tier 1 on the
+   From the Spaghetti Bridge plan (26/27 SB Relational Pillar), Tier 1 on the
    board for everyone, "Going further" slides for Tiers 2 and 3.
    Sensitive strands and the full tier plan: /lessons/notes.html?l=rel-week-2
    This week started on a Thursday, so it runs in two parts:
@@ -285,7 +285,7 @@ window.B5LESSON = {
         care: ["Location sharing and checking messages are early signs of controlling behaviour. Keep it on fictional characters, and if a student connects it to home or their own relationships, follow it up afterwards and talk to Helen (DSL)."] }
     ],
     clips: [["For the Birds (Pixar short, pause at 2:30)", "Tier 1 Skill Up: how the small birds treat the big bird who tries to join. Notice one action you'd change."], ["Spider-Man: Homecoming, Ned finds out", "Tier 2 Skill Up: surprise, privacy and friendship."], ["Zootopia, the gondola scene", "Tier 3 Skill Up: Nick shares something painful; what does Judy do that shows empathy?"]],
-    clipsLine: "Clips the trust plan suggests. They are not on the board (film clips can't be drawn in code), so play them from YouTube if you want them.",
+    clipsLine: "Clips the plan suggests. They are not on the board (film clips can't be drawn in code), so play them from YouTube if you want them.",
     support: ["Trusted adults in school: Jay, Holly, Helen (DSL)", "Childline: 0800 1111, any time, free", "Kooth (online support for young people)", "YoungMinds", "The Mix (peer chat is for 16 plus)"]
   }
 };

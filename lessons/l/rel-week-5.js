@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Relational (PSHE and RSE)
    Autumn 2 Week 5 (30 Nov to 4 Dec 2026): Choice and Autonomy
-   The trust plan leaves this week blank, so it is written from the
+   The Spaghetti Bridge plan leaves this week blank, so it is written from the
    Autumn 2 overview targets and milestones for each tier. Tier 1 on
    the board for everyone, "Going further" slides for Tiers 2 and 3.
    Sensitive strands and the full tier plan: /lessons/notes.html?l=rel-week-5
@@ -275,7 +275,7 @@ window.B5LESSON = {
   notes: {
     week: "Autumn 2, Week 5 (30 November to 4 December 2026)",
     theme: "Choice and Autonomy",
-    written: "The trust plan has no activities for this week (blank template), so this week was written for Base 5 from the Autumn 2 overview targets and milestones, in the same shape as Weeks 1 to 4. Swap in the trust's version if one arrives.",
+    written: "The Spaghetti Bridge plan has no activities for this week (blank template), so this week was written for Base 5 from the Autumn 2 overview targets and milestones, in the same shape as Weeks 1 to 4. Swap in Spaghetti Bridge's version if one arrives.",
     words: [["Choice", "Picking what you want from the options you have."], ["Autonomy", "Having the freedom to make your own decisions and choices."], ["Influence", "The effect our words or actions can have on someone's feelings or decisions."]],
     car: [["Tiers 1 and 2", "What's a choice you made this week that was all yours? Who helps you when a choice feels big?"], ["Tier 3", "When does persuading someone turn into pressuring them? What would you notice first?"]],
     shape: [

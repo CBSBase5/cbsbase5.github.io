@@ -77,7 +77,7 @@ var SERIES = [
     { id: "pfa-careers-2", step: 2, title: "Jobs that vanished, jobs that appeared", line: "Lamplighters to drone pilots.", ready: true, drop: "career-explorer" },
     { id: "pfa-careers-3", step: 2, title: "What suits me?", line: "Interests, strengths and where they lead.", ready: true, drop: "career-explorer" }
   ]},
-  /* Relational: from Week 2 (9 Nov 2026) the PHSE slot follows the trust's weekly
+  /* Relational: from Week 2 (9 Nov 2026) the PHSE slot follows Spaghetti Bridge's weekly
      PSHE/RSE themes (26/27 SB Relational Pillar, Autumn 2 "Building Connections"),
      one lesson a week over the Monday, Thursday and Friday 15 minute slots. Still the
      rel-assert target, so Send to Buddy links each week to a milestone step.

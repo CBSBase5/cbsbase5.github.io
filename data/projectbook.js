@@ -1,11 +1,11 @@
 /* ==========================================================
    Base 5 - the project book (ELP workbook, Nov 2026)
-   The trust's Enterprise Learning Project workbook (Explore ELP
+   Spaghetti Bridge's Enterprise Learning Project workbook (Explore ELP
    Workbook Pages, Autumn 2025 v3) as an interactive book that lives
    in every student's HQ, alongside their project page.
 
    Same 21 steps, same six stages and same order as the paper book,
-   so it lines up with the trust's ELP. Each step is one page (a step
+   so it lines up with Spaghetti Bridge's ELP. Each step is one page (a step
    can have more pages: a second draft, another experiment). Students
    see one small card at a time; staff see the whole page.
 
@@ -65,7 +65,7 @@ var P = WHO ? (S.prefix || PREFIX[WHO]) : null;
 var REDUCED = false;
 try{ REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
 
-/* ---------- the stages and steps (the trust's wording) ---------- */
+/* ---------- the stages and steps (Spaghetti Bridge's wording) ---------- */
 var STAGES = [
   { n: "Context and Research",           half: "Creating the Project",   c: "#007291" },
   { n: "Developing Ideas",               half: "Creating the Project",   c: "#00a6c9" },

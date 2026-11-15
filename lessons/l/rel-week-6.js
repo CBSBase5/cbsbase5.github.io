@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Relational (PSHE and RSE)
    Autumn 2 Week 6 (7 to 11 Dec 2026): Personal Safety
-   The trust plan leaves this week blank, so it is written from the
+   The Spaghetti Bridge plan leaves this week blank, so it is written from the
    Autumn 2 overview targets and milestones for each tier. Tier 1 on
    the board for everyone, "Going further" slides for Tiers 2 and 3.
    Sensitive strands and the full tier plan: /lessons/notes.html?l=rel-week-6
@@ -272,7 +272,7 @@ window.B5LESSON = {
   notes: {
     week: "Autumn 2, Week 6 (7 to 11 December 2026)",
     theme: "Personal Safety",
-    written: "The trust plan has no activities for this week (blank template), so this week was written for Base 5 from the Autumn 2 overview targets and milestones, in the same shape as Weeks 1 to 4. Swap in the trust's version if one arrives.",
+    written: "The Spaghetti Bridge plan has no activities for this week (blank template), so this week was written for Base 5 from the Autumn 2 overview targets and milestones, in the same shape as Weeks 1 to 4. Swap in Spaghetti Bridge's version if one arrives.",
     words: [["Safe", "Protected from harm, and feeling OK."], ["Risk", "A chance that something could go wrong or cause harm."], ["Trusted adult", "A grown-up you can go to who will listen and help keep you safe."]],
     car: [["Tiers 1 and 2", "Where do you feel safest, and why? What would you do if something online made you feel uneasy?"], ["Tier 3", "Why might someone not tell anyone when something online goes wrong? What would make it easier?"]],
     shape: [

@@ -32,7 +32,7 @@ window.B5OVERVIEW = {
     lead: "The week is the same shape every week, so students know what is coming.",
     points: [
       ["The day", "Breathe In, brain games and the Cultural Calendar to start; Breathe Out to finish."],
-      ["Whole group lessons", "Each pillar target is taught on the board in its slot, linked to a milestone step. PHSE follows the trust's Building Connections plan."],
+      ["Whole group lessons", "Each pillar target is taught on the board in its slot, linked to a milestone step. PHSE follows Spaghetti Bridge's Building Connections plan."],
       ["Each student's HQ", "English and maths at their level, activities dropped into their folder, and their ELP project book."],
       ["Beyond the room", "A weekly trip, Forest School with Vernon, horticulture with Kara and digital media with Andy. Two students go to Horizon."],
       ["Adults", "Holly and I are with the group all day. Her deployment is planned together in BridgeLink Buddy."]

@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Relational (PSHE and RSE)
    Autumn 2 Week 3 (16 to 20 Nov 2026): Conflict and Assertiveness
-   From the trust plan (26/27 SB Relational Pillar), Tier 1 on the
+   From the Spaghetti Bridge plan (26/27 SB Relational Pillar), Tier 1 on the
    board for everyone, "Going further" slides for Tiers 2 and 3.
    Sensitive strands and the full tier plan: /lessons/notes.html?l=rel-week-3
    Split over the week's three 15 minute PHSE slots:
@@ -300,7 +300,7 @@ window.B5LESSON = {
     ],
     safeguard: ["Let Helen (DSL) know the Tier 3 coercion and domestic abuse strand is being taught this week, and check whether any student needs a heads up or a different plan.", "Image sharing (the TikTok and photo scenarios): if a student mentions an image of themselves being shared, Childline and the IWF's Report Remove service can help get it taken down; tell Helen."],
     clips: [["Snack Attack (short film)", "Tier 2 Skill Up: what did you assume at first, and what changed your mind?"]],
-    clipsLine: "Clips the trust plan suggests. They are not on the board, so play them from YouTube if you want them.",
+    clipsLine: "Clips the plan suggests. They are not on the board, so play them from YouTube if you want them.",
     support: ["Trusted adults in school: Jay, Holly, Helen (DSL)", "Childline: 0800 1111, any time, free", "Report Remove (Childline and the IWF) for an image shared online", "In an emergency: 999"]
   }
 };

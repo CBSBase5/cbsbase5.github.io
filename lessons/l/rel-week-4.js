@@ -1,7 +1,7 @@
 /* ==========================================================
    Base 5 Lessons - Relational (PSHE and RSE)
    Autumn 2 Week 4 (23 to 27 Nov 2026): Self Respect
-   From the trust plan (26/27 SB Relational Pillar), Tier 1 on the
+   From the Spaghetti Bridge plan (26/27 SB Relational Pillar), Tier 1 on the
    board for everyone, "Going further" slides for Tiers 2 and 3.
    Full tier plan: /lessons/notes.html?l=rel-week-4
    Split over the week's three 15 minute PHSE slots:
@@ -304,7 +304,7 @@ window.B5LESSON = {
         care: ["'You're amazing when you do what I say' and comments about appearance and clothing are early signs of control. Changing your own self-talk does not remove another person's responsibility for controlling behaviour. Follow up anything that sounds close to home, and tell Helen (DSL)."] }
     ],
     clips: [["Alike (short film, about eight minutes)", "Tier 1 Skill Up: discouragement, care, and a father who changes."], ["Dove: Reverse Selfie", "Tier 2: likes, appearance and feeling valued."]],
-    clipsLine: "Clips the trust plan suggests. They are not on the board, so play them from YouTube if you want them.",
+    clipsLine: "Clips the plan suggests. They are not on the board, so play them from YouTube if you want them.",
     support: ["Trusted adults in school: Jay, Holly, Helen (DSL)", "Childline: 0800 1111, any time, free", "Kooth (online support for young people)"]
   }
 };

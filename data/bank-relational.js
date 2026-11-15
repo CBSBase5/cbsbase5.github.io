@@ -1,6 +1,6 @@
 /* ==========================================================
    Base 5 - Relational (PSHE & RSE) targets for BridgeLink Buddy
-   From the trust's "26/27 SB Relational Pillar" plan. Autumn 2 is
+   From Spaghetti Bridge's "26/27 SB Relational Pillar" plan. Autumn 2 is
    "Building Connections": three targets at each tier, choose one,
    each with its milestones. The staff Targets page sends these to
    the Bank tab of BridgeLink Buddy, where "Plan a term" picks them
@@ -12,8 +12,8 @@
    targets arriving.
 
    Target wording is BridgeLink's own (kept as it is, so it matches
-   in BridgeLink); milestone wording is the trust's, with only the
-   doubled "and and" tidied. flag: marked ** in the trust's plan.
+   in BridgeLink); milestone wording is Spaghetti Bridge's, with only the
+   doubled "and and" tidied. flag: marked ** in Spaghetti Bridge's plan.
 
    B5BLNAMES: BridgeLink's name (the bold line above each target) for
    the PSHE Tier 1 list, read from BridgeLink's Relational page, for
