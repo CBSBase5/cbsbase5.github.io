@@ -2,16 +2,17 @@
 """
 Builds LP's GCSE HQ (/lp/) from EGW's (/egw/).
 
-LP is on the same GCSEs as EGW in English and Maths (AQA English Language,
-Edexcel Maths Foundation), so the activities are shared. This script copies
-the English and Maths pages, the two matching escape rooms and the hub
-pages, and gives them LP's name, links, storage keys and look.
+LP is on the same GCSEs as EGW in English, Maths and Biology (AQA English
+Language, Edexcel Maths Foundation, AQA Biology), so the activities are
+shared. This script copies the English, Maths and Biology pages, the three
+matching escape rooms and the hub pages, and gives them LP's name, links,
+storage keys and look. Statistics stays in EGW's HQ only.
 
 Shared code stays in /egw/ and is loaded from there: engine.js, progress.js,
 skin.js, egw.css and the daily drop and swipe card banks. They read
 window.HQ from /lp/conf.js. LP's own look is /lp/lp.css.
 
-Run it again after changing any of EGW's English or Maths pages:
+Run it again after changing any of EGW's English, Maths or Biology pages:
     python3 lp/_build/build_lp.py
 (from the repo root). It needs node for the catalogue. Files written by this
 script should not be edited by hand; edit the EGW page and rebuild.
@@ -23,13 +24,13 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 EGW = os.path.join(ROOT, "egw")
 LP = os.path.join(ROOT, "lp")
 
-SUBJECTS = ["english", "maths"]
-EXTRAS = ["escape-maths", "escape-english"]
+SUBJECTS = ["english", "maths", "bio"]
+EXTRAS = ["escape-maths", "escape-english", "escape-bio"]
 HUBS = ["index.html", "papers.html", "sky.html", "daily.html", "swipe.html", "bonnie.html", "looks.html", "folder.html"]
 SHARED = r"(engine\.js|skin\.js|progress\.js|egw\.css|daily-bank-|swipe-bank-)"
 LP_CSS = "/lp/lp.css?v=1"
 CONF = "/lp/conf.js?v=1"
-CAT_V = "1"
+CAT_V = "2"
 
 
 def must(s, a, b, count=None, where=""):
@@ -79,20 +80,22 @@ def hub_patches(name, s):
         if "mark-jay" in s:
             sys.exit("build_lp: mark-jay link still in index")
     if name == "daily.html":
-        for sub in ("bio", "stats"):
-            s = re.sub(r'<script src="/egw/daily-bank-%s\.js\?v=\d+"></script>\n' % sub, "", s)
-        s = must(s, 'var CYCLE = ["maths", "english", "bio", "stats"];', 'var CYCLE = ["maths", "english"];', 1, name)
+        s = re.sub(r'<script src="/egw/daily-bank-stats\.js\?v=\d+"></script>\n', "", s)
+        s = must(s, 'var CYCLE = ["maths", "english", "bio", "stats"];', 'var CYCLE = ["maths", "english", "bio"];', 1, name)
         s = re.sub(r'var START = "\d{4}-\d\d-\d\d";', 'var START = "2026-10-09";', s)
     if name == "daily.html":
-        s = must(s, "One question a day, from any of your four subjects.", "One question a day, English or Maths.", 1, name)
+        s = must(s, "One question a day, from any of your four subjects.", "One question a day: English, Maths or Biology.", 1, name)
+        # Biology joined on 18 Nov 2026: earlier days keep the English and Maths
+        # cycle they were set with, so answered squares still show their question
+        s = must(s, "  var sj = CYCLE[n % CYCLE.length], list = bySubj[sj];\n  if(!list || !list.length) return null;\n  return { k: list[Math.floor(n / CYCLE.length) % list.length], n: n + 1, s: sj };",
+                 "  var cyc = str < \"2026-11-18\" ? [\"maths\", \"english\"] : CYCLE;\n  var sj = cyc[n % cyc.length], list = bySubj[sj];\n  if(!list || !list.length) return null;\n  return { k: list[Math.floor(n / cyc.length) % list.length], n: n + 1, s: sj };", 1, name)
     if name == "sky.html":
         s = must(s, 'english: "#ff7a7a", maths: "#ffd23f"', 'english: "#ff6fa0", maths: "#c6f03c"', 1, name)
     if name == "swipe.html":
         s = must(s, 'maths: "#ffd23f", english: "#ff5d5d"', 'maths: "#c6f03c", english: "#ff4f8b"', 1, name)
-        for sub in ("bio", "stats"):
-            s = re.sub(r'<script src="/egw/swipe-bank-%s\.js\?v=\d+"></script>\n' % sub, "", s)
-        s = must(s, '["mixed", "maths", "english", "bio", "stats"].forEach', '["mixed", "maths", "english"].forEach', 1, name)
-        s = must(s, "(maths|english|bio|stats)", "(maths|english)", 1, name)
+        s = re.sub(r'<script src="/egw/swipe-bank-stats\.js\?v=\d+"></script>\n', "", s)
+        s = must(s, '["mixed", "maths", "english", "bio", "stats"].forEach', '["mixed", "maths", "english", "bio"].forEach', 1, name)
+        s = must(s, "(maths|english|bio|stats)", "(maths|english|bio)", 1, name)
     return s
 
 
@@ -114,7 +117,7 @@ process.stdout.write(JSON.stringify(out));
     def dump(x):
         return json.dumps(x, indent=1, ensure_ascii=True)
     body = ("/* LP's GCSE HQ - catalogue. BUILT by lp/_build/build_lp.py from\n"
-            "   /egw/catalogue.js (English and Maths only). Do not edit by hand. */\n"
+            "   /egw/catalogue.js (English, Maths and Biology). Do not edit by hand. */\n"
             "var EGWCAT = {};\n"
             "EGWCAT.acts = " + dump(data["acts"]) + ";\n\n"
             "EGWCAT.subjects = " + dump(data["subjects"]) + ";\n\n"

@@ -1,5 +1,5 @@
 /* LP's GCSE HQ - catalogue. BUILT by lp/_build/build_lp.py from
-   /egw/catalogue.js (English and Maths only). Do not edit by hand. */
+   /egw/catalogue.js (English, Maths and Biology). Do not edit by hand. */
 var EGWCAT = {};
 EGWCAT.acts = [
  {
@@ -214,6 +214,158 @@ EGWCAT.acts = [
    "Frequency trees",
    "Tree diagrams",
    "Exam style"
+  ]
+ },
+ {
+  "id": "biology-cells",
+  "subject": "bio",
+  "title": "Cells and transport",
+  "line": "Cell parts, microscopes and magnification, diffusion and osmosis.",
+  "mins": 50,
+  "chunks": [
+   "Cell types",
+   "Cell parts",
+   "Specialised cells",
+   "Microscopes",
+   "Transport",
+   "Surface area",
+   "Your explanation"
+  ]
+ },
+ {
+  "id": "biology-organisation",
+  "subject": "bio",
+  "title": "Organisation",
+  "line": "Digestion, enzymes, the heart and lungs, disease and plant transport.",
+  "mins": 55,
+  "chunks": [
+   "Levels and digestion",
+   "Enzymes",
+   "Food tests practical",
+   "Amylase practical",
+   "The heart",
+   "Blood and lungs",
+   "Health and disease",
+   "Plant transport"
+  ]
+ },
+ {
+  "id": "biology-infection",
+  "subject": "bio",
+  "title": "Infection and response",
+  "line": "Pathogens, defences, vaccines and medicines, with an outbreak simulator.",
+  "mins": 50,
+  "chunks": [
+   "Pathogens",
+   "Diseases",
+   "First defences",
+   "White blood cells",
+   "Vaccination",
+   "Antibiotics",
+   "New medicines",
+   "Your explanation"
+  ]
+ },
+ {
+  "id": "biology-bioenergetics",
+  "subject": "bio",
+  "title": "Photosynthesis and respiration",
+  "line": "Photosynthesis, limiting factors and respiration, with a greenhouse to run.",
+  "mins": 55,
+  "chunks": [
+   "Photosynthesis",
+   "Limiting factors",
+   "Greenhouses",
+   "Pondweed practical",
+   "Respiration",
+   "Exercise",
+   "Metabolism",
+   "Your explanation"
+  ]
+ },
+ {
+  "id": "biology-homeostasis",
+  "subject": "bio",
+  "title": "Homeostasis and hormones",
+  "line": "Nerves, reflexes and hormones, with a reaction time game.",
+  "mins": 50,
+  "chunks": [
+   "Homeostasis",
+   "Nerves and reflexes",
+   "Reaction time",
+   "Hormones",
+   "Blood glucose",
+   "Reproduction",
+   "Brain, eye and heat",
+   "Your explanation"
+  ]
+ },
+ {
+  "id": "biology-inheritance",
+  "subject": "bio",
+  "title": "Inheritance and evolution",
+  "line": "Cell division, DNA, Punnett squares, evolution and classification.",
+  "mins": 55,
+  "chunks": [
+   "Cell division",
+   "DNA and genes",
+   "Punnett squares",
+   "Disorders and sex",
+   "Evolution",
+   "Breeding and GM",
+   "Classification",
+   "Your explanation"
+  ]
+ },
+ {
+  "id": "biology-ecology",
+  "subject": "bio",
+  "title": "Ecology",
+  "line": "Communities, food webs, sampling, cycles and human impact.",
+  "mins": 50,
+  "chunks": [
+   "Communities",
+   "Adaptations",
+   "Feeding",
+   "Sampling",
+   "Cycles",
+   "Human impact",
+   "Biomass",
+   "Your explanation"
+  ]
+ },
+ {
+  "id": "biology-microbes-plants",
+  "subject": "bio",
+  "title": "Microbes and plant health",
+  "line": "Mostly Separate Biology: growing bacteria, clear zones, monoclonal antibodies, plant diseases and hormones.",
+  "mins": 45,
+  "chunks": [
+   "Growing bacteria",
+   "Aseptic technique",
+   "Clear zones",
+   "Monoclonal antibodies",
+   "Plant diseases",
+   "Plant defences",
+   "Plant hormones",
+   "Exam style"
+  ]
+ },
+ {
+  "id": "biology-kidneys-species",
+  "subject": "bio",
+  "title": "Kidneys, species and food",
+  "line": "Separate Biology only: kidneys, speciation, decay and food security, with a kidney sorting machine.",
+  "mins": 45,
+  "chunks": [
+   "Water balance",
+   "Urea and ADH",
+   "Kidney failure",
+   "Speciation",
+   "Food security",
+   "Food solutions",
+   "Decay",
+   "Milk practical"
   ]
  }
 ];
@@ -1174,6 +1326,573 @@ EGWCAT.subjects = [
     ]
    }
   ]
+ },
+ {
+  "key": "bio",
+  "name": "Biology",
+  "short": "Biology",
+  "acc": "acc-bio",
+  "board": "AQA GCSE Biology (8461)",
+  "boardNote": "Foundation tier is graded 1 to 5; some content is Higher only. If LP is on AQA Combined Science instead, the same topics apply with less detail; anything marked Separate Biology only can be skipped.",
+  "overview": "Two papers, each 1 hour 45 minutes and 100 marks, each worth half the GCSE. Questions mix multiple choice, short answers, calculations and longer 4 or 6 mark explanations. The required practicals come up on both papers, and some marks need maths skills.",
+  "papers": [
+   {
+    "name": "Paper 1",
+    "time": "1 hour 45 minutes",
+    "marks": 100,
+    "calc": "Calculator",
+    "what": "Topics 1 to 4: cell biology, organisation, infection and response, bioenergetics.",
+    "qs": []
+   },
+   {
+    "name": "Paper 2",
+    "time": "1 hour 45 minutes",
+    "marks": 100,
+    "calc": "Calculator",
+    "what": "Topics 5 to 7: homeostasis and response, inheritance, variation and evolution, ecology.",
+    "qs": []
+   }
+  ],
+  "topics": [
+   {
+    "group": "Paper 1: Cell biology",
+    "name": "Cell structure and cell types",
+    "often": 1,
+    "links": [
+     [
+      "biology-cells",
+      1
+     ],
+     [
+      "biology-cells",
+      2
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Cell biology",
+    "name": "Specialised cells",
+    "often": 1,
+    "links": [
+     [
+      "biology-cells",
+      3
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Cell biology",
+    "name": "Microscopes and magnification",
+    "often": 1,
+    "links": [
+     [
+      "biology-cells",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Cell biology",
+    "name": "Mitosis and stem cells",
+    "often": 1,
+    "links": [
+     [
+      "biology-inheritance",
+      1
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Cell biology",
+    "name": "Diffusion, osmosis, active transport",
+    "often": 1,
+    "links": [
+     [
+      "biology-cells",
+      5
+     ],
+     [
+      "biology-cells",
+      6
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Organisation",
+    "name": "Digestion and enzymes",
+    "often": 1,
+    "links": [
+     [
+      "biology-organisation",
+      1
+     ],
+     [
+      "biology-organisation",
+      2
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Organisation",
+    "name": "Heart, blood and lungs",
+    "often": 1,
+    "links": [
+     [
+      "biology-organisation",
+      5
+     ],
+     [
+      "biology-organisation",
+      6
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Organisation",
+    "name": "Health and non communicable disease",
+    "often": 1,
+    "links": [
+     [
+      "biology-organisation",
+      7
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Organisation",
+    "name": "Plant tissues and transpiration",
+    "often": 1,
+    "links": [
+     [
+      "biology-organisation",
+      8
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Infection and response",
+    "name": "Pathogens and diseases",
+    "often": 1,
+    "links": [
+     [
+      "biology-infection",
+      1
+     ],
+     [
+      "biology-infection",
+      2
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Infection and response",
+    "name": "Defences and the immune system",
+    "often": 1,
+    "links": [
+     [
+      "biology-infection",
+      3
+     ],
+     [
+      "biology-infection",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Infection and response",
+    "name": "Vaccines, antibiotics and new drugs",
+    "often": 1,
+    "links": [
+     [
+      "biology-infection",
+      5
+     ],
+     [
+      "biology-infection",
+      6
+     ],
+     [
+      "biology-infection",
+      7
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Bioenergetics",
+    "name": "Photosynthesis and limiting factors",
+    "often": 1,
+    "links": [
+     [
+      "biology-bioenergetics",
+      1
+     ],
+     [
+      "biology-bioenergetics",
+      2
+     ],
+     [
+      "biology-bioenergetics",
+      3
+     ]
+    ]
+   },
+   {
+    "group": "Paper 1: Bioenergetics",
+    "name": "Respiration and exercise",
+    "often": 1,
+    "links": [
+     [
+      "biology-bioenergetics",
+      5
+     ],
+     [
+      "biology-bioenergetics",
+      6
+     ],
+     [
+      "biology-bioenergetics",
+      7
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Homeostasis and response",
+    "name": "Homeostasis, nerves and reflexes",
+    "often": 1,
+    "links": [
+     [
+      "biology-homeostasis",
+      1
+     ],
+     [
+      "biology-homeostasis",
+      2
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Homeostasis and response",
+    "name": "Hormones and blood glucose",
+    "often": 1,
+    "links": [
+     [
+      "biology-homeostasis",
+      4
+     ],
+     [
+      "biology-homeostasis",
+      5
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Homeostasis and response",
+    "name": "Hormones in reproduction",
+    "often": 1,
+    "links": [
+     [
+      "biology-homeostasis",
+      6
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Homeostasis and response",
+    "name": "Brain, eye and temperature (Separate Biology only)",
+    "often": 0,
+    "links": [
+     [
+      "biology-homeostasis",
+      7
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Inheritance and evolution",
+    "name": "Meiosis, DNA and genes",
+    "often": 1,
+    "links": [
+     [
+      "biology-inheritance",
+      1
+     ],
+     [
+      "biology-inheritance",
+      2
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Inheritance and evolution",
+    "name": "Punnett squares and inherited disorders",
+    "often": 1,
+    "links": [
+     [
+      "biology-inheritance",
+      3
+     ],
+     [
+      "biology-inheritance",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Inheritance and evolution",
+    "name": "Variation and evolution",
+    "often": 1,
+    "links": [
+     [
+      "biology-inheritance",
+      5
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Inheritance and evolution",
+    "name": "Selective breeding, GM and classification",
+    "often": 1,
+    "links": [
+     [
+      "biology-inheritance",
+      6
+     ],
+     [
+      "biology-inheritance",
+      7
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Ecology",
+    "name": "Communities, adaptations and food webs",
+    "often": 1,
+    "links": [
+     [
+      "biology-ecology",
+      1
+     ],
+     [
+      "biology-ecology",
+      2
+     ],
+     [
+      "biology-ecology",
+      3
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Ecology",
+    "name": "Carbon and water cycles",
+    "often": 1,
+    "links": [
+     [
+      "biology-ecology",
+      5
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Ecology",
+    "name": "Biodiversity and human impact",
+    "often": 1,
+    "links": [
+     [
+      "biology-ecology",
+      6
+     ]
+    ]
+   },
+   {
+    "group": "Paper 2: Ecology",
+    "name": "Trophic levels and biomass (Separate Biology only)",
+    "often": 0,
+    "links": [
+     [
+      "biology-ecology",
+      7
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Microscopy",
+    "often": 1,
+    "links": [
+     [
+      "biology-cells",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Osmosis in potato",
+    "often": 1,
+    "links": [
+     [
+      "biology-cells",
+      5
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Food tests",
+    "often": 1,
+    "links": [
+     [
+      "biology-organisation",
+      3
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Enzymes and pH (amylase)",
+    "often": 1,
+    "links": [
+     [
+      "biology-organisation",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Photosynthesis and light (pondweed)",
+    "often": 1,
+    "links": [
+     [
+      "biology-bioenergetics",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Reaction time",
+    "often": 1,
+    "links": [
+     [
+      "biology-homeostasis",
+      3
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Sampling with quadrats",
+    "often": 1,
+    "links": [
+     [
+      "biology-ecology",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Required practicals",
+    "name": "Microbes, plant growth and decay (Separate Biology only)",
+    "often": 0,
+    "links": [
+     [
+      "biology-microbes-plants",
+      3
+     ],
+     [
+      "biology-microbes-plants",
+      7
+     ],
+     [
+      "biology-kidneys-species",
+      8
+     ]
+    ]
+   },
+   {
+    "group": "Separate Biology only",
+    "name": "Culturing microorganisms and monoclonal antibodies",
+    "often": 0,
+    "links": [
+     [
+      "biology-microbes-plants",
+      1
+     ],
+     [
+      "biology-microbes-plants",
+      2
+     ],
+     [
+      "biology-microbes-plants",
+      4
+     ]
+    ]
+   },
+   {
+    "group": "Separate Biology only",
+    "name": "Plant diseases, defences and hormones",
+    "often": 0,
+    "links": [
+     [
+      "biology-microbes-plants",
+      5
+     ],
+     [
+      "biology-microbes-plants",
+      6
+     ],
+     [
+      "biology-microbes-plants",
+      7
+     ]
+    ]
+   },
+   {
+    "group": "Separate Biology only",
+    "name": "Kidneys and water balance",
+    "often": 0,
+    "links": [
+     [
+      "biology-kidneys-species",
+      1
+     ],
+     [
+      "biology-kidneys-species",
+      2
+     ],
+     [
+      "biology-kidneys-species",
+      3
+     ]
+    ]
+   },
+   {
+    "group": "Separate Biology only",
+    "name": "Speciation, decay and food security",
+    "often": 0,
+    "links": [
+     [
+      "biology-kidneys-species",
+      4
+     ],
+     [
+      "biology-kidneys-species",
+      7
+     ],
+     [
+      "biology-kidneys-species",
+      5
+     ],
+     [
+      "biology-kidneys-species",
+      6
+     ]
+    ]
+   }
+  ]
  }
 ];
 
@@ -1205,6 +1924,21 @@ EGWCAT.extras = [
    "The spiral stair",
    "The watch room",
    "The lamp room",
+   "The final door"
+  ]
+ },
+ {
+  "id": "escape-bio",
+  "kind": "escape",
+  "subject": "bio",
+  "title": "Escape the research station",
+  "line": "A research station in lockdown. Biology from both papers opens the doors.",
+  "mins": 35,
+  "chunks": [
+   "The microscope lab",
+   "The greenhouse",
+   "The medical bay",
+   "The field survey hut",
    "The final door"
   ]
  }
