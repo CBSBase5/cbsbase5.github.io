@@ -335,6 +335,14 @@ ICONS = {
         '<path d="M14 24L6 17L24 11L32 16M50 24L58 17L40 11L32 16" fill="none" stroke="#c98a4b" stroke-width="3" stroke-linejoin="round"/>' +
         eyes(20, 27, 37, 2.6) +
         '<path d="M19 44q4 3 8 2" fill="none" stroke="%s" stroke-width="2" stroke-linecap="round"/>' % K),
+    # LW's Box-man 2 planner: a cardboard clapperboard with a big orange 2
+    "icons/boxman-2": (P,
+        '<path d="M10 20L50 10L52 18L12 28Z" fill="%s"/>' % K +
+        '<path d="M18 18L24 26M30 15L36 23M42 12L48 20" stroke="#fffdf8" stroke-width="3"/>' +
+        '<rect x="10" y="28" width="44" height="28" rx="3" fill="#c98a4b"/>' +
+        '<path d="M10 34H54" stroke="#b5763a" stroke-width="3"/>' +
+        eyes(20, 28, 44, 2.6) +
+        '<path d="M38 39q6-5 10 0q0 5-10 13h11" fill="none" stroke="%s" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' % O),
 }
 
 
