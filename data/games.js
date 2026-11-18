@@ -54,12 +54,6 @@ window.B5GAMES = {
 
   games: [
     {
-      id:"fifty-fifty", title:"Fifty Fifty", href:"/games/fifty-fifty/",
-      blurb:"Two doors, one right answer. Play along with a general knowledge quiz video that waits for you before every answer, or blast through it without the video. Fifty one questions, from octopus hearts to the Burj Khalifa.",
-      meta:"Six short rounds &middot; with or without the video &middot; Mild or Spicy &middot; good on the board &middot; saves on this computer",
-      tags:["learning","fun"], added:"2026-11-18", fill:"orange", motif:"stars", year:"Laika to the iPhone"
-    },
-    {
       id:"boxman", title:"Box-man: Unboxed!", href:"/games/boxman/",
       blurb:"LW's film, now a game. Pick a hero, fight your way through the City, the Mansion and Dream Land, and deliver justice to Box-man in his lair. Then see what is inside the sealed box.",
       meta:"Four levels &middot; nine heroes &middot; Box-man mode &middot; leaderboard &middot; saves on this computer",

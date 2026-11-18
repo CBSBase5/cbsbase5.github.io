@@ -341,7 +341,7 @@ window.B5TERM = {
       sessions:{},
       feature:[
         { kicker:"Thursday 19 November, 9:45", title:"Fifty Fifty", sticker:"New game",
-          text:"Brain games on the board: a general knowledge quiz with real pictures. Two doors, one right. In the game vault after that.",
+          text:"Brain games on the board: a general knowledge quiz with real pictures. Two doors, one right. Go with your gut.",
           href:"/games/fifty-fifty/", fill:"orange" }
       ]
     },

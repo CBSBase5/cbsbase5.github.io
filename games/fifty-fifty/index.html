@@ -68,12 +68,6 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
 .titlejay svg{width:96px;height:96px;image-rendering:pixelated}
 
 /* play area */
-.vgrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
-.vbox{position:relative;border:4px solid var(--ink);border-radius:18px 22px 16px 20px;overflow:hidden;background:#000;aspect-ratio:16/9;box-shadow:0 6px 0 var(--ink)}
-.vbox iframe,#yt{position:absolute;inset:0;width:100%;height:100%;border:0}
-.vcover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--ink);color:var(--tile);text-align:center;padding:20px}
-.vcover h3{font-size:28px}
-.vbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
 .panel{position:relative;background:var(--tile);border:4px solid var(--ink);border-radius:20px 16px 22px 18px;padding:16px;box-shadow:0 6px 0 var(--ink);min-height:300px}
 .panel.wide{max-width:1100px;margin:0 auto}
 .rtag{display:inline-block;font-weight:700;font-size:14px;background:var(--mint);border:2px solid var(--ink);border-radius:999px;padding:3px 10px;margin-bottom:8px}
@@ -114,9 +108,6 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
 .why{margin-top:10px}
 .why textarea{width:100%;min-height:58px;border:2px dashed #9bb5bb;border-radius:10px;padding:8px;font:inherit;background:#fff}
 .nextrow{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
-.waiting{display:flex;align-items:center;gap:10px;margin-top:12px;font-weight:700}
-.waiting .pulse{width:14px;height:14px;border-radius:50%;background:var(--orange);animation:pul 1.2s infinite}
-@keyframes pul{50%{transform:scale(1.5);opacity:.5}}
 .idle{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;min-height:260px}
 .idle h3{font-size:26px}
 
@@ -164,7 +155,7 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
 .sec h3{font-size:22px;margin-bottom:4px}
 
 @media (max-width:980px){
-  .vgrid,.endgrid,#scrTitle{grid-template-columns:1fr}
+  .endgrid,#scrTitle{grid-template-columns:1fr}
   .bigdoors{height:280px}
   .doors.n3{grid-template-columns:1fr 1fr}
 }
@@ -190,9 +181,8 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
       <h1>FIFTY<br><span>FIFTY</span><b>.</b></h1>
       <div class="tsub">Two doors. One is right. Go with your gut.</div>
       <div class="tbtns">
-        <button class="btn big orange" id="goVideo">&#9654; Play along with the video</button>
         <div class="row">
-          <button class="btn teal" id="goQuick">Quick play, no video</button>
+          <button class="btn big orange" id="goQuick">&#9654; Play</button>
           <button class="btn quiet hide" id="goCarry">Carry on where you stopped</button>
         </div>
         <div class="tiny">51 questions in six short rounds. Stop after any round and it keeps your place.</div>
@@ -202,22 +192,6 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
       <div class="bd a"><div class="glow"></div><div class="leaf">A</div><div class="knob"></div></div>
       <div class="bd b"><div class="glow"></div><div class="leaf">B</div><div class="knob"></div></div>
       <div class="titlejay" id="titleJay"></div>
-    </div>
-  </section>
-
-  <!-- video play along -->
-  <section id="scrVideo" class="hide">
-    <div class="vgrid">
-      <div>
-        <div class="vbox"><div id="yt"></div>
-          <div class="vcover" id="vcover"><h3>Warming up the video...</h3><div class="tiny">If it never turns up, quick play works without it.</div></div>
-        </div>
-        <div class="vbar">
-          <button class="btn quiet" id="skipIntro">Skip to the first question</button>
-          <button class="btn quiet" id="vToQuick">Switch to quick play</button>
-        </div>
-      </div>
-      <div class="panel" id="vpanel"></div>
     </div>
   </section>
 
@@ -262,7 +236,7 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
           <canvas id="cardCv" width="1080" height="1350"></canvas>
           <div class="cardrow">
             <button class="btn orange" id="saveCard">Save the picture</button>
-            <button class="btn quiet" id="againQuick">Play again, quick</button>
+            <button class="btn quiet" id="againQuick">Play again</button>
             <button class="btn quiet" id="toTitle">Back to the doors</button>
           </div>
           <div id="sendHost"></div>
@@ -289,15 +263,14 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
 "use strict";
 
 /* ==========================================================
-   Fifty Fifty: a play along quiz for a YouTube general
-   knowledge video (video id below). The video pauses just
-   before each answer so nobody gets rushed, then carries on
-   and says the answer while the right door lights up.
+   Fifty Fifty: a two door general knowledge quiz with real
+   photos. The 51 questions came from a YouTube quiz video
+   (Quiz Blitz), rewritten in Base 5 words with a fact for
+   every answer. Six rounds, Mild (2 doors) or Spicy (3).
 
-   Question timings come from the video's own captions.
-   s = when the question starts, a = when the answer is said.
+   r = round, q = the question,
    o = the two doors, c = the right one (0 or 1),
-   d = a third door for Spicy quick play, f = a fun fact,
+   d = a third door for Spicy, f = a fun fact,
    w = what to say if someone picks the other door,
    also = the other door counts too (see the note in f),
    hero = an extra picture, x = a hidden bit.
@@ -309,121 +282,119 @@ button{font-family:inherit;cursor:pointer;color:var(--ink)}
    Plain ASCII only.
    ========================================================== */
 
-var VID = "6i3sRhcpxUs";
 var KEY = "b5.fifty.v1";
 var PICKEY = "b5.fifty.pics.v1";
 
 var Q = [
  /* round 1 */
- {r:1,s:20,a:32,q:"Which is the hottest planet in the Solar System?",o:[["Jupiter","Jupiter"],["Venus","Venus"]],c:1,d:["Mercury","Mercury (planet)"],
+ {r:1,q:"Which is the hottest planet in the Solar System?",o:[["Jupiter","Jupiter"],["Venus","Venus"]],c:1,d:["Mercury","Mercury (planet)"],
   f:"Venus wears a thick blanket of cloud that traps the heat. It is even hotter than Mercury, which is closer to the Sun.",w:{0:"Jupiter is the biggest planet, not the hottest. Easy pair to mix up."}},
- {r:1,s:34,a:50,q:"Which animal eats eucalyptus leaves?",o:[["Koala","Koala"],["Panda","Giant panda"]],c:0,d:["Sloth","Sloth"],
+ {r:1,q:"Which animal eats eucalyptus leaves?",o:[["Koala","Koala"],["Panda","Giant panda"]],c:0,d:["Sloth","Sloth"],
   f:"Koalas sleep up to 20 hours a day. Eucalyptus is very hard work to digest.",w:{1:"Pandas are the bamboo munchers."}},
- {r:1,s:52,a:68,q:"Which animal can sleep standing up?",o:[["Rabbit","Rabbit"],["Horse","Horse"]],c:1,d:["Hedgehog","Hedgehog"],
+ {r:1,q:"Which animal can sleep standing up?",o:[["Rabbit","Rabbit"],["Horse","Horse"]],c:1,d:["Hedgehog","Hedgehog"],
   f:"Horses lock their legs so they can doze without toppling over. They still lie down for a proper deep sleep.",w:{0:"Rabbits flop right down to sleep. Very dramatic about it."}},
- {r:1,s:70,a:86,q:"What is in the middle of our Solar System?",o:[["The Moon","Moon"],["The Sun","Sun"]],c:1,d:["Earth","Earth"],
+ {r:1,q:"What is in the middle of our Solar System?",o:[["The Moon","Moon"],["The Sun","Sun"]],c:1,d:["Earth","Earth"],
   f:"The Sun holds nearly all the stuff in the Solar System: about 99.8 percent of it.",w:{0:"The Moon goes round the Earth, and the Earth goes round the Sun."}},
- {r:1,s:88,a:97,q:"What turns into caramel when you heat it?",o:[["Butter","Butter"],["Sugar","Sugar"]],c:1,d:["Salt","Salt"],
+ {r:1,q:"What turns into caramel when you heat it?",o:[["Butter","Butter"],["Sugar","Sugar"]],c:1,d:["Salt","Salt"],
   f:"Sugar melts and goes golden at about 160 degrees. Butter just helps it taste good.",w:{0:"Butter goes into lots of caramel recipes, but the sugar is what turns."}},
- {r:1,s:110,a:115,q:"Where does the cacao for chocolate come from?",o:[["Durian","Durian"],["Cacao pod","Theobroma cacao"]],c:1,d:["Coconut","Coconut"],
+ {r:1,q:"Where does the cacao for chocolate come from?",o:[["Durian","Durian"],["Cacao pod","Theobroma cacao"]],c:1,d:["Coconut","Coconut"],
   f:"The beans grow inside big pods that sprout straight off the tree trunk.",w:{0:"Durian is the famously stinky fruit. Banned on some trains."}},
- {r:1,s:128,a:140,q:"Acrophobia is a fear of...",o:[["Spiders","Spider"],["Heights","Cliff"]],c:1,d:["Thunder","Lightning"],
+ {r:1,q:"Acrophobia is a fear of...",o:[["Spiders","Spider"],["Heights","Cliff"]],c:1,d:["Thunder","Lightning"],
   f:"Acro comes from the Greek for high up. Fear of spiders is arachnophobia.",w:{0:"Spiders are arachnophobia. Acro means high."}},
- {r:1,s:142,a:152,q:"Which animal has three hearts?",o:[["Dolphin","Dolphin"],["Octopus","Octopus"]],c:1,d:["Jellyfish","Jellyfish"],
+ {r:1,q:"Which animal has three hearts?",o:[["Dolphin","Dolphin"],["Octopus","Octopus"]],c:1,d:["Jellyfish","Jellyfish"],
   f:"Octopuses have three hearts AND blue blood. Outrageous.",w:{0:"Dolphins have one heart, like us."}},
  /* round 2 */
- {r:2,s:164,a:176,q:"Which fruit grows on a palm tree?",o:[["Date","Date palm"],["Pineapple","Pineapple"]],c:0,d:["Banana","Banana"],
+ {r:2,q:"Which fruit grows on a palm tree?",o:[["Date","Date palm"],["Pineapple","Pineapple"]],c:0,d:["Banana","Banana"],
   f:"Pineapples grow out of the ground on a spiky plant. No tree at all.",w:{1:"Pineapples grow low down on a spiky plant, not up a tree."}},
- {r:2,s:178,a:194,q:"What was the first animal to go into orbit?",o:[["A dog","Laika"],["A cat","Cat"]],c:0,d:["A monkey","Rhesus macaque"],
+ {r:2,q:"What was the first animal to go into orbit?",o:[["A dog","Laika"],["A cat","Cat"]],c:0,d:["A monkey","Rhesus macaque"],
   f:"A dog called Laika, in 1957. She was a stray from the streets of Moscow.",w:{1:"A cat did go to space later, in 1963. But a dog got there first."},x:"bonnie"},
- {r:2,s:196,a:212,q:"Who wrote Romeo and Juliet?",o:[["Shakespeare","p:Shakespeare"],["Moli\u00e8re","p:Moli\u00e8re"]],c:0,d:["Dickens","p:Dickens"],
+ {r:2,q:"Who wrote Romeo and Juliet?",o:[["Shakespeare","p:Shakespeare"],["Moli\u00e8re","p:Moli\u00e8re"]],c:0,d:["Dickens","p:Dickens"],
   f:"Shakespeare is the first person we know of to write words like bedroom and lonely.",w:{1:"Moli\u00e8re was a French writer of comedies, a bit later on."}},
- {r:2,s:214,a:230,q:"Which country created Pok\u00e9mon?",o:[["Japan","Flag of Japan"],["The USA","Flag of the United States"]],c:0,d:["South Korea","Flag of South Korea"],
+ {r:2,q:"Which country created Pok\u00e9mon?",o:[["Japan","Flag of Japan"],["The USA","Flag of the United States"]],c:0,d:["South Korea","Flag of South Korea"],
   f:"It started as a Game Boy game in Japan in 1996.",w:{1:"Huge in the USA, but it was made in Japan."}},
- {r:2,s:232,a:248,q:"Which is a primary colour in paint?",o:[["Red","c:#e2322c"],["Green","c:#3aa64a"]],c:0,d:["Purple","c:#7a3fa0"],
+ {r:2,q:"Which is a primary colour in paint?",o:[["Red","c:#e2322c"],["Green","c:#3aa64a"]],c:0,d:["Purple","c:#7a3fa0"],
   f:"Blue and yellow paint mix to make green. On screens it works differently: light mixes from red, green and blue.",w:{1:"Green is what you get when blue and yellow paint mix. On a screen it would count though."}},
- {r:2,s:250,a:266,q:"Which reptile can look two ways at once?",o:[["Chameleon","Chameleon"],["Snake","Snake"]],c:0,d:["Gecko","Gecko"],
+ {r:2,q:"Which reptile can look two ways at once?",o:[["Chameleon","Chameleon"],["Snake","Snake"]],c:0,d:["Gecko","Gecko"],
   f:"Each chameleon eye moves on its own, like two security cameras.",w:{1:"Snakes cannot even blink. Chameleons win this one."}},
- {r:2,s:268,a:284,q:"Who brought out the first iPhone?",o:[["Elon Musk","p:Elon Musk"],["Steve Jobs","p:Steve Jobs"]],c:1,d:["Bill Gates","p:Bill Gates"],hero:"Smartphone",
+ {r:2,q:"Who brought out the first iPhone?",o:[["Elon Musk","p:Elon Musk"],["Steve Jobs","p:Steve Jobs"]],c:1,d:["Bill Gates","p:Bill Gates"],hero:"Smartphone",
   f:"Steve Jobs showed it off in 2007. Phones have not been the same since.",w:{0:"Elon Musk does electric cars and rockets."}},
- {r:2,s:286,a:302,q:"Which tower is taller?",o:[["Big Ben","Big Ben"],["Eiffel Tower","Eiffel Tower"]],c:1,d:["Blackpool Tower","Blackpool Tower"],
+ {r:2,q:"Which tower is taller?",o:[["Big Ben","Big Ben"],["Eiffel Tower","Eiffel Tower"]],c:1,d:["Blackpool Tower","Blackpool Tower"],
   f:"The Eiffel Tower is about 330 metres. Big Ben's tower is about 96. More than three times taller.",w:{0:"Big Ben is tall for London, but the Eiffel Tower is over three times taller."}},
- {r:2,s:304,a:320,q:"Which country gave the USA the Statue of Liberty?",o:[["France","Flag of France"],["Italy","Flag of Italy"]],c:0,d:["Spain","Flag of Spain"],hero:"Statue of Liberty",
+ {r:2,q:"Which country gave the USA the Statue of Liberty?",o:[["France","Flag of France"],["Italy","Flag of Italy"]],c:0,d:["Spain","Flag of Spain"],hero:"Statue of Liberty",
   f:"It sailed over from France in 1885, in 350 pieces packed into crates. Flat pack statue.",w:{1:"Good guess, but it was a gift from France."}},
  /* round 3 */
- {r:3,s:322,a:333,q:"Which planet is closer to the Sun?",o:[["Earth","Earth"],["Mars","Mars"]],c:0,d:["Saturn","Saturn"],x:"why",
+ {r:3,q:"Which planet is closer to the Sun?",o:[["Earth","Earth"],["Mars","Mars"]],c:0,d:["Saturn","Saturn"],x:"why",
   f:"Mercury, Venus, Earth, Mars. We are third, Mars is fourth.",w:{1:"Mars is one further out than us, which is why it is so cold."}},
- {r:3,s:344,a:356,q:"What lets us see galaxies really far away?",o:[["Telescope","Telescope"],["Microscope","Microscope"]],c:0,d:["Binoculars","Binoculars"],
+ {r:3,q:"What lets us see galaxies really far away?",o:[["Telescope","Telescope"],["Microscope","Microscope"]],c:0,d:["Binoculars","Binoculars"],
   f:"The James Webb telescope sits about 1.5 million kilometres from Earth.",w:{1:"Microscopes are for tiny things close up. Telescopes are for far away."}},
- {r:3,s:358,a:374,q:"Which organs clean your blood and make wee?",o:[["Kidneys","Kidney"],["Lungs","Lung"]],c:0,d:["Heart","Heart symbol"],
+ {r:3,q:"Which organs clean your blood and make wee?",o:[["Kidneys","Kidney"],["Lungs","Lung"]],c:0,d:["Heart","Heart symbol"],
   f:"Your kidneys are each about the size of your fist.",w:{1:"Lungs swap air in and out. The kidneys do the wee."}},
- {r:3,s:376,a:392,q:"Which animal can live for over 100 years?",o:[["Hamster","Hamster"],["Turtle","Turtle"]],c:1,d:["Goldfish","Goldfish"],
+ {r:3,q:"Which animal can live for over 100 years?",o:[["Hamster","Hamster"],["Turtle","Turtle"]],c:1,d:["Goldfish","Goldfish"],
   f:"Jonathan, a giant tortoise on St Helena, hatched in about 1832.",w:{0:"Hamsters live two or three years. Turtles can outlive us."}},
- {r:3,s:394,a:410,q:"What is the capital of Canada?",o:[["Toronto","Toronto"],["Ottawa","Ottawa"]],c:1,d:["Vancouver","Vancouver"],
+ {r:3,q:"What is the capital of Canada?",o:[["Toronto","Toronto"],["Ottawa","Ottawa"]],c:1,d:["Vancouver","Vancouver"],
   f:"Toronto is Canada's biggest city, which is why it catches loads of people out.",w:{0:"Toronto is the biggest city, but Ottawa is the capital. Sneaky."}},
- {r:3,s:412,a:428,q:"What money do they use in Japan?",o:[["Yen","Japanese yen"],["Won","South Korean won"]],c:0,d:["Yuan","Renminbi"],
+ {r:3,q:"What money do they use in Japan?",o:[["Yen","Japanese yen"],["Won","South Korean won"]],c:0,d:["Yuan","Renminbi"],
   f:"The won is South Korea's money. China uses the yuan.",w:{1:"The won is next door in South Korea."}},
- {r:3,s:431,a:447,q:"What is the biggest island in the world?",o:[["Madagascar","Madagascar"],["Greenland","Greenland"]],c:1,d:["Great Britain","Great Britain"],
+ {r:3,q:"What is the biggest island in the world?",o:[["Madagascar","Madagascar"],["Greenland","Greenland"]],c:1,d:["Great Britain","Great Britain"],
   f:"Greenland is mostly covered in ice, up to 3 kilometres thick.",w:{0:"Madagascar is fourth biggest. Still massive."}},
- {r:3,s:449,a:465,q:"Sunlight through raindrops makes a...",o:[["Rainbow","Rainbow"],["Northern lights","Aurora"]],c:0,d:["Fog","Fog"],
+ {r:3,q:"Sunlight through raindrops makes a...",o:[["Rainbow","Rainbow"],["Northern lights","Aurora"]],c:0,d:["Fog","Fog"],
   f:"You always see a rainbow with the Sun behind you.",w:{1:"The northern lights come from the Sun's particles hitting the air, not rain."}},
- {r:3,s:467,a:478,q:"Which country are the Pyramids of Giza in?",o:[["Mexico","Flag of Mexico"],["Egypt","Flag of Egypt"]],c:1,d:["Peru","Flag of Peru"],hero:"Giza pyramid complex",
+ {r:3,q:"Which country are the Pyramids of Giza in?",o:[["Mexico","Flag of Mexico"],["Egypt","Flag of Egypt"]],c:1,d:["Peru","Flag of Peru"],hero:"Giza pyramid complex",
   f:"Mexico has pyramids too, which makes this one sneaky.",w:{0:"Mexico has its own pyramids, so fair guess. Giza is in Egypt."}},
  /* round 4 */
- {r:4,s:488,a:501,q:"Which country is famous for its chocolate?",o:[["Switzerland","Flag of Switzerland"],["Netherlands","Flag of the Netherlands"]],c:0,d:["Finland","Flag of Finland"],
-  f:"The Swiss eat around 10 kilos of chocolate each, every year.",w:{1:"The Dutch do make great cocoa, but the video wanted Switzerland."}},
- {r:4,s:503,a:519,q:"What did the Wright brothers invent?",o:[["Train","Steam locomotive"],["Aeroplane","Airliner"]],c:1,d:["Car","Car"],
+ {r:4,q:"Which country is famous for its chocolate?",o:[["Switzerland","Flag of Switzerland"],["Netherlands","Flag of the Netherlands"]],c:0,d:["Finland","Flag of Finland"],
+  f:"The Swiss eat around 10 kilos of chocolate each, every year.",w:{1:"The Dutch make great cocoa too, but Swiss chocolate is the famous one."}},
+ {r:4,q:"What did the Wright brothers invent?",o:[["Train","Steam locomotive"],["Aeroplane","Airliner"]],c:1,d:["Car","Car"],
   f:"Their first flight, in 1903, lasted 12 seconds.",w:{0:"Trains were about 100 years earlier. The Wrights did the aeroplane."}},
- {r:4,s:521,a:537,q:"Which ocean is the biggest?",o:[["Pacific","Pacific Ocean"],["Atlantic","Atlantic Ocean"]],c:0,d:["Indian","Indian Ocean"],
+ {r:4,q:"Which ocean is the biggest?",o:[["Pacific","Pacific Ocean"],["Atlantic","Atlantic Ocean"]],c:0,d:["Indian","Indian Ocean"],
   f:"The Pacific is bigger than all the land on Earth put together.",w:{1:"The Atlantic is second. The Pacific is huge."}},
- {r:4,s:539,a:555,q:"Which flower turns to face the Sun?",o:[["Rose","Rose"],["Sunflower","Common sunflower"]],c:1,d:["Tulip","Tulip"],
+ {r:4,q:"Which flower turns to face the Sun?",o:[["Rose","Rose"],["Sunflower","Common sunflower"]],c:1,d:["Tulip","Tulip"],
   f:"Young sunflowers follow the Sun across the sky. Grown up ones mostly just face east.",w:{0:"Roses stay put. The clue is in the sunflower's name."}},
- {r:4,s:557,a:573,q:"What is the chemical symbol for gold?",o:[["Au","t:Au"],["Gd","t:Gd"]],c:0,d:["Go","t:Go"],hero:"Gold",
+ {r:4,q:"What is the chemical symbol for gold?",o:[["Au","t:Au"],["Gd","t:Gd"]],c:0,d:["Go","t:Go"],hero:"Gold",
   f:"Au comes from aurum, the Latin word for gold.",w:{1:"Gd is gadolinium. Gold is Au, from the Latin aurum."}},
- {r:4,s:575,a:591,q:"Which is the tallest tower in the world?",o:[["Shanghai Tower","Shanghai Tower"],["Burj Khalifa","Burj Khalifa"]],c:1,d:["The Shard","The Shard"],
+ {r:4,q:"Which is the tallest tower in the world?",o:[["Shanghai Tower","Shanghai Tower"],["Burj Khalifa","Burj Khalifa"]],c:1,d:["The Shard","The Shard"],
   f:"The Burj Khalifa in Dubai is over 800 metres. The Shanghai Tower is just over 600.",w:{0:"The Shanghai Tower is second. The Burj Khalifa is about 200 metres taller."}},
- {r:4,s:593,a:611,q:"Which country was the Buddha born in?",o:[["China","Flag of China"],["Nepal","Flag of Nepal"]],c:1,d:["India","Flag of India"],
+ {r:4,q:"Which country was the Buddha born in?",o:[["China","Flag of China"],["Nepal","Flag of Nepal"]],c:1,d:["India","Flag of India"],
   f:"He was born in Lumbini, in Nepal, about 2,500 years ago.",w:{0:"Lots of Buddhists in China, but he was born in Nepal."}},
- {r:4,s:613,a:629,q:"What do you study in mycology?",o:[["Flowers","Flower"],["Mushrooms","Mushroom"]],c:1,d:["Bugs","Insect"],
+ {r:4,q:"What do you study in mycology?",o:[["Flowers","Flower"],["Mushrooms","Mushroom"]],c:1,d:["Bugs","Insect"],
   f:"Some mushrooms glow in the dark.",w:{0:"Flowers are botany. Myco means fungus."}},
  /* round 5 */
- {r:5,s:631,a:647,q:"Which chocolate has no cocoa solids in it?",o:[["Milk chocolate","Milk chocolate"],["White chocolate","White chocolate"]],c:1,d:["Dark chocolate","Types of chocolate"],
+ {r:5,q:"Which chocolate has no cocoa solids in it?",o:[["Milk chocolate","Milk chocolate"],["White chocolate","White chocolate"]],c:1,d:["Dark chocolate","Types of chocolate"],
   f:"White chocolate is made from cocoa butter, sugar and milk. Some say that means it is not really chocolate.",w:{0:"Milk chocolate still has cocoa solids. White has none."}},
- {r:5,s:649,a:665,q:"Where can you get a hole in one?",o:[["Golf","Golf ball"],["Tennis","Tennis ball"]],c:0,d:["Snooker","Billiard ball"],
+ {r:5,q:"Where can you get a hole in one?",o:[["Golf","Golf ball"],["Tennis","Tennis ball"]],c:0,d:["Snooker","Billiard ball"],
   f:"One hit, ball in the hole. Most golfers never manage one.",w:{1:"Tennis has no holes, just nets."}},
- {r:5,s:667,a:683,q:"Where did Neil Armstrong walk?",o:[["Mars","Mars"],["The Moon","Moon"]],c:1,d:["Venus","Venus"],
+ {r:5,q:"Where did Neil Armstrong walk?",o:[["Mars","Mars"],["The Moon","Moon"]],c:1,d:["Venus","Venus"],
   f:"The Moon, in 1969. Nobody has walked on Mars yet. Yet.",w:{0:"Nobody has walked on Mars yet."}},
- {r:5,s:685,a:701,q:"What is the square root of 25?",o:[["5","t:5"],["12.5","t:12.5"]],c:0,d:["50","t:50"],x:"why",
+ {r:5,q:"What is the square root of 25?",o:[["5","t:5"],["12.5","t:12.5"]],c:0,d:["50","t:50"],x:"why",
   f:"5 times 5 makes 25, so the square root of 25 is 5.",w:{1:"12.5 is half of 25. Square root means: which number times itself makes 25?"}},
- {r:5,s:703,a:720,q:"Which city is the Colosseum in?",o:[["Rome","Trevi Fountain"],["Athens","Parthenon"]],c:0,d:["Paris","Arc de Triomphe"],hero:"Colosseum",
+ {r:5,q:"Which city is the Colosseum in?",o:[["Rome","Trevi Fountain"],["Athens","Parthenon"]],c:0,d:["Paris","Arc de Triomphe"],hero:"Colosseum",
   f:"It could hold about 50,000 people. Gladiators fought there nearly 2,000 years ago.",w:{1:"Athens has the Parthenon. The Colosseum is in Rome."}},
- {r:5,s:722,a:738,q:"What did the Lumi\u00e8re brothers invent?",o:[["Aeroplanes","Airliner"],["Films","Movie projector"]],c:1,d:["Radio","Radio"],
+ {r:5,q:"What did the Lumi\u00e8re brothers invent?",o:[["Aeroplanes","Airliner"],["Films","Movie projector"]],c:1,d:["Radio","Radio"],
   f:"One of their first films was just workers leaving a factory. People still queued to see it.",w:{0:"Aeroplanes were the Wright brothers, a couple of questions back."}},
- {r:5,s:740,a:756,q:"Who came up with the theory of relativity?",o:[["Albert Einstein","p:Albert Einstein"],["Isaac Newton","p:Isaac Newton"]],c:0,d:["Charles Darwin","p:Charles Darwin"],
+ {r:5,q:"Who came up with the theory of relativity?",o:[["Albert Einstein","p:Albert Einstein"],["Isaac Newton","p:Isaac Newton"]],c:0,d:["Charles Darwin","p:Charles Darwin"],
   f:"Its most famous bit is E = mc squared.",w:{1:"Newton did gravity, about 200 years earlier."}},
- {r:5,s:758,a:774,q:"In chess, which piece only moves diagonally?",o:[["Bishop","Bishop (chess)"],["Rook","Rook (chess)"]],c:0,d:["Knight","Knight (chess)"],
+ {r:5,q:"In chess, which piece only moves diagonally?",o:[["Bishop","Bishop (chess)"],["Rook","Rook (chess)"]],c:0,d:["Knight","Knight (chess)"],
   f:"Each bishop stays on the same colour square for the whole game.",w:{1:"The rook goes in straight lines."}},
- {r:5,s:776,a:792,q:"What do you get when you heat sand?",o:[["Wood","Wood"],["Glass","Glass"]],c:1,d:["Brick","Brick"],
+ {r:5,q:"What do you get when you heat sand?",o:[["Wood","Wood"],["Glass","Glass"]],c:1,d:["Brick","Brick"],
   f:"Sand needs about 1,700 degrees to melt into glass.",w:{0:"Wood grows on trees. Sand melts into glass."}},
  /* round 6 */
- {r:6,s:794,a:810,q:"Which is the biggest country by land?",o:[["Russia","Flag of Russia"],["Canada","Flag of Canada"]],c:0,d:["China","Flag of China"],
+ {r:6,q:"Which is the biggest country by land?",o:[["Russia","Flag of Russia"],["Canada","Flag of Canada"]],c:0,d:["China","Flag of China"],
   f:"Russia is almost twice the size of Canada and stretches across 11 time zones.",w:{1:"Canada is second biggest. Russia is nearly twice as big."}},
- {r:6,s:812,a:829,q:"Who was president of South Africa?",o:[["Barack Obama","p:Barack Obama"],["Nelson Mandela","p:Nelson Mandela"]],c:1,d:["Winston Churchill","p:Winston Churchill"],
+ {r:6,q:"Who was president of South Africa?",o:[["Barack Obama","p:Barack Obama"],["Nelson Mandela","p:Nelson Mandela"]],c:1,d:["Winston Churchill","p:Winston Churchill"],
   f:"Nelson Mandela became president in 1994, after 27 years in prison.",w:{0:"Barack Obama was president of the USA."}},
- {r:6,s:831,a:847,q:"Who wrote the music The Four Seasons?",o:[["Vivaldi","p:Vivaldi"],["Mozart","p:Mozart"]],c:0,d:["Beethoven","p:Beethoven"],hero:"Violin",x:"birds",
+ {r:6,q:"Who wrote the music The Four Seasons?",o:[["Vivaldi","p:Vivaldi"],["Mozart","p:Mozart"]],c:0,d:["Beethoven","p:Beethoven"],hero:"Violin",x:"birds",
   f:"Spring has birdsong played on violins. Jay approves.",w:{1:"Mozart wrote loads, but not this one."}},
- {r:6,s:849,a:865,q:"What do we celebrate on 25 December?",o:[["Christmas","Christmas tree"],["Halloween","Jack-o'-lantern"]],c:0,d:["Bonfire Night","Guy Fawkes Night"],
+ {r:6,q:"What do we celebrate on 25 December?",o:[["Christmas","Christmas tree"],["Halloween","Jack-o'-lantern"]],c:0,d:["Bonfire Night","Guy Fawkes Night"],
   f:"Halloween is on 31 October.",w:{1:"Halloween is the end of October."}},
- {r:6,s:867,a:883,q:"Which animal can taste with its feet?",o:[["Butterfly","Butterfly"],["Frog","Frog"]],c:0,d:["Snail","Snail"],
+ {r:6,q:"Which animal can taste with its feet?",o:[["Butterfly","Butterfly"],["Frog","Frog"]],c:0,d:["Snail","Snail"],
   f:"Butterflies land on a leaf to taste it, to check it is good for their eggs.",w:{1:"Frogs catch food with their tongues. Butterflies taste with their feet."}},
- {r:6,s:885,a:901,q:"Which country is IKEA from?",o:[["Sweden","Flag of Sweden"],["Norway","Flag of Norway"]],c:0,d:["Denmark","Flag of Denmark"],
+ {r:6,q:"Which country is IKEA from?",o:[["Sweden","Flag of Sweden"],["Norway","Flag of Norway"]],c:0,d:["Denmark","Flag of Denmark"],
   f:"The name is made from the founder's initials, plus the farm and village where he grew up.",w:{1:"Close neighbours. IKEA is Swedish."}},
- {r:6,s:903,a:919,q:"Which country is in two continents?",o:[["Turkey","Flag of Turkey"],["Egypt","Flag of Egypt"]],c:0,also:1,d:["Brazil","Flag of Brazil"],
+ {r:6,q:"Which country is in two continents?",o:[["Turkey","Flag of Turkey"],["Egypt","Flag of Egypt"]],c:0,also:1,d:["Brazil","Flag of Brazil"],
   f:"Turkey is in Europe and Asia. Sneaky bonus: a bit of Egypt is in Asia too, so both doors count here."},
- {r:6,s:921,a:937,q:"What is the biggest mammal on Earth?",o:[["Blue whale","Blue whale"],["Elephant","African bush elephant"]],c:0,d:["Giraffe","Giraffe"],
+ {r:6,q:"What is the biggest mammal on Earth?",o:[["Blue whale","Blue whale"],["Elephant","African bush elephant"]],c:0,d:["Giraffe","Giraffe"],
   f:"A blue whale's heart is about the size of a small car.",w:{1:"Elephants are the biggest on land. The blue whale beats everything."}}
 ];
-var ENDT = 944;
 var ROUNDS = [1,2,3,4,5,6];
 function inRound(r){ var a = []; Q.forEach(function(q, i){ if(q.r === r) a.push(i); }); return a; }
 
@@ -531,21 +502,13 @@ function drawDots(r, cur){
 /* ---------- screens ---------- */
 var mode = "title";
 function show(id){
-  ["scrTitle","scrVideo","scrQuick","scrEnd"].forEach(function(s){ $(s).classList.toggle("hide", s !== id); });
+  ["scrTitle","scrQuick","scrEnd"].forEach(function(s){ $(s).classList.toggle("hide", s !== id); });
   $("diffBox").classList.toggle("hide", id !== "scrQuick");
   window.scrollTo(0, 0);
 }
 function goTitle(){
-  mode = "title"; stopVideo(); show("scrTitle"); drawDots(0);
+  mode = "title"; show("scrTitle"); drawDots(0);
   $("titleJay").innerHTML = jay("cool", "Pixel Jay, ready to host");
-  var bl = wasBlocked();
-  $("goVideo").className = bl ? "btn quiet" : "btn big orange";
-  $("goVideo").innerHTML = bl ? "Try the video (school wifi blocked it last time)" : "&#9654; Play along with the video";
-  $("goQuick").className = bl ? "btn big orange" : "btn teal";
-  $("goQuick").innerHTML = bl ? "&#9654; Play" : "Quick play, no video";
-  var tb = document.querySelector(".tbtns"), row = tb.querySelector(".row");
-  if(bl) tb.insertBefore($("goQuick"), $("goVideo"));
-  else { tb.insertBefore($("goVideo"), tb.firstChild); row.insertBefore($("goQuick"), row.firstChild); }
   var any = Object.keys(S.p).length > 0 && Object.keys(S.p).length < Q.length;
   $("goCarry").classList.toggle("hide", !any);
 }
@@ -664,186 +627,12 @@ function roundCard(r, onGo, onStop){
 }
 
 /* ==========================================================
-   Video play along
-   ========================================================== */
-var player = null, ytOk = false, ytFailed = false, ticker = null, pausedFor = -1, vRevealed = {}, roundShown = {}, vIdx = -1, ourPause = false;
-/* School filters (Securly) can block the video in two ways: the player
-   never loads, or it loads and then the filter swaps the video frame for
-   its own "not allowed" page. Both are caught here. The first time, it
-   tries YouTube's other address; if that is blocked too, the quiz says so
-   kindly and offers quick play, and this device remembers for a week so
-   the title screen leads with quick play next time. */
-var HOSTS = ["https://www.youtube-nocookie.com", "https://www.youtube.com"], hostI = 0, apiReady = false, lastYT = 0;
-var BLOCKKEY = "b5.fifty.blocked.v1", blockedNow = false, lastT = -1, lastTAt = 0;
-window.addEventListener("message", function(e){ if(/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)) lastYT = Date.now(); });
-function wasBlocked(){ try{ return Date.now() - (+localStorage.getItem(BLOCKKEY) || 0) < 7 * 864e5; }catch(e){ return false; } }
-function noteBlocked(){ try{ localStorage.setItem(BLOCKKEY, String(Date.now())); }catch(e){} }
-function clearBlocked(){ try{ localStorage.removeItem(BLOCKKEY); }catch(e){} }
-function resetPlayer(){
-  try{ if(player && player.destroy) player.destroy(); }catch(e){}
-  player = null; ytOk = false;
-  var old = $("yt"), box = document.querySelector(".vbox");
-  if(old && old.tagName === "IFRAME") old.parentNode.removeChild(old);
-  if(!$("yt")){ var d = document.createElement("div"); d.id = "yt"; box.insertBefore(d, box.firstChild); }
-}
-function watchFrame(){
-  var f = null; try{ f = player.getIframe(); }catch(e){}
-  if(!f) return;
-  f.addEventListener("load", function(){
-    /* the player frame reloaded: if YouTube stays silent afterwards,
-       something else (the filter) has taken the frame over */
-    var at = Date.now();
-    setTimeout(function(){ if(lastYT < at) videoBlocked(); }, 2500);
-  });
-}
-function makePlayer(cb){
-  var done = false;
-  function finish(ok){ if(done) return; done = true; cb(ok); }
-  player = new YT.Player("yt", {
-    videoId: VID, host: HOSTS[hostI],
-    playerVars: { rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3 },
-    events: {
-      onReady: function(){ ytOk = true; watchFrame(); finish(true); },
-      onStateChange: onState,
-      onError: function(e){ if(!done) finish(false); else if(e && (e.data === 100 || e.data === 101 || e.data === 150)) videoBlocked(); }
-    }
-  });
-  setTimeout(function(){ finish(false); }, 10000);
-}
-function loadYT(cb){
-  var called = false;
-  function once(ok){ if(called) return; called = true; cb(ok); }
-  if(ytOk){ once(true); return; }
-  if(ytFailed){ once(false); return; }
-  function attempt(){
-    makePlayer(function(ok){
-      if(ok){ $("vcover").classList.add("hide"); once(true); return; }
-      if(hostI === 0){ hostI = 1; resetPlayer(); attempt(); return; }
-      ytFailed = true; once(false);
-    });
-  }
-  if(apiReady){ attempt(); return; }
-  window.onYouTubeIframeAPIReady = function(){ apiReady = true; attempt(); };
-  var s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api";
-  s.onerror = function(){ ytFailed = true; once(false); };
-  document.head.appendChild(s);
-  setTimeout(function(){ if(!apiReady){ ytFailed = true; once(false); } }, 12000);
-}
-function videoBlocked(){
-  if(blockedNow || mode !== "video") return;
-  if(ticker){ clearInterval(ticker); ticker = null; }
-  if(hostI === 0){ hostI = 1; resetPlayer(); goVideo(S.vt > 15 ? S.vt - 3 : 0); return; }
-  blockedNow = true; ytFailed = true; noteBlocked(); resetPlayer(); showBlocked();
-}
-function showBlocked(){
-  $("skipIntro").classList.add("hide");
-  var c = $("vcover");
-  c.classList.remove("hide");
-  c.innerHTML = '<h3>School wifi has blocked this video</h3><div>No problem. Same 51 questions, same doors, no video.</div>' +
-    '<button class="btn big orange" id="vfQuick">Quick play</button>' +
-    '<div class="tiny" style="max-width:440px">For staff: the video can be unblocked in Securly. It is YouTube video ' + VID + '.</div>';
-  $("vfQuick").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
-  $("vpanel").innerHTML = '<div class="idle">' + jay("shrug") + '<h3>The filter said no</h3><div>Quick play said yes.</div>' +
-    '<button class="btn big orange" id="vfQuick2">Quick play</button></div>';
-  $("vfQuick2").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
-}
-function goVideo(from){
-  mode = "video"; show("scrVideo"); $("skipIntro").classList.remove("hide"); vRevealed = {}; roundShown = {}; vIdx = -1; pausedFor = -1; lastT = -1;
-  $("vpanel").innerHTML = '<div class="idle">' + jay("salute") + '<h3>Press play on the video</h3><div>The doors turn up when each question does. It waits for you before every answer.</div></div>';
-  drawDots(0);
-  loadYT(function(ok){
-    if(mode !== "video") return;
-    if(!ok){ noteBlocked(); showBlocked(); return; }
-    var t = from != null ? from : 0;
-    /* carrying on: do not show the break cards for rounds already behind us */
-    ROUNDS.forEach(function(r){ var l = inRound(r); if(Q[l[l.length - 1]].a + 2 <= t + 4) roundShown[r] = true; });
-    if(t > 0) player.seekTo(t, true);
-    try{ player.playVideo(); }catch(e){}
-    if(ticker) clearInterval(ticker);
-    ticker = setInterval(tick, 200);
-  });
-}
-function stopVideo(){
-  if(ticker){ clearInterval(ticker); ticker = null; }
-  try{ if(player && player.pauseVideo) player.pauseVideo(); }catch(e){}
-}
-function onState(e){
-  /* playing again while we were waiting = they chose to skip it */
-  if(e.data === 1 && pausedFor >= 0 && !ourPause){
-    var i = pausedFor; pausedFor = -1;
-    if(!S.p[i] || S.p[i].vSeen !== true){ record(i, null, "v"); S.p[i].vSeen = true; save(); }
-    vRevealed[i] = true; reveal($("vpanel"), i, null); drawDots(Q[i].r, i); VN().innerHTML = "";
-  }
-  ourPause = false;
-  if(e.data === 0) finishVideo();
-}
-function qAt(t){
-  var idx = -1;
-  for(var i = 0; i < Q.length; i++) if(t >= Q[i].s - .3) idx = i;
-  return idx;
-}
-function tick(){
-  if(!player || !player.getCurrentTime) return;
-  var t = player.getCurrentTime(), st = player.getPlayerState ? player.getPlayerState() : -1;
-  if(st === 1){ S.vt = t; if(Math.random() < .07) save(); }
-  /* "playing" but the clock has stood still for 8 seconds: the frame has been taken over */
-  if(st === 1){
-    if(t !== lastT){ lastT = t; lastTAt = Date.now(); }
-    else if(Date.now() - lastTAt > 8000){ videoBlocked(); return; }
-  } else { lastT = t; lastTAt = Date.now(); }
-  if(st === 1 && t > 5) clearBlocked();
-  var i = qAt(t);
-  if(i < 0) return;
-  var q = Q[i];
-  if(i !== vIdx){
-    vIdx = i; pausedFor = -1;
-    var already = S.p[i] && S.p[i].vSeen;
-    renderQ($("vpanel"), i, { order: [0,1], sure: false, onPick: function(k){ vPick(i, k); } });
-    if(already && t > q.a){ vRevealed[i] = true; reveal($("vpanel"), i, S.p[i].k); }
-    else vRevealed[i] = false;
-  }
-  var p = S.p[i], picked = p && p.vSeen;
-  if(!picked && !vRevealed[i] && t >= q.a - 1 && st === 1 && pausedFor !== i){
-    ourPause = true; pausedFor = i; player.pauseVideo();
-    VN().innerHTML = '<div class="waiting"><span class="pulse"></span>Paused for you. Pick a door when you are ready.</div><button class="btn quiet" id="vSkip">Skip this one</button>';
-    $("vSkip").onclick = function(){ pausedFor = -1; record(i, null, "v"); S.p[i].vSeen = true; save(); vRevealed[i] = true; reveal($("vpanel"), i, null); drawDots(q.r, i); VN().innerHTML = ""; player.playVideo(); };
-  }
-  if(picked && !vRevealed[i] && t >= q.a + .6){
-    vRevealed[i] = true; reveal($("vpanel"), i, p.k); drawDots(q.r, i);
-  }
-  /* end of a round: a natural place to stop (checked by round, because
-     the next question can start a second or two after the answer) */
-  for(var r = 1; r < 6; r++){
-    var lst = inRound(r), last = lst[lst.length - 1];
-    if(!roundShown[r] && t >= Q[last].a + 2 && t < Q[last].a + 12 && st === 1){
-      roundShown[r] = true; ourPause = true; player.pauseVideo(); save();
-      roundCard(r, function(){ player.playVideo(); }, function(){ goTitle(); });
-      break;
-    }
-  }
-  if(t >= ENDT && !roundShown[6]){ roundShown[6] = true; finishVideo(); }
-}
-function VN(){ return $("vpanel").querySelector(".nextrow") || document.createElement("div"); }
-function QN(){ return $("qpanel").querySelector(".nextrow") || document.createElement("div"); }
-function vPick(i, k){
-  record(i, k, "v"); S.p[i].vSeen = true; save();
-  markPick($("vpanel"), k); locked = true;
-  say($("vpanel"), "<b>Locked in.</b> Let's see...", "sweat");
-  VN().innerHTML = "";
-  if(pausedFor === i){ pausedFor = -1; ourPause = true; player.playVideo(); }
-}
-function finishVideo(){
-  if(mode !== "video") return;
-  mode = "ending"; stopVideo(); S.vt = 0; save();
-  roundCard(6, goEnd, goEnd);
-}
-
-/* ==========================================================
-   Quick play (no video)
+   Playing
    ========================================================== */
 var qp = null;
+function QN(){ return $("qpanel").querySelector(".nextrow") || document.createElement("div"); }
 function goQuick(startRound){
-  mode = "quick"; stopVideo(); show("scrQuick"); setDiff(S.diff);
+  mode = "quick"; show("scrQuick"); setDiff(S.diff);
   var r = startRound || firstOpenRound();
   qp = { r: r, list: shuffle(inRound(r)), k: 0 };
   nextQuick();
@@ -903,7 +692,7 @@ function blip(ok){
    ========================================================== */
 var tmFacts = [];
 function goEnd(){
-  mode = "end"; stopVideo(); show("scrEnd"); drawDots(0);
+  mode = "end"; show("scrEnd"); drawDots(0);
   var opened = 0, got = 0;
   Q.forEach(function(q, i){ if(S.p[i]){ opened++; if(S.p[i].ok) got++; } });
   $("endLine").innerHTML = "Doors opened: <b>" + opened + "</b>. Your gut was spot on <b>" + got + "</b> times.";
@@ -937,7 +726,7 @@ function goEnd(){
 function sendText(){
   var opened = 0, got = 0, lines = [];
   Q.forEach(function(q, i){ if(S.p[i]){ opened++; if(S.p[i].ok) got++; } });
-  lines.push("Fifty Fifty: the general knowledge quiz video (" + (S.lastMode === "q" ? "quick play" : "play along") + ")");
+  lines.push("Fifty Fifty: the two door general knowledge quiz");
   lines.push("Doors opened: " + opened + " of " + Q.length + ". Right first time: " + got + ".");
   lines.push("By round: " + ROUNDS.map(function(r){ return "R" + r + " " + starsFor(r) + "/" + inRound(r).length; }).join(", "));
   var w = [];
@@ -1021,18 +810,15 @@ $("credBtn").onclick = function(){
 $("credClose").onclick = function(){ $("credCard").classList.add("hide"); };
 
 /* ---------- buttons ---------- */
-$("goVideo").onclick = function(){ S.lastMode = "v"; save(); goVideo(S.vt > 15 ? S.vt - 3 : 0); };
-$("goQuick").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
-$("goCarry").onclick = function(){ if(S.lastMode === "v" && S.vt > 15) goVideo(S.vt - 3); else goQuick(); };
-$("vToQuick").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
-$("skipIntro").onclick = function(){ if(player && player.seekTo){ player.seekTo(Q[0].s - 1, true); player.playVideo(); } };
+$("goQuick").onclick = function(){ if(Object.keys(S.p).length >= Q.length){ S.p = {}; S.rdone = {}; save(); } goQuick(); };
+$("goCarry").onclick = function(){ goQuick(); };
 $("againQuick").onclick = function(){ S.p = {}; S.rdone = {}; S.why = {}; save(); goQuick(1); };
 $("toTitle").onclick = goTitle;
 $("brandBtn").onclick = function(e){ e.preventDefault(); goTitle(); };
 document.addEventListener("keydown", function(e){
-  if(mode !== "quick" && mode !== "video") return;
+  if(mode !== "quick") return;
   if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
-  var host = mode === "quick" ? $("qpanel") : $("vpanel");
+  var host = $("qpanel");
   var k = { "1":0, "a":0, "2":1, "b":1, "3":2, "c":2 }[e.key.toLowerCase()];
   if(k != null && !locked){ var d = host.querySelectorAll(".door")[k]; if(d) d.click(); }
   if(e.key === "Enter" && $("qNext")) $("qNext").click();
