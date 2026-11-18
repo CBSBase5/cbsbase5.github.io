@@ -702,9 +702,10 @@ var BACKS = {
   l8:{ name:'Pigeon Grey', c1:'#8e9aab', c2:'#5aa58a', c3:'#8a5fb0', pat:'argyle' },
   l9:{ name:'Bonnie Brown', c1:'#8a5a3b', c2:'#f6f2ea', c3:'#20adca', pat:'spots' },
   l10:{ name:'Gold Sock', c1:'#d4a017', c2:'#fff4c2', c3:'#1b2630', pat:'argyle' },
-  oddsocks:{ name:'Odd Socks', c1:'#ef7724', c2:'#20adca', c3:'#7e57c2', pat:'odd' }
+  oddsocks:{ name:'Odd Socks', c1:'#ef7724', c2:'#20adca', c3:'#7e57c2', pat:'odd' },
+  tommy:{ name:'Tommy Mode', c1:'#1a0f14', c2:'#e84a5f', c3:'#f3d36b', pat:'zig' }
 };
-var BACK_ORDER = ['plain','l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','oddsocks'];
+var BACK_ORDER = ['plain','l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','oddsocks','tommy'];
 
 /* what each friend says as they are freed: warm or funny, always short */
 var FRIEND_LINES = {
@@ -795,7 +796,11 @@ function saveMeta(){ Store.set(Store.META, Meta); }
 var Run = null, B = null;
 var UI = UI || { fx:function(){}, refresh:function(){}, onBattleEnd:function(){} };
 
-function lv(n){ return Run && Run.level >= n; }
+/* the hardest mode: every level rule at once, plus its own (see TOMMY below) */
+/* tuned with the simulator: the test bot wins about 4% of runs here, against 13% on level 10 */
+var TOMMY = { hp:1.1, grow:1, drain:0, guard:0.3, rest:0.22, price:1.25, sticky:1, heard:10, vol:-5 };
+function hardMode(){ return !!(Run && Run.hard); }
+function lv(n){ return Run && (Run.level >= n || !!Run.hard); }
 function hasT(id){ return Run && Run.trinkets.indexOf(id) >= 0; }
 function cardInst(id, up){ Run.uid = (Run.uid||1)+1; return { id:id, up:!!up, uid:'c'+Run.uid }; }
 function rawCost(c){
@@ -807,12 +812,14 @@ function rawCost(c){
 function cardCost(c){ var cost = rawCost(c); if (cost > 0 && B && B.freeNext) cost = 0; return cost; }
 
 /* ---------- run ---------- */
-function newRun(level){
-  Run = { level:level||0, deck:[], vol:55, maxVol:55, socks:0, trinkets:[], row:-1, col:-1, uid:1, rescued:[], found:[], fights:0, startedAt:Date.now(), tutorial:!Meta.tutorialDone };
+function newRun(level, hard){
+  Run = { level:hard ? 10 : (level||0), hard:!!hard, deck:[], vol:55, maxVol:55, socks:0, trinkets:[], row:-1, col:-1, uid:1, rescued:[], found:[], fights:0, startedAt:Date.now(), tutorial:hard ? false : !Meta.tutorialDone };
   if (lv(4)){ Run.maxVol -= 5; Run.vol = Run.maxVol; }
+  if (hard){ Run.maxVol += TOMMY.vol + 5; Run.vol = Run.maxVol; }
   ['speak','speak','speak','speak','stand','stand','listen','listen'].forEach(function(id){ Run.deck.push(cardInst(id)); });
   if (lv(10)) Run.deck.push(cardInst('sticky'));
-  Run.map = genMap(level||0);
+  if (hard) for (var st=1; st<TOMMY.sticky; st++) Run.deck.push(cardInst('sticky'));
+  Run.map = genMap(hard ? 10 : (level||0), hard);
   Meta.runs++; saveMeta(); saveRun();
 }
 function saveRun(){ if (Run) Store.set(Store.RUN, Run); }
@@ -835,7 +842,7 @@ function addTrinket(id){ if (Run.trinkets.indexOf(id) >= 0) return; Run.trinkets
 function unlockAlly(id){ var isNew = !Meta.unlocked[id]; Meta.unlocked[id] = true; saveMeta(); return isNew; }
 
 /* ---------- map ---------- */
-function genMap(level){
+function genMap(level, hard){
   /* 10 rows. The first three are almost all fights so you earn socks before you can spend them.
      Rest at rows 4 and 9. Shops only from row 3, never two in a row on a path. */
   var R = seeded(Date.now() & 0xffffff), ROWS = 10, COLS = 5, nodes = {}, edges = [];
@@ -849,7 +856,7 @@ function genMap(level){
     }
   });
   var dedup = {}; edges = edges.filter(function(e){ var s = e[0]+'>'+e[1]; if (dedup[s]) return false; dedup[s] = 1; return true; });
-  var guardChance = level >= 3 ? 0.24 : 0.14;
+  var guardChance = hard ? TOMMY.guard : level >= 3 ? 0.24 : 0.14;
   Object.keys(nodes).forEach(function(k){
     var n = nodes[k], t, x = R();
     if (n.r <= 1) t = 'fight';
@@ -902,15 +909,16 @@ function startBattle(node){
   if (kind === 'boss') def = BOSS; else if (kind === 'guard') def = GUARDS[place]; else def = ENEMIES[place];
   var hp = def.hp + 2 + (kind === 'boss' ? 0 : Math.round(scaleRow()*3));
   if (lv(2)) hp = Math.round(hp*1.08);
+  if (hardMode()) hp = Math.round(hp*TOMMY.hp);
   if (kind === 'boss' && lv(9)) hp = Math.round(hp*1.1);
   var tutorial = Run.tutorial && Run.fights === 0 && kind === 'fight';
   if (tutorial) hp = 22;
   var cards = Run.deck.map(function(c){ return { id:c.id, up:c.up, uid:c.uid }; });
   B = { kind:kind, place:place, tutorial:tutorial,
-    en:{ name:def.name, form:def.form, hp:hp, max:hp, fog:0, grow:lv(1)?1:0, moves:def.moves, mi:0, last:-1, intent:null, stun:0, mutePending:0 },
+    en:{ name:def.name, form:def.form, hp:hp, max:hp, fog:0, grow:hardMode() ? TOMMY.grow : lv(1)?1:0, moves:def.moves, mi:0, last:-1, intent:null, stun:0, mutePending:0 },
     draw:shuffle(cards), hand:[], discard:[], exhaust:[], breath:0, maxBreath:3, backupv:0, loudv:0, calmv:0, echo:0, curEcho:0, muted:{}, crowd:[],
     turn:0, bonusBreath:0, stealNext:0, bonusDraw:0, keepBackup:false, freeNext:false, nullNext:false, halfNext:false, modShield:false, listenThisTurn:false, played:0, firstStand:true, earmuffsUsed:false,
-    phase:1, heard:0, heardMax:TINY.heard + (lv(9)?10:0), rescue:null, over:false, log:[] };
+    phase:1, heard:0, heardMax:TINY.heard + (lv(9)?10:0) + (hardMode() ? TOMMY.heard : 0), rescue:null, over:false, log:[] };
   if (kind !== 'boss') B.rescue = chooseRescue(place);
   if (tutorial){ /* stack a friendly first hand */
     var order = ['listen','stand','speak','stand','speak'];
@@ -938,7 +946,7 @@ function chooseIntent(){
   if (lv(6)){ var j = mv.indexOf('junk'); if (j >= 0) mv[j+1] += 1; else if (mv.indexOf('drain') >= 0 && Math.random() < 0.3) mv.push('junk', 1); }
   e.intent = mv;
 }
-function drainAmount(n){ return n + B.en.grow + Math.floor(scaleRow()/3) + (lv(7) && B.kind !== 'fight' ? 1 : 0) + (B.kind === 'guard' && lv(3) ? 1 : 0); }
+function drainAmount(n){ return n + B.en.grow + Math.floor(scaleRow()/3) + (lv(7) && B.kind !== 'fight' ? 1 : 0) + (B.kind === 'guard' && lv(3) ? 1 : 0) + (hardMode() ? TOMMY.drain : 0); }
 function startTurn(first){
   if (B.over) return;
   B.turn++;
@@ -1049,16 +1057,18 @@ function rewardChoices(rareBoost){
   }
   return out;
 }
-function price(base){ var p = base; if (hasT('stickers')) p = Math.round(p*0.8); return p; }
+function price(base){ var p = base; if (hardMode()) p = Math.round(p*TOMMY.price); if (hasT('stickers')) p = Math.round(p*0.8); return p; }
 function shopStock(){
   var cards = rewardChoices(1).concat(rewardChoices(1)).filter(function(v,i,a){ return a.indexOf(v) === i; }).slice(0,5);
   var tr = shuffle(TRINKET_IDS.filter(function(t){ return Run.trinkets.indexOf(t) < 0; })).slice(0,2);
   return { cards:cards.map(function(id){ var d = CARDS[id]; return { id:id, price:price(d.rarity === 'rare' ? 56 : 38), sold:false }; }), trinkets:tr.map(function(t){ return { id:t, price:price(85), sold:false }; }), remove:price(45), upgrade:price(40), removeUsed:false };
 }
-function restHeal(){ var pc = lv(8) ? 0.25 : 0.3; var n = Math.round(Run.maxVol*pc); var b = Run.vol; Run.vol = Math.min(Run.maxVol, Run.vol+n); return Run.vol-b; }
+function restPct(){ return hardMode() ? TOMMY.rest : lv(8) ? 0.25 : 0.3; }
+function restHeal(){ var pc = restPct(); var n = Math.round(Run.maxVol*pc); var b = Run.vol; Run.vol = Math.min(Run.maxVol, Run.vol+n); return Run.vol-b; }
 function finishRunWin(){
   var r = { level:Run.level, newLevel:false, back:null, allies:Run.rescued.slice(), tiny:unlockAlly('tinyhush'), newHall:!Meta.lit.hall }; Meta.lit.hall = true; Meta.litLv = Meta.litLv || {}; if (!(Meta.litLv.hall >= Run.level)) Meta.litLv.hall = Run.level;
   Meta.wins++;
+  if (Run.hard){ r.hard = true; Meta.hardWins = (Meta.hardWins || 0) + 1; if (!Meta.backs.tommy){ Meta.backs.tommy = true; r.back = 'tommy'; } saveMeta(); endRunSave(); return r; }
   if (Run.level > Meta.beaten){ Meta.beaten = Run.level; }
   if (Run.level >= Meta.maxLevel && Run.level < 10){ Meta.maxLevel = Run.level+1; r.newLevel = true; }
   var bk = Run.level === 0 ? null : 'l'+Run.level; if (bk && BACKS[bk] && !Meta.backs[bk]){ Meta.backs[bk] = true; r.back = bk; }
@@ -1887,7 +1897,7 @@ function topHud(b, opt){
   if (G.hover(x, 2, 60, 18)) opt.tip = { x:x - 20, y:26, title:'Places you brought back', text:lit.length ? lit.map(function(p){ return PLACES[p].name; }).join(', ') : 'None yet. Break a Hush to light a place up.' };
   x += 60;
   Run.trinkets.forEach(function(t, i){ var ic = ART.mini('star'); var px = x + i*12; b.drawImage(PX.iconC(TRINKETS[t].icon), px - 3, 2, 18, 18); if (G.hover(px-3, 2, 14, 18)) opt.tip = { x:px - 40, y:26, title:TRINKETS[t].name, text:TRINKETS[t].text }; });
-  x = 300; if (Run.level){ G.text('Level '+Run.level, x - 4, 11, { size:5, col:'#ef7724', align:'right', base:'middle' }); }
+  x = 300; if (Run.hard){ G.text('TOMMY MODE', x - 4, 11, { size:5, col:'#e84a5f', align:'right', base:'middle', bold:true }); } else if (Run.level){ G.text('Level '+Run.level, x - 4, 11, { size:5, col:'#ef7724', align:'right', base:'middle' }); }
   if (G.btn('Deck '+Run.deck.length, x + 8, 4, 44, 14, { col:'#3a4566', size:5 })) Picker.open({ title:'Your deck', list:Run.deck.slice(), view:true });
   drawCorner(b, opt.pause ? function(){ Pause.open(); } : null);
   if (opt.tip){ drawTip(b, opt.tip); }
@@ -2006,7 +2016,8 @@ var Battle = {
     S.colour = 0; S.say = null; S.bigLost = 0; S.flood = -1; S.winT = -1; S.loseT = -1; S.intentKey = ''; S.intentPop = 0; S.shield = 0;
     S.rescue = B.rescue ? { id:B.rescue, x:357, y:HUSH_FLOOR, free:false, walk:0, hop:0, alpha:1 } : null;
     var where = PLACES[node.place] ? PLACES[node.place].name : '';
-    S.banner = { text: node.t === 'boss' ? 'The Hall: the Big Hush' : node.t === 'guard' ? 'A tough Hush guards '+where : 'Bring back '+where, t:0, life:2.4, col: node.t === 'boss' ? '#8a5fb0' : '#ef7724' };
+    S.banner = { text: node.t === 'boss' ? 'The Hall: the Big Hush' : node.t === 'guard' ? 'A tough Hush guards '+where : 'Bring back '+where, t:0, life:2.4, col: Run.hard ? '#c0392b' : node.t === 'boss' ? '#8a5fb0' : '#ef7724' };
+    if (Run.hard && Run.fights === 0) S.banner.text = 'Tommy Mode. Good luck.';
     S.dealHold = 0.9; S.layer = 1; S.windT = 0; S.volNum = Run.vol; S.tickAcc = 0; S.breathPop = 0; S.lastBreath = -1; S.lastHover = null; S.dragVX = 0; S.lastMX = 0; S.dealN = 0; Sound.setLayers(1);
     S.rain = node.place === 'busstop' && node.t !== 'boss'; S.place = node.t === 'boss' ? 'hall' : node.place;
     S.youHop = 0; S.crowdT = {}; S.crowdHop = {}; S.hoverIdx = -1; S.pileTip = null;
@@ -2228,6 +2239,7 @@ var Battle = {
   },
   drawTop:function(b){
     var S = this; if (!B || !Run) return;
+    if (Run.hard){ G.text('TOMMY MODE', 30, 12, { size:5, col:'#ffffff', outline:'#c0392b', base:'middle' }); }
     if (S.banner) drawBanner(b, S.banner);
     if (S.pairT){ var a = Math.min(1, S.pairT*2); G.text(S.pairText, 192, 26, { size:6, col:'#f3d36b', align:'center', outline:'#0a1020', alpha:a }); }
     if (S.prompt && B && !B.over && !S.hoverUid) drawPrompt(b, S.prompt);
@@ -2423,8 +2435,12 @@ var Title = {
     /* menu */
     var y = 150;
     if (S.saved){ if (G.btn('Carry on', 142, y, 100, 22, { size:9, pulse:true })){ Sound.start(); Run = S.saved; resumeRun(); } if (G.btn('Start fresh', 248, y + 3, 72, 17, { col:'#3a4566', size:6 })){ Sound.start(); if (window.confirm('Start a fresh run? Your saved run will end.')) S.start(); } }
-    else if (G.btn('Start', 147, y, 90, 22, { size:10, pulse:true })){ Sound.start(); S.start(); }
-    if (Meta.maxLevel > 0){ var ly = 176; if (G.btn('<', 140, ly, 14, 13, { col:'#3a4566', size:6, disabled:S.level <= 0 })) S.level--; G.text('Level '+S.level, 192, ly + 6.5, { size:6, col:'#ffffff', align:'center', base:'middle' }); if (G.btn('>', 230, ly, 14, 13, { col:'#3a4566', size:6, disabled:S.level >= Meta.maxLevel })) S.level++; if (G.hover(140, ly, 104, 13)) S.tip = { x:120, y:ly - 34, title:'Level '+S.level, text:S.level ? 'Adds: '+LEVELS[S.level] : 'The normal game.' }; }
+    else if (G.btn(S.hard ? 'Start Tommy Mode' : 'Start', S.hard ? 132 : 147, y, S.hard ? 120 : 90, 22, { size:S.hard ? 8 : 10, pulse:true, col:S.hard ? '#c0392b' : null })){ Sound.start(); S.start(); }
+    /* Tommy Mode: every level rule at once, and then some */
+    var hx = 286, hy = 176; if (G.btn(S.hard ? 'Tommy Mode: ON' : 'Tommy Mode', hx, hy, 76, 13, { col:S.hard ? '#c0392b' : '#3a2030', size:5.2 })){ S.hard = !S.hard; Sound.sfx(S.hard ? 'windup' : 'click'); if (S.hard) G.word('GOOD LUCK.', hx + 38, hy - 10, { col:'#ffffff', burst:'#c0392b', size:7, life:0.9 }); }
+    if (G.hover(hx, hy, 76, 13)) S.tip = { x:hx - 40, y:hy - 66, title:'Tommy Mode', text:'Really hard. Every level rule at once, tougher Hushes, more mini bosses, smaller rests and dearer shops.'+(Meta.hardWins ? ' Beaten '+Meta.hardWins+' time'+(Meta.hardWins > 1 ? 's' : '')+'.' : ' Nobody here has beaten it yet.') };
+    if (Meta.hardWins){ b.drawImage(ART.mini('crown'), hx + 66, hy - 7, 9, 9); }
+    if (Meta.maxLevel > 0 && !S.hard){ var ly = 176; if (G.btn('<', 140, ly, 14, 13, { col:'#3a4566', size:6, disabled:S.level <= 0 })) S.level--; G.text('Level '+S.level, 192, ly + 6.5, { size:6, col:'#ffffff', align:'center', base:'middle' }); if (G.btn('>', 230, ly, 14, 13, { col:'#3a4566', size:6, disabled:S.level >= Meta.maxLevel })) S.level++; if (G.hover(140, ly, 104, 13)) S.tip = { x:120, y:ly - 34, title:'Level '+S.level, text:S.level ? 'Adds: '+LEVELS[S.level] : 'The normal game.' }; }
     var by = 196, bw = 58; var items = [['Collection', function(){ openBinder(); }], ['Make a card', function(){ showMaker(); }], ['Card wall', function(){ openWall(); }], ['Story', function(){ Intro.after = function(){ Title.go(); }; G.go(Intro); }]];
     var bx = 192 - (items.length*bw + (items.length-1)*4)/2; items.forEach(function(it, i){ if (G.btn(it[0], bx + i*(bw+4), by, bw, 15, { col:i < 2 ? '#007291' : '#3a4566', size:5.2 })){ Sound.start(); it[1](); } });
     /* progress */
@@ -2434,7 +2450,7 @@ var Title = {
     if (S.oddToast){ G.text('Odd Socks card back unlocked!', 192, 82, { size:6, col:'#f3d36b', align:'center', outline:'#0a1020', alpha:Math.min(1, S.oddToast) }); }
   },
   drawTop:function(b){ if (this.tip){ drawTip(b, this.tip); this.tip = null; } drawCorner(b, null); },
-  start:function(){ Sound.sfx('click'); var lvl = this.level || 0; newRun(lvl); Run.lit = []; saveRun(); if (!Meta.introSeen){ Meta.introSeen = true; saveMeta(); Intro.after = function(){ MapScene.go(); }; G.go(Intro); } else MapScene.go(); }
+  start:function(){ Sound.sfx('click'); var lvl = this.level || 0; newRun(lvl, !!this.hard); Run.lit = []; saveRun(); if (!Meta.introSeen){ Meta.introSeen = true; saveMeta(); Intro.after = function(){ MapScene.go(); }; G.go(Intro); } else MapScene.go(); }
 };
 
 /* four wordless panels: friends chatting; a hurtful message; the quiet spreads; you pick up your voice */
@@ -2703,7 +2719,7 @@ var Stop = {
     G.text('Rest stop', 192, 32, { size:10, col:'#ffffff', align:'center', outline:'#0a1020' });
     var bs = 'Run saved'; b.fillStyle = '#7cf07c'; G.text(bs, 192, 48, { size:5.5, col:'#7cf07c', align:'center' });
     if (S.msg){ G.text(S.msg, 192, 100, { size:7, col:'#ffffff', align:'center', read:true, w:300, lh:9 }); S.carry(); return; }
-    var heal = Math.min(Run.maxVol - Run.vol, Math.round(Run.maxVol*(lv(8) ? 0.25 : 0.3)));
+    var heal = Math.min(Run.maxVol - Run.vol, Math.round(Run.maxVol*restPct()));
     S.choice(b, 92, 66, 90, 96, 'heart', 'Rest', heal > 0 ? 'Get '+heal+' volume back.' : 'You are at full volume.', function(){ var got = restHeal(); Sound.sfx('heal'); G.burst(137, 110, ['#7cf07c','#ffffff'], 30, 90); S.done('You rested. +'+got+' volume.'); });
     S.choice(b, 202, 66, 90, 96, 'star', 'Make a card louder', 'Upgrade one card in your deck.', function(){ Picker.open({ title:'Pick a card to make louder', list:upgradable(), upgrade:true, pick:function(c){ c.up = true; markDone(); saveRun(); UpShow.open(c, function(){ S.done(CARDS[c.id].name+' is louder now. Look for the LOUDER bar on it in your hand.'); }); } }); });
   },
@@ -2772,6 +2788,7 @@ var Ending = {
       G.text('The Big Hush was only ever a tiny Hush that needed someone to listen.', 250, 44, { size:6, col:'#dfe6ff', align:'center', read:true, w:220, lh:7.5 });
       G.text('The Hush is the quiet that grows when someone is treated unkindly and nobody says anything.', 250, 66, { size:5.4, col:'#f3d36b', align:'center', read:true, w:220, lh:7 });
       var y = 92; var r = S.res || {};
+      if (r.hard){ G.text('YOU BEAT TOMMY MODE', 250, y, { size:7, col:'#ffffff', align:'center', outline:'#c0392b', wave:1 }); y += 13; }
       if (r.tiny){ G.text('Tiny Hush joined your collection', 250, y, { size:5.5, col:'#7fe0f8', align:'center' }); y += 12; }
       if (r.newLevel){ G.text('Level '+Meta.maxLevel+' unlocked', 250, y, { size:6, col:'#f3d36b', align:'center' }); G.text(LEVELS[Meta.maxLevel], 250, y + 9, { size:5, col:'#c9d4f0', align:'center', read:true, w:200 }); y += 26; }
       if (r.back){ b.drawImage(ART.backCard(r.back), 236, y, 27, 38); G.text('New card back', 270, y + 14, { size:5, col:'#ffffff' }); y += 44; }
@@ -2870,7 +2887,7 @@ function openBinder(){
     TRINKET_IDS.forEach(function(id){ var t = TRINKETS[id], has = Meta.trinkets[id]; var p = el('button','pocket'+(has?'':' locked')); p.appendChild(PX.img('icon', t.icon)); p.appendChild(el('span','', has ? esc(t.name) : '?')); if (has) addTip(p, t.name, t.text); grid.appendChild(p); });
   }
   if (binderTab === 'backs'){
-    BACK_ORDER.forEach(function(id, i){ var has = Meta.backs[id]; var p = el('button','pocket'+(has?'':' locked')+(Meta.back===id?' sel':'')); var im = el('img','px'); im.src = ART.backCard(id).toDataURL(); im.style.width = '58px'; im.style.height = '80px'; p.appendChild(im); p.appendChild(el('span','', has ? esc(BACKS[id].name) : (id === 'oddsocks' ? 'Only 16 to 20 Nov 2026' : 'Beat level '+i))); p.onclick = function(){ if (!has) return; Meta.back = id; saveMeta(); Sound.sfx('flip'); openBinder(); }; grid.appendChild(p); });
+    BACK_ORDER.forEach(function(id, i){ var has = Meta.backs[id]; var p = el('button','pocket'+(has?'':' locked')+(Meta.back===id?' sel':'')); var im = el('img','px'); im.src = ART.backCard(id).toDataURL(); im.style.width = '58px'; im.style.height = '80px'; p.appendChild(im); p.appendChild(el('span','', has ? esc(BACKS[id].name) : (id === 'oddsocks' ? 'Only 16 to 20 Nov 2026' : id === 'tommy' ? 'Beat Tommy Mode' : 'Beat level '+i))); p.onclick = function(){ if (!has) return; Meta.back = id; saveMeta(); Sound.sfx('flip'); openBinder(); }; grid.appendChild(p); });
   }
   o.appendChild(detail);
   var b = el('button','pbtn teal','Back'); b.onclick = function(){ overlay('ovBinder', false); }; o.appendChild(b);
