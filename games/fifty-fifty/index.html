@@ -538,6 +538,14 @@ function show(id){
 function goTitle(){
   mode = "title"; stopVideo(); show("scrTitle"); drawDots(0);
   $("titleJay").innerHTML = jay("cool", "Pixel Jay, ready to host");
+  var bl = wasBlocked();
+  $("goVideo").className = bl ? "btn quiet" : "btn big orange";
+  $("goVideo").innerHTML = bl ? "Try the video (school wifi blocked it last time)" : "&#9654; Play along with the video";
+  $("goQuick").className = bl ? "btn big orange" : "btn teal";
+  $("goQuick").innerHTML = bl ? "&#9654; Play" : "Quick play, no video";
+  var tb = document.querySelector(".tbtns"), row = tb.querySelector(".row");
+  if(bl) tb.insertBefore($("goQuick"), $("goVideo"));
+  else { tb.insertBefore($("goVideo"), tb.firstChild); row.insertBefore($("goQuick"), row.firstChild); }
   var any = Object.keys(S.p).length > 0 && Object.keys(S.p).length < Q.length;
   $("goCarry").classList.toggle("hide", !any);
 }
@@ -659,37 +667,93 @@ function roundCard(r, onGo, onStop){
    Video play along
    ========================================================== */
 var player = null, ytOk = false, ytFailed = false, ticker = null, pausedFor = -1, vRevealed = {}, roundShown = {}, vIdx = -1, ourPause = false;
-function loadYT(cb){
-  if(ytOk){ cb(true); return; }
-  if(ytFailed){ cb(false); return; }
+/* School filters (Securly) can block the video in two ways: the player
+   never loads, or it loads and then the filter swaps the video frame for
+   its own "not allowed" page. Both are caught here. The first time, it
+   tries YouTube's other address; if that is blocked too, the quiz says so
+   kindly and offers quick play, and this device remembers for a week so
+   the title screen leads with quick play next time. */
+var HOSTS = ["https://www.youtube-nocookie.com", "https://www.youtube.com"], hostI = 0, apiReady = false, lastYT = 0;
+var BLOCKKEY = "b5.fifty.blocked.v1", blockedNow = false, lastT = -1, lastTAt = 0;
+window.addEventListener("message", function(e){ if(/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)) lastYT = Date.now(); });
+function wasBlocked(){ try{ return Date.now() - (+localStorage.getItem(BLOCKKEY) || 0) < 7 * 864e5; }catch(e){ return false; } }
+function noteBlocked(){ try{ localStorage.setItem(BLOCKKEY, String(Date.now())); }catch(e){} }
+function clearBlocked(){ try{ localStorage.removeItem(BLOCKKEY); }catch(e){} }
+function resetPlayer(){
+  try{ if(player && player.destroy) player.destroy(); }catch(e){}
+  player = null; ytOk = false;
+  var old = $("yt"), box = document.querySelector(".vbox");
+  if(old && old.tagName === "IFRAME") old.parentNode.removeChild(old);
+  if(!$("yt")){ var d = document.createElement("div"); d.id = "yt"; box.insertBefore(d, box.firstChild); }
+}
+function watchFrame(){
+  var f = null; try{ f = player.getIframe(); }catch(e){}
+  if(!f) return;
+  f.addEventListener("load", function(){
+    /* the player frame reloaded: if YouTube stays silent afterwards,
+       something else (the filter) has taken the frame over */
+    var at = Date.now();
+    setTimeout(function(){ if(lastYT < at) videoBlocked(); }, 2500);
+  });
+}
+function makePlayer(cb){
   var done = false;
-  window.onYouTubeIframeAPIReady = function(){
-    player = new YT.Player("yt", {
-      videoId: VID, host: "https://www.youtube-nocookie.com",
-      playerVars: { rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3 },
-      events: {
-        onReady: function(){ if(done) return; done = true; ytOk = true; $("vcover").classList.add("hide"); cb(true); },
-        onStateChange: onState,
-        onError: function(){ if(!done){ done = true; ytFailed = true; cb(false); } }
-      }
+  function finish(ok){ if(done) return; done = true; cb(ok); }
+  player = new YT.Player("yt", {
+    videoId: VID, host: HOSTS[hostI],
+    playerVars: { rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3 },
+    events: {
+      onReady: function(){ ytOk = true; watchFrame(); finish(true); },
+      onStateChange: onState,
+      onError: function(e){ if(!done) finish(false); else if(e && (e.data === 100 || e.data === 101 || e.data === 150)) videoBlocked(); }
+    }
+  });
+  setTimeout(function(){ finish(false); }, 10000);
+}
+function loadYT(cb){
+  var called = false;
+  function once(ok){ if(called) return; called = true; cb(ok); }
+  if(ytOk){ once(true); return; }
+  if(ytFailed){ once(false); return; }
+  function attempt(){
+    makePlayer(function(ok){
+      if(ok){ $("vcover").classList.add("hide"); once(true); return; }
+      if(hostI === 0){ hostI = 1; resetPlayer(); attempt(); return; }
+      ytFailed = true; once(false);
     });
-  };
+  }
+  if(apiReady){ attempt(); return; }
+  window.onYouTubeIframeAPIReady = function(){ apiReady = true; attempt(); };
   var s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api";
-  s.onerror = function(){ if(!done){ done = true; ytFailed = true; cb(false); } };
+  s.onerror = function(){ ytFailed = true; once(false); };
   document.head.appendChild(s);
-  setTimeout(function(){ if(!done){ done = true; ytFailed = true; cb(false); } }, 10000);
+  setTimeout(function(){ if(!apiReady){ ytFailed = true; once(false); } }, 12000);
+}
+function videoBlocked(){
+  if(blockedNow || mode !== "video") return;
+  if(ticker){ clearInterval(ticker); ticker = null; }
+  if(hostI === 0){ hostI = 1; resetPlayer(); goVideo(S.vt > 15 ? S.vt - 3 : 0); return; }
+  blockedNow = true; ytFailed = true; noteBlocked(); resetPlayer(); showBlocked();
+}
+function showBlocked(){
+  $("skipIntro").classList.add("hide");
+  var c = $("vcover");
+  c.classList.remove("hide");
+  c.innerHTML = '<h3>School wifi has blocked this video</h3><div>No problem. Same 51 questions, same doors, no video.</div>' +
+    '<button class="btn big orange" id="vfQuick">Quick play</button>' +
+    '<div class="tiny" style="max-width:440px">For staff: the video can be unblocked in Securly. It is YouTube video ' + VID + '.</div>';
+  $("vfQuick").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
+  $("vpanel").innerHTML = '<div class="idle">' + jay("shrug") + '<h3>The filter said no</h3><div>Quick play said yes.</div>' +
+    '<button class="btn big orange" id="vfQuick2">Quick play</button></div>';
+  $("vfQuick2").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
 }
 function goVideo(from){
-  mode = "video"; show("scrVideo"); vRevealed = {}; roundShown = {}; vIdx = -1; pausedFor = -1;
+  mode = "video"; show("scrVideo"); $("skipIntro").classList.remove("hide"); vRevealed = {}; roundShown = {}; vIdx = -1; pausedFor = -1; lastT = -1;
   $("vpanel").innerHTML = '<div class="idle">' + jay("salute") + '<h3>Press play on the video</h3><div>The doors turn up when each question does. It waits for you before every answer.</div></div>';
   drawDots(0);
   loadYT(function(ok){
-    if(!ok){
-      $("vcover").classList.remove("hide");
-      $("vcover").innerHTML = '<h3>The video will not load here</h3><div>School wifi sometimes blocks it. Same questions, no video:</div><button class="btn big orange" id="vfQuick">Quick play</button>';
-      $("vfQuick").onclick = function(){ goQuick(); };
-      return;
-    }
+    if(mode !== "video") return;
+    if(!ok){ noteBlocked(); showBlocked(); return; }
     var t = from != null ? from : 0;
     /* carrying on: do not show the break cards for rounds already behind us */
     ROUNDS.forEach(function(r){ var l = inRound(r); if(Q[l[l.length - 1]].a + 2 <= t + 4) roundShown[r] = true; });
@@ -722,6 +786,12 @@ function tick(){
   if(!player || !player.getCurrentTime) return;
   var t = player.getCurrentTime(), st = player.getPlayerState ? player.getPlayerState() : -1;
   if(st === 1){ S.vt = t; if(Math.random() < .07) save(); }
+  /* "playing" but the clock has stood still for 8 seconds: the frame has been taken over */
+  if(st === 1){
+    if(t !== lastT){ lastT = t; lastTAt = Date.now(); }
+    else if(Date.now() - lastTAt > 8000){ videoBlocked(); return; }
+  } else { lastT = t; lastTAt = Date.now(); }
+  if(st === 1 && t > 5) clearBlocked();
   var i = qAt(t);
   if(i < 0) return;
   var q = Q[i];

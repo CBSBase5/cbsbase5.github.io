@@ -326,10 +326,10 @@ window.B5TERM = {
           sessions:{
             brain:{
               title:"Brain games: Fifty Fifty", hook:true,
-              line:"A quiz video on the board. Two doors, one right answer.",
+              line:"A quiz on the board. Two doors, one right answer.",
               heading:"Fifty Fifty",
               sub:"This morning's warm up, on the board.",
-              body:"A general knowledge quiz video. It stops before every answer so everyone can pick door A or door B, then the right door lights up. A few rounds fit in the quarter of an hour, and it keeps your place for next time. Nothing gets marked.",
+              body:"A general knowledge quiz on the board. Everyone picks door A or door B, then the right door lights up. If the school wifi lets the video through, it plays along and stops before every answer. A few rounds fit in the quarter of an hour, and it keeps your place for next time. Nothing gets marked.",
               options:[["Pick","Shout A or B, or point at the board."],["Gut","No thinking too hard. Go with your first feeling."],["Spot","This week is 1969. One question is about that year. Can you spot it?"]],
               links:[["Play Fifty Fifty","/games/fifty-fifty/"]],
               wayslabel:"Ways to be part of it",
@@ -341,7 +341,7 @@ window.B5TERM = {
       sessions:{},
       feature:[
         { kicker:"Thursday 19 November, 9:45", title:"Fifty Fifty", sticker:"New game",
-          text:"Brain games on the board: a quiz video that waits for you before every answer. Two doors, one right. In the game vault after that.",
+          text:"Brain games on the board: a general knowledge quiz with real pictures. Two doors, one right. In the game vault after that.",
           href:"/games/fifty-fifty/", fill:"orange" }
       ]
     },
