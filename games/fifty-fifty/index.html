@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fifty Fifty</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/fifty-fifty.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<script src="/data/b5site.js?v=8"></script>
+<style>
+:root{--paper:#fef8f4;--tile:#fffdf8;--teal:#007291;--orange:#ef7724;--ink:#0a2f38;--cyan:#20adca;--yellow:#ffc93c;--amber:#f4a259;--plum:#6b3a6e;--mint:#c9efe6}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:'Atkinson Hyperlegible',system-ui,sans-serif;color:var(--ink);background:var(--paper);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 500px at 8% -10%,rgba(32,173,202,.22),transparent 60%),radial-gradient(800px 520px at 105% 110%,rgba(239,119,36,.2),transparent 60%)}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.18;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+#app{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:14px 18px 90px}
+h1,h2,h3,.disp{font-family:'Archivo',sans-serif;font-stretch:118%;margin:0}
+button{font-family:inherit;cursor:pointer;color:var(--ink)}
+.hide{display:none!important}
+.btn{border:3px solid var(--ink);background:var(--tile);font-weight:700;font-size:17px;padding:9px 16px;border-radius:14px 17px 13px 16px;box-shadow:0 4px 0 var(--ink);transition:transform .12s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--ink)}
+.btn.big{font-size:26px;padding:14px 30px;font-family:'Archivo',sans-serif;font-stretch:118%;font-weight:900}
+.btn.orange,.btn-orange{background:var(--orange);color:#fff}
+.btn.teal{background:var(--teal);color:#fff}
+.btn.quiet,.btn-quiet{background:rgba(255,253,248,.9);box-shadow:0 3px 0 var(--ink);font-size:15px;padding:7px 12px}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+
+/* top strip */
+.top{display:flex;align-items:center;gap:12px;margin-bottom:12px;min-height:44px}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Archivo',sans-serif;font-stretch:120%;font-weight:900;font-size:22px;text-decoration:none;color:var(--ink)}
+.brand i{display:inline-block;width:16px;height:24px;border:3px solid var(--ink);border-radius:4px 4px 2px 2px;background:var(--teal)}
+.brand i+i{background:var(--orange);margin-left:-6px}
+.dots{display:flex;gap:6px;flex-wrap:wrap;margin-left:6px}
+.dots span{width:13px;height:13px;border-radius:50%;border:2px solid var(--ink);background:var(--tile)}
+.dots span.got{background:var(--teal)}
+.dots span.nope{background:var(--amber)}
+.dots span.skip{background:#d9d2c9}
+.dots span.now{box-shadow:0 0 0 3px var(--yellow)}
+.top .sp{flex:1}
+.diff{display:flex;border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:var(--tile)}
+.diff button{border:0;background:none;font-weight:700;padding:6px 12px;font-size:15px}
+.diff button.on{background:var(--ink);color:var(--tile)}
+
+/* title */
+#scrTitle{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center;min-height:calc(100vh - 140px)}
+#scrTitle h1{font-size:clamp(64px,9vw,140px);line-height:.85;font-weight:900;color:var(--tile);-webkit-text-stroke:4px var(--ink);text-shadow:0 7px 0 var(--ink);transform:rotate(-3deg);letter-spacing:-1px}
+#scrTitle h1 span{color:var(--orange)}
+#scrTitle h1 b{color:var(--cyan)}
+.tsub{display:inline-block;font-size:22px;font-weight:700;background:var(--tile);border:3px solid var(--ink);padding:7px 14px;border-radius:12px 17px 12px 15px;margin:26px 0 22px;transform:rotate(1deg)}
+.tbtns{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.tbtns .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tiny{font-size:14px;opacity:.75}
+.bigdoors{position:relative;height:min(62vh,520px);display:flex;justify-content:center;align-items:flex-end;gap:34px;perspective:900px}
+.bd{position:relative;width:min(16vw,200px);height:88%;border:5px solid var(--ink);border-radius:90px 90px 10px 10px;background:#24120a;box-shadow:0 10px 0 var(--ink);overflow:hidden}
+.bd .leaf{position:absolute;inset:0;border-radius:inherit;transform-origin:0 50%;animation:swing 4.5s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:900;font-size:min(9vw,110px);color:var(--tile);-webkit-text-stroke:3px var(--ink)}
+.bd.a .leaf{background:linear-gradient(160deg,#25c3df,var(--teal))}
+.bd.b .leaf{background:linear-gradient(160deg,#ffa25b,var(--orange));animation-delay:-2.2s}
+.bd .knob{position:absolute;right:16px;top:52%;width:16px;height:16px;border-radius:50%;background:var(--yellow);border:3px solid var(--ink)}
+.bd .glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,#fff3b0,#ffc93c 40%,transparent 70%)}
+@keyframes swing{0%,55%,100%{transform:rotateY(0)}70%,85%{transform:rotateY(-62deg)}}
+.titlejay{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%)}
+.titlejay svg{width:96px;height:96px;image-rendering:pixelated}
+
+/* play area */
+.vgrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+.vbox{position:relative;border:4px solid var(--ink);border-radius:18px 22px 16px 20px;overflow:hidden;background:#000;aspect-ratio:16/9;box-shadow:0 6px 0 var(--ink)}
+.vbox iframe,#yt{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vcover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--ink);color:var(--tile);text-align:center;padding:20px}
+.vcover h3{font-size:28px}
+.vbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.panel{position:relative;background:var(--tile);border:4px solid var(--ink);border-radius:20px 16px 22px 18px;padding:16px;box-shadow:0 6px 0 var(--ink);min-height:300px}
+.panel.wide{max-width:1100px;margin:0 auto}
+.rtag{display:inline-block;font-weight:700;font-size:14px;background:var(--mint);border:2px solid var(--ink);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+.qtext{font-size:clamp(22px,2.3vw,34px);line-height:1.1;font-weight:850}
+.hero{margin:10px 0 0;display:flex;align-items:center;gap:10px}
+.hero .pic{width:120px;height:80px;flex:none;border-radius:10px;border:3px solid var(--ink)}
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.doors.n3{grid-template-columns:1fr 1fr 1fr}
+.door{position:relative;border:4px solid var(--ink);border-radius:18px 14px 20px 16px;background:var(--tile);padding:8px 8px 10px;box-shadow:0 6px 0 var(--ink);transition:transform .15s,box-shadow .15s,opacity .3s,filter .3s;text-align:center}
+.door:nth-child(odd){transform:rotate(-1deg)}
+.door:nth-child(even){transform:rotate(1.2deg)}
+.door:hover{transform:translateY(-4px) rotate(0)}
+.door .lab{display:block;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:850;font-size:clamp(17px,1.7vw,24px);margin-top:8px;line-height:1.05}
+.door .tag{position:absolute;top:-14px;left:-10px;width:34px;height:34px;border-radius:50%;border:3px solid var(--ink);background:var(--yellow);font-family:'Archivo';font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center}
+.door.picked{box-shadow:0 0 0 5px var(--yellow),0 6px 0 var(--ink)}
+.door.right{background:#dff5ef;box-shadow:0 0 0 6px var(--teal),0 6px 0 var(--ink);animation:pop .5s}
+.door.wrong{background:#fdebd9;box-shadow:0 0 0 5px var(--amber),0 6px 0 var(--ink)}
+.door.fade{opacity:.45;filter:grayscale(.6)}
+.door.wobble{animation:wob 1.2s ease-in-out infinite}
+.lock .door{cursor:default}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes wob{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.pic{position:relative;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:linear-gradient(150deg,#e6f6f8,#fde7d6)}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+.pic img.ok{opacity:1}
+.pic.fit img{object-fit:contain;padding:8%;background:#fff}
+.pic .fb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:8px;font-family:'Archivo';font-weight:900;font-size:clamp(20px,2.4vw,34px);color:rgba(10,47,56,.28);text-align:center;line-height:1}
+.pic svg{position:absolute;inset:0;width:100%;height:100%}
+.sure{display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:700;font-size:14px}
+.sure button{border:2px solid var(--ink);background:var(--tile);border-radius:999px;padding:4px 11px;font-weight:700;font-size:14px}
+.sure button.on{background:var(--cyan);color:#fff}
+.say{display:flex;gap:10px;align-items:flex-end;margin-top:16px;min-height:72px}
+.say .jay{flex:none;cursor:pointer}
+.say .jay svg{height:66px;width:auto;image-rendering:pixelated}
+.bubble{position:relative;background:var(--paper);border:3px solid var(--ink);border-radius:16px 18px 16px 6px;padding:9px 13px;font-size:17px;line-height:1.3;max-width:620px}
+.bubble:empty{display:none}
+.bubble b{font-family:'Archivo';font-stretch:112%}
+.why{margin-top:10px}
+.why textarea{width:100%;min-height:58px;border:2px dashed #9bb5bb;border-radius:10px;padding:8px;font:inherit;background:#fff}
+.nextrow{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+.waiting{display:flex;align-items:center;gap:10px;margin-top:12px;font-weight:700}
+.waiting .pulse{width:14px;height:14px;border-radius:50%;background:var(--orange);animation:pul 1.2s infinite}
+@keyframes pul{50%{transform:scale(1.5);opacity:.5}}
+.idle{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;min-height:260px}
+.idle h3{font-size:26px}
+
+/* confetti */
+.bits{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.bits i{position:absolute;width:10px;height:14px;border-radius:2px;animation:fall 1.4s ease-out forwards}
+@keyframes fall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:40;background:rgba(10,47,56,.55);display:flex;align-items:center;justify-content:center;padding:18px}
+.card{background:var(--tile);border:4px solid var(--ink);border-radius:22px 18px 24px 20px;padding:22px;max-width:640px;width:100%;box-shadow:0 8px 0 var(--ink);max-height:92vh;overflow:auto}
+.card h2{font-size:36px;margin-bottom:6px}
+.stars{display:flex;gap:4px;flex-wrap:wrap;font-size:34px;margin:10px 0;line-height:1}
+.stars span{color:#d9d2c9;-webkit-text-stroke:1.5px var(--ink)}
+.stars span.on{color:var(--yellow);animation:pop .4s backwards}
+.cardrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.credits{font-size:14px;columns:2;column-gap:20px}
+.credits a{color:var(--teal)}
+
+/* end */
+.endgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.jars{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px}
+.jar{border:3px solid var(--ink);border-radius:12px 12px 16px 16px;background:#fff;height:110px;position:relative;overflow:hidden}
+.jar .fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,var(--yellow),var(--orange));transition:height 1s}
+.jar b{position:absolute;left:0;right:0;top:6px;text-align:center;font-family:'Archivo';font-size:13px}
+.jar em{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-style:normal;font-weight:700;font-size:15px}
+.chips{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.chip{border:3px solid var(--ink);background:var(--tile);border-radius:14px;padding:9px 12px;text-align:left;font-weight:700;font-size:16px;box-shadow:0 3px 0 var(--ink)}
+.chip.on{background:var(--mint)}
+.mk label{display:block;font-weight:700;font-size:14px;margin:10px 0 4px}
+.mk input{width:100%;border:3px solid var(--ink);border-radius:10px;padding:8px;font:inherit;background:#fff}
+.mk .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mk .pickright{display:flex;gap:14px;align-items:center;margin-top:10px;font-size:15px;font-weight:700}
+.mk .pickright label{display:inline-flex;align-items:center;gap:4px;margin:0;font-size:15px}
+#cardCv{width:100%;max-width:420px;border:3px solid var(--ink);border-radius:14px;display:block;background:#fff}
+.sendbox{border:2px dashed #9bb5bb;border-radius:12px;padding:10px 12px;margin-top:12px}
+.sendtitle{font-weight:700;margin:0 0 4px}
+.sendwhy{font-size:13px;margin:0 0 8px}
+.sendwho{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.sendwho input{width:90px;border:2px solid var(--ink);border-radius:8px;padding:5px;font:inherit}
+.sendlab{font-size:13px}
+.sendrow{display:flex;gap:8px;flex-wrap:wrap}
+.sendrow .btn{font-size:14px;padding:6px 10px}
+.sendmsg{font-size:13px;color:var(--teal);min-height:1em;margin:6px 0 0}
+.sec h3{font-size:22px;margin-bottom:4px}
+
+@media (max-width:980px){
+  .vgrid,.endgrid,#scrTitle{grid-template-columns:1fr}
+  .bigdoors{height:280px}
+  .doors.n3{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){.bd .leaf,.door.wobble{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="top">
+    <a class="brand" href="#" id="brandBtn" aria-label="Fifty Fifty title screen"><i></i><i></i>Fifty Fifty</a>
+    <div class="dots" id="dots"></div>
+    <div class="sp"></div>
+    <div class="diff hide" id="diffBox" role="group" aria-label="How many doors">
+      <button data-d="mild">Mild: 2 doors</button><button data-d="spicy">Spicy: 3 doors</button>
+    </div>
+    <button class="btn quiet" id="credBtn">Picture credits</button>
+  </div>
+
+  <!-- title -->
+  <section id="scrTitle">
+    <div>
+      <h1>FIFTY<br><span>FIFTY</span><b>.</b></h1>
+      <div class="tsub">Two doors. One is right. Go with your gut.</div>
+      <div class="tbtns">
+        <button class="btn big orange" id="goVideo">&#9654; Play along with the video</button>
+        <div class="row">
+          <button class="btn teal" id="goQuick">Quick play, no video</button>
+          <button class="btn quiet hide" id="goCarry">Carry on where you stopped</button>
+        </div>
+        <div class="tiny">51 questions in six short rounds. Stop after any round and it keeps your place.</div>
+      </div>
+    </div>
+    <div class="bigdoors" aria-hidden="true">
+      <div class="bd a"><div class="glow"></div><div class="leaf">A</div><div class="knob"></div></div>
+      <div class="bd b"><div class="glow"></div><div class="leaf">B</div><div class="knob"></div></div>
+      <div class="titlejay" id="titleJay"></div>
+    </div>
+  </section>
+
+  <!-- video play along -->
+  <section id="scrVideo" class="hide">
+    <div class="vgrid">
+      <div>
+        <div class="vbox"><div id="yt"></div>
+          <div class="vcover" id="vcover"><h3>Warming up the video...</h3><div class="tiny">If it never turns up, quick play works without it.</div></div>
+        </div>
+        <div class="vbar">
+          <button class="btn quiet" id="skipIntro">Skip to the first question</button>
+          <button class="btn quiet" id="vToQuick">Switch to quick play</button>
+        </div>
+      </div>
+      <div class="panel" id="vpanel"></div>
+    </div>
+  </section>
+
+  <!-- quick play -->
+  <section id="scrQuick" class="hide">
+    <div class="panel wide" id="qpanel"></div>
+  </section>
+
+  <!-- the end -->
+  <section id="scrEnd" class="hide">
+    <div class="endgrid">
+      <div class="panel">
+        <h2 class="disp" style="font-size:44px">All 51 doors opened!</h2>
+        <div id="endLine" style="font-size:18px;margin-top:6px"></div>
+        <div class="jars" id="jars"></div>
+        <div class="say"><div class="jay" id="endJay"></div><div class="bubble" id="endBubble"></div></div>
+
+        <div class="sec" style="margin-top:20px">
+          <h3>Time machine moment</h3>
+          <div>You can take one fact back to 1900. Which one?</div>
+          <div class="chips" id="tmChips"></div>
+          <div class="say" style="min-height:0"><div class="bubble" id="tmBubble"></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="sec mk">
+          <h3>Make a door for Jay <span class="tiny">(only if you fancy it)</span></h3>
+          <label for="mkQ">Your question</label>
+          <input id="mkQ" maxlength="120" placeholder="Which bird can fly backwards?">
+          <div class="two">
+            <div><label for="mkA">Door A</label><input id="mkA" maxlength="40" placeholder="Hummingbird"></div>
+            <div><label for="mkB">Door B</label><input id="mkB" maxlength="40" placeholder="Pigeon"></div>
+          </div>
+          <div class="pickright">The right one is:
+            <label><input type="radio" name="mkR" value="A" checked> A</label>
+            <label><input type="radio" name="mkR" value="B"> B</label>
+          </div>
+        </div>
+        <div class="sec" style="margin-top:16px">
+          <h3>Your card</h3>
+          <canvas id="cardCv" width="1080" height="1350"></canvas>
+          <div class="cardrow">
+            <button class="btn orange" id="saveCard">Save the picture</button>
+            <button class="btn quiet" id="againQuick">Play again, quick</button>
+            <button class="btn quiet" id="toTitle">Back to the doors</button>
+          </div>
+          <div id="sendHost"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="overlay hide" id="roundCard"><div class="card" id="roundInner"></div></div>
+<div class="overlay hide" id="credCard"><div class="card">
+  <h2>Picture credits</h2>
+  <p class="tiny">The photos come from Wikipedia and Wikimedia Commons, where people share them under free licences. Tap one to see who made it. The people cards are drawn here on purpose, not photos.</p>
+  <div class="credits" id="credList"></div>
+  <div class="cardrow"><button class="btn teal" id="credClose">Back to it</button></div>
+</div></div>
+<div class="bits" id="bits"></div>
+
+<script src="/data/jaypix.js"></script>
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ==========================================================
+   Fifty Fifty: a play along quiz for a YouTube general
+   knowledge video (video id below). The video pauses just
+   before each answer so nobody gets rushed, then carries on
+   and says the answer while the right door lights up.
+
+   Question timings come from the video's own captions.
+   s = when the question starts, a = when the answer is said.
+   o = the two doors, c = the right one (0 or 1),
+   d = a third door for Spicy quick play, f = a fun fact,
+   w = what to say if someone picks the other door,
+   also = the other door counts too (see the note in f),
+   hero = an extra picture, x = a hidden bit.
+
+   Picture codes:  plain text  = a Wikipedia article whose
+   main photo is used, loaded when the page opens (nothing to
+   upload); "p:" a drawn person card (never photos of real
+   people); "c:#hex" a paint splodge; "t:" big letters.
+   Plain ASCII only.
+   ========================================================== */
+
+var VID = "6i3sRhcpxUs";
+var KEY = "b5.fifty.v1";
+var PICKEY = "b5.fifty.pics.v1";
+
+var Q = [
+ /* round 1 */
+ {r:1,s:20,a:32,q:"Which is the hottest planet in the Solar System?",o:[["Jupiter","Jupiter"],["Venus","Venus"]],c:1,d:["Mercury","Mercury (planet)"],
+  f:"Venus wears a thick blanket of cloud that traps the heat. It is even hotter than Mercury, which is closer to the Sun.",w:{0:"Jupiter is the biggest planet, not the hottest. Easy pair to mix up."}},
+ {r:1,s:34,a:50,q:"Which animal eats eucalyptus leaves?",o:[["Koala","Koala"],["Panda","Giant panda"]],c:0,d:["Sloth","Sloth"],
+  f:"Koalas sleep up to 20 hours a day. Eucalyptus is very hard work to digest.",w:{1:"Pandas are the bamboo munchers."}},
+ {r:1,s:52,a:68,q:"Which animal can sleep standing up?",o:[["Rabbit","Rabbit"],["Horse","Horse"]],c:1,d:["Hedgehog","Hedgehog"],
+  f:"Horses lock their legs so they can doze without toppling over. They still lie down for a proper deep sleep.",w:{0:"Rabbits flop right down to sleep. Very dramatic about it."}},
+ {r:1,s:70,a:86,q:"What is in the middle of our Solar System?",o:[["The Moon","Moon"],["The Sun","Sun"]],c:1,d:["Earth","Earth"],
+  f:"The Sun holds nearly all the stuff in the Solar System: about 99.8 percent of it.",w:{0:"The Moon goes round the Earth, and the Earth goes round the Sun."}},
+ {r:1,s:88,a:97,q:"What turns into caramel when you heat it?",o:[["Butter","Butter"],["Sugar","Sugar"]],c:1,d:["Salt","Salt"],
+  f:"Sugar melts and goes golden at about 160 degrees. Butter just helps it taste good.",w:{0:"Butter goes into lots of caramel recipes, but the sugar is what turns."}},
+ {r:1,s:110,a:115,q:"Where does the cacao for chocolate come from?",o:[["Durian","Durian"],["Cacao pod","Theobroma cacao"]],c:1,d:["Coconut","Coconut"],
+  f:"The beans grow inside big pods that sprout straight off the tree trunk.",w:{0:"Durian is the famously stinky fruit. Banned on some trains."}},
+ {r:1,s:128,a:140,q:"Acrophobia is a fear of...",o:[["Spiders","Spider"],["Heights","Cliff"]],c:1,d:["Thunder","Lightning"],
+  f:"Acro comes from the Greek for high up. Fear of spiders is arachnophobia.",w:{0:"Spiders are arachnophobia. Acro means high."}},
+ {r:1,s:142,a:152,q:"Which animal has three hearts?",o:[["Dolphin","Dolphin"],["Octopus","Octopus"]],c:1,d:["Jellyfish","Jellyfish"],
+  f:"Octopuses have three hearts AND blue blood. Outrageous.",w:{0:"Dolphins have one heart, like us."}},
+ /* round 2 */
+ {r:2,s:164,a:176,q:"Which fruit grows on a palm tree?",o:[["Date","Date palm"],["Pineapple","Pineapple"]],c:0,d:["Banana","Banana"],
+  f:"Pineapples grow out of the ground on a spiky plant. No tree at all.",w:{1:"Pineapples grow low down on a spiky plant, not up a tree."}},
+ {r:2,s:178,a:194,q:"What was the first animal to go into orbit?",o:[["A dog","Laika"],["A cat","Cat"]],c:0,d:["A monkey","Rhesus macaque"],
+  f:"A dog called Laika, in 1957. She was a stray from the streets of Moscow.",w:{1:"A cat did go to space later, in 1963. But a dog got there first."},x:"bonnie"},
+ {r:2,s:196,a:212,q:"Who wrote Romeo and Juliet?",o:[["Shakespeare","p:Shakespeare"],["Moli\u00e8re","p:Moli\u00e8re"]],c:0,d:["Dickens","p:Dickens"],
+  f:"Shakespeare is the first person we know of to write words like bedroom and lonely.",w:{1:"Moli\u00e8re was a French writer of comedies, a bit later on."}},
+ {r:2,s:214,a:230,q:"Which country created Pok\u00e9mon?",o:[["Japan","Flag of Japan"],["The USA","Flag of the United States"]],c:0,d:["South Korea","Flag of South Korea"],
+  f:"It started as a Game Boy game in Japan in 1996.",w:{1:"Huge in the USA, but it was made in Japan."}},
+ {r:2,s:232,a:248,q:"Which is a primary colour in paint?",o:[["Red","c:#e2322c"],["Green","c:#3aa64a"]],c:0,d:["Purple","c:#7a3fa0"],
+  f:"Blue and yellow paint mix to make green. On screens it works differently: light mixes from red, green and blue.",w:{1:"Green is what you get when blue and yellow paint mix. On a screen it would count though."}},
+ {r:2,s:250,a:266,q:"Which reptile can look two ways at once?",o:[["Chameleon","Chameleon"],["Snake","Snake"]],c:0,d:["Gecko","Gecko"],
+  f:"Each chameleon eye moves on its own, like two security cameras.",w:{1:"Snakes cannot even blink. Chameleons win this one."}},
+ {r:2,s:268,a:284,q:"Who brought out the first iPhone?",o:[["Elon Musk","p:Elon Musk"],["Steve Jobs","p:Steve Jobs"]],c:1,d:["Bill Gates","p:Bill Gates"],hero:"Smartphone",
+  f:"Steve Jobs showed it off in 2007. Phones have not been the same since.",w:{0:"Elon Musk does electric cars and rockets."}},
+ {r:2,s:286,a:302,q:"Which tower is taller?",o:[["Big Ben","Big Ben"],["Eiffel Tower","Eiffel Tower"]],c:1,d:["Blackpool Tower","Blackpool Tower"],
+  f:"The Eiffel Tower is about 330 metres. Big Ben's tower is about 96. More than three times taller.",w:{0:"Big Ben is tall for London, but the Eiffel Tower is over three times taller."}},
+ {r:2,s:304,a:320,q:"Which country gave the USA the Statue of Liberty?",o:[["France","Flag of France"],["Italy","Flag of Italy"]],c:0,d:["Spain","Flag of Spain"],hero:"Statue of Liberty",
+  f:"It sailed over from France in 1885, in 350 pieces packed into crates. Flat pack statue.",w:{1:"Good guess, but it was a gift from France."}},
+ /* round 3 */
+ {r:3,s:322,a:333,q:"Which planet is closer to the Sun?",o:[["Earth","Earth"],["Mars","Mars"]],c:0,d:["Saturn","Saturn"],x:"why",
+  f:"Mercury, Venus, Earth, Mars. We are third, Mars is fourth.",w:{1:"Mars is one further out than us, which is why it is so cold."}},
+ {r:3,s:344,a:356,q:"What lets us see galaxies really far away?",o:[["Telescope","Telescope"],["Microscope","Microscope"]],c:0,d:["Binoculars","Binoculars"],
+  f:"The James Webb telescope sits about 1.5 million kilometres from Earth.",w:{1:"Microscopes are for tiny things close up. Telescopes are for far away."}},
+ {r:3,s:358,a:374,q:"Which organs clean your blood and make wee?",o:[["Kidneys","Kidney"],["Lungs","Lung"]],c:0,d:["Heart","Heart symbol"],
+  f:"Your kidneys are each about the size of your fist.",w:{1:"Lungs swap air in and out. The kidneys do the wee."}},
+ {r:3,s:376,a:392,q:"Which animal can live for over 100 years?",o:[["Hamster","Hamster"],["Turtle","Turtle"]],c:1,d:["Goldfish","Goldfish"],
+  f:"Jonathan, a giant tortoise on St Helena, hatched in about 1832.",w:{0:"Hamsters live two or three years. Turtles can outlive us."}},
+ {r:3,s:394,a:410,q:"What is the capital of Canada?",o:[["Toronto","Toronto"],["Ottawa","Ottawa"]],c:1,d:["Vancouver","Vancouver"],
+  f:"Toronto is Canada's biggest city, which is why it catches loads of people out.",w:{0:"Toronto is the biggest city, but Ottawa is the capital. Sneaky."}},
+ {r:3,s:412,a:428,q:"What money do they use in Japan?",o:[["Yen","Japanese yen"],["Won","South Korean won"]],c:0,d:["Yuan","Renminbi"],
+  f:"The won is South Korea's money. China uses the yuan.",w:{1:"The won is next door in South Korea."}},
+ {r:3,s:431,a:447,q:"What is the biggest island in the world?",o:[["Madagascar","Madagascar"],["Greenland","Greenland"]],c:1,d:["Great Britain","Great Britain"],
+  f:"Greenland is mostly covered in ice, up to 3 kilometres thick.",w:{0:"Madagascar is fourth biggest. Still massive."}},
+ {r:3,s:449,a:465,q:"Sunlight through raindrops makes a...",o:[["Rainbow","Rainbow"],["Northern lights","Aurora"]],c:0,d:["Fog","Fog"],
+  f:"You always see a rainbow with the Sun behind you.",w:{1:"The northern lights come from the Sun's particles hitting the air, not rain."}},
+ {r:3,s:467,a:478,q:"Which country are the Pyramids of Giza in?",o:[["Mexico","Flag of Mexico"],["Egypt","Flag of Egypt"]],c:1,d:["Peru","Flag of Peru"],hero:"Giza pyramid complex",
+  f:"Mexico has pyramids too, which makes this one sneaky.",w:{0:"Mexico has its own pyramids, so fair guess. Giza is in Egypt."}},
+ /* round 4 */
+ {r:4,s:488,a:501,q:"Which country is famous for its chocolate?",o:[["Switzerland","Flag of Switzerland"],["Netherlands","Flag of the Netherlands"]],c:0,d:["Finland","Flag of Finland"],
+  f:"The Swiss eat around 10 kilos of chocolate each, every year.",w:{1:"The Dutch do make great cocoa, but the video wanted Switzerland."}},
+ {r:4,s:503,a:519,q:"What did the Wright brothers invent?",o:[["Train","Steam locomotive"],["Aeroplane","Airliner"]],c:1,d:["Car","Car"],
+  f:"Their first flight, in 1903, lasted 12 seconds.",w:{0:"Trains were about 100 years earlier. The Wrights did the aeroplane."}},
+ {r:4,s:521,a:537,q:"Which ocean is the biggest?",o:[["Pacific","Pacific Ocean"],["Atlantic","Atlantic Ocean"]],c:0,d:["Indian","Indian Ocean"],
+  f:"The Pacific is bigger than all the land on Earth put together.",w:{1:"The Atlantic is second. The Pacific is huge."}},
+ {r:4,s:539,a:555,q:"Which flower turns to face the Sun?",o:[["Rose","Rose"],["Sunflower","Common sunflower"]],c:1,d:["Tulip","Tulip"],
+  f:"Young sunflowers follow the Sun across the sky. Grown up ones mostly just face east.",w:{0:"Roses stay put. The clue is in the sunflower's name."}},
+ {r:4,s:557,a:573,q:"What is the chemical symbol for gold?",o:[["Au","t:Au"],["Gd","t:Gd"]],c:0,d:["Go","t:Go"],hero:"Gold",
+  f:"Au comes from aurum, the Latin word for gold.",w:{1:"Gd is gadolinium. Gold is Au, from the Latin aurum."}},
+ {r:4,s:575,a:591,q:"Which is the tallest tower in the world?",o:[["Shanghai Tower","Shanghai Tower"],["Burj Khalifa","Burj Khalifa"]],c:1,d:["The Shard","The Shard"],
+  f:"The Burj Khalifa in Dubai is over 800 metres. The Shanghai Tower is just over 600.",w:{0:"The Shanghai Tower is second. The Burj Khalifa is about 200 metres taller."}},
+ {r:4,s:593,a:611,q:"Which country was the Buddha born in?",o:[["China","Flag of China"],["Nepal","Flag of Nepal"]],c:1,d:["India","Flag of India"],
+  f:"He was born in Lumbini, in Nepal, about 2,500 years ago.",w:{0:"Lots of Buddhists in China, but he was born in Nepal."}},
+ {r:4,s:613,a:629,q:"What do you study in mycology?",o:[["Flowers","Flower"],["Mushrooms","Mushroom"]],c:1,d:["Bugs","Insect"],
+  f:"Some mushrooms glow in the dark.",w:{0:"Flowers are botany. Myco means fungus."}},
+ /* round 5 */
+ {r:5,s:631,a:647,q:"Which chocolate has no cocoa solids in it?",o:[["Milk chocolate","Milk chocolate"],["White chocolate","White chocolate"]],c:1,d:["Dark chocolate","Types of chocolate"],
+  f:"White chocolate is made from cocoa butter, sugar and milk. Some say that means it is not really chocolate.",w:{0:"Milk chocolate still has cocoa solids. White has none."}},
+ {r:5,s:649,a:665,q:"Where can you get a hole in one?",o:[["Golf","Golf ball"],["Tennis","Tennis ball"]],c:0,d:["Snooker","Billiard ball"],
+  f:"One hit, ball in the hole. Most golfers never manage one.",w:{1:"Tennis has no holes, just nets."}},
+ {r:5,s:667,a:683,q:"Where did Neil Armstrong walk?",o:[["Mars","Mars"],["The Moon","Moon"]],c:1,d:["Venus","Venus"],
+  f:"The Moon, in 1969. Nobody has walked on Mars yet. Yet.",w:{0:"Nobody has walked on Mars yet."}},
+ {r:5,s:685,a:701,q:"What is the square root of 25?",o:[["5","t:5"],["12.5","t:12.5"]],c:0,d:["50","t:50"],x:"why",
+  f:"5 times 5 makes 25, so the square root of 25 is 5.",w:{1:"12.5 is half of 25. Square root means: which number times itself makes 25?"}},
+ {r:5,s:703,a:720,q:"Which city is the Colosseum in?",o:[["Rome","Trevi Fountain"],["Athens","Parthenon"]],c:0,d:["Paris","Arc de Triomphe"],hero:"Colosseum",
+  f:"It could hold about 50,000 people. Gladiators fought there nearly 2,000 years ago.",w:{1:"Athens has the Parthenon. The Colosseum is in Rome."}},
+ {r:5,s:722,a:738,q:"What did the Lumi\u00e8re brothers invent?",o:[["Aeroplanes","Airliner"],["Films","Movie projector"]],c:1,d:["Radio","Radio"],
+  f:"One of their first films was just workers leaving a factory. People still queued to see it.",w:{0:"Aeroplanes were the Wright brothers, a couple of questions back."}},
+ {r:5,s:740,a:756,q:"Who came up with the theory of relativity?",o:[["Albert Einstein","p:Albert Einstein"],["Isaac Newton","p:Isaac Newton"]],c:0,d:["Charles Darwin","p:Charles Darwin"],
+  f:"Its most famous bit is E = mc squared.",w:{1:"Newton did gravity, about 200 years earlier."}},
+ {r:5,s:758,a:774,q:"In chess, which piece only moves diagonally?",o:[["Bishop","Bishop (chess)"],["Rook","Rook (chess)"]],c:0,d:["Knight","Knight (chess)"],
+  f:"Each bishop stays on the same colour square for the whole game.",w:{1:"The rook goes in straight lines."}},
+ {r:5,s:776,a:792,q:"What do you get when you heat sand?",o:[["Wood","Wood"],["Glass","Glass"]],c:1,d:["Brick","Brick"],
+  f:"Sand needs about 1,700 degrees to melt into glass.",w:{0:"Wood grows on trees. Sand melts into glass."}},
+ /* round 6 */
+ {r:6,s:794,a:810,q:"Which is the biggest country by land?",o:[["Russia","Flag of Russia"],["Canada","Flag of Canada"]],c:0,d:["China","Flag of China"],
+  f:"Russia is almost twice the size of Canada and stretches across 11 time zones.",w:{1:"Canada is second biggest. Russia is nearly twice as big."}},
+ {r:6,s:812,a:829,q:"Who was president of South Africa?",o:[["Barack Obama","p:Barack Obama"],["Nelson Mandela","p:Nelson Mandela"]],c:1,d:["Winston Churchill","p:Winston Churchill"],
+  f:"Nelson Mandela became president in 1994, after 27 years in prison.",w:{0:"Barack Obama was president of the USA."}},
+ {r:6,s:831,a:847,q:"Who wrote the music The Four Seasons?",o:[["Vivaldi","p:Vivaldi"],["Mozart","p:Mozart"]],c:0,d:["Beethoven","p:Beethoven"],hero:"Violin",x:"birds",
+  f:"Spring has birdsong played on violins. Jay approves.",w:{1:"Mozart wrote loads, but not this one."}},
+ {r:6,s:849,a:865,q:"What do we celebrate on 25 December?",o:[["Christmas","Christmas tree"],["Halloween","Jack-o'-lantern"]],c:0,d:["Bonfire Night","Guy Fawkes Night"],
+  f:"Halloween is on 31 October.",w:{1:"Halloween is the end of October."}},
+ {r:6,s:867,a:883,q:"Which animal can taste with its feet?",o:[["Butterfly","Butterfly"],["Frog","Frog"]],c:0,d:["Snail","Snail"],
+  f:"Butterflies land on a leaf to taste it, to check it is good for their eggs.",w:{1:"Frogs catch food with their tongues. Butterflies taste with their feet."}},
+ {r:6,s:885,a:901,q:"Which country is IKEA from?",o:[["Sweden","Flag of Sweden"],["Norway","Flag of Norway"]],c:0,d:["Denmark","Flag of Denmark"],
+  f:"The name is made from the founder's initials, plus the farm and village where he grew up.",w:{1:"Close neighbours. IKEA is Swedish."}},
+ {r:6,s:903,a:919,q:"Which country is in two continents?",o:[["Turkey","Flag of Turkey"],["Egypt","Flag of Egypt"]],c:0,also:1,d:["Brazil","Flag of Brazil"],
+  f:"Turkey is in Europe and Asia. Sneaky bonus: a bit of Egypt is in Asia too, so both doors count here."},
+ {r:6,s:921,a:937,q:"What is the biggest mammal on Earth?",o:[["Blue whale","Blue whale"],["Elephant","African bush elephant"]],c:0,d:["Giraffe","Giraffe"],
+  f:"A blue whale's heart is about the size of a small car.",w:{1:"Elephants are the biggest on land. The blue whale beats everything."}}
+];
+var ENDT = 944;
+var ROUNDS = [1,2,3,4,5,6];
+function inRound(r){ var a = []; Q.forEach(function(q, i){ if(q.r === r) a.push(i); }); return a; }
+
+var SAYINGS = ["Unhand me, goblin.","My ears are not a toilet.","Outrageous.","When I was in China....","In the wise words of my late, great grandfather, stop."];
+var YES = ["Spot on.","Your gut is good.","Get in.","Nailed it.","Lovely stuff.","Outrageous. In a good way."];
+var NOPE = ["Not this time.","Next door might be yours.","Close. Ish.","Happens to the best of us."];
+
+/* ---------- save ---------- */
+var S = load();
+function load(){
+  var d = null;
+  try{ d = JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){}
+  d = d || {};
+  d.p = d.p || {}; d.best = d.best || {}; d.why = d.why || {};
+  d.diff = d.diff || "mild"; d.vt = d.vt || 0; d.rdone = d.rdone || {};
+  return d;
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function rnd(a){ return a[Math.floor(Math.random() * a.length)]; }
+function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+/* ---------- pixel Jay ---------- */
+function jay(face, label){ return window.B5JayPix ? B5JayPix.svg(face, label || "Pixel Jay") : ""; }
+
+/* ---------- real pictures from Wikipedia ---------- */
+var PIC = {};
+function allTitles(){
+  var t = {};
+  function add(p){ if(p && !/^(p:|c:|t:)/.test(p)) t[p] = 1; }
+  Q.forEach(function(q){ add(q.o[0][1]); add(q.o[1][1]); add(q.d && q.d[1]); add(q.hero); });
+  return Object.keys(t);
+}
+function loadPics(){
+  try{
+    var c = JSON.parse(localStorage.getItem(PICKEY) || "null");
+    if(c && c.at && Date.now() - c.at < 14 * 864e5 && c.pics){ PIC = c.pics; fillAll(); return; }
+  }catch(e){}
+  var titles = allTitles(), chunks = [];
+  for(var i = 0; i < titles.length; i += 45) chunks.push(titles.slice(i, i + 45));
+  var left = chunks.length, got = 0;
+  chunks.forEach(function(ch){
+    var url = "https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages&piprop=thumbnail%7Cname&pithumbsize=640&redirects=1&titles=" +
+      encodeURIComponent(ch.join("|"));
+    fetch(url).then(function(r){ return r.json(); }).then(function(j){
+      var qy = j.query || {}, map = {};
+      ch.forEach(function(t){ map[t] = t; });
+      (qy.normalized || []).forEach(function(n){ for(var k in map) if(map[k] === n.from) map[k] = n.to; });
+      (qy.redirects || []).forEach(function(n){ for(var k in map) if(map[k] === n.from) map[k] = n.to; });
+      var byTitle = {};
+      (qy.pages || []).forEach(function(p){ if(p.thumbnail && p.thumbnail.source) byTitle[p.title] = { src: p.thumbnail.source, file: p.pageimage || "" }; });
+      for(var k in map) if(byTitle[map[k]]){ PIC[k] = byTitle[map[k]]; got++; }
+    }).catch(function(){}).then(function(){
+      left--; fillAll();
+      if(!left && got > 20){ try{ localStorage.setItem(PICKEY, JSON.stringify({ at: Date.now(), pics: PIC })); }catch(e){} }
+    });
+  });
+}
+function fillAll(){
+  var imgs = document.querySelectorAll("img[data-wt]");
+  for(var i = 0; i < imgs.length; i++){
+    var im = imgs[i], p = PIC[im.getAttribute("data-wt")];
+    if(p && !im.getAttribute("src")){
+      im.onload = function(){ this.className = "ok"; };
+      im.onerror = function(){ this.removeAttribute("src"); };
+      im.src = p.src;
+    }
+  }
+}
+function personSvg(name){
+  var h = 0; for(var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 997;
+  var bgs = ["#c9efe6","#fde3c8","#e6e0f5","#d8eef7","#fff1bf"], bg = bgs[h % bgs.length];
+  var parts = name.split(" "), ini = (parts[0].charAt(0) + (parts.length > 1 ? parts[parts.length - 1].charAt(0) : "")).toUpperCase();
+  return '<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice"><rect width="160" height="120" fill="' + bg + '"/>' +
+    '<rect x="44" y="8" width="72" height="104" rx="34" fill="none" stroke="#b07a2a" stroke-width="6"/>' +
+    '<circle cx="80" cy="50" r="17" fill="#0a2f38" opacity=".82"/><path d="M52 104c2-22 14-32 28-32s26 10 28 32z" fill="#0a2f38" opacity=".82"/>' +
+    '<text x="80" y="58" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="900" font-size="18" fill="' + bg + '">' + esc(ini) + '</text></svg>';
+}
+function picHTML(pic, label){
+  if(!pic) return "";
+  if(pic.indexOf("p:") === 0) return '<div class="pic">' + personSvg(pic.slice(2)) + '</div>';
+  if(pic.indexOf("c:") === 0) return '<div class="pic"><svg viewBox="0 0 160 120"><rect width="160" height="120" fill="#fffdf8"/>' +
+    '<path d="M80 18c22 0 30 10 44 14s18 22 10 36 6 26-10 34-30 2-46 6-34-4-40-20 8-24 2-38 14-32 40-32z" fill="' + pic.slice(2) + '" stroke="#0a2f38" stroke-width="3"/>' +
+    '<circle cx="132" cy="22" r="7" fill="' + pic.slice(2) + '"/><circle cx="26" cy="98" r="5" fill="' + pic.slice(2) + '"/></svg></div>';
+  if(pic.indexOf("t:") === 0) return '<div class="pic"><svg viewBox="0 0 160 120"><rect width="160" height="120" fill="#0a2f38"/>' +
+    '<text x="80" y="78" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="900" font-size="' + (pic.length > 5 ? 40 : 54) + '" fill="#ffc93c">' + esc(pic.slice(2)) + '</text></svg></div>';
+  var fit = /^Flag of|^Heart symbol|\(chess\)/.test(pic);
+  return '<div class="pic' + (fit ? " fit" : "") + '"><div class="fb">' + esc(label) + '</div><img alt="" data-wt="' + esc(pic) + '"></div>';
+}
+
+/* ---------- top dots ---------- */
+function drawDots(r, cur){
+  var h = "";
+  if(r){
+    inRound(r).forEach(function(i){
+      var p = S.p[i], cl = p ? (p.skip ? "skip" : (p.ok ? "got" : "nope")) : "";
+      h += '<span class="' + cl + (i === cur ? " now" : "") + '"></span>';
+    });
+  }
+  $("dots").innerHTML = h;
+}
+
+/* ---------- screens ---------- */
+var mode = "title";
+function show(id){
+  ["scrTitle","scrVideo","scrQuick","scrEnd"].forEach(function(s){ $(s).classList.toggle("hide", s !== id); });
+  $("diffBox").classList.toggle("hide", id !== "scrQuick");
+  window.scrollTo(0, 0);
+}
+function goTitle(){
+  mode = "title"; stopVideo(); show("scrTitle"); drawDots(0);
+  $("titleJay").innerHTML = jay("cool", "Pixel Jay, ready to host");
+  var any = Object.keys(S.p).length > 0 && Object.keys(S.p).length < Q.length;
+  $("goCarry").classList.toggle("hide", !any);
+}
+
+/* ---------- the question panel (shared) ---------- */
+var cur = -1, order = [0,1], locked = false, sure = 0, jayTaps = 0, wobble = false;
+function renderQ(host, i, opts){
+  var q = Q[i]; cur = i; locked = false; sure = 0;
+  order = opts.order;
+  var list = inRound(q.r), n = list.indexOf(i) + 1;
+  var h = '<div class="rtag">Round ' + q.r + ' &middot; ' + n + ' of ' + list.length + '</div>' +
+    '<h2 class="qtext">' + esc(q.q) + '</h2>';
+  if(q.hero) h += '<div class="hero">' + picHTML(q.hero, "") + '</div>';
+  if(opts.sure) h += '<div class="sure">How sure? <button data-s="1">Sure</button><button data-s="2">Bit of a guess</button> <span class="tiny">(optional)</span></div>';
+  h += '<div class="doors' + (order.length === 3 ? " n3" : "") + '">';
+  order.forEach(function(k, j){
+    var o = k === 2 ? q.d : q.o[k];
+    h += '<button class="door' + (wobble ? " wobble" : "") + '" data-k="' + k + '"><span class="tag">' + "ABC".charAt(j) + '</span>' + picHTML(o[1], o[0]) + '<span class="lab">' + esc(o[0]) + '</span></button>';
+  });
+  h += '</div><div class="say"><div class="jay" title="Pixel Jay">' + jay("think") + '</div><div class="bubble" id="bub"></div></div>' +
+    '<div class="whybox"></div><div class="nextrow"></div>';
+  host.innerHTML = h;
+  host.querySelector(".hero .pic") && (host.querySelector(".hero .pic").style.cssText = "width:150px;height:100px;aspect-ratio:auto");
+  fillAll();
+  drawDots(q.r, i);
+  var doors = host.querySelectorAll(".door");
+  Array.prototype.forEach.call(doors, function(b){
+    b.onclick = function(){ if(locked) return; opts.onPick(+b.getAttribute("data-k")); };
+  });
+  Array.prototype.forEach.call(host.querySelectorAll(".sure button"), function(b){
+    b.onclick = function(){
+      sure = sure === +b.getAttribute("data-s") ? 0 : +b.getAttribute("data-s");
+      Array.prototype.forEach.call(host.querySelectorAll(".sure button"), function(x){ x.classList.toggle("on", +x.getAttribute("data-s") === sure); });
+    };
+  });
+  host.querySelector(".jay").onclick = function(){
+    jayTaps++;
+    if(jayTaps % 5 === 0){
+      wobble = !wobble;
+      say(host, "<b>" + esc(rnd(SAYINGS)) + "</b>", "dizzy");
+      Array.prototype.forEach.call(host.querySelectorAll(".door"), function(d){ d.classList.toggle("wobble", wobble); });
+    }
+  };
+}
+function say(host, html, face){
+  var b = host.querySelector("#bub"); if(b) b.innerHTML = html;
+  var j = host.querySelector(".jay"); if(j && face) j.innerHTML = jay(face);
+}
+function markPick(host, k){
+  Array.prototype.forEach.call(host.querySelectorAll(".door"), function(d){ d.classList.toggle("picked", +d.getAttribute("data-k") === k); });
+}
+function isRight(q, k){ return k === q.c || (q.also != null && k === q.also); }
+function reveal(host, i, k){
+  var q = Q[i]; locked = true;
+  host.querySelector(".doors").classList.add("lock");
+  Array.prototype.forEach.call(host.querySelectorAll(".door"), function(d){
+    var dk = +d.getAttribute("data-k");
+    d.classList.remove("picked","wobble");
+    if(isRight(q, dk)) d.classList.add("right");
+    else if(dk === k) d.classList.add("wrong");
+    else d.classList.add("fade");
+  });
+  var ok = k != null && isRight(q, k);
+  var face, line;
+  if(k == null){ face = "shrug"; line = "<b>That one was " + esc(q.o[q.c][0]) + ".</b> " + esc(q.f); }
+  else if(ok){ face = rnd(["thumbs","cool","salute"]); line = "<b>" + rnd(YES) + "</b> " + esc(q.f); burst(host.querySelector(".door.right")); }
+  else { face = rnd(["think","scratch","oops"]); line = "<b>" + rnd(NOPE) + "</b> " + esc((q.w && q.w[k]) || "") + " " + esc(q.f); }
+  if(q.x === "bonnie"){ face = "bonnie"; line += " <br><i>Bonnie applied for the rocket. Too small. No tail either.</i>"; }
+  if(q.x === "birds" && ok) face = "blush";
+  say(host, line, face);
+  if(q.x === "why" && k != null){
+    var wb = host.querySelector(".whybox");
+    wb.innerHTML = '<div class="why"><textarea id="whyTxt" maxlength="300" placeholder="How did you know? (only if you fancy saying)"></textarea></div>';
+    var ta = wb.querySelector("textarea"); ta.value = S.why[i] || "";
+    ta.oninput = function(){ S.why[i] = ta.value; save(); };
+  }
+  return ok;
+}
+function record(i, k, m){
+  var q = Q[i];
+  S.p[i] = { k: k, ok: k != null && isRight(q, k), sure: sure, m: m, skip: k == null };
+  save();
+}
+function starsFor(r){ var n = 0; inRound(r).forEach(function(i){ if(S.p[i] && S.p[i].ok) n++; }); return n; }
+function burst(el){
+  if(!el) return;
+  var b = el.getBoundingClientRect(), host = $("bits"), cols = ["#007291","#ef7724","#ffc93c","#20adca","#6b3a6e"];
+  for(var i = 0; i < 26; i++){
+    var s = document.createElement("i");
+    s.style.left = (b.left + b.width / 2) + "px"; s.style.top = (b.top + b.height / 3) + "px";
+    s.style.background = cols[i % cols.length];
+    s.style.setProperty("--dx", (Math.random() * 360 - 180) + "px");
+    s.style.setProperty("--dy", (Math.random() * 260 - 40) + "px");
+    s.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
+    host.appendChild(s);
+    setTimeout(function(x){ return function(){ x.remove(); }; }(s), 1500);
+  }
+}
+
+/* ---------- round card ---------- */
+function roundCard(r, onGo, onStop){
+  var n = starsFor(r), tot = inRound(r).length, isBest = n > (S.best[r] || 0) && (S.best[r] || 0) > 0;
+  S.best[r] = Math.max(S.best[r] || 0, n); S.rdone[r] = 1; save();
+  var st = "";
+  for(var i = 0; i < tot; i++) st += '<span class="' + (i < n ? "on" : "") + '" style="animation-delay:' + (i * .08) + 's">&#9733;</span>';
+  var last = r === 6;
+  $("roundInner").innerHTML =
+    '<div style="display:flex;gap:14px;align-items:center"><div>' + jay(n >= tot - 1 ? "cool" : "thumbs") + '</div><div>' +
+    '<h2>Round ' + r + ' done</h2><div>' + (isBest ? "<b>New best for this round!</b>" : "Doors opened: " + tot) + '</div></div></div>' +
+    '<div class="stars">' + st + '</div>' +
+    '<div class="cardrow">' + (last ? '<button class="btn big orange" id="rcGo">See how it went</button>'
+      : '<button class="btn big orange" id="rcGo">Round ' + (r + 1) + '</button><button class="btn quiet" id="rcStop">Stop here, keep my place</button>') + '</div>';
+  $("roundCard").classList.remove("hide");
+  $("rcGo").onclick = function(){ $("roundCard").classList.add("hide"); onGo(); };
+  if($("rcStop")) $("rcStop").onclick = function(){ $("roundCard").classList.add("hide"); onStop(); };
+}
+
+/* ==========================================================
+   Video play along
+   ========================================================== */
+var player = null, ytOk = false, ytFailed = false, ticker = null, pausedFor = -1, vRevealed = {}, roundShown = {}, vIdx = -1, ourPause = false;
+function loadYT(cb){
+  if(ytOk){ cb(true); return; }
+  if(ytFailed){ cb(false); return; }
+  var done = false;
+  window.onYouTubeIframeAPIReady = function(){
+    player = new YT.Player("yt", {
+      videoId: VID, host: "https://www.youtube-nocookie.com",
+      playerVars: { rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3 },
+      events: {
+        onReady: function(){ if(done) return; done = true; ytOk = true; $("vcover").classList.add("hide"); cb(true); },
+        onStateChange: onState,
+        onError: function(){ if(!done){ done = true; ytFailed = true; cb(false); } }
+      }
+    });
+  };
+  var s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api";
+  s.onerror = function(){ if(!done){ done = true; ytFailed = true; cb(false); } };
+  document.head.appendChild(s);
+  setTimeout(function(){ if(!done){ done = true; ytFailed = true; cb(false); } }, 10000);
+}
+function goVideo(from){
+  mode = "video"; show("scrVideo"); vRevealed = {}; roundShown = {}; vIdx = -1; pausedFor = -1;
+  $("vpanel").innerHTML = '<div class="idle">' + jay("salute") + '<h3>Press play on the video</h3><div>The doors turn up when each question does. It waits for you before every answer.</div></div>';
+  drawDots(0);
+  loadYT(function(ok){
+    if(!ok){
+      $("vcover").classList.remove("hide");
+      $("vcover").innerHTML = '<h3>The video will not load here</h3><div>School wifi sometimes blocks it. Same questions, no video:</div><button class="btn big orange" id="vfQuick">Quick play</button>';
+      $("vfQuick").onclick = function(){ goQuick(); };
+      return;
+    }
+    var t = from != null ? from : 0;
+    /* carrying on: do not show the break cards for rounds already behind us */
+    ROUNDS.forEach(function(r){ var l = inRound(r); if(Q[l[l.length - 1]].a + 2 <= t + 4) roundShown[r] = true; });
+    if(t > 0) player.seekTo(t, true);
+    try{ player.playVideo(); }catch(e){}
+    if(ticker) clearInterval(ticker);
+    ticker = setInterval(tick, 200);
+  });
+}
+function stopVideo(){
+  if(ticker){ clearInterval(ticker); ticker = null; }
+  try{ if(player && player.pauseVideo) player.pauseVideo(); }catch(e){}
+}
+function onState(e){
+  /* playing again while we were waiting = they chose to skip it */
+  if(e.data === 1 && pausedFor >= 0 && !ourPause){
+    var i = pausedFor; pausedFor = -1;
+    if(!S.p[i] || S.p[i].vSeen !== true){ record(i, null, "v"); S.p[i].vSeen = true; save(); }
+    vRevealed[i] = true; reveal($("vpanel"), i, null); drawDots(Q[i].r, i); VN().innerHTML = "";
+  }
+  ourPause = false;
+  if(e.data === 0) finishVideo();
+}
+function qAt(t){
+  var idx = -1;
+  for(var i = 0; i < Q.length; i++) if(t >= Q[i].s - .3) idx = i;
+  return idx;
+}
+function tick(){
+  if(!player || !player.getCurrentTime) return;
+  var t = player.getCurrentTime(), st = player.getPlayerState ? player.getPlayerState() : -1;
+  if(st === 1){ S.vt = t; if(Math.random() < .07) save(); }
+  var i = qAt(t);
+  if(i < 0) return;
+  var q = Q[i];
+  if(i !== vIdx){
+    vIdx = i; pausedFor = -1;
+    var already = S.p[i] && S.p[i].vSeen;
+    renderQ($("vpanel"), i, { order: [0,1], sure: false, onPick: function(k){ vPick(i, k); } });
+    if(already && t > q.a){ vRevealed[i] = true; reveal($("vpanel"), i, S.p[i].k); }
+    else vRevealed[i] = false;
+  }
+  var p = S.p[i], picked = p && p.vSeen;
+  if(!picked && !vRevealed[i] && t >= q.a - 1 && st === 1 && pausedFor !== i){
+    ourPause = true; pausedFor = i; player.pauseVideo();
+    VN().innerHTML = '<div class="waiting"><span class="pulse"></span>Paused for you. Pick a door when you are ready.</div><button class="btn quiet" id="vSkip">Skip this one</button>';
+    $("vSkip").onclick = function(){ pausedFor = -1; record(i, null, "v"); S.p[i].vSeen = true; save(); vRevealed[i] = true; reveal($("vpanel"), i, null); drawDots(q.r, i); VN().innerHTML = ""; player.playVideo(); };
+  }
+  if(picked && !vRevealed[i] && t >= q.a + .6){
+    vRevealed[i] = true; reveal($("vpanel"), i, p.k); drawDots(q.r, i);
+  }
+  /* end of a round: a natural place to stop (checked by round, because
+     the next question can start a second or two after the answer) */
+  for(var r = 1; r < 6; r++){
+    var lst = inRound(r), last = lst[lst.length - 1];
+    if(!roundShown[r] && t >= Q[last].a + 2 && t < Q[last].a + 12 && st === 1){
+      roundShown[r] = true; ourPause = true; player.pauseVideo(); save();
+      roundCard(r, function(){ player.playVideo(); }, function(){ goTitle(); });
+      break;
+    }
+  }
+  if(t >= ENDT && !roundShown[6]){ roundShown[6] = true; finishVideo(); }
+}
+function VN(){ return $("vpanel").querySelector(".nextrow") || document.createElement("div"); }
+function QN(){ return $("qpanel").querySelector(".nextrow") || document.createElement("div"); }
+function vPick(i, k){
+  record(i, k, "v"); S.p[i].vSeen = true; save();
+  markPick($("vpanel"), k); locked = true;
+  say($("vpanel"), "<b>Locked in.</b> Let's see...", "sweat");
+  VN().innerHTML = "";
+  if(pausedFor === i){ pausedFor = -1; ourPause = true; player.playVideo(); }
+}
+function finishVideo(){
+  if(mode !== "video") return;
+  mode = "ending"; stopVideo(); S.vt = 0; save();
+  roundCard(6, goEnd, goEnd);
+}
+
+/* ==========================================================
+   Quick play (no video)
+   ========================================================== */
+var qp = null;
+function goQuick(startRound){
+  mode = "quick"; stopVideo(); show("scrQuick"); setDiff(S.diff);
+  var r = startRound || firstOpenRound();
+  qp = { r: r, list: shuffle(inRound(r)), k: 0 };
+  nextQuick();
+}
+function firstOpenRound(){
+  for(var r = 1; r <= 6; r++) if(!S.rdone[r]) return r;
+  return 1;
+}
+function nextQuick(){
+  if(qp.k >= qp.list.length){
+    roundCard(qp.r, function(){
+      if(qp.r >= 6){ goEnd(); return; }
+      qp = { r: qp.r + 1, list: shuffle(inRound(qp.r + 1)), k: 0 }; nextQuick();
+    }, function(){ goTitle(); });
+    return;
+  }
+  var i = qp.list[qp.k];
+  var ord = S.diff === "spicy" ? shuffle([0,1,2]) : shuffle([0,1]);
+  renderQ($("qpanel"), i, { order: ord, sure: true, onPick: function(k){
+    record(i, k, "q"); markPick($("qpanel"), k);
+    var ok = reveal($("qpanel"), i, k); drawDots(Q[i].r, i);
+    blip(ok);
+    QN().innerHTML = '<button class="btn big orange" id="qNext">Next door &#9654;</button>';
+    $("qNext").onclick = function(){ qp.k++; nextQuick(); };
+    $("qNext").focus({ preventScroll: true });
+  }});
+  say($("qpanel"), "", "think");
+}
+function setDiff(d){
+  S.diff = d; save();
+  Array.prototype.forEach.call(document.querySelectorAll("#diffBox button"), function(b){ b.classList.toggle("on", b.getAttribute("data-d") === d); });
+}
+Array.prototype.forEach.call(document.querySelectorAll("#diffBox button"), function(b){
+  b.onclick = function(){
+    setDiff(b.getAttribute("data-d"));
+    if(mode === "quick" && !locked && qp){ nextQuick(); }
+  };
+});
+
+/* little sounds, quick play only */
+var AC = null;
+function blip(ok){
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = ok ? [523, 659, 784] : [392, 349];
+    notes.forEach(function(f, j){
+      var o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + j * .09;
+      o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(.12, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .25);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + .3);
+    });
+  }catch(e){}
+}
+
+/* ==========================================================
+   The end: jars, time machine, make a door, card, send
+   ========================================================== */
+var tmFacts = [];
+function goEnd(){
+  mode = "end"; stopVideo(); show("scrEnd"); drawDots(0);
+  var opened = 0, got = 0;
+  Q.forEach(function(q, i){ if(S.p[i]){ opened++; if(S.p[i].ok) got++; } });
+  $("endLine").innerHTML = "Doors opened: <b>" + opened + "</b>. Your gut was spot on <b>" + got + "</b> times.";
+  var h = "";
+  ROUNDS.forEach(function(r){
+    var n = starsFor(r), tot = inRound(r).length;
+    h += '<div class="jar"><b>R' + r + '</b><div class="fill" style="height:0" data-h="' + Math.round(n / tot * 100) + '"></div><em>' + n + '/' + tot + '</em></div>';
+  });
+  $("jars").innerHTML = h;
+  setTimeout(function(){ Array.prototype.forEach.call(document.querySelectorAll(".jar .fill"), function(f){ f.style.height = f.getAttribute("data-h") + "%"; }); }, 80);
+  var wobbly = [];
+  Q.forEach(function(q, i){ if(S.p[i] && S.p[i].sure === 1 && !S.p[i].ok) wobbly.push(q.o[q.c][0]); });
+  $("endJay").innerHTML = jay(got > 40 ? "cool" : "thumbs");
+  $("endBubble").innerHTML = (got > 45 ? "<b>Only 1 percent get them all, they said. Look at you.</b>" : "<b>Every door opened counts.</b> Have another go any time and see if a jar fills up more.") +
+    (wobbly.length ? "<br>You were sure about these and they surprised you: " + esc(wobbly.slice(0, 5).join(", ")) + ". Worth another look." : "");
+  tmFacts = shuffle(Q.map(function(q){ return q.f; }).filter(function(f){ return f.length < 95; })).slice(0, 3);
+  $("tmChips").innerHTML = tmFacts.map(function(f, j){ return '<button class="chip' + (S.tm === f ? " on" : "") + '" data-j="' + j + '">' + esc(f) + '</button>'; }).join("");
+  Array.prototype.forEach.call($("tmChips").querySelectorAll(".chip"), function(b){
+    b.onclick = function(){
+      S.tm = tmFacts[+b.getAttribute("data-j")]; save();
+      Array.prototype.forEach.call($("tmChips").querySelectorAll(".chip"), function(x){ x.classList.toggle("on", x === b); });
+      $("tmBubble").innerHTML = rnd(["People in 1900 would think you were a wizard.","A man in a top hat just dropped his monocle.","They would print that in the newspaper. Front page.","Nobody in 1900 has heard of half the words in that. Outrageous."]);
+      drawCard();
+    };
+  });
+  ["mkQ","mkA","mkB"].forEach(function(id){ $(id).value = (S.mk && S.mk[id]) || ""; $(id).oninput = function(){ S.mk = S.mk || {}; S.mk[id] = $(id).value; save(); drawCard(); }; });
+  drawCard();
+  if(window.Base5Send && !$("sendHost").firstChild) Base5Send.mount($("sendHost"), { tool: "Fifty Fifty quiz", getText: sendText, filename: "fifty-fifty" });
+  burst($("jars"));
+}
+function sendText(){
+  var opened = 0, got = 0, lines = [];
+  Q.forEach(function(q, i){ if(S.p[i]){ opened++; if(S.p[i].ok) got++; } });
+  lines.push("Fifty Fifty: the general knowledge quiz video (" + (S.lastMode === "q" ? "quick play" : "play along") + ")");
+  lines.push("Doors opened: " + opened + " of " + Q.length + ". Right first time: " + got + ".");
+  lines.push("By round: " + ROUNDS.map(function(r){ return "R" + r + " " + starsFor(r) + "/" + inRound(r).length; }).join(", "));
+  var w = [];
+  Q.forEach(function(q, i){ if(S.p[i] && S.p[i].sure === 1 && !S.p[i].ok) w.push(q.q); });
+  if(w.length) lines.push("Sure but surprised by: " + w.join(" | "));
+  Object.keys(S.why).forEach(function(i){ if(S.why[i]) lines.push("How I knew (" + Q[i].q + "): " + S.why[i]); });
+  if(S.tm) lines.push("Fact I would take back to 1900: " + S.tm);
+  var mk = S.mk || {};
+  if(mk.mkQ) lines.push("My question for Base 5: " + mk.mkQ + " A) " + (mk.mkA || "") + " B) " + (mk.mkB || "") + " (right one: " + rightLetter() + ")");
+  return lines.join("\n");
+}
+function rightLetter(){ var r = document.querySelector('input[name="mkR"]:checked'); return r ? r.value : "A"; }
+
+function drawCard(){
+  var cv = $("cardCv"), x = cv.getContext("2d"), W = cv.width, H = cv.height;
+  x.fillStyle = "#fef8f4"; x.fillRect(0, 0, W, H);
+  var g = x.createRadialGradient(150, 100, 10, 150, 100, 700); g.addColorStop(0, "rgba(32,173,202,.35)"); g.addColorStop(1, "rgba(32,173,202,0)");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.save(); x.translate(80, 80); x.rotate(-.04);
+  x.font = "900 150px Archivo, sans-serif"; x.lineWidth = 10; x.strokeStyle = "#0a2f38";
+  x.strokeText("FIFTY", 0, 140); x.fillStyle = "#fffdf8"; x.fillText("FIFTY", 0, 140);
+  x.strokeText("FIFTY", 0, 290); x.fillStyle = "#ef7724"; x.fillText("FIFTY", 0, 290);
+  x.restore();
+  /* two doors */
+  [[760, "#007291"], [900, "#ef7724"]].forEach(function(d){
+    x.fillStyle = d[1]; x.strokeStyle = "#0a2f38"; x.lineWidth = 8;
+    x.beginPath(); x.moveTo(d[0], 330); x.lineTo(d[0], 160); x.arc(d[0] + 55, 160, 55, Math.PI, 0); x.lineTo(d[0] + 110, 330); x.closePath(); x.fill(); x.stroke();
+  });
+  var opened = 0, got = 0;
+  Q.forEach(function(q, i){ if(S.p[i]){ opened++; if(S.p[i].ok) got++; } });
+  x.fillStyle = "#0a2f38"; x.font = "700 46px 'Atkinson Hyperlegible', sans-serif";
+  x.fillText("I opened " + opened + " doors.", 80, 450);
+  x.fillText("My gut was spot on " + got + " times.", 80, 510);
+  ROUNDS.forEach(function(r, j){
+    var n = starsFor(r), tot = inRound(r).length, bx = 80 + j * 155, by = 560, bh = 200;
+    x.fillStyle = "#fff"; x.strokeStyle = "#0a2f38"; x.lineWidth = 6;
+    x.fillRect(bx, by, 130, bh); x.strokeRect(bx, by, 130, bh);
+    var fh = bh * n / tot; x.fillStyle = "#ffc93c"; x.fillRect(bx + 3, by + bh - fh, 124, fh - 3);
+    x.fillStyle = "#0a2f38"; x.font = "900 30px Archivo, sans-serif"; x.fillText("R" + r, bx + 42, by + 42);
+    x.font = "700 30px 'Atkinson Hyperlegible', sans-serif"; x.fillText(n + "/" + tot, bx + 34, by + bh - 18);
+  });
+  var y = 850;
+  function wrapTxt(t, maxW, lh){
+    var words = t.split(" "), line = "";
+    words.forEach(function(w){ var test = line ? line + " " + w : w; if(x.measureText(test).width > maxW && line){ x.fillText(line, 80, y); y += lh; line = w; } else line = test; });
+    if(line){ x.fillText(line, 80, y); y += lh; }
+  }
+  if(S.tm){
+    x.fillStyle = "#007291"; x.font = "900 34px Archivo, sans-serif"; x.fillText("TAKING BACK TO 1900:", 80, y); y += 50;
+    x.fillStyle = "#0a2f38"; x.font = "700 36px 'Atkinson Hyperlegible', sans-serif"; wrapTxt(S.tm, 920, 46); y += 14;
+  }
+  var mk = S.mk || {};
+  if(mk.mkQ){
+    x.fillStyle = "#ef7724"; x.font = "900 34px Archivo, sans-serif"; x.fillText("MY DOOR FOR BASE 5:", 80, y); y += 50;
+    x.fillStyle = "#0a2f38"; x.font = "700 36px 'Atkinson Hyperlegible', sans-serif"; wrapTxt(mk.mkQ + "  A) " + (mk.mkA || "?") + "  B) " + (mk.mkB || "?"), 920, 46);
+  }
+  x.fillStyle = "#0a2f38"; x.font = "700 26px 'Atkinson Hyperlegible', sans-serif";
+  x.fillText("Base 5 " + new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }), 80, H - 60);
+  if(window.B5JayPix){
+    var im = new Image();
+    im.onload = function(){ x.imageSmoothingEnabled = false; x.drawImage(im, W - 260, H - 300, 200, 200); };
+    im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(B5JayPix.svg("thumbs").replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '));
+  }
+}
+$("saveCard").onclick = function(){
+  drawCard();
+  setTimeout(function(){ var a = document.createElement("a"); a.href = $("cardCv").toDataURL("image/png"); a.download = "fifty-fifty-card.png"; a.click(); }, 150);
+};
+Array.prototype.forEach.call(document.querySelectorAll('input[name="mkR"]'), function(r){ r.onchange = drawCard; });
+
+/* ---------- credits ---------- */
+$("credBtn").onclick = function(){
+  var seen = {}, h = [];
+  allTitles().sort().forEach(function(t){
+    var p = PIC[t]; if(!p || !p.file || seen[p.file]) return; seen[p.file] = 1;
+    h.push('<div><a href="https://en.wikipedia.org/wiki/File:' + encodeURIComponent(p.file) + '" target="_blank" rel="noopener">' + esc(t) + '</a></div>');
+  });
+  $("credList").innerHTML = h.length ? h.join("") : "<div>The pictures have not loaded on this device yet.</div>";
+  $("credCard").classList.remove("hide");
+};
+$("credClose").onclick = function(){ $("credCard").classList.add("hide"); };
+
+/* ---------- buttons ---------- */
+$("goVideo").onclick = function(){ S.lastMode = "v"; save(); goVideo(S.vt > 15 ? S.vt - 3 : 0); };
+$("goQuick").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
+$("goCarry").onclick = function(){ if(S.lastMode === "v" && S.vt > 15) goVideo(S.vt - 3); else goQuick(); };
+$("vToQuick").onclick = function(){ S.lastMode = "q"; save(); goQuick(); };
+$("skipIntro").onclick = function(){ if(player && player.seekTo){ player.seekTo(Q[0].s - 1, true); player.playVideo(); } };
+$("againQuick").onclick = function(){ S.p = {}; S.rdone = {}; S.why = {}; save(); goQuick(1); };
+$("toTitle").onclick = goTitle;
+$("brandBtn").onclick = function(e){ e.preventDefault(); goTitle(); };
+document.addEventListener("keydown", function(e){
+  if(mode !== "quick" && mode !== "video") return;
+  if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  var host = mode === "quick" ? $("qpanel") : $("vpanel");
+  var k = { "1":0, "a":0, "2":1, "b":1, "3":2, "c":2 }[e.key.toLowerCase()];
+  if(k != null && !locked){ var d = host.querySelectorAll(".door")[k]; if(d) d.click(); }
+  if(e.key === "Enter" && $("qNext")) $("qNext").click();
+});
+
+/* testing hooks (automated checks only) */
+window.FF = { Q: Q, S: function(){ return S; }, goEnd: goEnd, goQuick: goQuick, pics: function(){ return PIC; } };
+
+loadPics();
+goTitle();
+})();
+</script>
+<script src="/data/b5evidence.js?v=2"></script>
+<script>
+if(window.B5Evidence) B5Evidence.start({ slug: "game-fifty-fifty", title: "Fifty Fifty", subject: "Brain games", kind: "game",
+  line: function(){ try{ var s = JSON.parse(localStorage.getItem("b5.fifty.v1") || "{}"), n = Object.keys(s.p || {}).length; return "Opened " + n + " of 51 doors in the Fifty Fifty general knowledge quiz."; }catch(e){ return ""; } } });
+</script>
+</body>
+</html>

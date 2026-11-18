@@ -282,6 +282,12 @@ ICONS = {
         eyes(46, 46, 23, 2.4) +
         '<rect x="34" y="44" width="20" height="14" rx="2" fill="%s"/>' % O +
         '<path d="M35 46l9 6 9-6" fill="none" stroke="%s" stroke-width="2.2" stroke-linejoin="round"/>' % P),
+    "icons/fifty-fifty": (P,
+        '<path d="M7 56V24A12 12 0 0 1 31 24V56Z" fill="%s"/>' % T +
+        '<path d="M33 56V24A12 12 0 0 1 57 24V56Z" fill="%s"/>' % Y +
+        '<path d="M33 56V24A12 12 0 0 1 45 12.6L50 16V58Z" fill="%s"/>' % O +
+        '<circle cx="25" cy="40" r="2.6" fill="%s"/><circle cx="45" cy="40" r="2.6" fill="%s"/>' % (Y, K) +
+        '<path d="M4 57H60" stroke="%s" stroke-width="3" stroke-linecap="round"/>' % K),
     "icons/sankofa": (P,
         '<path d="M32 51C15 40 11 27 18 20C24 14 31 17 32 24C33 17 40 14 46 20C53 27 49 40 32 51Z" fill="none" stroke="%s" stroke-width="5" stroke-linejoin="round"/>' % O +
         '<path d="M32 24C30 30 23 30 23 26C23 23 27 23 27 26M32 24C34 30 41 30 41 26C41 23 37 23 37 26" fill="none" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % O +
