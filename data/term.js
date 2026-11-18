@@ -329,7 +329,7 @@ window.B5TERM = {
               line:"A quiz on the board. Two doors, one right answer.",
               heading:"Fifty Fifty",
               sub:"This morning's warm up, on the board.",
-              body:"A general knowledge quiz on the board. Everyone picks door A or door B, then the right door lights up. If the school wifi lets the video through, it plays along and stops before every answer. A few rounds fit in the quarter of an hour, and it keeps your place for next time. Nothing gets marked.",
+              body:"A general knowledge quiz on the board. Everyone picks door A or door B, then the right door lights up. Every door has a real photo on it. A few rounds fit in the quarter of an hour, and it keeps your place for next time. Nothing gets marked.",
               options:[["Pick","Shout A or B, or point at the board."],["Gut","No thinking too hard. Go with your first feeling."],["Spot","This week is 1969. One question is about that year. Can you spot it?"]],
               links:[["Play Fifty Fifty","/games/fifty-fifty/"]],
               wayslabel:"Ways to be part of it",
