@@ -1,0 +1,30 @@
+# Downloads the Fifty Fifty quiz photos from Wikipedia into the repo.
+# Runs by itself when the photo list or the script changes, or from the
+# Actions tab ("Run workflow"). Plain ASCII only.
+name: Fifty Fifty photos
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - games/fifty-fifty/_build/photos.txt
+      - games/fifty-fifty/_build/fetch_photos.py
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 games/fifty-fifty/_build/fetch_photos.py
+      - name: Save the photos
+        run: |
+          git config user.name "Fifty Fifty photos"
+          git config user.email "actions@users.noreply.github.com"
+          git add games/fifty-fifty/_build/raw
+          git diff --cached --quiet || git commit -m "Fifty Fifty: photos from Wikipedia"
+          git pull --rebase origin main
+          git push origin HEAD:main
