@@ -19,6 +19,18 @@ var COVERS = {
     players:"1<br>PLAYER",
     spine:T("THE HUSH","font:700 46px/1 Silk;color:#e6eaf2;"+ext("#5b6672",4,"#000"))
   },
+  "good-goose": {
+    vars:{base:"#0e3a4a",base2:"#082630",accent:"#ef7724",sub:"#d4ebf2",ribbon:"#fffaf0",ribbonInk:"#0a2f38",s1:"#ef7724",s2:"#20adca",s3:"#fffaf0"},
+    chip:"SNEAKY",
+    title:T("Good Goose","font:900 112px/1 Archivo;color:#fffdf8;-webkit-text-stroke:5px #0a2f38;paint-order:stroke fill;"+ext("#ef7724",8,"#000")),
+    sub:"SECRETLY KIND",
+    ribbon:"SNEAK &middot; HONK &middot; HELP",
+    burst:["60","DEEDS!"],
+    tag:"A GIVING TUESDAY GAME",
+    small:"Waddle round a snowy village doing secret good deeds. Can they catch you?",
+    players:"1<br>PLAYER",
+    spine:T("Good Goose","font:900 46px/1 Archivo;color:#fffdf8;"+ext("#ef7724",4,"#000"))
+  },
   "pigeon-post": {
     vars:{base:"#0d3340",base2:"#08222b",accent:"#ef7724",sub:"#ffd27a",ribbon:"#c8312f",ribbonInk:"#fffdf8",s1:"#ef7724",s2:"#20adca",s3:"#c8312f"},
     chip:"FLYING",

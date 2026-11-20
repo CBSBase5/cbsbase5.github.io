@@ -273,6 +273,15 @@ ICONS = {
         '<path d="M32 19Q37 27 32 34Q27 27 32 19Z" fill="%s"/>' % Y +
         '<path d="M10 38H54Q52 54 32 54Q12 54 10 38Z" fill="%s"/>' % T +
         '<path d="M17 44h30" stroke="%s" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 6"/>' % P),
+    "icons/good-goose": (P,
+        '<path d="M12 40L4 32L8 46Z" fill="%s"/>' % T +
+        '<ellipse cx="27" cy="41" rx="18" ry="12" fill="%s"/>' % T +
+        '<path d="M38 38Q35 22 42 15" fill="none" stroke="%s" stroke-width="9" stroke-linecap="round"/>' % T +
+        '<circle cx="44" cy="15" r="7.5" fill="%s"/>' % T +
+        '<path d="M50 12.5l10 3.5-10 3.5z" fill="%s"/>' % O +
+        '<path d="M16 38Q27 30 37 41Q26 47 16 38Z" fill="%s"/>' % C +
+        eyes(45, 45, 13, 2.2) +
+        '<path d="M22 52v7M32 52v7M19 59h6M29 59h6" stroke="%s" stroke-width="3" stroke-linecap="round"/>' % O),
     "icons/pigeon-post": (P,
         '<path d="M6 30L20 26L20 38Z" fill="%s"/>' % T +
         '<ellipse cx="30" cy="36" rx="17" ry="11" fill="%s"/>' % T +

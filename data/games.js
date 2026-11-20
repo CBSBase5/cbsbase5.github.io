@@ -102,6 +102,12 @@ window.B5GAMES = {
       tags:["make","learning"], added:"2026-10-12", art:"/practice/jump-lab-art/box.webp", fill:"bright", motif:"blocks", year:"Whenever you make it"
     },
     {
+      id:"good-goose", title:"Good Goose", href:"/practice/good-goose.html",
+      blurb:"A snowy 3D village and one very sneaky goose. Do 60 secret good deeds, collect 24 hats, join the honk choir, then see if the village can catch you.",
+      meta:"For Giving Tuesday &middot; 12 places to open up &middot; saves on this device",
+      tags:["cc","fun"], added:"2026-11-20", art:"/games/art/good-goose/box.webp", fill:"teal", motif:"heart", year:"This winter"
+    },
+    {
       id:"the-hush", title:"The Hush", href:"/practice/the-hush.html",
       blurb:"A card battler for Anti Bullying Week. Speak up, stand together and listen to break the Hush in each part of school, free your friends and turn the whole school back on.",
       meta:"For Anti Bullying Week &middot; about 10 minutes a run &middot; 10 levels &middot; saves on this device",

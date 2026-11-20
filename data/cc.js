@@ -478,7 +478,7 @@ window.B5CC = {
         {"i":"toolbox","t":"Fix something for someone","mins":20,"need":[],"steps":["Find something broken or messy: a game, a shelf, a display.","Fix it, with help if you need it.","Show the owner."],"easier":"Tidy something up.","bigger":"Run a repair cafe hour."}
       ],
       jobs:["fundraiser","volunteer","wildlife","community"],
-      game:null,
+      game:{ title:"Good Goose", href:"/practice/good-goose.html", verb:"Play", blurb:"Waddle round a snowy village doing secret good deeds. Can the village catch you?" },
       look:{ bg:"#ffbe0b", bg2:"#ffd166", ink:"#2b0f6b", pop:"#fb5607", pop2:"#3a86ff", motif:"gift", pattern:"confetti", scene:"giving", effect:"confetti", fx:["#fb5607","#3a86ff","#ff006e","#8338ec"] }
     },
     {
