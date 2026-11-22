@@ -89,6 +89,10 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .menu button,.menu a{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:700;background:#fff;border:2px solid rgba(10,47,56,.12);border-radius:16px 12px 18px 10px;padding:10px 14px;text-decoration:none;color:var(--ink);text-align:left}
 .menu button img,.menu a img{width:34px;height:34px}
 .menu .on{border-color:var(--teal)}
+.menu .mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menu .mrow.small button{font-size:17px;padding:8px 12px;gap:9px}
+.menu .mrow.small button img{width:28px;height:28px}
+@media (max-height:700px){.menu{gap:7px}.menu button,.menu a{padding:7px 12px}#pause .panel{padding-top:14px;padding-bottom:58px}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
 .hatc{background:#fff;border:3px solid rgba(10,47,56,.12);border-radius:16px 12px 18px 10px;padding:10px;text-align:center;font-weight:700;font-size:15px}
 .hatc img{width:64px;height:64px;display:block;margin:0 auto 4px}
@@ -2646,14 +2650,16 @@ function menuBtn(icon, label, fn, cls) { const b = document.createElement('butto
 function buildPauseMenu() {
   const m = $('pauseMenu'); m.innerHTML = '';
   m.appendChild(menuBtn('play', 'Carry on', () => setPaused(false)));
-  m.appendChild(menuBtn('map', 'Map', openMap));
-  m.appendChild(menuBtn('hanger', 'Wardrobe', openWardrobe));
+  const row = (cls, ...bs) => { const d = document.createElement('div'); d.className = 'mrow ' + cls; bs.forEach(b => d.appendChild(b)); return d; };
+  m.appendChild(row('', menuBtn('map', 'Map', openMap), menuBtn('hanger', 'Wardrobe', openWardrobe)));
+  const tg = row('small');
   if (S.flags.medal) m.appendChild(menuBtn('heart', 'Kindness card', () => { setPaused(false); openCard(); }));
-  m.appendChild(menuBtn('music', 'Music: ' + (AU.musicOn ? 'on' : 'off'), () => { setMusic(!AU.musicOn); buildPauseMenu(); }, AU.musicOn ? 'on' : ''));
-  m.appendChild(menuBtn('sound', 'Sounds: ' + (AU.sfxOn ? 'on' : 'off'), () => { setSfx(!AU.sfxOn); buildPauseMenu(); }, AU.sfxOn ? 'on' : ''));
-  m.appendChild(menuBtn('honk', 'Jay honks: ' + (AU.jayHonks ? 'on' : 'off'), () => { AU.jayHonks = !AU.jayHonks; saveAudioPrefs(); buildPauseMenu(); if (AU.ctx) { AU.ctx.resume(); sfxHonk(); } }, AU.jayHonks ? 'on' : ''));
-  m.appendChild(menuBtn('letter', 'Big notepad: ' + (AU.bigPad ? 'on' : 'off'), () => { AU.bigPad = !AU.bigPad; document.body.classList.toggle('bigpad', AU.bigPad); saveAudioPrefs(); buildPauseMenu(); }, AU.bigPad ? 'on' : ''));
-  m.appendChild(menuBtn('shake', 'Screen shake: ' + (AU.shakeOn ? 'on' : 'off'), () => { AU.shakeOn = !AU.shakeOn; saveAudioPrefs(); buildPauseMenu(); }, AU.shakeOn ? 'on' : ''));
+  tg.appendChild(menuBtn('music', 'Music: ' + (AU.musicOn ? 'on' : 'off'), () => { setMusic(!AU.musicOn); buildPauseMenu(); }, AU.musicOn ? 'on' : ''));
+  tg.appendChild(menuBtn('sound', 'Sounds: ' + (AU.sfxOn ? 'on' : 'off'), () => { setSfx(!AU.sfxOn); buildPauseMenu(); }, AU.sfxOn ? 'on' : ''));
+  tg.appendChild(menuBtn('honk', 'Jay honks: ' + (AU.jayHonks ? 'on' : 'off'), () => { AU.jayHonks = !AU.jayHonks; saveAudioPrefs(); buildPauseMenu(); if (AU.ctx) { AU.ctx.resume(); sfxHonk(); } }, AU.jayHonks ? 'on' : ''));
+  tg.appendChild(menuBtn('letter', 'Big notepad: ' + (AU.bigPad ? 'on' : 'off'), () => { AU.bigPad = !AU.bigPad; document.body.classList.toggle('bigpad', AU.bigPad); saveAudioPrefs(); buildPauseMenu(); }, AU.bigPad ? 'on' : ''));
+  tg.appendChild(menuBtn('shake', 'Screen shake: ' + (AU.shakeOn ? 'on' : 'off'), () => { AU.shakeOn = !AU.shakeOn; saveAudioPrefs(); buildPauseMenu(); }, AU.shakeOn ? 'on' : ''));
+  m.appendChild(tg);
   const rs = menuBtn('restart', 'Start again', () => { rs.innerHTML = '<img alt="" src="' + iconURL('restart') + '">Sure? Tap again'; rs.onclick = () => { wipeSave(); location.reload(); }; });
   m.appendChild(rs);
   const a = document.createElement('a'); a.href = '/cc/'; a.innerHTML = '<img alt="" src="' + iconURL('home') + '">Cultural Calendar'; m.appendChild(a);
@@ -4744,7 +4750,7 @@ function openMap() {
       svg += '<text x="' + cx + '" y="' + (cy + 40) + '" text-anchor="middle" font-family="Patrick Hand, sans-serif" font-size="16" fill="#ef7724">' + done + '/' + all.length + '</text>'; }
     else svg += '<text x="' + cx + '" y="' + (cy + 10) + '" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="30" fill="rgba(43,49,53,.35)">?</text>';
   }
-  svg += '<g transform="translate(' + X(G.x) + ' ' + Y(G.z) + ')"><circle r="15" fill="#ef7724" opacity=".25"><animate attributeName="r" values="12;20;12" dur="1.6s" repeatCount="indefinite"/></circle><image href="' + iconURL('goose') + '" x="-15" y="-15" width="30" height="30"/></g></svg>';
+  svg += '<g transform="translate(' + X(clamp(G.x, -58, 100)) + ' ' + Y(clamp(G.z, -48, 32)) + ')"><circle r="15" fill="#ef7724" opacity=".25"><animate attributeName="r" values="12;20;12" dur="1.6s" repeatCount="indefinite"/></circle><image href="' + iconURL('goose') + '" x="-15" y="-15" width="30" height="30"/></g></svg>';
   $('mapBox').innerHTML = svg; $('mapOver').classList.remove('hidden');
 }
 
