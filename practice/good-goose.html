@@ -1302,20 +1302,21 @@ class Villager {
       if (this.sus >= 1) this.startShoo();
     }
   }
-  startShoo() { this.state = 'shoo'; this.st = 0; this.hit = false; this.sus = 1; sfxMumble(this.pitch, 3, 'cross'); }
-  endShoo() { this.state = 'routine'; this.sus = 0; this.hit = false; this.lookT = 0.6; this.rp = 'walk'; this.doReact('huff', 1.3); sfxMumble(this.pitch, 3, 'cross', 0.6); }
+  startShoo() { if (!this.shooFrom) this.shooFrom = { x: this.x, z: this.z, face: this.face, area: areaAt(this.x, this.z) }; this.goHome = false; this.state = 'shoo'; this.st = 0; this.hit = false; this.sus = 1; sfxMumble(this.pitch, 3, 'cross'); }
+  endShoo() { if (this.shooFrom) { this.goHome = true; this.ghT = 0; } this.state = 'routine'; this.sus = 0; this.hit = false; this.lookT = 0.6; this.rp = 'walk'; this.doReact('huff', 1.3); sfxMumble(this.pitch, 3, 'cross', 0.6); }
   updShoo(dt) {
     this.st += dt; const dx = G.x - this.x, dz = G.z - this.z, d = Math.hypot(dx, dz);
     this.anim = this.hit ? 'shooFlap' : 'flail';
     if (!this.hit) {
-      if (d > 1.3) { this.walkTo(G.x, G.z, dt, this.speed * 2.3); this.moving = true; }
+      if (d > 1.3) { this.walkTo(G.x, G.z, dt, this.speed * 2.3); this.solid(); this.moving = true; }
       else {
         this.hit = true; this.flT = 0.9; this.moving = false;
         dropCarried(true); G.knockT = 0.42; G.kx = dx / (d || 1) * 7.5; G.kz = dz / (d || 1) * 7.5; sfxHonk(1.3); sfxMumble(this.pitch, 4, 'cross');
       }
-      if (this.st > 5 || d > this.range + 5) this.endShoo();
+      if (this.st > 5 || d > this.range + 5 || (this.shooFrom && (areaAt(G.x, G.z) !== this.shooFrom.area || dist2(this.x, this.z, this.shooFrom.x, this.shooFrom.z) > 9))) this.endShoo();
     } else { this.moving = false; this.flT -= dt; this.face = angLerp(this.face, Math.atan2(dx, dz), damp(6, dt)); if (this.flT <= 0) this.endShoo(); }
   }
+  solid() { const was = this.col.on; this.col.on = false; const q = { x: this.x, z: this.z }; pushOut(q, 0.34); this.col.on = was; this.x = q.x; this.z = q.z; }
   walkTo(tx, tz, dt, sp) {
     const dx = tx - this.x, dz = tz - this.z, d = Math.hypot(dx, dz); if (d < 0.001) return d;
     const s = Math.min(d, (sp || this.speed) * dt); this.x += dx / d * s; this.z += dz / d * s; if (dt > 0) this.curSpeed = s / dt;
@@ -1344,7 +1345,9 @@ class Villager {
     this.t += dt; this.perceive(dt);
     if (this.state === 'shoo') this.updShoo(dt);
     else if (this.react) { this.moving = false; this.anim = this.react; this.reactT -= dt; if (!this.seated && this.react !== 'doubletake' && this.react !== 'huff') this.face = angLerp(this.face, this.reactFace != null ? this.reactFace : Math.atan2(G.x - this.x, G.z - this.z), damp(this.react === 'startle' ? 9 : 3, dt)); if (this.reactT <= 0) { this.react = null; this.reactFace = null; } }
-    else if (this.script) { if (this.runSteps(this.script, dt, true)) { this.script = null; this.ri = 0; this.rp = 'walk'; } }
+    else if (this.script) { this.goHome = false; this.shooFrom = null; if (this.runSteps(this.script, dt, true)) { this.script = null; this.ri = 0; this.rp = 'walk'; } }
+    else if (this.goHome && this.shooFrom) { const h = this.shooFrom; this.ghT += dt; const r = this.walkTo(h.x, h.z, dt); this.solid(); this.moving = r > 0.08; this.anim = 'walk';
+      if (r <= 0.08 || (this.ghT > 9 && this.gd > 12)) { this.x = h.x; this.z = h.z; this.face = h.face; this.goHome = false; this.shooFrom = null; this.moving = false; } }
     else if (this.lookT > 0) { this.lookT -= dt; this.moving = false; this.anim = this.baseAnim === 'walk' ? 'idle' : this.baseAnim; this.face = angLerp(this.face, Math.atan2(G.x - this.x, G.z - this.z), damp(4, dt)); }
     else this.runSteps(this.routine, dt, false);
     // idle chatter when goose is near
@@ -3896,7 +3899,6 @@ function buildPond() {
 function buildWoods() {
   hedge(41, -50, 75, -50); hedge(41, -50, 41, -35.4); hedge(41, -32.6, 41, -18.5);
   W.woodsGate = gatePanel(41, -35.4, 2.75, true); W.woodsCol = colBox(41, -34, 0.3, 2.8, false);
-  makeSoonSign(39, -34); colBox(38.9, -34, 0.6, 3.6, false);
   stonePath(41, 75, -35.7, -34.3, '#a89878');
   // campfire circle
   const cf = new THREE.Group(); cf.position.set(58, 0, -28); scene.add(cf);
@@ -4219,7 +4221,7 @@ function makeCow(x, z, rotY, horse) {
   const head = new THREE.Group(); head.position.set(0, 1.35, 0.85); g.add(head); mk(rbox(0.36, 0.4, horse ? 0.75 : 0.55, 0.12), c1, 0, 0, 0.15, head); mk(rbox(0.3, 0.2, 0.2, 0.06), M('#e8b9a8'), 0, -0.1, 0.45, head);
   if (horse) mk(bxg(0.06, 0.3, 0.7), c2, 0, 0.3, -0.1, head); else for (const sd of [-1, 1]) mk(new THREE.ConeGeometry(0.04, 0.16, 5), M('#e8d3a9'), 0.16 * sd, 0.24, 0.05, head);
   for (const [lx, lz] of [[-0.24, 0.55], [0.24, 0.55], [-0.24, -0.55], [0.24, -0.55]]) mk(cyl(0.07, 0.06, 0.75, 6), c1, lx, 0.37, lz, g);
-  const tl = mk(cyl(0.02, 0.02, 0.6, 4), c2, 0, 1.0, -0.82, g); tl.rotation.x = 0.3; colBox(x, z, 1.2, 1.8, false);
+  const tl = mk(cyl(0.02, 0.02, 0.6, 4), c2, 0, 1.0, -0.82, g); tl.rotation.x = 0.3; for (const k of [-0.42, 0.42]) colCirc(x + Math.sin(rotY) * k, z + Math.cos(rotY) * k, 0.42);
   return { g, head, tl, munch: false, drink: false };
 }
 function setupFarm() {
@@ -4562,7 +4564,7 @@ function startEnding() {
     const v = V[id]; ENDING.crowd.push({ v, save: { x: v.x, z: v.z, face: v.face, routine: v.routine, script: v.script, seated: v.seated, seatY: v.seatY, baseAnim: v.baseAnim, speed: v.speed, needOn: v.needOn } }); v.needOn = false;
     const inner = i < 12, k = inner ? i / 11 : (i - 12) / Math.max(1, ids.length - 13), a = 0.8 + k * (TAU - 1.6), r = inner ? 2.5 : 3.7;
     const tx = P.x + Math.sin(a) * r, tz = P.z + Math.cos(a) * r, sx = P.x + Math.sin(a) * (r + 2.6), sz = P.z + Math.cos(a) * (r + 2.6);
-    v.isCrowd = true; v.x = sx; v.z = sz; v.seated = false; v.react = null; v.speed = 1.6; v.routine = []; v.baseAnim = 'idle';
+    v.isCrowd = true; v.goHome = false; v.shooFrom = null; if (v.state === 'shoo') v.state = 'routine'; v.x = sx; v.z = sz; v.seated = false; v.react = null; v.speed = 1.6; v.routine = []; v.baseAnim = 'idle';
     v.setScript([{ wait: rand(0, 0.6), anim: 'idle', face: a + Math.PI }, { to: [tx, tz] }, { wait: 99, anim: 'idle', face: a + Math.PI }]);
   });
   $('pad').classList.add('hidden'); $('tl').classList.add('hidden'); save();
@@ -4581,7 +4583,7 @@ function endingTick(dt) {
   if (E.step === 4 && t > 9.6) { E.step = 5; showEndPanel(); }
 }
 function finishEnding() {
-  for (const c of ENDING.crowd) { const v = c.v, sv2 = c.save; Object.assign(v, { isCrowd: false, x: sv2.x, z: sv2.z, face: sv2.face, seated: sv2.seated, seatY: sv2.seatY, baseAnim: sv2.baseAnim, speed: sv2.speed, needOn: sv2.needOn, react: null }); v.routine = sv2.routine; v.script = sv2.script; v.ri = 0; }
+  for (const c of ENDING.crowd) { const v = c.v, sv2 = c.save; Object.assign(v, { isCrowd: false, goHome: false, shooFrom: null, x: sv2.x, z: sv2.z, face: sv2.face, seated: sv2.seated, seatY: sv2.seatY, baseAnim: sv2.baseAnim, speed: sv2.speed, needOn: sv2.needOn, react: null }); v.routine = sv2.routine; v.script = sv2.script; v.ri = 0; }
   ENDING.on = false; ENDING.crowd = []; G.x = ENDING.P.x; G.z = ENDING.P.z; $('pad').classList.remove('hidden'); $('tl').classList.remove('hidden'); renderPad();
   const o = camOffset(); camLook.set(G.x, 0.6, G.z); camera.position.set(G.x + o.x, o.y, G.z + o.z); camera.lookAt(camLook);
 }
@@ -4717,19 +4719,19 @@ function makeProp(kind) {
 }
 function setupProps() {
   [['customer', 'bag'], ['parent', 'bag'], ['walker', 'umbrella'], ['oldman2', 'flask'], ['hiker', 'flask'], ['coatMan', 'umbrella'], ['farmwife', 'bag']].forEach(([id, kind]) => {
-    const v = V[id]; if (!v) return; const g = makeProp(kind); v.m.hand.add(g); PROPS.push({ v, g, kind, down: 0, home: g.position.clone() });
+    const v = V[id]; if (!v) return; const g = makeProp(kind); const lh = new THREE.Group(); lh.position.set(0, -0.3, 0.02); v.m.elbows[0].add(lh); lh.add(g); PROPS.push({ v, g, kind, down: 0, hand: lh, home: g.position.clone() });
   });
 }
 function propHonk() {
   for (const p2 of PROPS) { const v = p2.v; if (p2.down > 0 || v.seated || dist2(v.x, v.z, G.x, G.z) > 4.5 || v.script) continue;
-    const wp = p2.g.getWorldPosition(new THREE.Vector3()); v.m.hand.remove(p2.g); scene.add(p2.g); p2.g.position.copy(wp); p2.down = 3.2; v.doReact('startle', 0.6);
+    const wp = p2.g.getWorldPosition(new THREE.Vector3()); p2.hand.remove(p2.g); scene.add(p2.g); p2.g.position.copy(wp); p2.down = 3.2; v.doReact('startle', 0.6);
     const gx = v.x + Math.sin(v.face) * 0.5 + rand(-0.2, 0.2), gz = v.z + Math.cos(v.face) * 0.5 + rand(-0.2, 0.2), y0 = wp.y, gy = groundY(gx, gz) + (p2.kind === 'umbrella' ? 0.1 : 0.12);
     p2.gx = gx; p2.gz = gz; tween(0.45, k => { p2.g.position.set(lerp(wp.x, gx, k), lerp(y0, gy, k * k), lerp(wp.z, gz, k)); p2.g.rotation.z = k * (p2.kind === 'umbrella' ? 1.4 : 0.9); }, () => sfxThump()); }
 }
 function updProps(dt) {
   for (const p2 of PROPS) { if (p2.down <= 0) continue; p2.down -= dt; const v = p2.v;
     if (p2.down < 1.4 && !p2.bend) { p2.bend = true; v.doReact('tend', 1.2); v.reactFace = Math.atan2(p2.gx - v.x, p2.gz - v.z); }
-    if (p2.down <= 0) { p2.bend = false; scene.remove(p2.g); v.m.hand.add(p2.g); p2.g.position.copy(p2.home); p2.g.rotation.set(0, 0, 0); } }
+    if (p2.down <= 0) { p2.bend = false; scene.remove(p2.g); p2.hand.add(p2.g); p2.g.position.copy(p2.home); p2.g.rotation.set(0, 0, 0); } }
 }
 // the wardrobe preview: the camera circles the goose
 const WARD = { on: false, a: 0 };
@@ -4828,7 +4830,7 @@ function registerOcc(obj) {
   obj.traverse(o => { if (o.isMesh) { if (!cm.has(o.material)) { const c2 = o.material.clone(); if (o.material.userData.wind) { c2.userData.wind = 0; windify(c2, o.material.userData.wind); } cm.set(o.material, c2); } o.material = cm.get(o.material); } });
   if (!obj.isMesh) bakeGroup(obj);
   const mats = []; obj.traverse(o => { if (o.isMesh && !mats.includes(o.material)) mats.push(o.material); });
-  mats.forEach(m => { m.userData.op = m.opacity; m.userData.tr = m.transparent; m.userData.dw = m.depthWrite; });
+  mats.forEach(m => { m.userData.op = m.opacity; m.userData.tr = true; m.userData.dw = m.depthWrite; m.transparent = true; });
   occ.push({ obj, box: new THREE.Box3().setFromObject(obj).expandByScalar(0.6), mats, f: 1, ap: 1 });
 }
 function segBox(a, b, box) {
@@ -4882,7 +4884,7 @@ $('load').classList.add('hidden');
 requestAnimationFrame(frame);
 document.addEventListener('visibilitychange', () => { if (document.hidden && started && !paused) setPaused(true); });
 
-if (DEBUG) window.GG = { PROPS, openMap, WARD, ENDING, startEnding, openCard, QUAL, CRITTERS, WOBBLE, VOICE, HONKS, sfxHonk, HEN, PUP, SHEEP, RELIEFS, audioInit, save, bakeInfo, title, endTitle, AU: () => AU, DUCK, CHOIR, wakeGoose, balls, camAt: (x, z, zm) => { const o = camOffset(); const k = zm || 1; camLook.set(x, 0.8, z); camera.position.set(x + o.x * k, o.y * k, z + o.z * k); camera.lookAt(camLook); }, snapCam: () => { const o = camOffset(); camLook.set(G.x, 0.6, G.z); camera.position.set(G.x + o.x, o.y, G.z + o.z); camera.lookAt(camLook); }, forceIdle: t => { startIdle(); let n = 0; while (G.idle.type !== t && n++ < 200) startIdle(); }, G, S: () => S, V, W, items, villagers, completeDeed, tryGrab, doHonk, teleport: (x, z) => { G.x = x; G.z = z; const o = camOffset(); camLook.set(x, 0.6, z); camera.position.set(x + o.x, o.y, z + o.z); camera.lookAt(camLook); }, setZoom: z => { zoom = z; }, keys, endIntro, update, camera, renderer, scene, clock: () => clock, hint: currentHint, robin };
+if (DEBUG) window.GG = { THREE, colliders, circles, areaAt, PROPS, openMap, WARD, ENDING, startEnding, openCard, QUAL, CRITTERS, WOBBLE, VOICE, HONKS, sfxHonk, HEN, PUP, SHEEP, RELIEFS, audioInit, save, bakeInfo, title, endTitle, AU: () => AU, DUCK, CHOIR, wakeGoose, balls, camAt: (x, z, zm) => { const o = camOffset(); const k = zm || 1; camLook.set(x, 0.8, z); camera.position.set(x + o.x * k, o.y * k, z + o.z * k); camera.lookAt(camLook); }, snapCam: () => { const o = camOffset(); camLook.set(G.x, 0.6, G.z); camera.position.set(G.x + o.x, o.y, G.z + o.z); camera.lookAt(camLook); }, forceIdle: t => { startIdle(); let n = 0; while (G.idle.type !== t && n++ < 200) startIdle(); }, G, S: () => S, V, W, items, villagers, completeDeed, tryGrab, doHonk, teleport: (x, z) => { G.x = x; G.z = z; const o = camOffset(); camLook.set(x, 0.6, z); camera.position.set(x + o.x, o.y, z + o.z); camera.lookAt(camLook); }, setZoom: z => { zoom = z; }, keys, endIntro, update, camera, renderer, scene, clock: () => clock, hint: currentHint, robin };
 </script>
 <script src="/data/b5site.js?v=8"></script>
 </body>
