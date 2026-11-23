@@ -102,7 +102,7 @@ var B5ICON_MAP = [
   ["/jt/", "dugout"], ["/lw/boxman-2.html", "boxman-2"], ["/lw/boxman/", "boxman"], ["/games/boxman/", "boxman"],
   ["/games/", "vault"], ["/practice/", "practice"], ["/projects/", "projects"], ["/lessons/", "lessons"], ["/teacher/", "staff"], ["/paper/", "paper"], ["/nojay/", "nojay"],
   ["/cc/", "cc"], ["/parents/", "parents"], ["/guest/", "parents"], ["/baselines/", "baselines"],
-  ["/trips/", "trips"], ["/tools/", "tools"], ["/wall/", "wall"], ["/ideas/", "ideas"],
+  ["/trips/", "trips"], ["/studio5/", "studio5"], ["/tools/", "tools"], ["/wall/", "wall"], ["/ideas/", "ideas"],
   ["/my-targets.html", "targets"]
 ];
 function iconFor(p){

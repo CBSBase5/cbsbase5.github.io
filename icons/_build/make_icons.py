@@ -189,6 +189,13 @@ ICONS = {
         '<rect x="9" y="24" width="46" height="29" rx="6" fill="%s"/>' % T +
         '<path d="M9 36H55" stroke="%s" stroke-width="2.5"/>' % C +
         '<rect x="27" y="31" width="10" height="9" rx="2.5" fill="%s"/>' % O),
+    "icons/studio5": (P,
+        '<rect x="7" y="10" width="50" height="44" rx="10" fill="%s"/>' % T +
+        '<rect x="13" y="16" width="17" height="14" rx="4" fill="%s"/>' % O +
+        '<path d="M17.5 26.5v-4M21.5 26.5v-7M25.5 26.5v-3" stroke="%s" stroke-width="2.4" stroke-linecap="round"/>' % K +
+        '<rect x="34" y="16" width="17" height="14" rx="4" fill="%s"/>' % P +
+        '<rect x="13" y="34" width="17" height="14" rx="4" fill="%s"/>' % P +
+        '<rect x="34" y="34" width="17" height="14" rx="4" fill="%s"/>' % C),
     "icons/wall": (P,
         '<rect x="9" y="11" width="46" height="34" rx="12" fill="%s"/>' % T +
         '<path d="M19 42L16 55L31 44Z" fill="%s"/>' % T +
