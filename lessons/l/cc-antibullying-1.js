@@ -280,3 +280,42 @@ window.B5LESSON = {
   ]
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "It is not bullying if everyone is laughing, including them.", flip: "Not always. Sometimes the person being joked about laughs along because they feel they have to. If it is on purpose, keeps happening and they cannot make it stop, it can still be bullying." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "think", ask: "Why might someone stay quiet when they see bullying?", a: "Scared of being next, not sure it counts, not wanting to grass. All real reasons, and all things we can make easier." },
+  "sections.0.slides.1.do": { how: "hands", ask: "Which of the four is hardest to spot from the outside?", a: "Often 'it keeps happening'. Each moment can look small on its own." },
+  "sections.0.check": { q: "Which one is most likely to be bullying?", opts: ["A group keeps 'forgetting' to invite the same person, every week", "Two friends have a huge shouting row, once", "Someone snaps at you on a bad day", "A teammate moans about your pass in a match"], a: 0, why: "Quiet, on purpose and repeated: that is the shape. The others hurt, but they are one offs." },
+  "sections.1.slides.0.do": { how: "pair", ask: "Which kind do you think adults notice least?", a: "Leaving out and online. They are quiet, so they are easy to miss." },
+  "sections.1.slides.2.do": { how: "shout", ask: "Pick an app. Where is its report button?", a: "On most apps: press and hold the message or profile, then Report." },
+  "sections.1.slides.+": { type: "hot", take: "Online bullying is not as bad as bullying in person.", flip: "For lots of people it is worse. It can happen at 2am, in your own bedroom, in front of hundreds of people, and it does not stop when school does." },
+  "sections.1.check": { q: "Someone posts an embarrassing photo of a classmate in a group chat. Best first move?", opts: ["Screenshot it, report it, tell an adult", "Message the poster asking them to delete it", "Leave the chat so you are not involved", "Reply asking everyone to stop"], a: 0, why: "Proof first, then the report button and an adult. The others are kind instincts, but the photo stays up and there is no proof." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "think", ask: "What is the smallest thing someone could do that would still help?", a: "Sitting next to them later, a quiet 'you alright?', or a word with an adult. Small counts." },
+  "sections.2.slides.1.do": { how: "pair", ask: "Which of these would feel least awkward for you to do?", a: "Whichever one you would actually do is the right one." },
+  "sections.2.slides.+": { type: "hot", take: "If you see bullying and do nothing, you are part of it.", flip: "A hard one. Freezing is normal, and being scared is not your fault. But even one small move, like telling an adult afterwards, can change everything for the person it is happening to." },
+  "sections.2.check": { q: "Which of these is being an upstander?", opts: ["Quietly telling an adult what you saw", "Not joining in, but staying silent", "Laughing so it seems less serious", "Filming it to show people later"], a: 0, why: "Not joining in is a start, but it does not help them. Telling an adult is the one that actually changes things." },
+  "sections.3.slides.0.bleed": true,
+  "sections.3.slides.0.do": { how: "think", ask: "Think of one adult here. Where would you find them at 10 o'clock on a Tuesday?", a: "Knowing where to find them makes it much easier to go." },
+  "sections.3.slides.2.do": { how: "point", ask: "Which poster in this room can you read from furthest away? Why does it work?", a: "Usually: few words, huge letters, strong colours." },
+  "sections.3.slides.+": { type: "hot", take: "Telling an adult usually makes bullying worse.", flip: "It is a really common worry. Staff are trained to deal with it quietly, without saying who told. Bullying is much more likely to stop once an adult knows." },
+  "sections.3.check": { q: "Who can you tell if something is happening to you?", opts: ["Any adult you trust", "Only your teacher", "Only once you have proof", "Nobody, until it gets really bad"], a: 0, why: "Any adult you trust, any time, proof or not. Small things are worth telling too." },
+  "sections.4.slides.0.bleed": true,
+  "sections.4.slides.0.do": { how: "shout", ask: "One word for what makes a room feel safe.", a: "Calm, kind, fair, fun, quiet... they all count." },
+  "sections.4.slides.+": { type: "hot", take: "A group pledge does not change anything. It is just words on a wall.", flip: "Words alone, no. But a pledge the group wrote itself gives everyone something to point to: 'That is not what we agreed.'" },
+  "sections.4.check": { q: "'Break the Silence' means...", opts: ["Saying something, or telling someone, when something is not OK", "Confronting the bully yourself", "Telling everyone what happened"], a: 0, why: "Speaking up can be quiet: one word to one trusted adult counts." },
+  "realworld.do": { how: "hands", ask: "Hands up if you have ever used a report button in a game or an app.", a: "That is the grown up version of telling someone." },
+  "exit.0": { q: "Bullying is usually...", opts: ["On purpose, repeated and hard to stop", "Any argument that upsets someone", "Always physical"], a: 0, why: "On purpose, again and again, and hard for the person to make it stop." },
+  "exit.1": { q: "What could you do when something is not OK?", opts: ["'Not cool. Leave it.' Or tell an adult.", "Wait and see if it stops on its own", "Post about it online"], a: 0, why: "Say something, or tell someone. Both count." }
+};
+})(window.B5LESSON);

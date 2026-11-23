@@ -137,3 +137,31 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.1", kind: "bonnie", x: 1460, y: 160, w: 110, say: "Urban legend: Bonnie has never stolen a biscuit. Status: completely false." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "You are too smart to fall for a fake fact.", flip: "Everyone falls for some. Fake facts spread because they are surprising and come from people we trust, like friends. Being smart does not protect you; checking does." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "think", ask: "Why would wax wings be a problem near the sun?", a: "The wax melts. (In real life it gets colder the higher you go, but the myth is about the warning, not the science.)" },
+  "sections.0.slides.1.opts": ["Do not get carried away and ignore good advice", "Do not try to escape", "Inventions are dangerous"],
+  "sections.0.check": { q: "Many old myths were really...", opts: ["Lessons and warnings dressed up as stories", "Old news reports", "Instructions for real inventions"], a: 0, why: "Lessons and warnings in disguise." },
+  "sections.1.slides.0.do": { how: "hands", ask: "Hands up if you have seen a 'fact' online that turned out to be fake.", a: "Almost everyone has. That is normal." },
+  "sections.1.slides.2.opts": ["They are surprising, and come from someone we trust", "They are usually true", "Official news shares them"],
+  "sections.1.slides.+": { type: "hot", take: "Sharing a fake fact is no big deal if you did not know it was fake.", flip: "You did not mean any harm, but it still spreads. Some fake stories have caused real panic, and the fix is easy: check first." },
+  "sections.1.check": { q: "An urban legend is...", opts: ["A modern story lots of people believe, but is not true", "Any legend set in a city", "A true story that sounds fake"], a: 0, why: "Modern, widely believed, and not true." },
+  "sections.2.slides.0.do": { how: "shout", ask: "Which warning sign on the list is easiest to spot?", a: "Usually the angry or scary one. Strong feelings are a warning sign." },
+  "sections.2.check": { q: "You see a shocking 'fact' online. Best first move?", opts: ["Check if trusted places say it too", "Read the comments to see if people believe it", "Share it, asking 'is this true?'"], a: 0, why: "Comments are not proof, and sharing spreads it even with a question mark." },
+  "realworld.do": { how: "pair", ask: "Think of a 'fact' you heard recently. How would you check it?", a: "Search it on a trusted site, and look for more than one source." },
+  "exit.0": { q: "The Icarus myth warns people...", opts: ["Not to get carried away and ignore advice", "Not to fly", "That the sun is dangerous"], a: 0, why: "Do not get carried away. Listen to good advice." },
+  "exit.1": { q: "'Goldfish have a 3 second memory' is...", opts: ["An urban legend", "True", "True for baby goldfish only"], a: 0, why: "Goldfish can remember things for months. Scientists have trained them." },
+  "exit.2": { q: "Before sharing a surprising fact, you should...", opts: ["Check it somewhere trusted", "Ask the person who sent it", "Share it fast before it gets deleted"], a: 0, why: "Check it somewhere trusted, ideally more than one place." }
+};
+})(window.B5LESSON);

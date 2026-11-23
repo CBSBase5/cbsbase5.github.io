@@ -304,3 +304,25 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "If a friend asks nicely, you should do what they want.", flip: "Asking nicely is influence: the choice is still yours. You are allowed to say no to nice people too." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "A friend recommends a film. Choice, autonomy or influence?", a: "Influence. The choice is still yours." },
+  "sections.0.slides.2.do": { how: "think", ask: "Where do you feel a 'no' inside?", a: "A tight tummy, a hot face, freezing. Everyone's different." },
+  "sections.0.check": { q: "Whether someone hugs you is...", opts: ["Your choice", "Their choice, if they ask nicely", "Whoever asks first"], a: 0, why: "Your body, your choice. Asking nicely does not change that." },
+  "sections.1.slides.0.do": { how: "pair", ask: "Give an example of a nudge, then a shove.", a: "Nudge: 'You'd love this film.' Shove: 'Watch it or you're not my friend.'" },
+  "sections.2.slides.0.do": { how: "think", ask: "Which step do people forget?", a: "'You are allowed to change your mind.'" },
+  "sections.2.slides.3.do": { how: "hands", ask: "Which of the three is easiest to forget?", a: "Changeable: a yes can become a no." },
+  "sections.2.slides.+": { type: "hot", take: "Helping someone means doing it for them.", flip: "Doing it for them takes away their choice and their chance to learn. 'Want help, or a go first?' leaves the choice with them." },
+  "realworld.do": { how: "think", ask: "Which choice on the list feels biggest?", a: "Often who you let into your life." }
+};
+})(window.B5LESSON);

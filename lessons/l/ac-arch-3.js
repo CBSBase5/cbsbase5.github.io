@@ -174,3 +174,33 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.2", kind: "bonnie", x: 1460, y: 700, w: 110, say: "Bonnie's plan for the perfect house: one room. It is entirely sofa." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "You could build a house from photos of one.", flip: "Photos do not give sizes. A builder needs the exact length of every wall and the place of every door and window, which is exactly what a plan gives them." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "point", ask: "If you drew this room as a plan, what would be the biggest shape on it?", a: "Probably the tables. A plan shows everything from above, roof off." },
+  "sections.0.slides.1.opts": ["A plan", "An elevation", "A section", "A sketch"],
+  "sections.0.slides.1.why": "A plan: bird's eye view, roof off. A section is a slice through the building, and an elevation is the view from the side.",
+  "sections.0.check": { q: "You want to show a builder how high the windows are from the ground. Which drawing?", opts: ["An elevation", "A plan", "A map"], a: 0, why: "Heights show up from the side, so it is an elevation. A plan only shows the layout of the floor." },
+  "sections.1.slides.0.do": { how: "draw", ask: "Draw the symbol for a door on the board.", a: "A line for the door and an arc showing which way it swings." },
+  "sections.1.slides.2.do": { how: "shout", ask: "On a 1:50 plan, how long is 4 cm in real life?", a: "4 x 50 = 200 cm, which is 2 metres." },
+  "sections.1.slides.3.opts": ["3 metres", "30 cm", "6 metres", "300 metres"],
+  "sections.1.slides.3.why": "6 x 50 = 300 cm, which is 3 metres. The trap is forgetting to turn centimetres into metres.",
+  "sections.1.check": { q: "On a plan, a window is usually shown as...", opts: ["Thin lines inside the wall", "A line with an arc", "A small square", "A gap in the wall"], a: 0, why: "Thin lines within the wall. A line with an arc is a door swing, and a plain gap is just an opening." },
+  "sections.2.slides.0.do": { how: "think", ask: "What is the most expensive mistake you could make on a building site?", a: "Anything in concrete or steel. A wall in the wrong place has to be knocked down and built again." },
+  "sections.2.slides.+": { type: "hot", take: "Computers have made drawing by hand pointless for architects.", flip: "Most architects still sketch by hand first, because it is the quickest way to try ideas. The computer comes in once an idea is good enough to measure." },
+  "sections.2.check": { q: "Why do architects draw plans before building?", opts: ["Mistakes cost far less to fix on paper", "Builders cannot work without a picture", "Every building needs one by law", "It makes the building look better"], a: 0, why: "A rubbed out line costs nothing; a wall in the wrong place costs thousands. The council checks plans for big work, but not for every job." },
+  "realworld.do": { how: "hands", ask: "Hands up if you have built flat pack furniture. Did you have a part left over?", a: "Flat pack instructions are plans. A spare screw usually means a step got missed." },
+  "exit.0": { q: "Bird's eye view, roof off. It is a...", opts: ["Plan", "Elevation", "Section"], a: 0, why: "A plan." },
+  "exit.1": { q: "On a plan, a line with an arc means...", opts: ["A door, and the way it swings", "A window that opens", "A curved wall"], a: 0, why: "A door. The arc shows the space it needs to open." },
+  "exit.2": { q: "On a 1:50 plan, a room is 8 cm wide. How wide is the real room?", opts: ["4 metres", "8 metres", "40 cm"], a: 0, why: "8 x 50 = 400 cm, which is 4 metres." }
+};
+})(window.B5LESSON);

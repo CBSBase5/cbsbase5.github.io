@@ -164,3 +164,28 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Learning to drive is the only way to be properly independent.", flip: "Lots of people in cities never drive and get everywhere by bus, train, bike and walking. Knowing how to use public transport is independence too." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "How did you get here today?", a: "Car, bus, taxi, walking. Every one is a choice of transport." },
+  "sections.0.check": { q: "Which of these is public transport?", opts: ["A bus", "A taxi", "Your own bike"], a: 0, why: "A bus. Taxis are open to the public, but you hire them on your own, so they are usually counted separately." },
+  "sections.1.slides.0.do": { how: "hands", ask: "Fast, cheap or easy: which matters most to you?", a: "No wrong answer. It changes with the journey." },
+  "sections.1.slides.+": { type: "hot", take: "The bus is always the slowest way to get somewhere.", flip: "Not always. In busy towns, buses use bus lanes and skip traffic. For a short trip in rush hour, a bus can beat a car." },
+  "sections.1.check": { q: "Which is usually fastest for a long journey between cities?", opts: ["Train", "Coach", "Car"], a: 0, why: "Usually the train: no traffic, and it goes city centre to city centre. A car can win if the station is far away." },
+  "sections.2.slides.0.do": { how: "pair", ask: "Which of the four things would you most likely forget?", a: "Usually money or a charged phone. A quick check at the door helps." },
+  "sections.2.slides.1.opts": ["Check the timetable or app for the next one", "Start walking along the route", "Call someone to collect you straight away"],
+  "sections.2.check": { q: "Before a bus trip, which is most useful to know?", opts: ["Where to get off", "How long the whole route is", "What colour the bus is"], a: 0, why: "Where to get off. Knowing the stop before yours helps too." },
+  "realworld.do": { how: "think", ask: "Where would you go first if you could travel anywhere on your own?", a: "Friends, the coast, the cinema, a shop. Planning it is the first step." },
+  "exit.0": { q: "For a 5 minute trip to the shop, the best option is usually...", opts: ["Walking", "A bus", "A taxi"], a: 0, why: "Walking. Free, and probably faster than waiting." },
+  "exit.1": { q: "Which should you know before getting on a bus?", opts: ["Where to get off", "How many seats it has", "The driver's name"], a: 0, why: "Where to get off." }
+};
+})(window.B5LESSON);

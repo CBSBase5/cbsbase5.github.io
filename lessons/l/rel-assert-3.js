@@ -128,3 +128,26 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bird", x: 1450, y: 140, say: "Tweet. (Bird for: can I have some of your crisps? See, it's easy.)" }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Asking for help shows you cannot cope.", flip: "The opposite. Knowing what you need and asking for it is a skill adults use every day: at work, at college, at the doctor's." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "hands", ask: "Hands up for any on the list you asked for this week.", a: "Asking for small things every day is practice for the big ones." },
+  "sections.0.check": { q: "An 'I statement' starts with...", opts: ["I", "You", "We"], a: 0, why: "'I' says how it is for you. 'You' can sound like blame, and 'we' can speak for other people." },
+  "sections.1.slides.1.opts": ["When he is free and it is calm", "As soon as you think of it, whatever is happening", "Right at the end, as everyone is leaving"],
+  "sections.1.check": { q: "Which is an I statement?", opts: ["\"I'd like a turn when you're done.\"", "\"You always hog it.\"", "\"Can you not be so selfish?\""], a: 0, why: "It says what you would like, without blaming." },
+  "sections.2.slides.0.do": { how: "pair", ask: "Which 'how' suits you best?", a: "Out loud, written or a card all count the same." },
+  "sections.2.slides.1.opts": ["Ask someone who works there", "Search every aisle first", "Ask another shopper"],
+  "sections.2.slides.+": { type: "hot", take: "If you have to ask for something, it does not count.", flip: "People cannot read minds, even people who care about you. Asking is how they find out what you need." },
+  "sections.2.check": { q: "Which counts as asking for help?", opts: ["Saying it, writing it, or showing a card", "Only saying it out loud", "Only asking a teacher"], a: 0, why: "Any way that gets the message across counts." },
+  "realworld.do": { how: "think", ask: "What would you ask for on your first day at a new job?", a: "Where things are, who to ask, a quiet place for breaks." }
+};
+})(window.B5LESSON);

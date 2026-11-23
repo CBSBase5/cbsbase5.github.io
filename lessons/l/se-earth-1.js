@@ -139,3 +139,29 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.1", kind: "bird", x: 1450, y: 160, say: "Birds fly over volcanoes all the time. They do not recommend it." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Dig a hole straight down from here and you would come out in Australia.", flip: "Not from the UK. Straight through from here comes out in the ocean south east of New Zealand. And nobody could dig it: the deepest hole ever is about 12 km, and the centre is 6,400 km down." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "Which layer is the peach stone?", a: "The core." },
+  "sections.0.check": { q: "Which layer do we live on?", opts: ["The crust", "The mantle", "The outer core"], a: 0, why: "The crust. Compared to the whole Earth, it is thinner than a peach skin." },
+  "sections.1.slides.1.bleed": true,
+  "sections.1.slides.1.do": { how: "shout", ask: "Underground it is magma. What is it called once it is out?", a: "Lava." },
+  "sections.1.slides.+": { type: "hot", take: "The centre of the Earth is liquid.", flip: "Half right. The outer core is liquid metal, but the inner core is solid, even though it is about as hot as the surface of the Sun. The pressure is so huge it cannot melt." },
+  "sections.1.check": { q: "Lava comes from...", opts: ["Magma from the mantle", "Melted rock from the core", "Rock melted by the Sun"], a: 0, why: "Magma from the mantle, pushing up through cracks in the crust." },
+  "sections.2.slides.0.do": { how: "hands", ask: "Look at a fingernail. Roughly how far does a plate move in a year?", a: "A few centimetres: about as fast as your nails grow." },
+  "sections.2.check": { q: "The pieces the crust is broken into are called...", opts: ["Plates", "Faults", "Continents"], a: 0, why: "Plates. Faults are the cracks, and continents ride on top of the plates." },
+  "realworld.do": { how: "think", ask: "Which metal thing is closest to you right now?", a: "Whatever it is, it came out of the crust." },
+  "exit.0": { q: "The layer we live on is the...", opts: ["Crust", "Mantle", "Core"], a: 0, why: "The crust." },
+  "exit.1": { q: "The outer core is...", opts: ["Liquid metal", "Solid metal", "Hot rock that flows slowly"], a: 0, why: "Liquid iron and nickel. The solid one is the inner core; the slow rock is the mantle." },
+  "exit.2": { q: "Scientists learn about the inside of the Earth from...", opts: ["Earthquake waves", "Drilling deep holes", "Lava from volcanoes"], a: 0, why: "Earthquake waves. Holes only scratch the crust, and lava comes from the top of the mantle." }
+};
+})(window.B5LESSON);

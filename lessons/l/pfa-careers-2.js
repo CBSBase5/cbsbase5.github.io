@@ -127,3 +127,27 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.1", kind: "bird", x: 1450, y: 150, say: "Birds have been doing the same job for millions of years: early worm collection. Very secure." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Robots and AI will take all the jobs.", flip: "Every big new technology has killed some jobs and created others. Lamplighters vanished, but electricians appeared. Jobs that need caring, fixing and calming people are hardest to replace." }
+];
+L.rework = {
+  "sections.0.slides.0.opts": ["Lit gas street lamps by hand every evening", "Fixed broken street lamps in the daytime", "Sold oil lamps door to door"],
+  "sections.0.check": { q: "Why did the lamplighter job disappear?", opts: ["New technology: electric lights switch on by themselves", "Gas got too expensive", "Lamplighters went on strike"], a: 0, why: "Electric street lights did not need anyone to light them." },
+  "sections.1.slides.1.bleed": true,
+  "sections.1.slides.1.do": { how: "point", ask: "Point to the skill on this list you are best at.", a: "Every one of them is a skill machines still struggle with." },
+  "sections.1.slides.+": { type: "hot", take: "Being a YouTuber is a real job.", flip: "For some it is: they earn a living, pay tax and work long hours. For most it is a hobby. Like music or football, a few make it big and many do it for fun." },
+  "sections.1.check": { q: "Which skill is a machine worst at?", opts: ["Calming someone who is upset", "Spotting a pattern in a million numbers", "Driving a forklift in a warehouse", "Translating a sentence"], a: 0, why: "Calming people needs reading feelings and building trust. Machines can already do the others, at least partly." },
+  "sections.2.check": { q: "When new technology arrives, usually...", opts: ["Some jobs go, and new jobs appear", "Every job disappears", "Nothing changes for years"], a: 0, why: "Some go, new ones arrive, and lots of jobs just change." },
+  "realworld.do": { how: "pair", ask: "Name one skill you have that would work in any job.", a: "Being on time, being kind, fixing things, staying calm. They all travel." },
+  "exit.0": { q: "A knocker upper used to...", opts: ["Wake people up by tapping on windows", "Knock down old houses", "Collect rent"], a: 0, why: "Before alarm clocks were cheap, they tapped on windows with a long stick." },
+  "exit.1": { q: "Which is the newest job?", opts: ["Drone pilot", "Train driver", "Electrician"], a: 0, why: "Drone pilots are a job of the last 15 years or so." }
+};
+})(window.B5LESSON);

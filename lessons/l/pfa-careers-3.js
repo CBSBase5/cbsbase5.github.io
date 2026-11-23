@@ -109,3 +109,28 @@ window.B5LESSON = {
   surprise: { at: "sections.0.slides.0", kind: "bambi", x: 1450, y: 600, w: 120, say: "Bambi's dial settings: outdoors, quiet, hands on, in a team of one. Regal." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "You should do a job you love, even if it pays badly.", flip: "People really disagree. Some say loving it keeps you going; others say a job that pays the bills leaves time and money for what you love. Lots of people find something in the middle." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "point", ask: "Point to where you sit on one dial.", a: "Anywhere is right. It can even change day to day." },
+  "sections.0.check": { q: "Is there a right end of each dial?", opts: ["No, both ends suit different jobs", "Yes: busy is better", "Yes: working with people is better"], a: 0, why: "Quiet suits a lab, busy suits a kitchen. Both are good." },
+  "sections.1.slides.1.opts": ["Farm worker, dog walker or vet nurse", "Pet shop manager", "Zookeeper in an office role"],
+  "sections.1.slides.+": { type: "hot", take: "Your hobbies tell you nothing about the right job.", flip: "They often tell you a lot. Gamers can be good at strategy and fast decisions; people who fix bikes understand machines. Employers look for those skills." },
+  "sections.1.check": { q: "A carpenter's job is mostly about...", opts: ["Things", "People", "Ideas"], a: 0, why: "Things: wood, tools, measuring. With some people and ideas too, like most jobs." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "pair", ask: "Tell the person next to you one strength from the list they have.", a: "It is often easier to spot other people's strengths than your own." },
+  "sections.2.check": { q: "Which of these counts as a strength for work?", opts: ["All of them", "Only the ones linked to school subjects", "Only being good with people"], a: 0, why: "All of them. Employers want people who notice details, stay calm and solve problems." },
+  "realworld.do": { how: "hands", ask: "Hands up if you have ever talked to a careers adviser.", a: "They are free, and you can go back as many times as you like." },
+  "exit.0": { q: "A nurse's job is mostly about...", opts: ["People", "Things", "Ideas"], a: 0, why: "People, with plenty of things (kit, medicine) too." },
+  "exit.1": { q: "Being calm with animals is...", opts: ["A real strength for work", "Only useful for vets", "A hobby, not a strength"], a: 0, why: "It counts for dog walkers, farm workers, vet nurses, rescue centres and more." }
+};
+})(window.B5LESSON);

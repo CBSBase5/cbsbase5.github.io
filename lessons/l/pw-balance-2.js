@@ -139,3 +139,33 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bambi", x: 1460, y: 580, w: 120, say: "Bambi has excellent core strength. She has never once wobbled. She would like that noted." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Practising fast is the best way to get fast.", flip: "Coaches in lots of sports say the opposite: practise slowly and get it right, then speed comes. Fast and sloppy teaches your body the sloppy version." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "hands", ask: "Try writing your name at half speed in the air. Smoother?", a: "Usually much smoother. Slow lets your brain steer." },
+  "sections.0.slides.1.opts": ["So their body learns the movement exactly right", "To save energy for competitions", "Because coaches do not trust them yet"],
+  "sections.0.check": { q: "'Slow is smooth' means...", opts: ["Practise slowly to get it right; speed comes later", "Always move slowly in sport", "Slower people make fewer mistakes"], a: 0, why: "Slow practice now, speed later." },
+  "sections.1.slides.0.bleed": true,
+  "sections.1.slides.0.do": { how: "point", ask: "Point to where your core is.", a: "All round your middle: tummy, back and sides." },
+  "sections.1.slides.2.opts": ["Warm muscles work better and are less likely to get hurt", "It burns off energy so you are calmer", "It stretches muscles so they are longer"],
+  "sections.1.slides.+": { type: "hot", take: "Warming up is a waste of time.", flip: "Warm muscles move further and react faster, which is why every professional team does it. Five minutes can make a big difference." },
+  "sections.1.check": { q: "Your core is...", opts: ["The muscles round your middle", "Just your six pack", "Your back muscles only"], a: 0, why: "Tummy, back and sides: all of it." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "pair", ask: "Break a move you know into three small steps.", a: "Any move works: a kick, a dance step, tying a shoelace." },
+  "sections.2.check": { q: "Learning a tricky move is easier if you...", opts: ["Break it into small steps", "Watch it lots of times first", "Do it fast so you do not overthink"], a: 0, why: "Small steps. Watching helps, but doing it in pieces is what sticks." },
+  "realworld.do": { how: "think", ask: "Which job on the list needs the steadiest control?", a: "Surgeons, probably. They practise slowly for years." },
+  "exit.0": { q: "Slow is smooth, and smooth is...", opts: ["Fast", "Safe", "Easy"], a: 0, why: "Fast." },
+  "exit.1": { q: "Warming up helps because...", opts: ["Warm muscles work better", "It tires you out first", "It makes you sweat"], a: 0, why: "Warm muscles work better and are less likely to get hurt." },
+  "exit.2": { q: "Your core is...", opts: ["Muscles round your middle", "Just your tummy muscles", "Your leg muscles"], a: 0, why: "All round your middle." }
+};
+})(window.B5LESSON);

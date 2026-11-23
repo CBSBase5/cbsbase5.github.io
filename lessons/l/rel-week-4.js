@@ -309,3 +309,26 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Being proud of yourself is the same as showing off.", flip: "Showing off is about making others feel smaller. Being proud is noticing what you did well, and you can do it quietly, inside your own head." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "Give an example of self-talk.", a: "'I've got this', or 'I always mess up'. Both are self-talk." },
+  "sections.0.slides.2.do": { how: "draw", ask: "Draw a tiny symbol for one of your strengths.", a: "A pencil, a ball, a heart, a controller... anything." },
+  "sections.0.check": { q: "Strengths are...", opts: ["Different for everyone", "Only things you get top marks in", "Something you are born with"], a: 0, why: "Different for everyone, and they grow with practice." },
+  "sections.1.slides.0.do": { how: "think", ask: "Add 'yet' to something you tell yourself.", a: "'I can't do fractions... yet.'" },
+  "sections.1.slides.2.do": { how: "pair", ask: "Turn 'They're ignoring me' into a balanced thought.", a: "'They haven't replied yet. They might be busy.'" },
+  "sections.1.check": { q: "\"I can't do this\" becomes more helpful with which word?", opts: ["Yet", "Ever", "Really"], a: 0, why: "'I can't do this yet.'" },
+  "sections.2.slides.0.do": { how: "hands", ask: "Which step do people skip most?", a: "Changing what you do next." },
+  "sections.2.slides.+": { type: "hot", take: "Saying sorry fixes everything.", flip: "Sorry matters, but the repair is sorry plus changing what you do. A sorry followed by the same thing again stops meaning much." },
+  "realworld.do": { how: "pair", ask: "Answer the interview question: what is one of your strengths?", a: "Any real strength works. Add one example." }
+};
+})(window.B5LESSON);

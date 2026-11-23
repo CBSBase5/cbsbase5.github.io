@@ -83,6 +83,7 @@ function start(){
   sc.onload = function(){
     lesson = window.B5LESSON;
     if(!lesson){ showMissing(meta.title, "The lesson file did not load."); return; }
+    applyRework();
     applyEdits();
     build();
     var at = q("f") === "end" ? frames.length - 1 : parseInt(q("f"), 10);
@@ -98,6 +99,18 @@ function showMissing(title, line){
     '<p class="sline"><a href="/lessons/" style="color:inherit">Back to Lessons</a></p></div><div class="artbox plain">' + A.svg("-120 -80 260 170", A.bonnie(0, 0, 1.3, "sleep")) + '</div></div></div>';
 }
 
+/* the 23 Nov 2026 rework: a lesson file can carry rework: { "path": value }, set
+   before any board edits, so harder questions, hot takes and "your turn" prompts
+   sit alongside the original slides without rewriting them */
+function applyRework(){
+  var rw = lesson.rework; if(!rw) return;
+  for(var k in rw){
+    if(/^sections\.\d+\.slides\.\+$/.test(k)){ var sl = getPath(lesson, k.slice(0, -2)); if(sl) (Array.isArray(rw[k]) ? rw[k] : [rw[k]]).forEach(function(x){ sl.push(x); }); continue; }
+    var m = k.match(/^(sections\.\d+\.slides)\.\^(\d+)$/);
+    if(m){ var arr = getPath(lesson, m[1]); if(arr) arr.splice(+m[2], 0, rw[k]); continue; }
+    setPath(lesson, k, rw[k]);
+  }
+}
 function applyEdits(){
   var all = {}, k, local = {};
   try{ local = JSON.parse(localStorage.getItem(EDITKEY) || "{}") || {}; }catch(e){}
@@ -110,6 +123,7 @@ function applyEdits(){
 var SECNAME = { start: "Warm up", hook: "Hook", explore: "Explore", explain: "Explain", finish: "Finish" };
 var secMins = {};
 function build(){
+  var hookFirst = false;
   var F = [], L = lesson, mins = L.mins || (part ? 15 : 45), short = part || mins <= 30;
   F.push({ k: "cover", sec: "start" });
   if(!part || part === 1){
@@ -121,8 +135,13 @@ function build(){
       if(w.wordle) F.push({ k: "wordle", sec: "start", d: w.wordle, path: "warm.wordle" });
       if(w.wyr) F.push({ k: "wyr", sec: "start", d: w.wyr, path: "warm.wyr" });
     }
-    if(L.recap) F.push({ k: "recap", sec: "start", d: L.recap, path: "recap" });
-    if(L.objective) F.push({ k: "objective", sec: "start", d: L.objective, path: "objective" });
+    /* hot take openers, then the hook straight away; the mission comes once they are hooked */
+    (L.opener || []).forEach(function(o, i){ F.push({ k: "hot", sec: "start", d: o, path: "opener." + i }); });
+    if(L.opener && L.opener.length) hookFirst = true;
+    else {
+      if(L.recap) F.push({ k: "recap", sec: "start", d: L.recap, path: "recap" });
+      if(L.objective) F.push({ k: "objective", sec: "start", d: L.objective, path: "objective" });
+    }
     secMins.start = L.startMins || (short ? 4 : 7);
   } else {
     /* a later part: its own warm up if the lesson has one (L.warms[part]), then where we got to */
@@ -131,14 +150,27 @@ function build(){
     else if(wp && wp.wyr) F.push({ k: "wyr", sec: "start", d: wp.wyr, path: "warms." + part + ".wyr" });
     secMins.start = wp ? 4 : 1;
   }
-  (L.sections || []).forEach(function(s, si){
-    if(part && s.part !== part) return;
+  var mine = [];
+  (L.sections || []).forEach(function(s, si){ if(!part || s.part === part) mine.push([s, si]); });
+  function section(s, si){
     var p = "sections." + si;
     secMins[s.kind] = s.mins || 10;
     F.push({ k: "sech", sec: s.kind, d: s, path: p });
     (s.slides || []).forEach(function(sl, j){ F.push({ k: sl.type || "show", sec: s.kind, d: sl, path: p + ".slides." + j }); });
     if(s.check) F.push({ k: "predict", sec: s.kind, d: s.check, path: p + ".check", check: true });
+  }
+  mine.forEach(function(x, n){
+    section(x[0], x[1]);
+    /* hook first: after the opening section, the recap and today's mission */
+    if(n === 0 && hookFirst){
+      if(L.recap) F.push({ k: "recap", sec: "start", d: L.recap, path: "recap" });
+      if(L.objective) F.push({ k: "objective", sec: "start", d: L.objective, path: "objective" });
+    }
   });
+  if(!mine.length && hookFirst){
+    if(L.recap) F.push({ k: "recap", sec: "start", d: L.recap, path: "recap" });
+    if(L.objective) F.push({ k: "objective", sec: "start", d: L.objective, path: "objective" });
+  }
   if(!part || part === NP){
     if(L.realworld) F.push({ k: "realworld", sec: "finish", d: L.realworld, path: "realworld" });
     (L.exit || []).forEach(function(x, i){ F.push({ k: "predict", sec: "finish", d: x, path: "exit." + i, exit: i + 1, of: L.exit.length }); });
@@ -286,7 +318,30 @@ function trim(f, d, textKey){
 function leadHtml(f, key, cls, cut){
   return cut ? '<p class="' + cls + '">' + cut + '</p>' : E(f.path + "." + key, "p", cls);
 }
+/* "your turn": something for the room to do on a slide that is otherwise looking.
+   do: { ask, a, how } where how is hands, point, shout, pair or think. The ask
+   shows straight away; the answer (a) is the slide's last build step. */
+var DOHOW = { hands: "Hands up", point: "Point to it", shout: "Shout it out", pair: "Turn to the person next to you", think: "Ten seconds to think", draw: "Draw it on the board" };
+function doBlock(f){
+  var o = f.d && f.d.do; if(!o || !o.ask) return "";
+  return '<div class="doit"><span class="dtag">Your turn</span><span class="dhow">' + esc(DOHOW[o.how] || DOHOW.think) + '</span>' +
+    E(f.path + ".do.ask", "span", "dask", "") + (o.a ? '<span class="dans" data-s="1">' + E(f.path + ".do.a", "span", "", "") + '</span>' : "") + '</div>';
+}
 R.show = function(f){
+  if(f.d.bleed && f.d.art) return bleedShow(f);
+  return showInner(f) + doBlock(f);
+};
+/* a full bleed scene: the picture fills the board, the words sit on a card */
+function bleedShow(f){
+  var s = f.d, tr = trim(f, s, "text");
+  var art = /preserveAspectRatio/.test(String(s.art).slice(0, 300)) ? s.art : String(s.art).replace("<svg", '<svg preserveAspectRatio="xMidYMax slice"');
+  return '<div class="bleedart">' + art + '</div><div class="bleedcard' + (s.cardRight ? " right" : "") + '">' +
+    (s.kicker ? E(f.path + ".kicker", "p", "kicker") : "") + E(f.path + ".title", "h1", "ft small", "") +
+    (s.text && tr.text ? leadHtml(f, "text", "lead", tr.cut) : "") +
+    (s.pts ? '<ul class="pts">' + s.pts.map(function(x, i){ return E(f.path + ".pts." + i, "li", "", "").replace("<li ", '<li data-s="' + (s.build ? (s.ptsFrom || 1) + i : 0) + '" '); }).join("") + '</ul>' : "") +
+    '</div>' + doBlock(f);
+}
+function showInner(f){
   var s = f.d, tr = trim(f, s, "text"), has = (s.text && tr.text) || (s.pts && s.pts.length);
   var txt = (s.text && tr.text ? leadHtml(f, "text", "lead", tr.cut) : "") +
     (s.pts ? '<ul class="pts">' + s.pts.map(function(x, i){ return E(f.path + ".pts." + i, "li", "", "").replace("<li ", '<li data-s="' + (s.build ? (s.ptsFrom || 1) + i : 0) + '" '); }).join("") + '</ul>' : "") +
@@ -297,7 +352,22 @@ R.show = function(f){
   var body = !art ? '<div class="cols one">' + '<div>' + txt + '</div></div>'
     : !has ? '<div class="cols one" style="justify-items:center">' + art.replace('class="artbox', 'style="width:' + (s.artWidth || 1100) + 'px" class="artbox') + '</div>'
     : '<div class="cols' + (s.wideArt ? " wide-art" : "") + '">' + (s.artLeft ? art + '<div>' + txt + '</div>' : '<div>' + txt + '</div>' + art) + '</div>';
-  return (s.kicker ? E(f.path + ".kicker", "p", "kicker") : "") + E(f.path + ".title", "h1", "ft" + (s.small ? " small" : ""), "") + body;
+  return (s.kicker ? E(f.path + ".kicker", "p", "kicker") : "") + E(f.path + ".title", "h1", "ft" + (s.small || s.do ? " small" : ""), "") + body;
+}
+
+/* ---------- hot take: a strong statement, the room picks a side ----------
+   { take, flip, opts, say }. Hands up or colour cards, tallied on the board.
+   Next reveals the flip: a fact or a twist that makes them think again. */
+var HOTC = ["agree", "disagree", "unsure"];
+R.hot = function(f){
+  var s = f.d, opts = s.opts || ["Agree", "Disagree", "Not sure"], t = tally(f, opts.length), rev = S.rev[fi];
+  return '<p class="kicker hotk">Hot take</p>' + E(f.path + ".take", "h1", "ft hottake", "") +
+    '<div class="opts q hot n' + Math.min(4, Math.max(2, opts.length)) + '">' + opts.map(function(o, i){
+      return '<div class="opt hc ' + (HOTC[i] || "unsure") + '" data-o="' + i + '"><span class="card3"></span>' + E(f.path + ".opts." + i, "span", "", o) +
+        '<div class="tally">' + dots(t[i]) + '</div><button class="minus" data-minus="' + i + '" aria-label="One less">-</button></div>';
+    }).join("") + '</div>' + bar(t) +
+    (rev && s.flip ? '<div class="why flip"><span class="who">Now think again</span>' + E(f.path + ".flip", "span", "") + '</div>'
+      : '<p class="hint">Hands up, or hold up a colour card. Someone from each side says why. Changing your mind later is allowed.</p>');
 };
 
 R.predict = function(f){
@@ -359,7 +429,7 @@ R.realworld = function(f){
   var s = f.d, tr = trim(f, s, "text");
   return '<div class="rw"><div><span class="tag">Where you\'d meet this</span>' + E(f.path + ".title", "h1", "ft small", "") + leadHtml(f, "text", "lead", tr.cut) +
     (ccNow() ? '<p class="ccline"><span class="cctag">' + esc(ccNow().week) + '</span> ' + esc(ccNow().line) + '</p>' : "") + '</div>' +
-    '<div class="artbox' + (s.photo && !s.art ? " photoonly" : "") + '">' + (s.art || (s.photo ? "" : A.svg("-140 -110 300 220", A.bonnie(10, 10, 1.6, "happy")))) + photo(s.photo) + '</div></div>';
+    '<div class="artbox' + (s.photo && !s.art ? " photoonly" : "") + '">' + (s.art || (s.photo ? "" : A.svg("-140 -110 300 220", A.bonnie(10, 10, 1.6, "happy")))) + photo(s.photo) + '</div></div>'; + doBlock(f);
 };
 /* a real photo: fills the box on its own, or pinned to the corner of a drawing like a polaroid. Tap to enlarge. */
 function photo(p){
@@ -581,6 +651,7 @@ function pending(){
   if(f.k === "show" || f.k === "realworld") return (S.step[fi] || 0) < maxStep(el);
   if(f.k === "predict") return !S.rev[fi] && (f.d.a != null || f.d.why);
   if(f.k === "vote") return !S.rev[fi] && !!f.d.why;
+  if(f.k === "hot") return !S.rev[fi] && !!f.d.flip;
   if(f.k === "wyr") return !S.rev[fi] && !!f.d.twist;
   if(f.k === "sort") return !sortState(f).checked;
   if(f.k === "recap"){ var sh = S.recap[fi] || {}; return (f.d.items || []).some(function(x, i){ return !sh[i]; }); }
@@ -644,6 +715,9 @@ function render(enter){
   var html = (R[f.k] || R.show)(f);
   box.innerHTML = '<div class="frame' + (enter && !reduced() ? " enter" : "") + '" data-k="' + f.k + '">' + html + '</div>';
   var el = frameEl();
+  /* the "your turn" answer is always the last thing Next shows on a slide */
+  var dans = $(".dans", el);
+  if(dans){ var mx = 0; $$("[data-s]", el).forEach(function(x){ if(x !== dans) mx = Math.max(mx, +x.getAttribute("data-s") || 0); }); dans.setAttribute("data-s", String(mx + 1)); }
   showSteps(el);
   bindFrame(el, f);
   topStrip();
@@ -869,6 +943,7 @@ function frameName(f){
   var t = { cover: "Title", wordle: "Wordle", wyr: "Would you rather", recap: "Recap", objective: "Objective", sech: SECNAME[f.sec], confidence: "Fist to five", driving: "The big question", end: "The end" }[f.k];
   if(t) return t;
   if(f.exit) return "Exit vote " + f.exit;
+  if(f.k === "hot") return "Hot take: " + String((f.d || {}).take || "").replace(/<[^>]+>/g, "");
   if(f.check) return "Quick check";
   var s = f.d || {};
   return String(s.title || s.q || f.k).replace(/<[^>]+>/g, "");
@@ -998,12 +1073,168 @@ function snap(i, quiet){
 }
 function loadImg(src){ return new Promise(function(res){ var im = new Image(); im.onload = function(){ res(im); }; im.onerror = function(){ res(null); }; im.src = src; }); }
 function evidence(){
-  composeBoard().then(function(cv){
+  composeSummary().then(function(cv){
     var url;
     try{ url = cv.toDataURL("image/png"); }catch(e){ url = null; }
     if(!url){ toast("The browser would not save the picture. Try S on each slide and a screenshot."); return; }
     download("base5-lesson-" + meta.id + (part ? "-part" + part : "") + "-" + PLAN.iso() + ".png", url);
     toast("Board picture saved.");
+  });
+}
+/* ---------- the visual summary for BridgeLink Buddy (23 Nov 2026) ----------
+   One picture of the lesson, built for an evidence slide: the mission, every
+   hot take, guess, check, sort and vote the group actually did (with the
+   tallies as bars and the right answer marked), how sure they felt, the big
+   question, and one or two board snaps. Who was here sits in a plain panel,
+   initials only, never next to a result and never in red. */
+function wrapC(cx, text, maxW){
+  var words = String(text || "").split(/\s+/), lines = [], line = "";
+  words.forEach(function(w){ var t = line ? line + " " + w : w; if(cx.measureText(t).width > maxW && line){ lines.push(line); line = w; } else line = t; });
+  if(line) lines.push(line);
+  return lines;
+}
+function fitLine(cx, t, maxW){
+  t = String(t || "");
+  if(cx.measureText(t).width <= maxW) return t;
+  while(t.length > 3 && cx.measureText(t + "...").width > maxW) t = t.slice(0, -1);
+  return t.replace(/\s+$/, "") + "...";
+}
+function clip(cx, lines, n, maxW){
+  if(lines.length <= n) return lines.map(function(l){ return fitLine(cx, l, maxW); });
+  var out = lines.slice(0, n), last = out[n - 1];
+  while(last.length > 3 && cx.measureText(last + "...").width > maxW) last = last.slice(0, -1);
+  out[n - 1] = last.replace(/\s+\S*$/, "") + "...";
+  return out;
+}
+function summaryItems(){
+  var out = [], plain = function(h){ return plainText(h); };
+  frames.forEach(function(f, i){
+    var t = S.tally[i], has = t && t.some(function(v){ return v > 0; }), d0 = f.d || {};
+    if(f.k === "hot" && has) out.push({ kind: "Hot take", q: plain(d0.take), opts: (d0.opts || ["Agree", "Disagree", "Not sure"]).map(plain), t: t, hot: true });
+    else if(f.k === "predict" && has) out.push({ kind: f.exit ? "Exit vote " + f.exit : f.check ? "Quick check" : "Guess first", q: plain(d0.q || d0.title), opts: (d0.opts || []).map(function(o){ return plain(typeof o === "string" ? o : o.t); }), t: t, a: d0.a });
+    else if((f.k === "vote" || f.k === "driving") && has) out.push({ kind: f.k === "driving" ? "The big question" : "Group vote", q: plain(f.k === "driving" ? (d0.angle || "") : (d0.q || d0.title)), opts: (d0.opts || ["Yes", "No", "It depends"]).map(function(o){ return plain(typeof o === "string" ? o : o.t); }), t: t });
+    else if(f.k === "wyr" && has) out.push({ kind: "Would you rather", q: "", opts: [plain(d0.a), plain(d0.b)], t: t });
+    else if(f.k === "sort" && S.sort[i] && S.sort[i].checked) out.push({ kind: "Sort it", q: plain(d0.title || d0.q), line: sortLine(S.sort[i], d0) });
+    else if(f.k === "wordle" && S.word[i] && S.word[i].rows.length){ var ww = S.word[i]; out.push({ kind: "Wordle", q: "", line: ww.won ? "Got it in " + ww.rows.length + (ww.rows.length === 1 ? " go." : " goes.") : "Had " + ww.rows.length + " goes." }); }
+    else if(f.k === "confidence" && has){
+      var n = 0, sum = 0; t.forEach(function(v, j){ n += v; sum += v * j; });
+      out.push({ kind: "How sure we felt", q: "Fist to five, group average " + (Math.round(sum / n * 10) / 10) + " out of 5", opts: ["0", "1", "2", "3", "4", "5"], t: t, conf: true });
+    }
+  });
+  return out;
+}
+function composeSummary(){
+  var cw = 1600, P = 40, NC = 3, GAP = 22, colW = (cw - P * 2 - GAP * (NC - 1)) / NC, INKC = "#0a2f38", TEALC = "#007291", ORANGEC = "#ef7724", YEL = "#ffc247";
+  var cv = d.createElement("canvas"), cx = cv.getContext("2d");
+  var items = summaryItems(), here = PREVIEW || SCHOOL ? [] : hereList();
+  var F = function(w, px, disp){ return w + " " + px + "px " + (disp ? "Archivo, Arial Black, Arial, sans-serif" : "Atkinson Hyperlegible, Verdana, Arial, sans-serif"); };
+  /* lay out first: tile heights */
+  cx.font = F(700, 23);
+  items.forEach(function(it){
+    it.ql = it.q ? clip(cx, wrapC(cx, it.q, colW - 50), 3, colW - 50) : [];
+    it.h = 62 + it.ql.length * 28 + (it.opts ? (it.conf ? 112 : it.opts.length * 36) : 0) + (it.line ? 70 : 0) + 14;
+  });
+  var colY = [0, 0, 0], placed = items.map(function(it){ var c = colY.indexOf(Math.min.apply(null, colY)), y = colY[c]; colY[c] += it.h + 18; return { c: c, y: y }; });
+  var snapKeys = Object.keys(S.snaps).map(Number).sort(function(a, b){
+    var pa = (S.strokes[a] && S.strokes[a].length ? 0 : 1), pb = (S.strokes[b] && S.strokes[b].length ? 0 : 1); return pa - pb || a - b; }).slice(0, 2).sort(function(a, b){ return a - b; });
+  var objective = lesson.objective || {};
+  cx.font = F(400, 28);
+  var missionL = clip(cx, wrapC(cx, plainText(objective.mission || ""), cw - P * 2 - 520), 2, cw - P * 2 - 520);
+  var formalL = objective.formal ? clip(cx, wrapC(cx, "We were learning to " + plainText(objective.formal), cw - P * 2 - 520), 2, cw - P * 2 - 520) : [];
+  var top = 210, missionH = 60 + missionL.length * 36 + formalL.length * 32 + 20;
+  var gridTop = top + missionH + 30, gridH = Math.max(colY[0], colY[1], colY[2], items.length ? 0 : 90);
+  var snapTop = gridTop + gridH + (snapKeys.length ? 40 : 0), snapW = (cw - P * 2 - 30) / 2, snapH = Math.round(snapW * 9 / 16);
+  var ch = snapTop + (snapKeys.length ? snapH + 70 : 0) + 70;
+  cv.width = cw; cv.height = ch;
+  cx = cv.getContext("2d");
+  cx.fillStyle = "#f7f2e9"; cx.fillRect(0, 0, cw, ch);
+  /* header in the pillar colour */
+  cx.fillStyle = pillar.colour; cx.fillRect(0, 0, cw, 176);
+  cx.fillStyle = ORANGEC; cx.fillRect(0, 176, cw, 10);
+  cx.fillStyle = "rgba(255,255,255,.85)"; cx.font = F(900, 20, true);
+  cx.fillText("BASE 5 LESSON EVIDENCE  \u00b7  " + pillar.name.toUpperCase(), P, 46);
+  cx.fillStyle = "#fff"; cx.font = F(900, 50, true);
+  cx.fillText(clip(cx, [meta.title + (part ? " (part " + part + " of " + NP + ")" : "")], 1, cw - P * 2 - 380)[0], P, 106);
+  cx.font = F(400, 26);
+  var sub = (meta.pillar === "cc" ? "Cultural Calendar" : series.title + ", lesson " + meta.n + " of " + meta.of) + (meta.step ? ", step " + meta.step : "") + "  \u00b7  whole group, on the board";
+  cx.fillText(clip(cx, [sub], 1, cw - P * 2 - 380)[0], P, 148);
+  cx.textAlign = "right"; cx.font = F(900, 34, true);
+  var dd = new Date((S.day || PLAN.iso()) + "T12:00:00"), DN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  cx.fillText(DN[dd.getDay()] + " " + dd.getDate() + " " + MN[dd.getMonth()] + " " + dd.getFullYear(), cw - P, 70);
+  cx.font = F(400, 24); cx.fillText("About " + (part ? 15 : (lesson.mins || 45)) + " minutes", cw - P, 110);
+  cx.textAlign = "left";
+  /* mission panel, with who was here on the right */
+  function panel(x, y, w, h, edge){
+    cx.fillStyle = "#fffdf8"; cx.strokeStyle = INKC; cx.lineWidth = 3;
+    cx.beginPath(); if(cx.roundRect) cx.roundRect(x, y, w, h, 18); else cx.rect(x, y, w, h); cx.fill(); cx.stroke();
+    if(edge){ cx.fillStyle = edge; cx.fillRect(x + 2, y + 14, 10, h - 28); }
+  }
+  var mw = cw - P * 2 - 480;
+  panel(P, top, mw, missionH, pillar.colour);
+  cx.fillStyle = pillar.deep; cx.font = F(900, 18, true); cx.fillText("TODAY'S MISSION", P + 30, top + 38);
+  cx.fillStyle = INKC; cx.font = F(700, 28);
+  missionL.forEach(function(l, k){ cx.fillText(l, P + 30, top + 76 + k * 36); });
+  cx.font = F(400, 24); cx.fillStyle = "#4a5a60";
+  formalL.forEach(function(l, k){ cx.fillText(l, P + 30, top + 80 + missionL.length * 36 + k * 32); });
+  var hx = P + mw + 30, hw = cw - P - hx;
+  panel(hx, top, hw, missionH, null);
+  cx.fillStyle = INKC; cx.font = F(900, 18, true); cx.fillText("WHO WAS HERE", hx + 26, top + 38);
+  cx.font = F(900, 38, true);
+  var hl = clip(cx, wrapC(cx, here.length ? here.join("  ") : (SCHOOL ? "The whole group" : PREVIEW ? "Preview" : "Not ticked"), hw - 52), 2, hw - 52);
+  hl.forEach(function(l, k){ cx.fillText(l, hx + 26, top + 86 + k * 44); });
+  /* the tiles */
+  if(!items.length){
+    cx.fillStyle = "#4a5a60"; cx.font = F(400, 26);
+    cx.fillText("Nothing was tallied on the board this time: the slides were talked through together.", P, gridTop + 40);
+  }
+  items.forEach(function(it, n){
+    var x = P + placed[n].c * (colW + GAP), y = gridTop + placed[n].y;
+    panel(x, y, colW, it.h, it.hot ? ORANGEC : pillar.colour);
+    cx.fillStyle = it.hot ? "#b4520f" : pillar.deep; cx.font = F(900, 16, true); cx.fillText(it.kind.toUpperCase(), x + 28, y + 30);
+    cx.fillStyle = INKC; cx.font = F(700, 23);
+    it.ql.forEach(function(l, k){ cx.fillText(l, x + 28, y + 60 + k * 28); });
+    var oy = y + 60 + it.ql.length * 28 + 4;
+    if(it.opts && it.conf){
+      var mx = Math.max.apply(null, it.t) || 1;
+      it.t.forEach(function(v, j){
+        var bx = x + 28 + j * ((colW - 56) / 6), bw = (colW - 56) / 6 - 10, bh = Math.round(70 * v / mx);
+        cx.fillStyle = "#e6ddd4"; cx.fillRect(bx, oy + 10, bw, 70);
+        cx.fillStyle = TEALC; cx.fillRect(bx, oy + 80 - bh, bw, bh);
+        cx.fillStyle = INKC; cx.font = F(700, 18); cx.textAlign = "center";
+        cx.fillText(j + (v ? " (" + v + ")" : ""), bx + bw / 2, oy + 106); cx.textAlign = "left";
+      });
+    } else if(it.opts){
+      var total = it.t.reduce(function(a, b){ return a + b; }, 0) || 1, lw = Math.round((colW - 56) * 0.55);
+      it.opts.forEach(function(o, j){
+        var ry = oy + j * 36, right = it.a === j, v = it.t[j] || 0;
+        cx.font = F(right ? 700 : 400, 19); cx.fillStyle = INKC;
+        cx.fillText(fitLine(cx, (right ? "\u2713 " : "") + o, lw), x + 28, ry + 22);
+        var bx = x + 36 + lw, bw = colW - 56 - lw - 40;
+        cx.fillStyle = "#ece5dc"; cx.fillRect(bx, ry + 6, bw, 20);
+        cx.fillStyle = it.hot ? [TEALC, ORANGEC, YEL][j] || "#9fb3b9" : right ? TEALC : it.a == null ? pillar.colour : "#9fb3b9";
+        cx.fillRect(bx, ry + 6, Math.round(bw * v / total), 20);
+        cx.fillStyle = INKC; cx.font = F(700, 19); cx.fillText(String(v), bx + bw + 10, ry + 23);
+      });
+    }
+    if(it.line){ cx.fillStyle = INKC; cx.font = F(400, 21); clip(cx, wrapC(cx, it.line, colW - 56), 2, colW - 56).forEach(function(l, k){ cx.fillText(l, x + 28, oy + 22 + k * 27); }); }
+  });
+  /* one or two board snaps */
+  var jobs = snapKeys.map(function(k, n){
+    var sn = S.snaps[k], x = P + n * (snapW + 30), y = snapTop;
+    return loadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(sn.svg)).then(function(im){
+      cx.fillStyle = "#fffdf8"; cx.fillRect(x, y, snapW, snapH);
+      if(im){ try{ cx.drawImage(im, x, y, snapW, snapH); }catch(e){} }
+      return sn.ink ? loadImg(sn.ink) : null;
+    }).then(function(im2){
+      if(im2) cx.drawImage(im2, x, y, snapW, snapH);
+      cx.strokeStyle = INKC; cx.lineWidth = 4; cx.strokeRect(x, y, snapW, snapH);
+      cx.fillStyle = INKC; cx.font = F(700, 22); cx.fillText(fitLine(cx, "On the board: " + sn.name, snapW), x, y + snapH + 32);
+    });
+  });
+  return Promise.all(jobs).then(function(){
+    cx.fillStyle = "#5f6b73"; cx.font = F(400, 20);
+    cx.fillText("Drawn by the Base 5 site from the board. Bars are the group's own tallies; \u2713 marks the right answer.", P, ch - 30);
+    return cv;
   });
 }
 function composeBoard(){
@@ -1049,7 +1280,7 @@ function results(){
     var t = S.tally[i];
     if(!t || !t.some(function(v){ return v > 0; })) return;
     var plain = function(h){ return String(h || "").replace(/<[^>]+>/g, "").replace(/&[a-z]+;/g, " ").trim(); };
-    var opts = f.k === "wyr" ? [plain(f.d.a), plain(f.d.b)] : f.k === "confidence" ? ["0", "1", "2", "3", "4", "5"] :
+    var opts = f.k === "wyr" ? [plain(f.d.a), plain(f.d.b)] : f.k === "confidence" ? ["0", "1", "2", "3", "4", "5"] : f.k === "hot" ? (f.d.opts || ["Agree", "Disagree", "Not sure"]) :
       (f.d && f.d.opts || ["Yes", "No", "It depends"]).map(function(o){ return plain(typeof o === "string" ? o : o.t); });
     var parts = t.map(function(v, j){ return v ? plain(opts[j]).slice(0, 34) + ": " + v : ""; }).filter(Boolean);
     out.push(frameName(f).slice(0, 40) + " - " + parts.join(", "));
@@ -1098,8 +1329,8 @@ function sendBuddy(){
   sendMsg("Checking it's you...");
   staffPass().then(function(pass){
     if(!pass){ sendMsg("Not sent: Send to Buddy is for staff."); return null; }
-    sendMsg("Making the board picture...");
-    return composeBoard().then(function(cv){
+    sendMsg("Making the lesson summary picture...");
+    return composeSummary().then(function(cv){
       var png = "";
       try{ png = cv.toDataURL("image/jpeg", 0.82); }catch(e){ png = ""; }
       var lib = window.B5LIB, dropTitle = meta.drop;

@@ -139,3 +139,32 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bonnie", x: 1460, y: 140, w: 110, say: "Bonnie's design brief for 3026: underfloor heating. That's it. That's the whole brief." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "A building that looks ugly has failed, even if it works perfectly.", flip: "People have argued about this for centuries. Famous artists signed a letter calling the Eiffel Tower ugly when it was being built. Now it is one of the most loved buildings on Earth." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "point", ask: "Point at something in this room that is all function and no form.", a: "Radiators, plug sockets, fire doors. They just do a job." },
+  "sections.0.check": { q: "A train station's 'function' includes...", opts: ["Moving lots of people safely and quickly", "Having a famous clock", "Looking modern", "Being in the town centre"], a: 0, why: "Function is the job it does. A famous clock and a modern look are form, or nice extras." },
+  "sections.1.slides.0.bleed": true,
+  "sections.1.slides.0.do": { how: "pair", ask: "Which of these could this school add next year?", a: "Solar panels and rain butts are the cheapest starts. A green roof needs a strong, flat roof." },
+  "sections.1.slides.2.opts": ["Specially made wood", "Recycled plastic", "Carbon fibre"],
+  "sections.1.slides.2.why": "Engineered wood, sometimes called mass timber: layers glued crossways so it is very strong. Some wooden towers are now over 80 metres tall.",
+  "sections.1.slides.+": { type: "hot", take: "Building with wood is bad for the planet because it means cutting down trees.", flip: "It is more complicated. Trees store carbon, and replanted forests grow it back. Making concrete and steel releases a lot of carbon. Many scientists say wood is the greener choice, as long as the forests are replaced." },
+  "sections.1.check": { q: "In winter, which loses the most heat from a house?", opts: ["A roof with no insulation", "Opening the front door twice a day", "One old light bulb", "The fridge"], a: 0, why: "About a quarter of a home's heat can escape through an uninsulated roof." },
+  "sections.2.slides.1.bleed": true,
+  "sections.2.slides.1.do": { how: "think", ask: "Answer one of the four questions for your dream building.", a: "Any answer works if you can say why." },
+  "sections.2.check": { q: "A design brief is...", opts: ["What the building must do, and who it is for", "The first sketch of the building", "The architect's price", "The planning permission letter"], a: 0, why: "The brief comes first: the jobs and the people. Sketches come after." },
+  "realworld.do": { how: "hands", ask: "Which job would you pick: architect, engineer, builder, surveyor or planner?", a: "Engineers make it stand up, surveyors measure, planners decide what can go where." },
+  "exit.0": { q: "'Form' means...", opts: ["What a building looks like", "What it does", "What it is made of"], a: 0, why: "Form is the look. Function is the job." },
+  "exit.1": { q: "Which saves the most energy?", opts: ["Insulation and solar panels", "Bigger windows everywhere", "Taller ceilings"], a: 0, why: "Big windows and tall ceilings usually lose heat. Insulation keeps it in; solar makes power." },
+  "exit.2": { q: "Of these four lessons, what keeps a building up?", opts: ["Shape, base and materials", "Looks and colour", "Height and glass"], a: 0, why: "Shape, base and materials, every time." }
+};
+})(window.B5LESSON);

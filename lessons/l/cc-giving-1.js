@@ -270,3 +270,42 @@ window.B5LESSON = {
   ]
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Giving money is always better than giving time.", flip: "Not always. Millions of people in the UK volunteer, and lots of charities could not run without them. Money helps, but so do hands." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "think", ask: "When did someone last give you something that cost them nothing?", a: "Their time, a lift, help with something, a laugh when you needed one." },
+  "sections.0.slides.1.do": { how: "hands", ask: "Which of the four could you do before lunch today?", a: "Any of them. Most take under five minutes." },
+  "sections.0.check": { q: "Which of these is giving that costs nothing?", opts: ["Teaching a younger kid a game", "Buying a raffle ticket", "Paying for someone's lunch", "Lending money"], a: 0, why: "Time and skills cost nothing, and they are real gifts. The others are kind, but they all need money." },
+  "sections.1.slides.0.opts": ["A group that raises money and time to help a cause", "A shop that sells second hand clothes", "A company that gives some of its profit away"],
+  "sections.1.slides.0.why": "A charity exists for its cause. Charity shops are run by charities to raise money; a company exists to make a profit.",
+  "sections.1.slides.1.do": { how: "shout", ask: "Name a charity you have heard of. What does it help?", a: "RSPCA, RNLI, Shelter, Cancer Research UK... nearly every cause has one." },
+  "sections.1.slides.+": { type: "hot", take: "Big charities waste most of the money they get.", flip: "Most big UK charities spend the large majority on their cause. Charities have to publish their accounts, so anyone can check." },
+  "sections.1.check": { q: "Where does most of the money given to a big charity usually go?", opts: ["On its cause", "On adverts", "On staff wages", "Back to the government"], a: 0, why: "Most goes on the cause. Some has to pay staff and adverts, which help raise even more." },
+  "sections.2.slides.0.do": { how: "pair", ask: "Would you split it equally, or give most to one? Why?", a: "Both are good choices. Equal spreads it out; one cause gets more done in one place." },
+  "sections.2.slides.2.do": { how: "pair", ask: "Finish the sentence out loud to the person next to you.", a: "Any reason counts if it is yours." },
+  "sections.2.slides.+": { type: "hot", take: "You should help people near you before people far away.", flip: "Thoughtful people disagree. Some say look after your own community first; others say money goes further where people have less. Both are reasons, not rules." },
+  "sections.2.check": { q: "100 pounds is split: half to one cause, the rest equally between two more. How much do each of those two get?", opts: ["25 pounds", "50 pounds", "33 pounds"], a: 0, why: "Half is 50 pounds. The other 50 between two is 25 each." },
+  "sections.3.slides.1.do": { how: "point", ask: "Point to one square you could do in the next ten minutes.", a: "Start with the easiest. A line is a bonus." },
+  "sections.3.slides.2.bleed": true,
+  "sections.3.slides.2.do": { how: "point", ask: "Point at something in this room that needs fixing.", a: "A wobbly table, a messy shelf, a broken game. Pick one, with help." },
+  "sections.3.slides.+": { type: "hot", take: "A kind act does not count if you post about it online.", flip: "Posting can inspire other people, and the person still got helped. But if it is only for the likes, some would say the kindness was for you, not them." },
+  "sections.3.check": { q: "Why do tiny kind things matter?", opts: ["They add up, and they change someone's day", "They do not, only big things count", "They make you look good"], a: 0, why: "They add up. Most people remember a small kindness for years." },
+  "sections.4.slides.1.bleed": true,
+  "sections.4.slides.1.do": { how: "think", ask: "Who would least expect a kind thing from you this week?", a: "Often someone you see every day but never really talk to." },
+  "sections.4.slides.+": { type: "hot", take: "One day of giving a year is pointless.", flip: "Giving Tuesday has raised billions around the world since 2012, and lots of people who try it once start giving regularly." },
+  "sections.4.check": { q: "What could you give that costs nothing?", opts: ["Time, skills or kindness", "A charity shop bargain", "Your old phone"], a: 0, why: "Charity shops and old phones help too, but they cost money or things. Time, skills and kindness cost nothing." },
+  "realworld.do": { how: "hands", ask: "Hands up if you would try volunteering: animals, sport or people?", a: "Lots of places take volunteers from 16, and some take younger people with an adult." },
+  "exit.0": { q: "Which of these is a gift that costs nothing?", opts: ["Teaching someone something", "A gift card", "Buying cakes at a bake sale"], a: 0, why: "Teaching someone costs nothing but your time." },
+  "exit.1": { q: "What does a charity do?", opts: ["Raises money and time to help a cause", "Sells things to make a profit for its owners", "Lends money to people"], a: 0, why: "A charity exists for its cause, not for profit." }
+};
+})(window.B5LESSON);

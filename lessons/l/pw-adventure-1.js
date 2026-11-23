@@ -189,3 +189,30 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Adventure activities are only for brave people.", flip: "Most people who climb or kayak are scared at some point. Brave is not 'not scared'. It is choosing a stretch you can manage, with the right kit and people." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "hands", ask: "Hands up if you have done any of these before.", a: "Go Ape at Moors Valley counts." },
+  "sections.0.check": { q: "What do adventure activities have in common?", opts: ["A challenge, with the risk managed", "They are dangerous by design", "You need to be very fit"], a: 0, why: "A real challenge, with the risk made small. Lots of people do them without being super fit." },
+  "sections.1.slides.0.do": { how: "shout", ask: "A cold river: hazard or risk?", a: "Hazard. The risk is how likely you are to fall in, and how bad that would be." },
+  "sections.1.slides.2.do": { how: "point", ask: "Point to which zone you would be in on a zip wire.", a: "Anywhere is fine. Zones are different for everyone." },
+  "sections.1.slides.+": { type: "hot", take: "If something is risky, you should just not do it.", flip: "Crossing the road is risky, and so is football. Life has risk in it. The trick is shrinking it until the good bits are worth it." },
+  "sections.1.check": { q: "Where does a good adventure happen?", opts: ["Comfort zone", "Stretch zone", "Panic zone"], a: 1, why: "The stretch zone: a bit scary, but you are still thinking clearly. In the panic zone you stop learning." },
+  "sections.2.slides.0.do": { how: "shout", ask: "Name one person and one bit of kit that keep risk small.", a: "An instructor, a belayer; a helmet, a harness, a buoyancy aid." },
+  "sections.2.slides.1.opts": ["You say so, and the belayer lowers you down", "You have to reach the top first", "You climb down the holds on your own"],
+  "sections.2.check": { q: "Which one is a hazard?", opts: ["A steep drop", "A tired instructor", "Not checking the weather"], a: 0, why: "The drop is the hazard. A tired instructor and not checking the weather make the risk bigger." },
+  "realworld.do": { how: "think", ask: "Which adventure near here would you try first?", a: "Climbing walls, forests, rivers and the coast are all close by." },
+  "exit.0": { q: "Something that could hurt you is a...", opts: ["Hazard", "Risk", "Precaution"], a: 0, why: "A hazard. The risk is how likely and how bad." },
+  "exit.1": { q: "Which shrinks the risk of getting lost?", opts: ["Telling someone your route", "Walking faster", "Following other walkers"], a: 0, why: "If someone knows your route, help knows where to look." },
+  "exit.2": { q: "Where do good adventures happen?", opts: ["Comfort zone", "Stretch zone", "Panic zone"], a: 1, why: "The stretch zone." }
+};
+})(window.B5LESSON);

@@ -117,3 +117,28 @@ window.B5LESSON = {
   surprise: { at: "sections.0.slides.0", kind: "bonnie", x: 1460, y: 150, w: 110, say: "Bonnie's career path: puppy, sofa inspector, senior sofa inspector." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "You should know what job you want by the time you leave school.", flip: "Most adults did not. Lots of people change career several times, and plenty of today's jobs did not exist when they were at school." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "think", ask: "Think of an adult you know. Has their work been one job, or a road of jobs?", a: "Most are a road: a Saturday job, a first job, then something else." },
+  "sections.0.check": { q: "A career is...", opts: ["The road your jobs make over time", "The job with the best pay", "One job you do forever"], a: 0, why: "A career is the whole road. It can wind about, and that is normal." },
+  "sections.1.slides.1.opts": ["An apprenticeship", "A college course", "A university degree"],
+  "sections.1.slides.1.why": "An apprenticeship: a real job with a wage, plus training. College and university courses usually do not pay you.",
+  "sections.1.slides.+": { type: "hot", take: "University is the best route for everyone.", flip: "It suits some people and some jobs, like doctors. But electricians, chefs, mechanics and lots of others train through apprenticeships and college, and earn while they learn." },
+  "sections.1.check": { q: "Changing career later in life is...", opts: ["Normal: lots of people do it", "Possible, but only if you go back to university", "Only for people who failed at the first one"], a: 0, why: "Normal. People switch at 30, 40, 50, often using skills from before." },
+  "sections.2.slides.0.do": { how: "hands", ask: "Hands up for the road you know least about.", a: "That is the one worth asking a careers adviser about." },
+  "sections.2.check": { q: "Do you need to know your career now?", opts: ["No, most people work it out as they go", "Yes, or you will fall behind", "Only if you want a good job"], a: 0, why: "No. Trying things is how people find out." },
+  "realworld.do": { how: "pair", ask: "One question you would ask someone at a careers fair.", a: "'What do you actually do all day?' is a great one." },
+  "exit.0": { q: "Working one Saturday in a cafe is...", opts: ["A job", "A career", "An apprenticeship"], a: 0, why: "A job. It might be the first step of a career." },
+  "exit.1": { q: "An apprenticeship is...", opts: ["Paid work with training", "Unpaid work experience", "A college course"], a: 0, why: "Paid work, with training built in." }
+};
+})(window.B5LESSON);

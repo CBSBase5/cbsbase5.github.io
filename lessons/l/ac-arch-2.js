@@ -171,3 +171,29 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.1", kind: "bird", x: 1440, y: 650, say: "Birds have been building nests the same way for millions of years. No lifts needed." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Old buildings were built better than new ones.", flip: "We only see the old ones that survived. Most old buildings fell down, burned down or were knocked down long ago. The survivors look tough because the weak ones are gone." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "think", ask: "What is the oldest building you have ever been inside?", a: "Churches, castles and old pubs can be hundreds of years old. Skara Brae is 5,000." },
+  "sections.0.check": { q: "Over 5,000 years, what has changed least about why we build?", opts: ["The jobs a building has to do", "The materials", "The tools", "How tall we can go"], a: 0, why: "Keep the weather out and stay up. That has not changed since Skara Brae." },
+  "sections.1.slides.1.do": { how: "pair", ask: "Which change on this list made the biggest difference? Pick one each.", a: "No single right answer. Steel and lifts made tall cities possible; fire rules changed every building." },
+  "sections.1.check": { q: "Steel frames existed. What else had to exist before anyone would live on the 30th floor?", opts: ["A lift with a safety brake", "Electric lighting", "Central heating", "Big glass windows"], a: 0, why: "The safety lift, shown off by Elisha Otis in the 1850s, meant a snapped cable no longer meant a fall. Nobody climbs 30 floors of stairs every day." },
+  "sections.2.slides.0.do": { how: "hands", ask: "Hands up if you think luck matters more than material.", a: "It often does. Fires, floods and wars have destroyed far more buildings than weather." },
+  "sections.2.slides.+": { type: "hot", take: "Nothing being built today will still be standing in 1,000 years.", flip: "Nobody actually knows. Steel frames and reinforced concrete are only about 150 years old, so we have never seen one reach 1,000. Some engineers think they need far more looking after than stone." },
+  "sections.2.check": { q: "Skara Brae has lasted about 5,000 years. Mostly because...", opts: ["It is stone, and sand buried it for centuries", "People kept rebuilding it", "It was lived in until recently", "It was built from a special Viking concrete"], a: 0, why: "A storm buried it in sand, which protected it, until another storm uncovered it in 1850. (Skara Brae is far older than the Vikings, too.)" },
+  "realworld.do": { how: "point", ask: "Think of a street near you. Which building looks oldest, and what gives it away?", a: "Clues: stone or old brick, small windows, tall chimneys, a date carved over the door." },
+  "exit.0": { q: "The Romans built the Pantheon dome out of...", opts: ["Concrete", "Marble blocks", "Steel and glass"], a: 0, why: "Roman concrete, with no steel in it at all. It is still the biggest dome of its kind." },
+  "exit.1": { q: "Which two things made skyscrapers possible?", opts: ["Steel frames and safe lifts", "Concrete and cranes", "Glass and electricity"], a: 0, why: "Steel holds the weight; safe lifts get people up there. The others helped, but these two came first." },
+  "exit.2": { q: "Which helps a building last longest?", opts: ["Being looked after and repaired", "Being made of the strongest material", "Being built recently"], a: 0, why: "Even stone falls apart if the roof leaks and water gets in. Care beats material." }
+};
+})(window.B5LESSON);

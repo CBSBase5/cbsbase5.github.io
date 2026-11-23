@@ -154,3 +154,30 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bird", x: 1450, y: 150, say: "Birds sleep standing on one leg. Show offs." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Some people are just born with good balance.", flip: "Balance is a skill your brain learns. Dancers, gymnasts and climbers all started wobbly. Little and often makes everyone better." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "hands", ask: "Everyone who wants to: stand up, feet together, and lean slowly forward. When do you have to step?", a: "The moment your balance point moves past your toes." },
+  "sections.0.slides.1.opts": ["Feet together, standing tall", "Feet wide apart, knees bent", "Standing on one leg, arms out", "Feet wide, standing on tiptoe"],
+  "sections.0.check": { q: "Your base of support is...", opts: ["The space between and under your feet", "Just the soles of your feet", "Your stomach muscles"], a: 0, why: "The whole area under and between your feet. Wider feet, bigger base." },
+  "sections.1.slides.0.do": { how: "shout", ask: "Which trick do surfers use most?", a: "All three: wide stance, low knees, arms out." },
+  "sections.1.slides.2.opts": ["It spreads their weight out and slows down wobbles", "It makes them heavier", "It helps them see the rope"],
+  "sections.1.slides.+": { type: "hot", take: "Looking at your feet helps you balance.", flip: "It usually makes it worse. Balance is easier when you look at a fixed point ahead. Your eyes are part of your balance system." },
+  "sections.1.check": { q: "Which helps you balance most?", opts: ["Bending your knees", "Standing up very straight", "Looking down at your feet"], a: 0, why: "Bent knees lower your balance point. Looking ahead beats looking down." },
+  "sections.2.slides.0.do": { how: "think", ask: "Which line on the list surprises you?", a: "Often 'tiny wobbles': they are how your body learns." },
+  "sections.2.check": { q: "The best way to get better at balance is...", opts: ["Little and often practice", "One long session a week", "Waiting until you are older"], a: 0, why: "Little and often." },
+  "realworld.do": { how: "shout", ask: "Name one thing you did today that needed balance.", a: "Stairs, a bus, carrying a bag, putting on shoes." },
+  "exit.0": { q: "Which makes you steadier?", opts: ["A wider base", "A narrower base", "Standing taller"], a: 0, why: "A wider base." },
+  "exit.1": { q: "Bending your knees makes your centre of mass...", opts: ["Lower", "Higher", "Move forward"], a: 0, why: "Lower, which makes you steadier." },
+  "exit.2": { q: "Balance improves with...", opts: ["Practice", "Age", "Luck"], a: 0, why: "Practice." }
+};
+})(window.B5LESSON);

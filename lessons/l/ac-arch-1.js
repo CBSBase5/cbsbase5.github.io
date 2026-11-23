@@ -394,3 +394,32 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "A taller building is always a weaker building.", flip: "Not if it is built right. The world's tallest towers are designed to sway at the top in strong wind instead of snapping. Height is fine. A narrow base and the wrong materials are what bring things down." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "point", ask: "Point at something in this room doing the 'stay standing' job right now.", a: "Walls, the ceiling, table legs, the door frame. Anything holding weight." },
+  "sections.0.check": { q: "An architect designs a gorgeous tower that blows over in the first storm. Which job has it failed?", opts: ["Stay standing", "Look right", "Both jobs", "Neither: storms are just bad luck"], a: 0, why: "Looking amazing does not count if it cannot stay up. Staying standing is the job you can never skip." },
+  "sections.1.slides.0.do": { how: "hands", ask: "You sit on a chair. Are the chair legs squashed or stretched?", a: "Squashed. Your weight pushes down on them: compression." },
+  "sections.1.slides.2.do": { how: "pair", ask: "A shelf unit keeps leaning sideways. Where would one diagonal go?", a: "Corner to corner across the back. It turns the square into two triangles." },
+  "sections.1.slides.4.do": { how: "think", ask: "Why do you lean forward when you carry a really heavy bag on your back?", a: "To keep your balance point over your feet. Lean back and it drops past your heels." },
+  "sections.1.check": { q: "A tall tower keeps tipping over. What would help most?", opts: ["Make the base wider", "Put a heavy weight on the very top", "Build it from a lighter material", "Make it even taller so it is steadier"], a: 0, why: "A wider base keeps the balance point over the base. Weight at the top raises the balance point and makes it worse, and a lighter tower blows over more easily." },
+  "sections.2.slides.0.do": { how: "shout", ask: "Steel cable or brick: which would you hang a bridge deck from?", a: "Steel cable. It is brilliant at being pulled. Brick would snap." },
+  "sections.2.slides.2.do": { how: "draw", ask: "Draw an arrow on the board showing where the push goes in the arch.", a: "Round the curve, and down each side into the ground." },
+  "sections.2.slides.+": { type: "hot", take: "Glue would make a stone arch much stronger.", flip: "Hardly any difference. In an arch every stone is squashed against its neighbours, so the shape does the work. Plenty of Roman arches were built with no mortar at all and are still standing." },
+  "sections.2.check": { q: "Why can a stone arch stand up without any glue?", opts: ["Every stone is squashed against its neighbours", "The keystone holds all the others up", "The stones are cut perfectly flat", "The ground pulls the stones into place"], a: 0, why: "Squashing. Each stone pushes on the next, all the way round and into the ground. The keystone locks it in, but the squash is what holds it." },
+  "realworld.do": { how: "think", ask: "Name one triangle you will pass on the way home.", a: "Pylons, roof beams, bridges, cranes, bike frames." },
+  "exit.0": { q: "Being squashed is called...", opts: ["Compression", "Tension", "Torsion"], a: 0, why: "Compression. Tension is being pulled; torsion is being twisted." },
+  "exit.1": { q: "You push the corner of a square frame and it leans. What one change stops it?", opts: ["Add a diagonal", "Make the sides thicker", "Add another square next to it"], a: 0, why: "A diagonal makes two triangles, and triangles cannot change shape." },
+  "exit.2": { q: "Which tower is hardest to tip over?", opts: ["Short and wide, heavy at the bottom", "Tall and thin, heavy at the top", "Tall and wide, heavy at the top"], a: 0, why: "A wide base and a low balance point. Weight high up makes anything easier to tip." }
+};
+})(window.B5LESSON);

@@ -136,3 +136,27 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bird", x: 1450, y: 150, say: "Birds do not need timetables. They just leave when they feel like it. Must be nice." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "The 24 hour clock is pointless: everyone knows the difference between am and pm.", flip: "Mix them up once and you miss a train by 12 hours. Timetables, airports, hospitals and the army all use the 24 hour clock for exactly that reason." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "What is 19:15 in normal time?", a: "Quarter past 7 in the evening." },
+  "sections.0.check": { q: "17:00 is...", opts: ["5 o'clock in the afternoon", "7 o'clock in the evening", "7 o'clock in the morning"], a: 0, why: "17 take away 12 is 5: 5 o'clock in the afternoon." },
+  "sections.1.slides.0.do": { how: "point", ask: "Point to the column for the first bus of the day.", a: "The left hand column. Each column is one bus, all the way along." },
+  "sections.1.slides.2.opts": ["26 minutes", "31 minutes", "36 minutes"],
+  "sections.1.slides.+": { type: "hot", take: "You do not need to read a timetable now: the app does it all.", flip: "Apps die with your battery, and they show the same stops, times and routes. If you can read a timetable, you can check the app is right." },
+  "sections.1.check": { q: "On this timetable, each row is...", opts: ["A stop", "A bus", "A day of the week"], a: 0, why: "Rows are stops; columns are buses." },
+  "sections.2.check": { q: "Going there and back the same day, which is usually cheapest?", opts: ["A return", "Two singles", "A weekly ticket"], a: 0, why: "A return is usually cheaper than two singles. A weekly is only worth it if you travel most days." },
+  "realworld.do": { how: "hands", ask: "Hands up if you have a bus or train app on your phone.", a: "Same skills, different screen." },
+  "exit.0": { q: "14:30 is...", opts: ["Half past 2 in the afternoon", "Half past 4 in the afternoon", "Half past 2 at night"], a: 0, why: "14 take away 12 is 2." },
+  "exit.1": { q: "There and back on the same day: which ticket?", opts: ["Return", "Single", "Season ticket"], a: 0, why: "A return." }
+};
+})(window.B5LESSON);

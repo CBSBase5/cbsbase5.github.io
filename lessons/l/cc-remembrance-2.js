@@ -245,3 +245,34 @@ window.B5LESSON = {
   ]
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "The Christmas truce proves soldiers did not really want to fight.", flip: "Many did not hate the men opposite, and the truce shows it. But after Christmas most went back to fighting, and leaders on both sides tried to stop truces happening again." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "think", ask: "What would you be thinking, hearing carols from the other side?", a: "Lots of soldiers wrote that they were amazed: the enemy sounded just like them." },
+  "sections.0.slides.1.opts": ["Shook hands, swapped gifts and some played football", "Kept fighting, but stopped for Christmas dinner", "Swapped prisoners"],
+  "sections.0.check": { q: "What was the Christmas truce?", opts: ["An unofficial break in the fighting along parts of the front, Christmas 1914", "The agreement that ended the war in 1914", "A rest day the generals ordered"], a: 0, why: "Unofficial, and not everywhere. The generals did not order it, and the war went on for four more years." },
+  "sections.1.slides.0.do": { how: "pair", ask: "Two ways to get a message five miles, with no phone or internet.", a: "A runner, a bike, a horse, a pigeon, a dog, flags, lamps, smoke." },
+  "sections.1.slides.2.do": { how: "shout", ask: "Why would the army want ready made lines instead of real letters?", a: "Quick to check for secrets, and quick to send." },
+  "sections.1.slides.3.opts": ["An officer checked them, so no secrets reached the enemy", "The ink ran in the rain", "To save paper"],
+  "sections.1.slides.+": { type: "hot", take: "Reading soldiers' letters before they were sent was wrong.", flip: "A hard one. It kept secrets from the enemy and probably saved lives. But it also meant families at home rarely heard how bad things really were." },
+  "sections.1.check": { q: "Why did pigeons matter so much?", opts: ["They got through when wires were cut and roads were blocked", "They were faster than radio", "They could carry big parcels"], a: 0, why: "Shells cut wires and blocked roads. A pigeon just flew home." },
+  "sections.2.slides.0.do": { how: "shout", ask: "Is the S in SOS dots or dashes?", a: "Dots: three short. O is three long." },
+  "sections.2.slides.1.do": { how: "point", ask: "Point to the first letter's pattern and shout the letter.", a: "One letter at a time. Write them down as you go." },
+  "sections.2.slides.2.opts": ["SOS", "OK", "HELP"],
+  "sections.2.slides.+": { type: "hot", take: "Morse code is useless now we have phones.", flip: "Not quite. It still works when there is almost no signal: a light, a tap or a beep is enough. Pilots, sailors and radio fans still use it." },
+  "sections.2.check": { q: "In Morse code, what is a dash?", opts: ["A long signal", "A short signal", "A gap between letters"], a: 0, why: "A dash is long, a dot is short. Gaps are silences." },
+  "realworld.do": { how: "hands", ask: "Hands up if you would learn Morse.", a: "You can learn the whole alphabet in a few hours." },
+  "exit.0": { q: "How did lots of messages get through when the wires were cut?", opts: ["Pigeons, dogs and runners", "Radio, everywhere", "They did not: messages were lost"], a: 0, why: "Animals and runners got through when nothing else could." },
+  "exit.1": { q: "What happened at Christmas 1914?", opts: ["Soldiers met in no man's land, and some played football", "The war stopped until the new year", "Both armies went home for Christmas"], a: 0, why: "An unofficial truce, in some places. The war carried on afterwards." }
+};
+})(window.B5LESSON);

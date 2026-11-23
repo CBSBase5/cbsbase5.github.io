@@ -115,3 +115,27 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bird", x: 1450, y: 150, say: "Bird status: on time. As always." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "If you get lost, you should just keep going until it looks familiar.", flip: "It is the most common mistake. Stopping, checking where you are and asking someone working nearby usually gets you home much faster." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "hands", ask: "Hands up if any of these has happened to you.", a: "Almost everyone. It is normal." },
+  "sections.0.check": { q: "When a journey goes wrong, the first thing to do is...", opts: ["Stop, breathe, and think about plan B", "Ring home straight away", "Get on the next bus anywhere"], a: 0, why: "Stop and think first. Ringing someone is a great plan B once you know what is happening." },
+  "sections.1.slides.0.do": { how: "shout", ask: "The screen says 'Cancelled'. What do you look for next?", a: "The next train or bus to the same place, or a replacement bus." },
+  "sections.1.slides.+": { type: "hot", take: "It is embarrassing to ask for help when you are lost.", flip: "Station and bus staff help lost people all day. It is literally part of their job, and asking early saves hours." },
+  "sections.1.check": { q: "Your phone is dead and you are lost in town. Who is safest to ask?", opts: ["Someone working: shop staff, a driver, station staff", "A friendly looking person on the street", "Someone your age"], a: 0, why: "People in uniform or behind a counter are working there, and others can see them." },
+  "sections.2.slides.0.do": { how: "think", ask: "Whose number would go first on your card?", a: "Someone who usually answers. Then a second, just in case." },
+  "sections.2.check": { q: "Why carry a card as well as a phone?", opts: ["Phones run out of battery or get lost", "Cards work in more places", "Bus drivers ask to see it"], a: 0, why: "A card never runs out of battery." },
+  "realworld.do": { how: "pair", ask: "What is your plan B if your bus home is cancelled?", a: "Next bus, a different route, or ring your back up person." },
+  "exit.0": { q: "Missed your stop. Best plan B?", opts: ["Get off at the next one and go back", "Stay on to the end of the route", "Ask the driver to stop right away"], a: 0, why: "Next stop, then back. The driver can only stop at stops." },
+  "exit.1": { q: "Who is safest to ask for help?", opts: ["Someone working there", "A stranger offering a lift", "Someone in a car"], a: 0, why: "Someone working there. Never take a lift from a stranger." }
+};
+})(window.B5LESSON);

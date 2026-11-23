@@ -350,3 +350,44 @@ window.B5LESSON = {
   ]
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Wearing a poppy means you think war is a good thing.", flip: "The Royal British Legion says the red poppy is about remembering and hope, not celebrating war. Some people wear a white poppy to add a message of peace. Both are about remembering." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "point", ask: "Where have you seen a poppy this week?", a: "Coats, buses, shop windows, football shirts, TV presenters." },
+  "sections.0.slides.1.opts": ["It grew on the battlefields of the First World War", "It is the national flower of Britain", "It was chosen because red means danger"],
+  "sections.0.slides.3.do": { how: "shout", ask: "So what time and date is that, on our clocks?", a: "11 o'clock on 11 November: 11:00 on 11/11." },
+  "sections.0.check": { q: "What happens at 11 o'clock on 11 November?", opts: ["Lots of the country stops for two minutes of silence", "The national anthem plays everywhere", "Poppies go on sale for the first time"], a: 0, why: "Two minutes of silence, wherever people are." },
+  "sections.1.slides.0.do": { how: "think", ask: "Which group on the list do you think gets remembered least?", a: "Often the soldiers from India, Africa and the Caribbean, and the families at home." },
+  "sections.1.slides.1.bleed": true,
+  "sections.1.slides.1.do": { how: "shout", ask: "Why would a pigeon get through when a phone line could not?", a: "Shells cut the wires. A pigeon just flies home, over the top." },
+  "sections.1.slides.3.do": { how: "hands", ask: "Hands up for red, white or purple, or none.", a: "Every choice is fine. Lots of people wear none and still remember." },
+  "sections.1.slides.+": { type: "hot", take: "Animals that served in war should get medals like people.", flip: "They do. The Dickin Medal has been given to dogs, horses, pigeons and even a cat for bravery in war." },
+  "sections.1.check": { q: "Which animals carried messages in the First World War?", opts: ["Pigeons and dogs", "Horses and pigeons", "Dogs and cats"], a: 0, why: "Pigeons and dogs carried messages. Horses pulled guns and carts; cats kept the rats down in the trenches." },
+  "sections.2.slides.0.do": { how: "think", ask: "Where will you be at 11 o'clock?", a: "Wherever you are is fine. Lots of people just stop where they are." },
+  "sections.2.slides.2.bleed": true,
+  "sections.2.slides.2.do": { how: "think", ask: "Where is the nearest war memorial to where you live?", a: "Most towns and villages have one: in a churchyard, a park or on the high street." },
+  "sections.2.slides.+": { type: "hot", take: "Two minutes of silence is too long for anyone.", flip: "Plenty of people find it hard, and that is fine: sitting, fidgeting and eyes open all count. It is two minutes once a year, for a war that lasted four years." },
+  "sections.2.check": { q: "Why do people stay silent for two minutes?", opts: ["To remember and show respect", "Because the war ended after two minutes of peace talks", "Because it is the law"], a: 0, why: "To remember and show respect. It is not the law, and nobody gets in trouble for finding it hard." },
+  "sections.3.slides.1.do": { how: "draw", ask: "Draw a poppy on the board in four moves.", a: "Petals, petals, a black middle, a stalk." },
+  "sections.3.slides.2.do": { how: "pair", ask: "Who would you thank? Just the job, no names needed.", a: "Cooks, cleaners, drivers, nurses, crossing patrols. Short and real is best." },
+  "sections.3.slides.3.do": { how: "shout", ask: "Name one service that keeps people safe right now.", a: "Lifeboats, fire, ambulance, police, coastguard, mountain rescue." },
+  "sections.3.slides.+": { type: "hot", take: "You cannot really thank someone you never met.", flip: "That is what a memorial is: names of people nobody alive has met. People still lay flowers there a hundred years later." },
+  "sections.3.check": { q: "Which is a way of saying thank you to people you never met?", opts: ["Wearing a poppy", "Thanking the person who cooks your lunch", "Saying it only to people you know"], a: 0, why: "A poppy thanks people long gone. Thanking the cook is lovely too, but you have met them." },
+  "sections.4.slides.0.bleed": true,
+  "sections.4.slides.0.do": { how: "hands", ask: "Hands up if you have ever done odd socks or a spotty day.", a: "Small challenges add up: Children in Need raises millions every year." },
+  "sections.4.check": { q: "Remembrance and Children in Need: what is the difference?", opts: ["One remembers the past, one helps people now", "Both raise money for soldiers", "Both are about the World Wars"], a: 0, why: "Looking back, and helping now." },
+  "realworld.do": { how: "think", ask: "Where else have you seen a minute's silence?", a: "Football matches, assemblies, after big news." },
+  "exit.0": { q: "Why is the poppy the symbol of Remembrance?", opts: ["It grew on the battlefields", "It is Britain's national flower", "It was the King's favourite"], a: 0, why: "Poppies grew where the ground was churned up on the battlefields." },
+  "exit.1": { q: "How can you say thank you to people you never met?", opts: ["A silence, a poppy, or thanking someone who helps now", "You cannot, they are gone", "Only by joining the army"], a: 0, why: "Any of those count." }
+};
+})(window.B5LESSON);

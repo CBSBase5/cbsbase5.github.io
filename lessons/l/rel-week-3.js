@@ -305,3 +305,28 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Arguing with a friend means the friendship is in trouble.", flip: "Disagreements are normal, even in really close friendships. What matters is how you sort it out." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "Which word means 'both adjust to agree'?", a: "Compromise." },
+  "sections.0.slides.1.bleed": true,
+  "sections.0.slides.1.do": { how: "pair", ask: "Say one phrase out loud in your calm voice.", a: "Calm does not mean quiet. Steady and clear." },
+  "sections.0.slides.3.do": { how: "think", ask: "Which step is hardest when you are cross?", a: "Usually keeping your voice steady. A breath first helps." },
+  "sections.0.check": { q: "Disagreements with friends are...", opts: ["Normal. Everyone has them", "A sign one of you is a bad friend", "Something to avoid at all costs"], a: 0, why: "Normal. How you sort them is what counts." },
+  "sections.1.slides.0.do": { how: "point", ask: "Point to where you would feel it.", a: "Chest, fists, face, tummy. Everyone's different." },
+  "sections.1.slides.1.do": { how: "hands", ask: "Try it now: notice, one slow breath, then 'I need...'.", a: "Ten seconds can change how it goes." },
+  "sections.1.check": { q: "Step one when you feel a row coming is...", opts: ["Stop and notice my body", "Say what I need straight away", "Walk off"], a: 0, why: "Noticing comes first. Saying what you need comes after a breath, and walking off can be a good choice later." },
+  "sections.2.slides.1.do": { how: "shout", ask: "Ready? Shout CUT the second you hear bad advice.", a: "Spot it, then fix it." },
+  "sections.2.slides.+": { type: "hot", take: "Once you have said yes, you cannot take it back.", flip: "You can. A yes can become a no, and the other person should respect it. That goes for lending things, photos, plans and touch." },
+  "realworld.do": { how: "think", ask: "Which of these would you find hardest?", a: "Sending food back is a classic. Calm and clear works." }
+};
+})(window.B5LESSON);

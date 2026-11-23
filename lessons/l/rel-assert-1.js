@@ -222,3 +222,25 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Being assertive is just a polite word for being bossy.", flip: "Bossy tells other people what to do. Assertive says what you need and still respects them. 'I'd like a turn' is assertive; 'Give it here' is bossy." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "hands", ask: "Hands up if someone has pushed in front of you this week.", a: "It happens everywhere: queues, buses, games." },
+  "sections.1.slides.0.do": { how: "shout", ask: "Which clue gives a dragon away fastest?", a: "Usually the voice: loud and sharp. Body language is close behind." },
+  "sections.1.check": { q: "A friend borrows your headphones without asking. Which is the owl?", opts: ["Say nothing and buy new ones", "Snatch them back and shout", "\"I need those back. Ask me first next time.\"", "\"It's fine, keep them for now.\""], a: 2, why: "Clear, calm, and says what happens next. Saying 'it's fine' when it is not is the mouse." },
+  "sections.2.slides.0.do": { how: "pair", ask: "Fill in the recipe for someone taking your seat.", a: "'I feel annoyed when my seat gets taken. I'd like it back, please.'" },
+  "sections.2.slides.1.do": { how: "think", ask: "When would walking away be the smartest move for you?", a: "When it is not safe, or you are too wound up to think. Owls pick their moment." },
+  "sections.2.slides.+": { type: "hot", take: "Dragons get what they want more often than owls.", flip: "Sometimes, in the moment. But people stop trusting dragons, and owls usually get what they need without losing friends." },
+  "sections.2.check": { q: "When might walking away be the best owl move?", opts: ["When someone is getting angry and it does not feel safe", "When you are losing the argument", "Never: owls always stay and sort it"], a: 0, why: "Safety first. Walking away and telling an adult is still assertive." },
+  "realworld.do": { how: "pair", ask: "Which of these would you find hardest?", a: "Lots of people say the doctor's. Writing it down first helps." }
+};
+})(window.B5LESSON);

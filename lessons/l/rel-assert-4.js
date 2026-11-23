@@ -124,3 +124,25 @@ window.B5LESSON = {
   surprise: { at: "sections.0.slides.0", kind: "bonnie", x: 1450, y: 150, w: 110, say: "Group pressure has never worked on Bonnie. Unless the group has ham." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "If everyone is doing it, it cannot be that bad.", flip: "Groups can talk each other into things nobody would do alone. It is so common it has a name: groupthink. One person saying 'nah' often lets others say it too." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "think", ask: "Which of the three kinds have you seen most?", a: "Usually the fun stuff. Risky and mean stuff happen less, but are harder." },
+  "sections.0.check": { q: "Why is saying no harder in a group?", opts: ["Nobody wants to be the odd one out", "Groups are louder", "Groups always make worse choices"], a: 0, why: "Being the odd one out feels risky. Groups do not always choose badly, but they make no harder." },
+  "sections.1.slides.+": { type: "hot", take: "Using an excuse to get out of something is basically lying.", flip: "Lots of people think an excuse like 'I've got to get home' is a fine way out when saying no straight feels unsafe. Getting out safely comes first." },
+  "sections.1.check": { q: "Which is a good way out?", opts: ["\"Nah, I'm alright.\"", "Doing it so nobody laughs", "Doing it, but only a bit"], a: 0, why: "Short and calm. Doing 'only a bit' is still doing it." },
+  "sections.2.slides.0.do": { how: "pair", ask: "Which upstander move would you actually do?", a: "The one you would really do is the right one." },
+  "sections.2.check": { q: "Which is a safe way to be an upstander?", opts: ["Check on them after and tell a trusted adult", "Jump in and argue with the whole group", "Tell everyone off in the group chat"], a: 0, why: "Jumping in can make it worse and is not always safe. Checking in and telling an adult works." },
+  "realworld.do": { how: "shout", ask: "Name one way adults get pressured.", a: "Spending money, cutting corners at work, sharing things online." },
+  "exit.1": { q: "Leaving a situation with an excuse is...", opts: ["A fine owl move", "Being a mouse", "Lying, so not allowed"], a: 0, why: "Getting out safely is an owl move." }
+};
+})(window.B5LESSON);

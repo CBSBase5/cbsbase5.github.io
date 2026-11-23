@@ -286,3 +286,41 @@ window.B5LESSON = {
   ]
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "You need to be brilliant at maths to be an engineer.", flip: "Maths helps, but engineers say the big skills are spotting problems, trying ideas and not giving up when something fails. The maths can be learned along the way." }
+];
+L.rework = {
+  "sections.0.slides.0.opts": ["Seeing the road at night and in fog", "Slowing cars down at night", "Showing drivers where to park"],
+  "sections.0.slides.1.do": { how: "think", ask: "Why do cat's eyes not need electricity?", a: "They bounce car headlights back at the driver. The car is the power." },
+  "sections.0.slides.2.do": { how: "shout", ask: "Which letter of STEAM do you use most?", a: "Any answer works. Most fixes use at least three." },
+  "sections.0.slides.3.do": { how: "hands", ask: "Which step sounds most fun to you?", a: "Making and breaking usually wins." },
+  "sections.0.check": { q: "What does the A in STEAM stand for?", opts: ["Art", "Architecture", "Algebra"], a: 0, why: "Art, because design and creativity are part of fixing things." },
+  "sections.1.slides.0.do": { how: "point", ask: "Point at something in this room that annoys you a tiny bit.", a: "That is a design problem waiting for a fix." },
+  "sections.1.slides.2.do": { how: "pair", ask: "Say your problem in one sentence: 'People keep ... because ...'", a: "If it takes two sentences, it is probably two problems." },
+  "sections.1.slides.+": { type: "hot", take: "Small problems are not worth fixing.", flip: "Cat's eyes fixed a 'small' problem and have saved countless lives. Small, real problems are often the best place to start." },
+  "sections.1.check": { q: "Which is the best problem to fix this week?", opts: ["Water bottles keep getting mixed up", "Traffic in town is terrible", "Not enough people recycle, worldwide"], a: 0, why: "Small and real. The others matter, but they are too big for one week." },
+  "sections.2.slides.0.do": { how: "draw", ask: "Sketch a fix for coats falling off pegs, in 30 seconds.", a: "Hooks that curve up, a lip on the peg, a clip. Messy is fine." },
+  "sections.2.slides.1.do": { how: "think", ask: "Can you think of three different fixes in one minute?", a: "Even silly ones count. They often lead to the good one." },
+  "sections.2.slides.+": { type: "hot", take: "Your first idea is usually your best one.", flip: "Designers find it is rarely true. James Dyson made over 5,000 prototypes. Lots of ideas first, then pick." },
+  "sections.2.check": { q: "Why sketch before you build?", opts: ["To try lots of ideas quickly and cheaply", "So you do not need to test it", "Because the sketch is what gets marked"], a: 0, why: "Sketches are fast and free. You still have to test what you build." },
+  "sections.3.slides.0.bleed": true,
+  "sections.3.slides.0.do": { how: "point", ask: "Point to the junk or card you would start with.", a: "Whatever is closest. Rough is the point." },
+  "sections.3.slides.1.do": { how: "pair", ask: "What is the most likely way your prototype breaks?", a: "Guessing first means you will spot why faster." },
+  "sections.3.slides.+": { type: "hot", take: "If your prototype breaks, you have failed.", flip: "Breaking is the test doing its job. Every break shows you exactly what to fix next." },
+  "sections.3.check": { q: "Your prototype breaks in the test. Best next move?", opts: ["Work out why, change one thing, test again", "Change everything at once", "Build a stronger copy of the same design"], a: 0, why: "One change at a time, so you know what fixed it." },
+  "sections.4.slides.0.do": { how: "pair", ask: "Say your problem sentence in under ten seconds.", a: "Short wins. Then show the fix." },
+  "sections.4.slides.+": { type: "hot", take: "A good idea sells itself: you should not need a pitch.", flip: "Loads of brilliant inventions went nowhere because nobody understood them. A clear 60 seconds can be the difference." },
+  "sections.4.check": { q: "What should a good 60 second pitch start with?", opts: ["The problem", "How it was built", "A thank you"], a: 0, why: "The problem first, so people care about the fix." },
+  "realworld.do": { how: "hands", ask: "Hands up for engineer, designer, app maker or scientist.", a: "All of them start with spotting a problem." },
+  "exit.0": { q: "What is a prototype?", opts: ["A rough first version to test", "The finished product", "A drawing of the idea"], a: 0, why: "A rough version, built to be tested and changed." },
+  "exit.1": { q: "What do engineers do when a test fails?", opts: ["Find out why and try again", "Start a completely new idea", "Run the same test until it works"], a: 0, why: "Testing again without changing anything gives the same result." }
+};
+})(window.B5LESSON);

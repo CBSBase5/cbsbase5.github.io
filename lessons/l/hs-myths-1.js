@@ -187,3 +187,25 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Myths are just stories for kids.", flip: "For thousands of years, myths were how grown ups explained the world: thunder, seasons, death. The biggest films and games now are still full of them." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "pair", ask: "Make up a one line reason for thunder that is not science.", a: "Giants bowling? A god's hammer? That is exactly how myths started." },
+  "sections.0.slides.1.opts": ["A goddess grieves while her daughter is in the underworld, so nothing grows", "The sun god moves away to punish humans", "Winter is a giant who wins a fight every year"],
+  "sections.0.check": { q: "What were most myths for?", opts: ["Explaining how the world works", "Recording real history", "Entertaining children at bedtime"], a: 0, why: "Mostly explaining: seasons, storms, the sun. Legends lean more on real history, and folk tales on lessons and fun." },
+  "sections.1.slides.0.do": { how: "shout", ask: "Name any old story you know. Myth, legend or folk tale?", a: "Check: gods and the world, a real(ish) hero, or ordinary people with a lesson." },
+  "sections.1.slides.+": { type: "hot", take: "Robin Hood was a hero.", flip: "Depends who is telling it. To the poor, yes; to the Sheriff, he was a thief. The oldest stories make him much rougher than the films do." },
+  "sections.2.slides.0.do": { how: "think", ask: "Which job on the list does a scary film do today?", a: "Passes the time, and sometimes teaches a lesson: do not go in the basement." },
+  "sections.2.check": { q: "Why did people tell myths before science?", opts: ["To explain things they could not explain yet", "Because they had nothing better to do", "Mainly to scare children into behaving"], a: 0, why: "Mostly to explain. Some stories were used to make children behave, but that is more what folk tales did." },
+  "realworld.do": { how: "shout", ask: "Which day of the week is named after Thor?", a: "Thursday. Thor's day." }
+};
+})(window.B5LESSON);

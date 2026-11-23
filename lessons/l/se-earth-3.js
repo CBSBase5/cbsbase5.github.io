@@ -127,3 +127,31 @@ window.B5LESSON = {
   surprise: { at: "sections.2.slides.0", kind: "bonnie", x: 1460, y: 700, w: 110, say: "Bonnie's climate plan: stay under the blanket. She has missed the point slightly." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "A freezing cold winter proves the planet is not warming.", flip: "One winter is weather. Climate is the pattern over about 30 years, and the world's average temperature has been rising for decades, cold snaps and all." }
+];
+L.rework = {
+  "sections.0.slides.0.bleed": true,
+  "sections.0.slides.0.do": { how: "shout", ask: "'This July was rainy': weather or climate?", a: "Weather. 'Our summers are usually mild' is climate." },
+  "sections.0.check": { q: "Climate is...", opts: ["The usual weather pattern over many years", "The weather this season", "The temperature today"], a: 0, why: "The pattern over about 30 years." },
+  "sections.1.slides.0.do": { how: "pair", ask: "Why is a thin blanket good, and a thicker one a problem?", a: "With none, Earth would be frozen. Thicker, and it keeps on warming." },
+  "sections.1.slides.1.do": { how: "point", ask: "Point to where the line starts climbing fast.", a: "From the 1800s: factories and steam engines." },
+  "sections.1.slides.2.opts": ["Tiny bubbles of old air trapped in deep ice", "Very old rocks", "Fossils of plants"],
+  "sections.1.slides.+": { type: "hot", take: "One person cannot make any difference to climate change.", flip: "One person alone makes a small difference. But choices spread: friends copy, shops change what they sell, and governments listen when lots of people want something." },
+  "sections.1.check": { q: "Carbon dioxide in the air acts like...", opts: ["A blanket, trapping heat", "A mirror, bouncing heat away", "A hole, letting heat in"], a: 0, why: "A blanket. The 'hole' people talk about is the ozone layer, which is a different problem." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "hands", ask: "Which of these have you seen near where you live?", a: "Solar panels on roofs are the most common." },
+  "sections.2.check": { q: "Which helps the blanket get less thick?", opts: ["Using wind and solar power instead of coal", "Burning wood instead of coal", "Leaving the heating on with windows open"], a: 0, why: "Wind and solar. Burning wood still releases carbon dioxide." },
+  "realworld.do": { how: "think", ask: "What is one weather record you have heard was broken?", a: "Hottest day, wettest month, warmest year." },
+  "exit.1": { q: "Old air is found in...", opts: ["Ice cores", "Old photos", "Tree leaves"], a: 0, why: "Bubbles trapped in deep ice." },
+  "exit.2": { q: "Carbon dioxide traps heat like a...", opts: ["Blanket", "Mirror", "Fridge"], a: 0, why: "A blanket." }
+};
+})(window.B5LESSON);

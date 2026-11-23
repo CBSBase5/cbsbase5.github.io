@@ -137,3 +137,33 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bird", x: 1450, y: 150, say: "Birds don't need a buddy check. They have wings. Cheating, really." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Climbing is dangerous.", flip: "Indoor climbing with a rope, a trained belayer and buddy checks has a very low injury rate. The kit is tested to hold far more than any person weighs." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "draw", ask: "Draw the rope on the board: climber, anchor, belayer.", a: "Up from the climber, through the anchor at the top, down to the belayer." },
+  "sections.0.slides.1.opts": ["Belayer", "Spotter", "Anchor"],
+  "sections.0.slides.1.why": "The belayer. A spotter helps on low climbs without ropes, and the anchor is the point at the top.",
+  "sections.0.check": { q: "On a top rope, where does the rope go?", opts: ["From the climber, up through the anchor, down to the belayer", "From the climber straight down to the belayer", "From the anchor down to the climber only"], a: 0, why: "Up and over the anchor, like a pulley." },
+  "sections.1.slides.0.bleed": true,
+  "sections.1.slides.0.do": { how: "point", ask: "Point to where you would check first on a partner.", a: "Any order works, as long as all four get checked every time." },
+  "sections.1.slides.2.opts": ["\"Take!\"", "\"Slack!\"", "\"Lower!\""],
+  "sections.1.slides.2.why": "'Take!' means take in the rope and hold me. 'Slack' asks for more rope, and 'Lower' brings you down.",
+  "sections.1.slides.+": { type: "hot", take: "If you are good at climbing, you can skip the buddy check.", flip: "Experienced climbers have been hurt by an untied knot. That is exactly why the best climbers check every single time." },
+  "sections.1.check": { q: "When do climbers do a buddy check?", opts: ["Before every climb", "At the start of each session", "When trying a new wall"], a: 0, why: "Before every climb. Knots and buckles can be undone in between." },
+  "sections.2.slides.0.do": { how: "think", ask: "Which line on this list makes you feel most OK about falling off?", a: "Any of them. Most climbers trust it after their first gentle fall." },
+  "sections.2.check": { q: "What makes climbing on a rope safe?", opts: ["Kit, checks and good communication", "Strong arms", "Climbing slowly"], a: 0, why: "All three together. Strong arms are optional." },
+  "realworld.do": { how: "hands", ask: "Hands up if you knew climbing was in the Olympics.", a: "Since Tokyo 2020." },
+  "exit.0": { q: "The person managing the rope on the ground is the...", opts: ["Belayer", "Spotter", "Anchor"], a: 0, why: "The belayer." },
+  "exit.1": { q: "To be held still on the rope you shout...", opts: ["\"Take!\"", "\"Slack!\"", "\"Lower!\""], a: 0, why: "'Take!'" },
+  "exit.2": { q: "A buddy check happens...", opts: ["Before every climb", "Once per session", "When the instructor asks"], a: 0, why: "Every climb." }
+};
+})(window.B5LESSON);

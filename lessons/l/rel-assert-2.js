@@ -144,3 +144,24 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bambi", x: 1440, y: 620, w: 120, say: "Bambi's no: a slow, regal turn of the head. Nobody argues with that." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Saying no to a friend is rude.", flip: "A kind, clear no is one of the most respectful things you can say. Real friends would rather hear 'no' than a fake 'yes'." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "think", ask: "Think of one thing you are OK with that someone else might not be.", a: "Hugs, sharing food, loud music... everyone's lines are different." },
+  "sections.1.slides.0.do": { how: "pair", ask: "Say 'Just no' to the person next to you. Was it hard?", a: "It feels strange at first. It gets easier." },
+  "sections.1.slides.2.opts": ["No. 'No' can be enough", "Yes, or it is rude", "Only to adults"],
+  "sections.1.check": { q: "Someone asks to borrow your phone and you do not want to lend it. Owl answer?", opts: ["\"No, sorry. I'd rather not.\"", "\"Fine... here.\"", "\"Maybe later\" (but you mean no)", "\"Get lost.\""], a: 0, why: "Clear and kind. 'Maybe later' when you mean no just puts it off." },
+  "sections.2.slides.0.do": { how: "think", ask: "Which line is hardest when you really want something?", a: "Usually 'don't push'. That is why it is worth practising." },
+  "sections.2.slides.+": { type: "hot", take: "If you keep asking nicely, it is not pressure.", flip: "Asking again and again, even nicely, wears people down. A yes after lots of pushing is not a real yes." },
+  "realworld.do": { how: "shout", ask: "Name one thing an adult might need to say no to.", a: "Scam calls, extra shifts, pushy salespeople, lending money." }
+};
+})(window.B5LESSON);

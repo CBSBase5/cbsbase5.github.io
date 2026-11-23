@@ -301,3 +301,26 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Online friends are not real friends.", flip: "Lots of people have real friendships online. But you cannot always be sure who someone is online, so the safety rules matter more: no secrets, no photos, and no meeting up without a trusted adult knowing." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "think", ask: "Who is one trusted adult for you?", a: "Someone at home, someone here, someone you can find every day." },
+  "sections.0.slides.1.do": { how: "shout", ask: "Name one safety rule you follow without thinking.", a: "Looking before crossing, not opening the door to strangers, locking your phone." },
+  "sections.0.check": { q: "A trusted adult is someone who...", opts: ["Listens and helps keep you safe", "Is any adult you know", "Is friendly to you online"], a: 0, why: "Someone who listens and helps keep you safe. Being older, or friendly online, is not enough." },
+  "sections.1.slides.0.do": { how: "point", ask: "Point to where your alarm goes off in your body.", a: "Tummy, chest, neck. Take it seriously." },
+  "sections.1.slides.2.do": { how: "hands", ask: "Which sign would be hardest to spot?", a: "Often 'too much, too fast'. It can feel nice at first." },
+  "sections.1.slides.4.do": { how: "think", ask: "Who could you tell if this happened?", a: "Any trusted adult. Childline's Report Remove can help get images taken down." },
+  "sections.2.slides.0.do": { how: "pair", ask: "Use the four steps on a message asking to meet up.", a: "Stop, think, choose 'tell an adult', and tell." },
+  "sections.2.slides.3.do": { how: "shout", ask: "What is Childline's number?", a: "0800 1111, any time." },
+  "realworld.do": { how: "think", ask: "What is the first safety thing you would check in your own flat?", a: "The smoke alarm, the locks, and the way out in a fire." }
+};
+})(window.B5LESSON);

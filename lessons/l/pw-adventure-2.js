@@ -145,3 +145,33 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.1", kind: "bonnie", x: 1470, y: 760, w: 100, say: "Bonnie's weather plan: refuse to go out if it is raining. Then go out anyway because of the biscuits." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Planning takes the fun out of an adventure.", flip: "Planning is what lets you do the fun bits without worrying. The best mountaineers plan every trip, then enjoy it." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "Which of the four questions do people forget most?", a: "Usually 'who knows where we are?'" },
+  "sections.0.slides.1.opts": ["Falling off cliffs while climbing", "Simple things: slips, getting lost, darkness or bad weather", "Wild animals"],
+  "sections.0.check": { q: "Which question helps most if you get lost?", opts: ["Who knows where we are?", "What kit do we need?", "What is the weather doing?"], a: 0, why: "If someone knows your route, help knows where to look. Kit and weather matter too, but they will not bring help." },
+  "sections.1.slides.1.bleed": true,
+  "sections.1.slides.1.do": { how: "shout", ask: "It is 9 degrees at the car park. About how cold is it 900 metres higher up?", a: "About 3 degrees: roughly 6 degrees colder, before the wind." },
+  "sections.1.slides.2.opts": ["A shorter route, back by 1pm", "Go anyway, but bring waterproofs", "Start at 10 and decide at 2pm"],
+  "sections.1.slides.+": { type: "hot", take: "If the forecast is bad, you should cancel the whole trip.", flip: "Sometimes. But often the answer is a shorter, lower or earlier version. Good planners change the plan instead of throwing it away." },
+  "sections.1.check": { q: "When should you check the weather?", opts: ["Before you go, and keep an eye on it", "The night before, then trust it", "Only on the morning"], a: 0, why: "Before you go, and as you go. Mountain weather changes fast." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "pair", ask: "Who would you tell, and how?", a: "Someone who will notice if you are late. A message with route and return time is perfect." },
+  "sections.2.slides.1.opts": ["Message them a new time", "Hurry, so you are only a bit late", "Wait until you are back to explain"],
+  "sections.2.check": { q: "What does a good adventure plan have?", opts: ["Route, kit, weather, and who knows", "Route and kit", "A map and a phone"], a: 0, why: "All four." },
+  "realworld.do": { how: "think", ask: "What is one thing on Jay's trip plan you never noticed before?", a: "Weather checks and who to call are on every one." },
+  "exit.0": { q: "Which is most important to leave at home?", opts: ["Brand new boots you have never worn", "A spare jumper", "A torch"], a: 0, why: "New boots give blisters. Break them in first." },
+  "exit.1": { q: "The higher you go, the...", opts: ["Colder it gets", "Warmer it gets, nearer the sun", "Calmer the wind gets"], a: 0, why: "Colder, and windier. Being nearer the sun makes no real difference." },
+  "exit.2": { q: "You are running late. Best move?", opts: ["Message the person who knows your plan", "Speed up and say nothing", "Take a shortcut off the path"], a: 0, why: "Tell them, so nobody starts worrying." }
+};
+})(window.B5LESSON);

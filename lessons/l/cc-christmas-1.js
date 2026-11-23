@@ -292,3 +292,40 @@ window.B5LESSON = {
   ]
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Christmas is basically the same everywhere.", flip: "Not even the date. Many Orthodox Christians celebrate on 7 January, in Australia it is a summer beach day, and in Japan Christmas Eve is more like Valentine's Day." }
+];
+L.rework = {
+  "sections.0.slides.1.do": { how: "hands", ask: "Which tradition here surprises you most? Hands up for each.", a: "Japan's fried chicken usually wins. It took off after an advert in the 1970s." },
+  "sections.0.check": { q: "Why is Christmas in summer in Australia?", opts: ["It is in the southern half of the world, where December is summer", "Australia is closer to the sun in December", "Australia is near the equator, so it is always hot", "They move Christmas to fit the weather"], a: 0, why: "Seasons come from the Earth's tilt. In December the south leans towards the sun. (The Earth is actually closest to the sun in January, for everyone.)" },
+  "sections.1.slides.1.do": { how: "pair", ask: "Which of the four does your winter have most of?", a: "Light, food, giving or music. Most families do all four somehow." },
+  "sections.1.slides.2.do": { how: "shout", ask: "How many days apart are 25 December and 7 January?", a: "13 days. Different church calendars, same celebration." },
+  "sections.1.slides.+": { type: "hot", take: "Christmas has become too much about presents.", flip: "Lots of people think so. But in many countries the presents are small and the big thing is food, church, family or a street party. What it is 'about' depends who you ask." },
+  "sections.1.check": { q: "Iceland's 'Christmas book flood' means...", opts: ["Books are given on Christmas Eve and read that night", "Libraries give away old books in December", "Everyone reads the same book at once", "Books are thrown in the sea for luck"], a: 0, why: "Books on Christmas Eve, then reading in bed, often with chocolate." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "think", ask: "Why might someone not celebrate Christmas at all?", a: "A different faith, no faith, family reasons, or it is just not their thing. All fine." },
+  "sections.2.slides.1.do": { how: "shout", ask: "One more candle each night for eight nights. How many candles are lit on the last night?", a: "Eight, plus the helper candle used to light them: nine." },
+  "sections.2.slides.+": { type: "hot", take: "Schools should only celebrate the festivals most of the class celebrates.", flip: "People really disagree on this. One side: keep it about the people in the room. The other: learning about other festivals is how you understand people, and a small festival here might be huge somewhere else." },
+  "sections.2.check": { q: "A classmate says their family does not do Christmas. A good reply?", opts: ["'Oh, what do you do in winter, if anything?'", "'That's so sad.'", "'You should, it's the best.'", "Say nothing and change the subject"], a: 0, why: "Curious and respectful. Changing the subject is not rude, but asking shows you are interested." },
+  "sections.3.slides.1.bleed": true,
+  "sections.3.slides.1.do": { how: "point", ask: "Point to where a star lantern would be seen best in this room.", a: "A window. Parols are hung so people outside can see them." },
+  "sections.3.slides.2.do": { how: "shout", ask: "Name a winter song from any country.", a: "Anything counts. Bonus points for one nobody else knows." },
+  "sections.3.slides.+": { type: "hot", take: "Homemade decorations are better than shop bought ones.", flip: "No right answer. But the parol started as a homemade lantern of bamboo and paper, and lots of families in the Philippines still make their own." },
+  "sections.3.check": { q: "Parols, star lanterns, come from...", opts: ["The Philippines", "Mexico", "Sweden"], a: 0, why: "The Philippines. Mexico is famous for pinatas and Sweden for Santa Lucia's candles." },
+  "sections.4.slides.0.bleed": true,
+  "sections.4.slides.0.do": { how: "think", ask: "One tiny thing your family does every winter.", a: "Tiny counts: a film, a walk, a food. Passing is fine too." },
+  "sections.4.slides.+": { type: "hot", take: "Traditions should never change.", flip: "Almost every tradition has changed. Christmas trees only became popular in Britain in the 1840s, after Queen Victoria's family was pictured with one." },
+  "sections.4.check": { q: "What do December traditions around the world usually share?", opts: ["Light, food, giving and music", "The same date", "Snow", "Presents from Father Christmas"], a: 0, why: "Light in the dark, food, giving and music. The date, the weather and who brings presents all change." },
+  "realworld.do": { how: "hands", ask: "Hands up if you would take a December job: grotto helper, delivery driver or baker?", a: "Lots of young people get their first job in December." },
+  "exit.0": { q: "Why do some people have Christmas on 7 January?", opts: ["They follow a different church calendar", "It is when presents arrive in their country", "25 December is a work day there"], a: 0, why: "A different church calendar. Same celebration, different date." },
+  "exit.1": { q: "Hanukkah is called the festival of...", opts: ["Lights", "Winter", "Stars"], a: 0, why: "Lights: one more candle every night for eight nights." }
+};
+})(window.B5LESSON);

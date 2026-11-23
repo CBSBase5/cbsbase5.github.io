@@ -158,3 +158,29 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.1", kind: "bird", x: 1440, y: 120, say: "Tweet. (Bird for: I once caught a worm THIS big. No, THIS big. Honestly, it was enormous.)" }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "If a legend is not true, it is basically a lie.", flip: "Not quite. A lie is meant to trick you. Legends grew over hundreds of years, each teller adding a bit, usually to say something about bravery, fairness or pride." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "hands", ask: "Which of the four have you heard of? Hands up for each.", a: "Most people know at least two. That is how long legends last." },
+  "sections.0.check": { q: "A legend usually has...", opts: ["Some truth, and a lot of story", "No truth at all", "Gods and monsters, every time"], a: 0, why: "A real person or place underneath, with lots added on top." },
+  "sections.1.slides.1.do": { how: "pair", ask: "Pass a one line story round the room. Each person adds one detail.", a: "Watch how fast it grows. That is a legend on fast forward." },
+  "sections.1.slides.+": { type: "hot", take: "There could still be something in Loch Ness.", flip: "In 2018 scientists tested DNA in the loch's water. No reptile DNA, but lots of eel DNA. Some think big eels explain the sightings." },
+  "sections.1.check": { q: "Why do legends change over time?", opts: ["Each teller adds or changes bits", "Historians correct them", "They get translated badly"], a: 0, why: "Each teller adds a bit, for hundreds of years." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "think", ask: "Does your town or area have a legend?", a: "Lots do: a ghost, a giant, a hero, a monster in a lake." },
+  "sections.2.check": { q: "Why might a town love its legend?", opts: ["It brings pride, and visitors", "It proves the town is old", "The council has to promote it"], a: 0, why: "Pride, and visitors who spend money." },
+  "realworld.do": { how: "shout", ask: "Name a film or game with King Arthur or Robin Hood in it.", a: "There are dozens. Every generation retells them." },
+  "exit.0": { q: "Richard Whittington was...", opts: ["A real Lord Mayor of London", "A made up pantomime character", "A real boy who sold his cat"], a: 0, why: "A real Lord Mayor. The cat is the made up part." },
+  "exit.1": { q: "The famous 1934 Nessie photo was...", opts: ["A hoax", "Proof of a monster", "A photo of a big eel"], a: 0, why: "A toy submarine with a model head. People involved admitted it decades later." },
+  "exit.2": { q: "Legends grow because...", opts: ["Each teller adds a bit", "Historians make them up", "They are written down once and never change"], a: 0, why: "Each teller adds a bit." }
+};
+})(window.B5LESSON);

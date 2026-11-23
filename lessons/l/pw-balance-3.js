@@ -133,3 +133,31 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.2", kind: "bonnie", x: 1460, y: 700, w: 110, say: "Bonnie's three points of contact: sofa, cushion, your lap." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Climbing is mostly about strong arms.", flip: "Good climbers say it is mostly legs and feet. Legs are much stronger, and arms tire fast. Watch an expert: they push up with their legs." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "pair", ask: "On all fours, lift one hand. Now lift a hand and a foot. Which felt steadier?", a: "Three points on: steady. Two: wobbly." },
+  "sections.0.slides.1.opts": ["Legs, by a long way", "Arms", "About the same"],
+  "sections.0.check": { q: "Three points of contact means...", opts: ["Three of your hands and feet on holds at once", "Both feet and one hand, always", "Touching three different holds a minute"], a: 0, why: "Any three. It could be two hands and a foot, or two feet and a hand." },
+  "sections.1.slides.1.opts": ["Straighten your arms and rest, or shout 'Take!'", "Grip harder", "Climb faster to the top"],
+  "sections.1.slides.2.do": { how: "think", ask: "Why do beginners look up instead of down?", a: "Hands feel like the important bit. Feet are where the strength is." },
+  "sections.1.slides.+": { type: "hot", take: "Resting halfway up a climb means you are not good enough.", flip: "The best climbers rest all the time: straight arms, weight on the legs. Resting well is a skill." },
+  "sections.1.check": { q: "Which rests your arms best?", opts: ["Straight arms", "Bent arms", "Hugging the wall"], a: 0, why: "Straight arms hang off your bones, not your muscles." },
+  "sections.2.slides.0.bleed": true,
+  "sections.2.slides.0.do": { how: "shout", ask: "Where else could three points of contact keep you safe?", a: "Loft ladders, bunk beds, stepladders, getting off a boat." },
+  "sections.2.check": { q: "On a ladder, three points of contact means...", opts: ["Two feet and a hand on the ladder", "Two hands and a foot on the ladder", "Someone holding the bottom"], a: 0, why: "Two feet and one hand, so the other hand can carry or work. Someone holding the bottom helps too." },
+  "realworld.do": { how: "hands", ask: "Hands up if you will try three on, one moves next time you climb anything.", a: "Even stepping onto a bus counts." },
+  "exit.0": { q: "How many points of contact should stay on?", opts: ["Three", "Two", "Four"], a: 0, why: "Three on, one moves." },
+  "exit.1": { q: "Who does the hard work: arms or legs?", opts: ["Legs", "Arms", "Both the same"], a: 0, why: "Legs." },
+  "exit.2": { q: "Arms tired: best move?", opts: ["Straight arms, or 'Take!'", "Grip harder", "Climb faster"], a: 0, why: "Straight arms to rest, or ask to be held." }
+};
+})(window.B5LESSON);

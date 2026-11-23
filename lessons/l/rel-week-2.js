@@ -290,3 +290,27 @@ window.B5LESSON = {
   }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "A good friend always tells you what you want to hear.", flip: "A good friend is kind and honest. Sometimes support sounds like 'I'm not sure that's a good idea', said gently." }
+];
+L.rework = {
+  "sections.0.slides.0.do": { how: "shout", ask: "Support, trust or commitment: which matters most to you in a friend?", a: "Any of the three. Lots of people say trust." },
+  "sections.0.slides.2.bleed": true,
+  "sections.0.slides.2.do": { how: "think", ask: "What is wrong with Alex's line?", a: "'HAVE to' takes away Sam's choice." },
+  "sections.0.slides.4.do": { how: "pair", ask: "Use the recipe: one wants a film, one wants a walk.", a: "'Walk first, then a film? Does that work for you?'" },
+  "sections.0.check": { q: "Jo wants music on. Alex wants it quiet. Both want to hang out. Fair plan?", opts: ["Quiet game now, music later", "Music, because Jo asked first", "Alex just puts up with it"], a: 0, why: "Both get something. Asking first does not decide it." },
+  "sections.1.slides.0.bleed": true,
+  "sections.1.slides.0.do": { how: "pair", ask: "Which phrase would you use most?", a: "'Would you like...?' leaves them the choice." },
+  "sections.1.slides.3.do": { how: "think", ask: "Whatever the label, what does a good relationship need?", a: "Respect, trust, kindness and fairness." },
+  "sections.1.slides.+": { type: "hot", take: "If a friend needs you, you should be there for them any time, day or night.", flip: "Caring matters, but nobody can be someone's only support. Agreeing times, and helping them find other support, is still being a good friend." },
+  "realworld.do": { how: "think", ask: "Name two people in your support web.", a: "Family, a friend, an adult here, or Childline." }
+};
+})(window.B5LESSON);

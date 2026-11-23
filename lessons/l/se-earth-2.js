@@ -142,3 +142,30 @@ window.B5LESSON = {
   surprise: { at: "sections.1.slides.0", kind: "bird", x: 1460, y: 620, say: "Some geese fly over the Himalayas, higher than most clouds. Show offs." }
 };
 })();
+
+/* ---------- Rework, 23 Nov 2026 ----------
+   Hot take opener (the hook comes straight after it), harder questions with
+   tempting wrong answers, and something for the room to do on every slide.
+   Read by lessons/engine.js (opener, rework, do, type "hot", bleed).
+   Board edits (edits) still win over anything here. */
+(function(L){
+if(!L) return;
+L.opener = [
+  { take: "Space is really, really far away.", flip: "Space starts about 100 km up. That is closer than London is to Birmingham. If you could drive straight up, you would be there in about an hour." }
+];
+L.rework = {
+  "sections.0.slides.1.do": { how: "shout", ask: "Roughly what fraction of the air is oxygen?", a: "About a fifth (21%)." },
+  "sections.0.check": { q: "Which gas makes up most of the air?", opts: ["Nitrogen", "Oxygen", "Carbon dioxide"], a: 0, why: "About 78% nitrogen and 21% oxygen. Carbon dioxide is a tiny amount." },
+  "sections.1.slides.0.do": { how: "point", ask: "Point to the layer planes fly in.", a: "Big jets cruise near the top of the troposphere, or just above it." },
+  "sections.1.slides.2.opts": ["The air is thinner up high, so each breath holds less oxygen", "There is a smaller share of oxygen in the air up high", "It is too cold to breathe properly"],
+  "sections.1.slides.2.why": "The mix is the same, about 21% oxygen, but the air is so thin that each breath holds much less of it.",
+  "sections.1.slides.+": { type: "hot", take: "Planes fly above the weather.", flip: "Mostly. Big jets cruise above most clouds, but tall storm clouds can reach even higher, so pilots fly round them." },
+  "sections.1.check": { q: "All our weather happens in the...", opts: ["Troposphere", "Stratosphere", "Ozone layer"], a: 0, why: "The troposphere, the layer we live in." },
+  "sections.2.slides.0.do": { how: "pair", ask: "Which job of the atmosphere matters most?", a: "No single answer. We would be in trouble without any of them." },
+  "sections.2.check": { q: "The ozone layer...", opts: ["Blocks lots of the Sun's harmful rays", "Keeps the Earth warm like a blanket", "Makes the sky blue"], a: 0, why: "It blocks harmful UV. The blanket is greenhouse gases, and the blue sky is sunlight scattering." },
+  "realworld.do": { how: "think", ask: "Why do your ears pop on a plane?", a: "The air pressure changes as you go up and down." },
+  "exit.0": { q: "Most of the air is...", opts: ["Nitrogen", "Oxygen", "Carbon dioxide"], a: 0, why: "Nitrogen, about 78%." },
+  "exit.1": { q: "Weather happens in the...", opts: ["Troposphere", "Stratosphere", "Thermosphere"], a: 0, why: "The troposphere." },
+  "exit.2": { q: "Space starts about...", opts: ["100 km up", "10 km up", "1,000 km up"], a: 0, why: "About 100 km up." }
+};
+})(window.B5LESSON);
