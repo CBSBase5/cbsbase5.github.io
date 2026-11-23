@@ -1295,23 +1295,37 @@ function results(){
    script (teacher/sync/base5-sheet.gs.txt). Sending again updates, never doubles. */
 function plainText(h){ return String(h || "").replace(/<[^>]+>/g, "").replace(/&[a-z]+;/g, " ").replace(/\s+/g, " ").trim(); }
 function summaryLine(){
+  /* the written part of the Buddy note: what the group actually did, question by question
+     (the sheet keeps up to 1,600 characters of it) */
   var bits = [], ex = 0, exRight = 0, voted = false;
+  var plainO = function(o){ return plainText(typeof o === "string" ? o : (o && o.t)); };
+  var cutT = function(t, n){ t = String(t || ""); return t.length > n ? t.slice(0, n - 3).replace(/\s+\S*$/, "") + "..." : t; };
+  var tl = function(t, opts){ return opts.map(function(o, j){ return t[j] ? cutT(o, 40) + " " + t[j] : ""; }).filter(Boolean).join(", "); };
   frames.forEach(function(f, i){
     var t = S.tally[i];
     if(f.exit){ ex++; if(t && t.some(function(v){ return v > 0; })){ voted = true; var mx = Math.max.apply(null, t); if(f.d.a != null && t[f.d.a] === mx) exRight++; } }
   });
   bits.push("Joined in with the whole group lesson on the board" + (part ? " (part " + part + " of " + NP + ": " + pname(part).toLowerCase() + ")" : "") + ".");
+  if(lesson.objective && lesson.objective.formal) bits.push("We were learning to " + plainText(lesson.objective.formal).replace(/\.?\s*$/, "."));
   if(voted) bits.push("Group exit vote: most picked the right answer on " + exRight + " of " + ex + " questions.");
   frames.forEach(function(f, i){
-    var t = S.tally[i];
-    if(f.k === "confidence" && t && t.some(function(v){ return v > 0; })){
+    var t = S.tally[i], has = t && t.some(function(v){ return v > 0; }), d0 = f.d || {};
+    if(f.k === "hot" && has) bits.push("Hot take '" + cutT(plainText(d0.take).replace(/[.!?]+$/, ""), 90) + "': " + tl(t, (d0.opts || ["Agree", "Disagree", "Not sure"]).map(plainO)) + ".");
+    else if(f.k === "predict" && has){
+      var opts = (d0.opts || []).map(plainO), mx = Math.max.apply(null, t), top = t.indexOf(mx);
+      var kind = f.exit ? "Exit vote" : f.check ? "Check" : "Guess";
+      bits.push(kind + " '" + cutT(plainText(d0.q || d0.title), 80) + "': most said " + cutT(opts[top], 50) +
+        (d0.a != null ? (top === d0.a ? " (right)" : " (the answer was " + cutT(opts[d0.a], 50) + ")") : "") + ".");
+    }
+    else if(f.k === "sort" && S.sort[i] && S.sort[i].checked) bits.push(plainText(frameName(f)) + ": " + sortLine(S.sort[i], d0));
+    else if(f.k === "confidence" && has){
       var n = 0, sum = 0; t.forEach(function(v, j){ n += v; sum += v * j; });
       bits.push("Fist to five, group average " + (Math.round(sum / n * 10) / 10) + " out of 5.");
     }
-    if(f.k === "sort" && S.sort[i] && S.sort[i].checked) bits.push(plainText(frameName(f)) + ": " + sortLine(S.sort[i], f.d));
+    else if(f.k === "driving" && has) bits.push("The big question: " + tl(t, (d0.opts || ["Yes", "No", "It depends"]).map(plainO)) + ".");
   });
-  if(lesson.objective && lesson.objective.formal) bits.push("We were learning to " + plainText(lesson.objective.formal));
-  return bits.join(" ").slice(0, 400);
+  var out = bits.join(" ");
+  return out.length > 1600 ? out.slice(0, 1597).replace(/\s+\S*$/, "") + "..." : out;
 }
 function sendMsg(t){ S.sent = t; var el = $("#sendmsg"); if(el) el.textContent = t; }
 function sendBuddy(){
