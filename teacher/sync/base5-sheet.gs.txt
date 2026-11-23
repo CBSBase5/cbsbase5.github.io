@@ -1275,7 +1275,7 @@ var WRITE3 = {
    ========================================================== */
 var EVH = ["Day", "Who", "Activity", "Slug", "Subject", "Target", "Step", "Buddy milestone", "Level", "Theme", "Minutes",
   "Chunks done", "Chunks", "Tried", "First go", "Second go", "Shown", "Skipped", "Sure but slipped", "Explained",
-  "Made", "Picture", "Finished", "Note", "Buddy note", "Updated", "Second look", "With", "Quote", "Kind"];
+  "Made", "Picture", "Finished", "Note", "Buddy note", "Updated", "Second look", "With", "Quote", "Kind", "Chunk cards", "Detail"];
 function setup4_(ss){
   var ev = tab_(ss, "Evidence", EVH);
   ev.getRange(1, 1, 1, EVH.length).setValues([EVH]).setFontWeight("bold");
@@ -1375,7 +1375,7 @@ var EVC = {}; EVH.forEach(function(h, i){ EVC[h] = i; });
 function evBlank_(who, slug, day){
   return { day: day, who: who, activity: "", slug: slug, subject: "", target: "", step: 0, msId: "", level: "", theme: "", minutes: 0,
     chunksDone: 0, chunks: 0, tried: 0, got1: 0, got2: 0, shown: 0, skipped: 0, flagged: 0, explained: 0, made: "", picture: "",
-    finished: false, note: "", buddy: "", second: "", with: "", quote: "", kind: "activity", line: "" };
+    finished: false, note: "", buddy: "", second: "", with: "", quote: "", kind: "activity", line: "", cards: "", detail: "" };
 }
 function evFromRow_(v){
   var g = function(h){ return v[EVC[h]]; };
@@ -1387,6 +1387,7 @@ function evFromRow_(v){
   e.made = String(g("Made") || ""); e.picture = String(g("Picture") || ""); e.finished = String(g("Finished")) === "yes"; e.note = String(g("Note") || "");
   e.buddy = String(g("Buddy note") || ""); e.second = String(g("Second look") || ""); e.with = String(g("With") || ""); e.quote = String(g("Quote") || "");
   e.kind = String(g("Kind") || "activity");
+  e.cards = String(g("Chunk cards") || ""); e.detail = String(g("Detail") || "");
   return e;
 }
 function evToRow_(e){
@@ -1397,6 +1398,7 @@ function evToRow_(e){
   put("Skipped", e.skipped); put("Sure but slipped", e.flagged); put("Explained", e.explained); put("Made", plain_(e.made)); put("Picture", e.picture);
   put("Finished", e.finished ? "yes" : ""); put("Note", plain_(e.note)); put("Buddy note", e.buddy); put("Updated", new Date());
   put("Second look", e.second); put("With", plain_(e.with)); put("Quote", plain_(e.quote)); put("Kind", e.kind);
+  put("Chunk cards", e.cards); put("Detail", plain_(e.detail));
   return out;
 }
 function evidenceNote_(e){
@@ -1419,6 +1421,9 @@ function evidenceNote_(e){
   if(e.second) bits.push("Came back for a second look and got " + e.second + " right.");
   if(e.explained) bits.push("Explained how they got it " + (e.explained === 1 ? "once" : e.explained === 2 ? "twice" : e.explained + " times") + ".");
   if(e.quote) bits.push('In their words: "' + e.quote.replace(/[.!?]+$/, "") + '".');
+  if(e.detail) bits.push("What they did: " + e.detail.replace(/\.?\s*$/, "."));
+  var nCards = e.cards ? e.cards.split(/\s*,\s*/).filter(String).length : 0;
+  if(nCards) bits.push(nCards === 1 ? "A picture of the chunk, with each question and their answers, is on this note." : nCards + " pictures of the chunks, with each question and their answers, are on this note.");
   if(e.made) bits.push("Made at the end: " + e.made + (e.picture ? " (picture: " + e.picture + ")" : "") + ".");
   if(e.target) bits.push("Built for: " + e.target + (e.step ? ", step " + e.step : "") + ".");
   return "Base 5 site: " + bits.join(" ");
@@ -1433,6 +1438,9 @@ function evidenceFor_(who, key, val){
 /* today's row for who and slug: { sh, row (0 if none), e } */
 function evRow_(who, slug, today){
   var sh = sheet_("Evidence"); if(!sh) return null;
+  /* columns added later (Chunk cards, Detail) get their headings without running setup again */
+  var h1 = sh.getRange(1, 1, 1, EVH.length).getValues()[0];
+  if(String(h1[EVH.length - 1]) !== EVH[EVH.length - 1]) sh.getRange(1, 1, 1, EVH.length).setValues([EVH]).setFontWeight("bold");
   var v = sh.getDataRange().getValues();
   for(var i = 1; i < v.length; i++){
     if(String(v[i][EVC.Who]) === who && String(v[i][EVC.Slug]) === slug && (v[i][0] instanceof Date ? day_(v[i][0]) : String(v[i][0])) === today) return { sh: sh, row: i + 1, e: evFromRow_(v[i]) };
@@ -1443,7 +1451,7 @@ function evRow_(who, slug, today){
 function evWrite_(R, e, old){
   e.note = evidenceNote_(e);
   var moved = !R.row || !old.buddy || /^not sent|^no /.test(old.buddy) || old.chunksDone !== e.chunksDone || old.finished !== e.finished ||
-    old.made !== e.made || old.picture !== e.picture || old.second !== e.second || old.with !== e.with || old.quote !== e.quote ||
+    old.made !== e.made || old.picture !== e.picture || old.second !== e.second || old.with !== e.with || old.quote !== e.quote || old.cards !== e.cards ||
     (e.kind !== "activity" && (Math.floor(old.minutes / 5) !== Math.floor(e.minutes / 5) || old.line !== e.line));
   var real = e.chunksDone || e.finished || e.made || e.second || (e.kind !== "activity" && e.minutes >= 3);
   if(moved && real && ticked_(setting_("Evidence to Buddy"))){
@@ -1482,6 +1490,14 @@ function evidence_(who, id, n, review){
     e.with = Array.isArray(s.helped) ? s.helped.map(function(x){ return String(x).replace(/[^A-Za-z ]/g, "").slice(0, 20); }).filter(String).join(", ") : "";
     e.quote = String(s.quote || "").replace(/["\u201c\u201d]/g, "'").replace(/\s+/g, " ").trim().slice(0, 200);
     if(s.madeId) e.picture = "https://drive.google.com/file/d/" + String(s.madeId).replace(/[^\w-]/g, "") + "/view";
+    /* chunk evidence cards (23 Nov 2026): [chunk, Drive file id, day], today's only */
+    if(Array.isArray(s.cards)){
+      var cl = s.cards.filter(function(c){ return Array.isArray(c) && String(c[2]) === today && c[1]; })
+        .sort(function(a, b){ return (+a[0] || 0) - (+b[0] || 0); })
+        .map(function(c){ return "https://drive.google.com/file/d/" + String(c[1]).replace(/[^\w-]/g, "") + "/view"; });
+      if(cl.length) e.cards = cl.join(",");
+    }
+    e.detail = String(s.detail || "").replace(/\s+/g, " ").trim().slice(0, 1600);
   }
   evWrite_(R, e, old);
 }
@@ -1566,6 +1582,15 @@ function buddyNote_(e, prev){
     put("photos", ph.join(","));
     if(ci.file >= 0 && !String(line[ci.file] || "")) put("file", e.picture);
   }
+  /* chunk evidence cards: each one on the note as a photo too */
+  if(e.cards && ci.photos >= 0){
+    var ph2 = String(line[ci.photos] || "").split(",").map(function(x){ return x.trim(); }).filter(String);
+    e.cards.split(",").forEach(function(u){
+      u = u.trim(); var cid = (u.match(/[-\w]{25,}/) || [""])[0];
+      if(cid && !ph2.some(function(x){ return x.indexOf(cid) >= 0; })) ph2.push(u);
+    });
+    put("photos", ph2.join(","));
+  }
   /* games and practice are not built for one step, so Wrap up does not ask you to link them */
   if(!row && e.kind !== "activity" && !e.msId) put("linkSkip", "yes");
   /* Changed: left empty, so Buddy (1.22.1 and later) gives the note the next number in its own running count and
@@ -1592,6 +1617,8 @@ function made_(r){
   if(!m || m[2].length > 2600000) return { ok: false, error: "no picture" };
   var slug = String(r.slug || "").replace(/[^a-z0-9-]/gi, "").slice(0, 60) || "activity";
   var ext = m[1] === "image/png" ? ".png" : ".jpg";
+  /* a chunk evidence card (its slug ends -chunkN): one picture per chunk per day, not logged as Made */
+  var chunk = !!r.card;
   var name = who + " " + day_() + " " + slug + ext;
   var folder = madeFolder_();
   var sub, it = folder.getFoldersByName(who);
@@ -1600,7 +1627,7 @@ function made_(r){
   while(old.hasNext()) old.next().setTrashed(true);
   var file = sub.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name));
   file.setDescription(clean_(String(r.title || "") + (r.text ? ": " + r.text : ""), 900));
-  logEvents_(who, [["Made", clean_(r.title || nice_(slug), 120)]]);
+  if(!chunk) logEvents_(who, [["Made", clean_(r.title || nice_(slug), 120)]]);
   return { ok: true, id: file.getId(), url: "https://drive.google.com/file/d/" + file.getId() + "/view" };
 }
 

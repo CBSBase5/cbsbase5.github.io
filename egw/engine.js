@@ -439,7 +439,8 @@ function summary(){
            secs: state.secs || 0, round: state.round || 0, sure: sure, explained: explained,
            made: madeText || undefined, madeId: state.madeId || undefined, mins: cfg.mins || undefined,
            levelName: a2() && A2LV ? lvName(A2LV) : undefined, quote: quote || undefined,
-           helped: Array.isArray(state.helped) && state.helped.length ? state.helped.slice(0, 8) : undefined };
+           helped: Array.isArray(state.helped) && state.helped.length ? state.helped.slice(0, 8) : undefined,
+           cards: cardList(), detail: a2() && !cfg.review ? (todayDetail() || undefined) : undefined };
 }
 /* questions answered with "certain" that slipped on the first go */
 function flaggedList(){
@@ -801,8 +802,197 @@ function chunkDone(k){
   $("nextChunkBtn").onclick = function(){ go(chunks[nk].from); };
   confetti($("stampNum"), 26);
   state.pos = chunks[nk].from; save();
+  sendChunkCard(k);
   if(P() && !cfg.escape) try{ P().chunkEnd($("chunkCard"), { k: k, n: chunks.length }); }catch(e){}
   if(F() && !cfg.review) try{ F().chunkEnd($("chunkCard"), { k: k, n: chunks.length, subject: cfg.subject || "", id: cfg.id, topic: stripTags(c.topic || "") }); }catch(e){}
+}
+
+/* ---------- chunk evidence cards (23 Nov 2026) ----------
+   When a chunk of an Autumn 2 activity is finished, a picture of it
+   (each question, what the student answered, how it landed and their
+   own explanation) quietly goes to Jay's Drive through the shared
+   memory and onto that day's BridgeLink Buddy note as a photo, so the
+   evidence slide shows the actual learning rather than a count.
+   Nothing new is shown to the student. Signed in only: guests and
+   second looks are left out, and nothing is lost if it cannot send.
+   One card per chunk per day; doing the chunk again replaces it.
+   The same specifics go into the note text (todayDetail, below). */
+/* only where the work itself syncs to the student's HQ: their own device, or Jay's laptop while they are driving */
+function cardOk(){ return a2() && !cfg.review && !!HQ.who && !!(window.B5Site && B5Site.call && B5Site.syncUrl && !B5Site.guest && window.B5Sync && B5Sync.on); }
+function plainOf(v){ return stripTags(tok(String(v == null ? "" : v)).replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|table|tr|td)\b[^>]*>/gi, " $&")); }
+function cut(t, n){ t = String(t || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 3).replace(/\s+\S*$/, "") + "..." : t; }
+function optText(s, k){
+  var o = s.options && s.options[k]; if(o == null) return "";
+  var t = plainOf(o);
+  return t || "picture option " + (k + 1);
+}
+/* what the student actually gave, in plain words */
+function answerOf(s, a, i){
+  if(!a) return "";
+  var v = a.value;
+  try{
+    switch(s.type){
+      case "mc": return v != null && v >= 0 ? optText(s, v) : "";
+      case "multi": return (v || []).map(function(k){ return optText(s, k); }).join("; ");
+      case "num":
+        if(!v) return "";
+        var b = (s.boxes || []).map(function(bx, k){
+          var t = String((v.v || [])[k] || "").trim(); if(!t) return "";
+          return (bx.label ? plainOf(bx.label) + " " : "") + (bx.pre ? plainOf(bx.pre) : "") + t + (bx.post ? " " + plainOf(bx.post) : "");
+        }).filter(String).join(", ");
+        return b + (v.w && String(v.w).trim() ? " (working: " + String(v.w).replace(/\s+/g, " ").trim() + ")" : "");
+      case "text": return String(v || "").replace(/\s+/g, " ").trim();
+      case "write": return v && v.text ? String(v.text).replace(/\s+/g, " ").trim() : "";
+      case "sort":
+        if(!v) return "";
+        return (s.buckets || []).map(function(bn, b){
+          var cs = (s.cards || []).map(function(c, k){ return v[k] === b ? plainOf(c[0]) : ""; }).filter(String);
+          return cs.length ? plainOf(bn) + ": " + cs.join(", ") : "";
+        }).filter(String).join(" | ");
+      case "order": return (v || []).map(function(k, n){ return (n + 1) + ") " + plainOf(s.items[k]); }).join("  ");
+      case "match": return (s.pairs || []).map(function(p, k){ return plainOf(p[0]) + " = " + ((v || [])[k] || "?"); }).join("; ");
+      case "mark":
+        if(!v) return "";
+        return (v.l === -1 ? "said Jay got it all right" : v.l >= 0 ? "spotted Jay's slip on line " + (v.l + 1) : "") + (v.m >= 0 ? ", gave " + v.m + " of " + s.max + " marks" : "");
+      case "unlock": return String(v || "");
+      case "widget": return s.report ? String(s.report(state.widgets[i] || {}) || "") : "";
+    }
+  }catch(e){}
+  return "";
+}
+/* the right answer, for a question that needed Show me (simple types only) */
+function rightOf(s){
+  try{
+    if(s.type === "mc") return optText(s, s.answer);
+    if(s.type === "multi") return (s.answers || []).map(function(k){ return optText(s, k); }).join("; ");
+    if(s.type === "num") return (s.boxes || []).map(function(bx){ return (bx.label ? plainOf(bx.label) + " " : "") + (bx.pre ? plainOf(bx.pre) : "") + String(bx.show != null ? bx.show : bx.a) + (bx.post ? " " + plainOf(bx.post) : ""); }).join(", ");
+    if(s.type === "text" && s.model) return plainOf(s.model);
+  }catch(e){}
+  return "";
+}
+var LANDED = { right1: "right first go", right2: "right on a second go", shown: "learnt from Show me", done: "done", skipped: "skipped", trying: "started" };
+var SUREW = { certain: "felt sure", think: "thought so", guess: "had a guess" };
+function chunkRows(k){
+  var c = chunks[k], rows = [], n = 0;
+  for(var i = c.from; i <= c.to; i++){
+    var s = steps[i]; if(s.type === "learn") continue;
+    n++;
+    var a = state.answers[i] || null;
+    rows.push({ i: i, n: n, q: plainOf(s.q || s.title || s.html || ""), ans: answerOf(s, a, i), st: a ? a.status : "",
+      right: a && a.status === "shown" ? rightOf(s) : "", why: a && a.why ? String(a.why).replace(/\s+/g, " ").trim() : "",
+      sure: a && a.sure ? SUREW[a.sure] || "" : "", stretch: !!s.stretch, write: s.type === "write", day: a ? a.day || "" : "" });
+  }
+  return rows;
+}
+/* specifics for the Buddy note: only questions answered today, grouped by chunk */
+function todayDetail(){
+  if(!chunks.length) return "";
+  var today = dayStr(new Date()), out = [];
+  chunks.forEach(function(c, k){
+    var bits = chunkRows(k).filter(function(r){ return r.day === today && r.st && r.st !== "skipped" && r.st !== "trying"; }).map(function(r){
+      return "'" + cut(r.q, 80) + "' " + (r.write ? "wrote '" + cut(r.ans, 120) + "'" : (r.ans ? "answered " + cut(r.ans, 70) : "")) +
+        (r.write ? "" : (r.ans ? ", " : "") + (LANDED[r.st] || r.st)) + (r.right ? " (answer: " + cut(r.right, 40) + ")" : "");
+    });
+    if(bits.length) out.push((chunks.length > 1 ? "Chunk " + (k + 1) + ", " : "") + cut(plainOf(c.topic), 50) + ": " + bits.join("; "));
+  });
+  return cut(out.join(". "), 1600);
+}
+function cardList(){
+  var out = [];
+  Object.keys(state.cards || {}).forEach(function(k){ var c = state.cards[k]; if(c && c.id) out.push([+k + 1, c.id, c.day || ""]); });
+  return out.length ? out : undefined;
+}
+function xmlEsc(t){ return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+/* rough wrap by character count (the picture is drawn without web fonts) */
+function wrapLines(t, max, most){
+  var words = String(t || "").split(" "), lines = [], line = "";
+  words.forEach(function(w){
+    while(w.length > max){ if(line){ lines.push(line); line = ""; } lines.push(w.slice(0, max)); w = w.slice(max); }
+    if(!line) line = w; else if((line + " " + w).length <= max) line += " " + w; else { lines.push(line); line = w; }
+  });
+  if(line) lines.push(line);
+  if(lines.length > most){ lines = lines.slice(0, most); lines[most - 1] = cut(lines[most - 1] + " ...", max); if(!/\.\.\.$/.test(lines[most - 1])) lines[most - 1] = lines[most - 1].slice(0, max - 3) + "..."; }
+  return lines;
+}
+function chunkCardSvg(k){
+  var c = chunks[k], rows = chunkRows(k), W = 1600, P = 64, F = "Atkinson Hyperlegible, Verdana, Arial, sans-serif";
+  var TEAL = "#007291", ORANGE = "#ef7724", INK = "#1f2a30", GREY = "#5f6b73", PAPER = "#fef8f4";
+  var chipW = 330, textW = W - P * 2 - chipW - 40;
+  var perQ = Math.floor(textW / (30 * 0.56)), perA = Math.floor(textW / (26 * 0.56)), perW = Math.floor(textW / (24 * 0.56));
+  var many = rows.length > 6, qMost = many ? 1 : 2, aMost = many ? 1 : 3;
+  var now = new Date(), days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], mons = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var when = days[now.getDay()] + " " + now.getDate() + " " + mons[now.getMonth()] + " " + now.getFullYear() + ", " + (now.getHours() < 10 ? "0" : "") + now.getHours() + ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes();
+  var tally = { right1: 0, right2: 0, shown: 0, skipped: 0, done: 0 };
+  rows.forEach(function(r){ if(tally[r.st] != null) tally[r.st]++; });
+  var tl = [];
+  if(tally.right1) tl.push(tally.right1 + " right first go");
+  if(tally.right2) tl.push(tally.right2 + " on a second go");
+  if(tally.shown) tl.push(tally.shown + " learnt from Show me");
+  if(tally.done) tl.push(tally.done + " written");
+  if(tally.skipped) tl.push(tally.skipped + " skipped");
+  var body = "", y = 300;
+  rows.forEach(function(r){
+    var ql = wrapLines("Q" + r.n + (r.stretch ? " (stretch)" : "") + ". " + r.q, perQ, qMost);
+    var aText = r.st === "skipped" || !r.st ? "" : (r.write ? "Wrote: " : "Answered: ") + (r.ans || "(nothing typed)");
+    var al = aText ? wrapLines(aText, perA, r.write ? aMost + 1 : aMost) : [];
+    var rl = r.right ? wrapLines("Answer shown: " + r.right, perA, 1) : [];
+    var wl = r.why && !many ? wrapLines("In their words: '" + r.why + "'", perW, 2) : [];
+    var h = 26 + ql.length * 40 + al.length * 34 + rl.length * 34 + wl.length * 32 + 22;
+    var g = '<rect x="' + P + '" y="' + y + '" width="' + (W - P * 2) + '" height="' + h + '" rx="18" fill="#ffffff" stroke="#e6ddd4" stroke-width="2"/>';
+    var ty = y + 26;
+    ql.forEach(function(l){ ty += 34; g += '<text x="' + (P + 28) + '" y="' + ty + '" font-size="30" font-weight="700" fill="' + INK + '">' + xmlEsc(l) + '</text>'; ty += 6; });
+    al.forEach(function(l){ ty += 34; g += '<text x="' + (P + 28) + '" y="' + ty + '" font-size="26" fill="' + TEAL + '">' + xmlEsc(l) + '</text>'; });
+    rl.forEach(function(l){ ty += 34; g += '<text x="' + (P + 28) + '" y="' + ty + '" font-size="26" fill="' + GREY + '">' + xmlEsc(l) + '</text>'; });
+    wl.forEach(function(l){ ty += 32; g += '<text x="' + (P + 28) + '" y="' + ty + '" font-size="24" font-style="italic" fill="' + INK + '">' + xmlEsc(l) + '</text>'; });
+    /* how it landed: teal for right, orange for Show me, grey otherwise; never red */
+    var lab = r.st ? (LANDED[r.st] || r.st) : "not tried", fillC = "#eef1f2", txtC = GREY, strokeC = "#d5dbde";
+    if(r.st === "right1"){ fillC = TEAL; txtC = "#ffffff"; strokeC = TEAL; }
+    else if(r.st === "right2"){ fillC = "#e3f2f6"; txtC = TEAL; strokeC = TEAL; }
+    else if(r.st === "shown"){ fillC = "#fdeee3"; txtC = "#a8480a"; strokeC = ORANGE; }
+    else if(r.st === "done"){ fillC = "#e3f2f6"; txtC = TEAL; strokeC = TEAL; }
+    var cx = W - P - chipW - 24, cy = y + 24;
+    g += '<rect x="' + cx + '" y="' + cy + '" width="' + chipW + '" height="52" rx="26" fill="' + fillC + '" stroke="' + strokeC + '" stroke-width="2"/>' +
+      '<text x="' + (cx + chipW / 2) + '" y="' + (cy + 35) + '" font-size="24" font-weight="700" text-anchor="middle" fill="' + txtC + '">' + xmlEsc(lab.charAt(0).toUpperCase() + lab.slice(1)) + '</text>';
+    if(r.sure) g += '<text x="' + (cx + chipW / 2) + '" y="' + (cy + 86) + '" font-size="22" text-anchor="middle" fill="' + GREY + '">' + xmlEsc("Before checking: " + r.sure) + '</text>';
+    body += g;
+    y += h + 14;
+  });
+  var H = Math.max(900, y + 70);
+  var lvl = A2LV ? lvName(A2LV) + " level" : "", th = A2TH && cfg.themes && cfg.themes[A2TH] ? cfg.themes[A2TH].name + " theme" : "";
+  var right = [lvl, th].filter(String).join(", ");
+  var head = '<rect x="0" y="0" width="' + W + '" height="250" fill="' + TEAL + '"/>' +
+    '<rect x="0" y="250" width="' + W + '" height="10" fill="' + ORANGE + '"/>' +
+    '<text x="' + P + '" y="66" font-size="24" font-weight="700" letter-spacing="3" fill="#ffd9bf">BASE 5 LEARNING EVIDENCE</text>' +
+    '<text x="' + P + '" y="128" font-size="50" font-weight="700" fill="#ffffff">' + xmlEsc(cut(plainOf(cfg.title), 44)) + '</text>' +
+    '<text x="' + P + '" y="180" font-size="30" fill="#ffffff">' + xmlEsc(cut((cfg.subject ? plainOf(cfg.subject) + ". " : "") + (cfg.escape ? "Room " : "Chunk ") + (k + 1) + " of " + chunks.length + ": " + plainOf(c.topic), 70)) + '</text>' +
+    '<text x="' + P + '" y="224" font-size="26" fill="#cfe7ee">' + xmlEsc(rows.length + " question" + (rows.length === 1 ? "" : "s") + (tl.length ? ": " + tl.join(", ") : "")) + '</text>' +
+    '<text x="' + (W - P) + '" y="110" font-size="72" font-weight="700" text-anchor="end" fill="#ffffff">' + xmlEsc(HQ.who) + '</text>' +
+    '<text x="' + (W - P) + '" y="160" font-size="26" text-anchor="end" fill="#ffffff">' + xmlEsc(when) + '</text>' +
+    (right ? '<text x="' + (W - P) + '" y="200" font-size="24" text-anchor="end" fill="#cfe7ee">' + xmlEsc(right) + '</text>' : "");
+  var foot = '<text x="' + P + '" y="' + (H - 30) + '" font-size="20" fill="' + GREY + '">Drawn by the Base 5 site when the chunk was finished. Answers are the student\'s own; a second go shows the answer they landed on.</text>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" font-family="' + F + '">' +
+    '<rect width="' + W + '" height="' + H + '" fill="' + PAPER + '"/>' + head + body + foot + '</svg>';
+}
+function cardSig(k){
+  return JSON.stringify(chunkRows(k).map(function(r){ return [r.st, r.ans, r.why, r.sure]; }));
+}
+function sendChunkCard(k){
+  try{
+    if(!cardOk() || k == null || !chunks[k]) return;
+    var rows = chunkRows(k), today = dayStr(new Date());
+    if(!rows.some(function(r){ return r.day === today && r.st && r.st !== "skipped" && r.st !== "trying"; })) return;
+    var sig = cardSig(k), have = (state.cards || {})[k];
+    if(have && have.sig === sig && have.day === today) return;
+    var topic = plainOf(chunks[k].topic);
+    svgToPngData(chunkCardSvg(k), function(data){
+      if(!data) return;
+      /* its own slug, so it never replaces the picture made at the end of the activity */
+      B5Site.call("made", { who: HQ.who, slug: cfg.id + "-chunk" + (k + 1), chunk: k + 1, card: true,
+        title: plainOf(cfg.title) + ", chunk " + (k + 1) + ": " + topic, png: data, text: cut(todayDetail(), 800) }).then(function(r){
+        if(r && r.ok && r.id){ state.cards = state.cards || {}; state.cards[k] = { id: r.id, sig: sig, day: today }; save(); }
+      }).catch(function(){});
+    });
+  }catch(e){}
 }
 
 function confetti(from, n){
@@ -1446,7 +1636,7 @@ R.write = function(s, body, i){
   function keep(){
     var n = words();
     wc.textContent = n + " word" + (n === 1 ? "" : "s") + (s.minWords ? " (aim for about " + s.minWords + ")" : "") + ". Saves as you type.";
-    state.answers[i] = { status: n > 0 ? "done" : "skipped", value: { text: ta.value, ticks: ticks.map(function(t){ return t.checked; }) } };
+    state.answers[i] = { status: n > 0 ? "done" : "skipped", value: { text: ta.value, ticks: ticks.map(function(t){ return t.checked; }) }, day: dayStr(new Date()) };
     save();
   }
   ta.addEventListener("input", keep);
@@ -1573,7 +1763,7 @@ R.widget = function(s, body, i){
     done: function(result){
       var prev = state.answers[i];
       var first = !(prev && resolved(i));
-      if(!(prev && resolved(i) && rank(prev.status) >= rank(result))) state.answers[i] = { status: result || "done" };
+      if(!(prev && resolved(i) && rank(prev.status) >= rank(result))) state.answers[i] = { status: result || "done", day: dayStr(new Date()) };
       if(first) bump(result || "done", host);
       save();
       setButtons(s, i);
@@ -1611,6 +1801,7 @@ function check(giveUp){
     else a.status = "trying";
   }
   a.value = cur.get();
+  a.day = dayStr(new Date());
   state.answers[i] = a;
   save();
 
@@ -1702,6 +1893,7 @@ function makeQuestion(){
 }
 function finish(){
   state.finished = true; save();
+  if(!cfg.review && steps.length) sendChunkCard(chunkOf[steps.length - 1]);
   refreshCode();
   showOnly("resultCard");
   makeQuestion();
