@@ -440,7 +440,7 @@ function summary(){
            made: madeText || undefined, madeId: state.madeId || undefined, mins: cfg.mins || undefined,
            levelName: a2() && A2LV ? lvName(A2LV) : undefined, quote: quote || undefined,
            helped: Array.isArray(state.helped) && state.helped.length ? state.helped.slice(0, 8) : undefined,
-           cards: cardList(), detail: a2() && !cfg.review ? (todayDetail() || undefined) : undefined };
+           cards: cardList(), cardErr: state.cardErr || undefined, detail: a2() && !cfg.review ? (todayDetail() || undefined) : undefined };
 }
 /* questions answered with "certain" that slipped on the first go */
 function flaggedList(){
@@ -989,8 +989,9 @@ function sendChunkCard(k){
       /* its own slug, so it never replaces the picture made at the end of the activity */
       B5Site.call("made", { who: HQ.who, slug: cfg.id + "-chunk" + (k + 1), chunk: k + 1, card: true,
         title: plainOf(cfg.title) + ", chunk " + (k + 1) + ": " + topic, png: data, text: cut(todayDetail(), 800) }).then(function(r){
-        if(r && r.ok && r.id){ state.cards = state.cards || {}; state.cards[k] = { id: r.id, sig: sig, day: today }; save(); }
-      }).catch(function(){});
+        if(r && r.ok && r.id){ state.cards = state.cards || {}; state.cards[k] = { id: r.id, sig: sig, day: today }; delete state.cardErr; save(); }
+        else { state.cardErr = String((r && r.error) || "no answer").slice(0, 120); save(); }
+      }).catch(function(e){ state.cardErr = String((e && e.message) || "no answer").slice(0, 120); save(); });
     });
   }catch(e){}
 }
@@ -2313,6 +2314,10 @@ function run(c){
   if(cfg.review) buildReviewStart();
   showStart();
   save();
+  /* chunks finished today whose picture never reached Drive (sheet down, or no Drive permission yet) try again, quietly */
+  if(a2() && !cfg.review) setTimeout(function(){
+    try{ chunks.forEach(function(c, k){ if(chunkState(c) === "done") sendChunkCard(k); }); }catch(e){}
+  }, 6000);
   window.addEventListener("hashchange", function(){
     if(((location.hash || "") === "#review") !== !!cfg.review) location.reload();
   });

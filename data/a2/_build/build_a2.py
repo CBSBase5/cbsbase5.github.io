@@ -25,7 +25,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 sys.path.insert(0, HERE)
 import plan
 
-ENGINE_V = "23"
+ENGINE_V = "24"
 A2CSS_V = "3"
 ART_V = "1"
 # pillar activities say which whole group lesson leads into them (/lessons/tie.js)

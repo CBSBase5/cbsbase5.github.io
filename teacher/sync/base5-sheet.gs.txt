@@ -1422,7 +1422,7 @@ function evidenceNote_(e){
   if(e.explained) bits.push("Explained how they got it " + (e.explained === 1 ? "once" : e.explained === 2 ? "twice" : e.explained + " times") + ".");
   if(e.quote) bits.push('In their words: "' + e.quote.replace(/[.!?]+$/, "") + '".');
   if(e.detail) bits.push("What they did: " + e.detail.replace(/\.?\s*$/, "."));
-  var nCards = e.cards ? e.cards.split(/\s*,\s*/).filter(String).length : 0;
+  var nCards = e.cards ? e.cards.split(/\s*,\s*/).filter(function(u){ return /^http/.test(u); }).length : 0;
   if(nCards) bits.push(nCards === 1 ? "A picture of the chunk, with each question and their answers, is on this note." : nCards + " pictures of the chunks, with each question and their answers, are on this note.");
   if(e.made) bits.push("Made at the end: " + e.made + (e.picture ? " (picture: " + e.picture + ")" : "") + ".");
   if(e.target) bits.push("Built for: " + e.target + (e.step ? ", step " + e.step : "") + ".");
@@ -1497,6 +1497,8 @@ function evidence_(who, id, n, review){
         .map(function(c){ return "https://drive.google.com/file/d/" + String(c[1]).replace(/[^\w-]/g, "") + "/view"; });
       if(cl.length) e.cards = cl.join(",");
     }
+    /* the chunk pictures are failing to save: say why, so it shows on the evidence page */
+    if(s.cardErr && !/^http/.test(e.cards)) e.cards = "not saved: " + clean_(s.cardErr, 100);
     e.detail = String(s.detail || "").replace(/\s+/g, " ").trim().slice(0, 1600);
   }
   evWrite_(R, e, old);
