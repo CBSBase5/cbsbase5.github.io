@@ -111,6 +111,7 @@ function doGet(e){
   if(p.bridge) return HtmlService.createHtmlOutput(bridgeHtml_())
     .setTitle("Base 5")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  if(p.pic) return picPage_(String(p.pic));
   return out_(api(p));
 }
 
@@ -1489,12 +1490,12 @@ function evidence_(who, id, n, review){
     e.made = String(s.made || "").slice(0, 600); e.finished = !!s.finished;
     e.with = Array.isArray(s.helped) ? s.helped.map(function(x){ return String(x).replace(/[^A-Za-z ]/g, "").slice(0, 20); }).filter(String).join(", ") : "";
     e.quote = String(s.quote || "").replace(/["\u201c\u201d]/g, "'").replace(/\s+/g, " ").trim().slice(0, 200);
-    if(s.madeId) e.picture = "https://drive.google.com/file/d/" + String(s.madeId).replace(/[^\w-]/g, "") + "/view";
+    if(s.madeId) e.picture = picLink_(s.madeId);
     /* chunk evidence cards (23 Nov 2026): [chunk, Drive file id, day], today's only */
     if(Array.isArray(s.cards)){
       var cl = s.cards.filter(function(c){ return Array.isArray(c) && String(c[2]) === today && c[1]; })
         .sort(function(a, b){ return (+a[0] || 0) - (+b[0] || 0); })
-        .map(function(c){ return "https://drive.google.com/file/d/" + String(c[1]).replace(/[^\w-]/g, "") + "/view"; });
+        .map(function(c){ return picLink_(c[1]); });
       if(cl.length) e.cards = cl.join(",");
     }
     /* the chunk pictures are failing to save: say why, so it shows on the evidence page */
@@ -1579,8 +1580,8 @@ function buddyNote_(e, prev){
   /* the picture they made: on the note like a photo, so Buddy offers it when the step's slide is made */
   if(e.picture && ci.photos >= 0){
     var ph = String(line[ci.photos] || "").split(",").map(function(x){ return x.trim(); }).filter(String);
-    var pid = (e.picture.match(/[-\w]{25,}/) || [""])[0];
-    if(pid && !ph.some(function(u){ return u.indexOf(pid) >= 0; })) ph.push(e.picture);
+    var pid = photoKey_(e.picture);
+    if(pid && !ph.some(function(u){ return photoKey_(u) === pid; })) ph.push(e.picture);
     put("photos", ph.join(","));
     if(ci.file >= 0 && !String(line[ci.file] || "")) put("file", e.picture);
   }
@@ -1588,8 +1589,8 @@ function buddyNote_(e, prev){
   if(e.cards && ci.photos >= 0){
     var ph2 = String(line[ci.photos] || "").split(",").map(function(x){ return x.trim(); }).filter(String);
     e.cards.split(",").forEach(function(u){
-      u = u.trim(); var cid = (u.match(/[-\w]{25,}/) || [""])[0];
-      if(cid && !ph2.some(function(x){ return x.indexOf(cid) >= 0; })) ph2.push(u);
+      u = u.trim(); var cid = photoKey_(u);
+      if(cid && !ph2.some(function(x){ return photoKey_(x) === cid; })) ph2.push(u);
     });
     put("photos", ph2.join(","));
   }
@@ -1622,16 +1623,79 @@ function made_(r){
   /* a chunk evidence card (its slug ends -chunkN): one picture per chunk per day, not logged as Made */
   var chunk = !!r.card;
   var name = who + " " + day_() + " " + slug + ext;
-  var folder = madeFolder_();
-  var sub, it = folder.getFoldersByName(who);
-  sub = it.hasNext() ? it.next() : folder.createFolder(who);
-  var old = sub.getFilesByName(name);
-  while(old.hasNext()) old.next().setTrashed(true);
-  var file = sub.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name));
-  file.setDescription(clean_(String(r.title || "") + (r.text ? ": " + r.text : ""), 900));
+  var desc = clean_(String(r.title || "") + (r.text ? ": " + r.text : ""), 900), out = null;
+  /* Drive first; where the school has switched off Drive for scripts, the picture is kept in this Sheet instead */
+  if(driveOk_()){
+    try{
+      var folder = madeFolder_();
+      var sub, it = folder.getFoldersByName(who);
+      sub = it.hasNext() ? it.next() : folder.createFolder(who);
+      var old = sub.getFilesByName(name);
+      while(old.hasNext()) old.next().setTrashed(true);
+      var file = sub.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name));
+      try{ file.setDescription(desc); }catch(ed){}
+      out = { ok: true, id: file.getId(), url: "https://drive.google.com/file/d/" + file.getId() + "/view" };
+    }catch(e1){ driveOff_(e1); }
+  }
+  if(!out){
+    var pid = picSave_(who, slug, m[1], m[2], desc, name);
+    out = { ok: true, id: pid, url: picUrl_(pid) };
+  }
   if(!chunk) logEvents_(who, [["Made", clean_(r.title || nice_(slug), 120)]]);
-  return { ok: true, id: file.getId(), url: "https://drive.google.com/file/d/" + file.getId() + "/view" };
+  return out;
 }
+
+/* ---------- pictures kept in this Sheet (24 Nov 2026) ----------
+   Chilton Bridge has Drive switched off for scripts ("disabled by your domain
+   administrator"), so pictures that cannot go to Drive are kept in a Pictures
+   tab: one row each, the picture split across cells. Each has a link that opens
+   it for staff only (this web app, ?pic=<id>). BridgeLink Buddy turns them into
+   its own photos when it next opens, so evidence slides get them too. */
+var PICH = ["ID", "Day", "Who", "Slug", "Mime", "Name", "Description", "Parts"], PIC_PART = 45000;
+function driveOk_(){ var t = +(PropertiesService.getScriptProperties().getProperty("driveOffUntil") || 0); return Date.now() > t; }
+function driveOff_(e){
+  /* only the school's switch counts: anything else is tried again next time */
+  if(/disabled by your domain administrator|domain administrator/i.test(String((e && e.message) || e))) PropertiesService.getScriptProperties().setProperty("driveOffUntil", String(Date.now() + 6 * 3600000));
+}
+function picTab_(){
+  var ss = SpreadsheetApp.getActive(), sh = ss.getSheetByName("Pictures");
+  if(sh) return sh;
+  sh = tab_(ss, "Pictures", PICH);
+  sh.getRange(1, PICH.length + 2).setValue("Pictures the site could not put in Drive. Leave this tab alone: BridgeLink Buddy reads it.");
+  return sh;
+}
+function picUrl_(id){ var u = ""; try{ u = ScriptApp.getService().getUrl(); }catch(e){} return (u || "") + "?pic=" + id; }
+function picSave_(who, slug, mime, b64, desc, name){
+  var sh = picTab_(), day = day_(), id = "b5pic-" + randomKey_() + randomKey_().slice(0, 8);
+  /* the same picture saved again the same day (a chunk done twice) replaces the last one */
+  var last = sh.getLastRow(), meta = last > 1 ? sh.getRange(2, 1, last - 1, 6).getValues() : [], old = day_(new Date(Date.now() - 21 * 86400000));
+  /* and anything over three weeks old (Buddy will have its own copy by then), so the Sheet stays light */
+  for(var i = meta.length - 1; i >= 0; i--){
+    var d = meta[i][1] instanceof Date ? day_(meta[i][1]) : String(meta[i][1]);
+    if(String(meta[i][5]) === name || (d && d < old)) sh.deleteRow(i + 2);
+  }
+  var parts = []; for(var k = 0; k < b64.length; k += PIC_PART) parts.push(b64.slice(k, k + PIC_PART));
+  var row = [id, day, who, slug, mime, name, desc, parts.length].concat(parts);
+  sh.getRange(sh.getLastRow() + 1, 1, 1, row.length).setNumberFormat("@").setValues([row]);
+  return id;
+}
+function picGet_(id){
+  var sh = SpreadsheetApp.getActive().getSheetByName("Pictures"); if(!sh || !/^b5pic-[a-z0-9]{20,}$/.test(id)) return null;
+  var hit = sh.getRange("A:A").createTextFinder(id).matchEntireCell(true).findNext(); if(!hit) return null;
+  var r = hit.getRow(), head = sh.getRange(r, 1, 1, PICH.length).getValues()[0], n = +head[7] || 0;
+  var data = n ? sh.getRange(r, PICH.length + 1, 1, n).getValues()[0].join("") : "";
+  return { id: id, who: String(head[2]), mime: String(head[4]), name: String(head[5]), desc: String(head[6]), b64: data };
+}
+function picPage_(id){
+  var me = signedIn_(), pic = me.staff ? picGet_(id) : null;
+  var body = !me.staff ? "<p>Staff only. Sign in with a staff school account listed in the Base 5 sheet.</p>" : !pic ? "<p>That picture could not be found.</p>" :
+    '<p style="margin:0 0 10px">' + String(pic.name).replace(/[<&]/g, "") + '</p><img alt="" style="max-width:100%;border:2px solid #0a2f38;border-radius:10px" src="data:' + pic.mime + ';base64,' + pic.b64 + '">';
+  return HtmlService.createHtmlOutput('<div style="font-family:Verdana,sans-serif;max-width:1400px;margin:20px auto;padding:0 16px;color:#0a2f38">' + body + '</div>').setTitle("Base 5 picture");
+}
+/* a picture's link from what the site sent back: a Drive file id, or a picture kept here */
+function picLink_(id){ id = String(id || ""); return /^b5pic-/.test(id) ? picUrl_(id.replace(/[^\w-]/g, "")) : "https://drive.google.com/file/d/" + id.replace(/[^\w-]/g, "") + "/view"; }
+/* the key that tells two photo links apart: a kept picture's id (also on the Drive link Buddy swaps it for, after #), or a Drive id */
+function photoKey_(u){ u = String(u || ""); var p = u.match(/(b5pic-[a-z0-9]{20,})/); if(p) return p[1]; var m = u.match(/[-\w]{25,}/); return m ? m[0] : ""; }
 
 /* ---------- staff: the evidence list ---------- */
 function evidence_list_(r){
@@ -1688,14 +1752,17 @@ function lesson_(r){
   var tname = (map.names && map.names[key]) || clean_(r.targetName || key, 120);
   var pic = "", png = String(r.png || ""), m = png.match(/^data:(image\/(?:png|jpeg));base64,([A-Za-z0-9+\/=]+)$/);
   if(m && m[2].length <= 4000000){
-    try{
-      var folder = madeFolder_(), it = folder.getFoldersByName("Lessons"), sub = it.hasNext() ? it.next() : folder.createFolder("Lessons");
-      var name = today + " " + id + (m[1] === "image/png" ? ".png" : ".jpg");
-      var old0 = sub.getFilesByName(name); while(old0.hasNext()) old0.next().setTrashed(true);
-      var file = sub.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name));
-      file.setDescription(clean_(r.title || id, 200));
-      pic = "https://drive.google.com/file/d/" + file.getId() + "/view";
-    }catch(e1){ pic = ""; }
+    var name = today + " " + id + (m[1] === "image/png" ? ".png" : ".jpg");
+    if(driveOk_()){
+      try{
+        var folder = madeFolder_(), it = folder.getFoldersByName("Lessons"), sub = it.hasNext() ? it.next() : folder.createFolder("Lessons");
+        var old0 = sub.getFilesByName(name); while(old0.hasNext()) old0.next().setTrashed(true);
+        var file = sub.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name));
+        try{ file.setDescription(clean_(r.title || id, 200)); }catch(ed){}
+        pic = "https://drive.google.com/file/d/" + file.getId() + "/view";
+      }catch(e1){ driveOff_(e1); pic = ""; }
+    }
+    if(!pic){ try{ pic = picUrl_(picSave_("ALL", "lesson-" + id, m[1], m[2], clean_(r.title || id, 200), name)); }catch(e2){ pic = ""; } }
   }
   var notes = [];
   here.forEach(function(who){

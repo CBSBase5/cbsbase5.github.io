@@ -992,7 +992,7 @@ function sendChunkCard(k){
         if(r && r.ok && r.id){ state.cards = state.cards || {}; state.cards[k] = { id: r.id, sig: sig, day: today }; delete state.cardErr; save(); }
         else { state.cardErr = String((r && r.error) || "no answer").slice(0, 120); save(); }
       }).catch(function(e){ state.cardErr = String((e && e.message) || "no answer").slice(0, 120); save(); });
-    });
+    }, true);
   }catch(e){}
 }
 
@@ -2068,7 +2068,7 @@ function a2Finish(){
   }
 }
 /* the same picture as a data URL, for sending rather than saving */
-function svgToPngData(svg, cb){
+function svgToPngData(svg, cb, jpeg){
   try{
     var m = svg.match(/viewBox="\s*([-\d.]+)[\s,]+([-\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/);
     var W = m ? +m[3] : 800, H = m ? +m[4] : 600, k = W > 900 ? 1 : 1.5;
@@ -2085,6 +2085,8 @@ function svgToPngData(svg, cb){
         var x = c.getContext("2d");
         x.fillStyle = "#ffffff"; x.fillRect(0, 0, c.width, c.height);
         x.drawImage(img, 0, 0, c.width, c.height);
+        /* jpeg: a chunk picture, kept small because it may have to live in a Sheet */
+        if(jpeg){ cb(c.toDataURL("image/jpeg", 0.85)); return; }
         var d = c.toDataURL("image/png");
         cb(d.length < 900000 ? d : c.toDataURL("image/jpeg", 0.8));
       }catch(e){ cb(null); }
