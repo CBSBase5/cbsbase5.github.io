@@ -1178,6 +1178,8 @@ function makePerson(L) {
   if (L.bag) { const b = mk(rbox(0.32, 0.36, 0.14, 0.04), M(L.bag), 0.36, 0.3, 0.05, torso); }
   if (L.collar) mk(rbox(0.13, 0.06, 0.05, 0.02), M('#fffaf0'), 0, 0.93, 0.25, torso);
   if (L.book) { const bk = mk(rbox(0.3, 0.04, 0.22, 0.02), M(L.book), 0, 0.62, 0.36, torso); bk.rotation.x = -0.7; }
+  if (L.badge) { const bt = textTex(256, 112, (c, W2, H2) => { c.fillStyle = '#fffaf0'; c.beginPath(); c.roundRect(4, 4, W2 - 8, H2 - 8, 22); c.fill(); c.lineWidth = 8; c.strokeStyle = '#ef7724'; c.stroke(); c.fillStyle = '#0a2f38'; c.textAlign = 'center'; c.textBaseline = 'middle'; fitText(c, L.badge, W2 - 40, 64); c.fillText(L.badge, W2 / 2, H2 / 2 + 3); });
+    const bp = signPlane(torso, 0.21 * (L.wide || 1), 0.64, 0.34, 0.42, 0.18, bt, 0); bp.rotation.x = -0.12; }
   if (L.lanyard) { for (const sd of [-1, 1]) { const st2 = mk(rbox(0.04, 0.34, 0.02, 0.01), M('#007291'), 0.09 * sd, 0.72, 0.27, torso); st2.rotation.z = 0.32 * sd; st2.rotation.x = -0.2; } mk(rbox(0.16, 0.2, 0.025, 0.02), M('#fffaf0'), 0, 0.5, 0.31, torso); mk(bxg(0.12, 0.04, 0.03), M('#ef7724'), 0, 0.57, 0.315, torso); }
   const head = new THREE.Group(); head.position.set(0, 1.1, 0); torso.add(head);
   mk(sph(0.245, 22, 16), skin, 0, 0.06, 0, head);
@@ -2071,7 +2073,7 @@ function buildStreet() {
   // buildings (fronts at z=-10)
   building(-23.5, 7, { wall: '#e6c7a8', door: '#007291', roof: '#6b5f58' });
   building(-17.1, 5.8, { shop: 1, wall: '#cfe0c9', awning: ['#5f8f4e', '#fffaf0'], icon: 'orange', door: '#5f8f4e', name: 'Greengrocer' });
-  building(-8.9, 5.8, { shop: 1, wall: '#cfdfe6', awning: ['#007291', '#fffaf0'], icon: 'heart', door: '#ef7724', signbg: '#007291', name: 'Charity Shop' });
+  building(-8.9, 5.8, { shop: 1, wall: '#cfdfe6', awning: ['#007291', '#fffaf0'], icon: 'heart', door: '#ef7724', signbg: '#007291', name: "Tommy's Charity Shop" });
   building(-2, 8, { shop: 1, wall: '#f1e2c0', awning: ['#ef7724', '#fffaf0'], icon: 'shop', door: '#007291', roof: '#56606b', name: 'Chilton Stores' });
   building(5.5, 7, { shop: 1, wall: '#e9c9b6', awning: ['#c9b8d6', '#fffaf0'], icon: 'cup', door: '#2f4a45', h: 4.8, name: 'Bridge Cafe' });
   building(13, 8, { shop: 1, wall: '#f3e7d3', awning: ['#20adca', '#fffaf0'], icon: 'note', door: '#ef7724', h: 5.6, roof: '#6b5f58', name: 'Music Shop' });
@@ -2483,8 +2485,15 @@ function setupStreet() {
   makePoodle(V.teacher);
   // student cameo T: runs the charity shop
   V.camT = new Villager('camT', { x: -8.4, z: -8.2, face: 0, pitch: 1.35, canShoo: false, friendly: true, range: 6, speed: 1.0,
-    look: { coat: '#9fb784', legs: '#2f3c55', skin: '#f0c8a8', hat: 'flowing', hair: '#6b4a32', apron: '#007291', scale: 0.96 },
+    look: { coat: '#9fb784', legs: '#2f3c55', skin: '#f0c8a8', hat: 'flowing', hair: '#6b4a32', apron: '#007291', scale: 0.96, badge: 'Tommy' },
     routine: [{ to: [-8.4, -8.2], wait: 5, anim: 'idle', face: 0 }, { to: [-10.6, -8.6], wait: 4, anim: 'tend', face: Math.PI }, { to: [-7.0, -8.6], wait: 4, anim: 'pat', face: Math.PI }, { to: [-8.4, -8.2], wait: 3, anim: 'wave', face: 0.2 }] });
+  // pavement A-board outside cameo T's shop
+  const ab = new THREE.Group(); ab.position.set(-6.0, 0.14, -7.1); ab.rotation.y = -0.25; ab.scale.setScalar(1.25); scene.add(ab);
+  const abt = textTex(256, 320, (c, W2, H2) => { c.fillStyle = '#0a2f38'; c.fillRect(0, 0, W2, H2); c.strokeStyle = '#fffaf0'; c.lineWidth = 10; c.strokeRect(14, 14, W2 - 28, H2 - 28); const im = iconImg('heart'); if (im.complete && im.naturalWidth) c.drawImage(im, W2 / 2 - 44, 34, 88, 88);
+    c.fillStyle = '#fffaf0'; c.textAlign = 'center'; c.textBaseline = 'middle'; fitText(c, "Tommy's", W2 - 50, 62); c.fillText("Tommy's", W2 / 2, 168); c.fillStyle = '#ef7724'; fitText(c, 'Charity Shop', W2 - 50, 34); c.fillText('Charity Shop', W2 / 2, 230); c.fillStyle = '#f2c14e'; fitText(c, 'come in!', W2 - 60, 28); c.fillText('come in!', W2 / 2, 274); });
+  iconImg('heart').addEventListener('load', () => abt.redraw(), { once: true });
+  for (const sd of [-1, 1]) { const leaf = new THREE.Group(); leaf.position.z = -0.17 * sd; leaf.rotation.x = 0.2 * sd; ab.add(leaf); mk(rbox(0.72, 0.92, 0.05, 0.02), M('#6b5240'), 0, 0.46, 0.0, leaf); if (sd === -1) signPlane(leaf, 0, 0.47, 0.03, 0.62, 0.8, abt, 0); }
+  colBox(-6.0, -7.1, 1.0, 0.6, false);
   // hidden earmuffs in the alley
   addPickup('earmuffs', -12.5, -15.3);
   makeFlock(-1.6, -7.1, 1.3, 6, [['#8d96a0', '#7aa39a'], ['#6f7b87', '#9aa5ab'], ['#a3abb3', '#8fa7a0']]);
@@ -3879,7 +3888,7 @@ function buildPond() {
   mk(rbox(2.6, 1.0, 0.1, 0.03), M('#f3d9a0', { emissive: '#f3c070', emissiveIntensity: 0.35 }), 0, 1.5, 1.11, hut);
   mk(rbox(3.2, 0.12, 0.5, 0.03), M('#efe9dc'), 0, 0.96, 2.15, hut); mk(rbox(3.1, 0.9, 0.08, 0.03), M('#a8582a'), 0, 0.46, 2.35, hut);
   const aw = mk(bxg(3.6, 0.08, 0.5), M('#ef7724'), 0, 2.45, 1.3, hut); aw.rotation.x = 0.3;
-  signBoard(hut, 0, 2.7, 1.13, 2.4, 'mug', '#007291', 'Hot Chocolate');
+  signBoard(hut, 0, 2.7, 1.13, 3.2, 'mug', '#007291', "Igor's Hot Chocolate");
   colBox(80.2, -25.0, 3.4, 2.2, true); colBox(80.2, -22.8, 3.2, 0.45, false);
   // lights, benches, bird hide, jetty
   [[84, -26.5], [97, -27.5], [92.5, -44.2]].forEach(([x, z]) => lampPost(x, z));
@@ -3955,7 +3964,7 @@ function photoHonk() { if (S.done.p_photo || !unlocked('pond')) return; if (dist
 function setupPond() {
   // student cameo I: runs the hot chocolate hut
   V.camI = new Villager('camI', { x: 80.2, z: -23.42, face: 0, pitch: 0.82, canShoo: false, friendly: true, range: 6,
-    look: { coat: '#3f8aa8', legs: '#2b3135', skin: '#f0c8a8', hat: 'short', hair: '#6b4a32', specs: true, apron: '#ef7724', scale: 1.13, wide: 1.2 },
+    look: { coat: '#3f8aa8', legs: '#2b3135', skin: '#f0c8a8', hat: 'short', hair: '#6b4a32', specs: true, apron: '#ef7724', scale: 1.13, wide: 1.2, badge: 'Igor' },
     routine: [{ to: [80.2, -23.42], wait: 5, anim: 'idle', face: 0 }, { to: [79.2, -23.42], wait: 3, anim: 'pat', face: 0 }, { to: [81.2, -23.42], wait: 3, anim: 'wave', face: 0.2 }] });
   V.skater = new Villager('skater', { x: 98.2, z: -25.0, face: Math.PI, pitch: 1.5, canShoo: false, seated: true, seatY: 0.52, anim: 'sad', need: 'skate', range: 5, look: { coat: '#c97a8a', legs: '#2b3135', skin: '#a8714f', hat: 'pom', hatc: '#fffaf0', scale: 0.85 } });
   V.warden = new Villager('warden', { x: 77.6, z: -31.4, face: 1.6, pitch: 0.85, range: 6, look: { coat: '#4f6b4a', legs: '#2b3135', skin: '#e8bfa0', hat: 'beanie', hatc: '#2f4a45', scarf: '#f2c94c' }, routine: [{ wait: 5, anim: 'look', face: 1.6 }, { to: [77.8, -38.6], wait: 4, anim: 'idle', face: 1.6 }, { to: [77.6, -31.4], wait: 2, anim: 'idle', face: 1.6 }] });
