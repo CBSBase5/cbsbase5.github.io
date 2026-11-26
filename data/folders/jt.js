@@ -2,7 +2,7 @@
    Written by /teacher/folders.html (or by hand: keep the same shape). ASCII only. */
 window.B5FOLDER = {
  "who": "JT",
- "updated": "2026-10-21T05:21:19.006Z",
+ "updated": "2026-11-26T20:40:00.000Z",
  "data": {
   "v": 2,
   "messages": [
@@ -23,6 +23,12 @@ window.B5FOLDER = {
    }
   ],
   "activities": [
+   {
+    "id": "a-chiltontube",
+    "title": "Chilton Tube",
+    "href": "/tube/",
+    "note": "Your video site is live. Designed by you, open to everyone at Chilton Bridge. Fancy putting the first video up on your channel?"
+   },
    {
     "id": "a-longgame",
     "title": "EPOCH",
