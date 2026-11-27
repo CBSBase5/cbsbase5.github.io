@@ -1594,6 +1594,19 @@ function buddyNote_(e, prev){
     });
     put("photos", ph2.join(","));
   }
+  /* dead picture links (a picture replaced or cleared from the Pictures tab) come off this note, and off any
+     other note that still has one, so Add to slides never meets a photo it cannot open */
+  try{
+    var ids = picIds_();
+    if(ids && ci.photos >= 0){
+      var cur = String(line[ci.photos] || "").split(",").map(function(x){ return x.trim(); }).filter(String), live = livePhotos_(cur, ids);
+      if(live.length !== cur.length){
+        put("photos", live.join(","));
+        if(ci.file >= 0 && livePhotos_([String(line[ci.file] || "")].filter(String), ids).length === 0 && String(line[ci.file] || "")) put("file", live[0] || "");
+      }
+      tidyPhotoCells_(sh, v, ids, row);
+    }
+  }catch(et){}
   /* games and practice are not built for one step, so Wrap up does not ask you to link them */
   if(!row && e.kind !== "activity" && !e.msId) put("linkSkip", "yes");
   /* Changed: left empty, so Buddy (1.22.1 and later) gives the note the next number in its own running count and
@@ -1666,17 +1679,22 @@ function picTab_(){
 }
 function picUrl_(id){ var u = ""; try{ u = ScriptApp.getService().getUrl(); }catch(e){} return (u || "") + "?pic=" + id; }
 function picSave_(who, slug, mime, b64, desc, name){
-  var sh = picTab_(), day = day_(), id = "b5pic-" + randomKey_() + randomKey_().slice(0, 8);
-  /* the same picture saved again the same day (a chunk done twice) replaces the last one */
+  var sh = picTab_(), day = day_(), id = "b5pic-" + randomKey_() + randomKey_().slice(0, 8), keep = 0;
+  /* the same picture saved again the same day (a chunk card redrawn after another answer) replaces the last one
+     IN PLACE, keeping its id (27 Nov 2026). It used to get a new id, which left the old link on the Buddy note
+     pointing at nothing, so Add to slides said "1 photo could not be opened". */
   var last = sh.getLastRow(), meta = last > 1 ? sh.getRange(2, 1, last - 1, 6).getValues() : [], old = day_(new Date(Date.now() - 21 * 86400000));
-  /* and anything over three weeks old (Buddy will have its own copy by then), so the Sheet stays light */
+  for(var j = meta.length - 1; j >= 0; j--) if(String(meta[j][5]) === name && /^b5pic-/.test(String(meta[j][0]))){ keep = j + 2; id = String(meta[j][0]); break; }
+  /* any other copies of it, and anything over three weeks old (Buddy will have its own copy by then), so the Sheet stays light */
   for(var i = meta.length - 1; i >= 0; i--){
+    if(i + 2 === keep) continue;
     var d = meta[i][1] instanceof Date ? day_(meta[i][1]) : String(meta[i][1]);
-    if(String(meta[i][5]) === name || (d && d < old)) sh.deleteRow(i + 2);
+    if(String(meta[i][5]) === name || (d && d < old)){ sh.deleteRow(i + 2); if(keep > i + 2) keep--; }
   }
   var parts = []; for(var k = 0; k < b64.length; k += PIC_PART) parts.push(b64.slice(k, k + PIC_PART));
   var row = [id, day, who, slug, mime, name, desc, parts.length].concat(parts);
-  sh.getRange(sh.getLastRow() + 1, 1, 1, row.length).setNumberFormat("@").setValues([row]);
+  if(keep) sh.getRange(keep, 1, 1, Math.max(sh.getLastColumn(), row.length)).clearContent();
+  sh.getRange(keep || sh.getLastRow() + 1, 1, 1, row.length).setNumberFormat("@").setValues([row]);
   return id;
 }
 function picGet_(id){
@@ -1691,6 +1709,43 @@ function picPage_(id){
   var body = !me.staff ? "<p>Staff only. Sign in with a staff school account listed in the Base 5 sheet.</p>" : !pic ? "<p>That picture could not be found.</p>" :
     '<p style="margin:0 0 10px">' + String(pic.name).replace(/[<&]/g, "") + '</p><img alt="" style="max-width:100%;border:2px solid #0a2f38;border-radius:10px" src="data:' + pic.mime + ';base64,' + pic.b64 + '">';
   return HtmlService.createHtmlOutput('<div style="font-family:Verdana,sans-serif;max-width:1400px;margin:20px auto;padding:0 16px;color:#0a2f38">' + body + '</div>').setTitle("Base 5 picture");
+}
+/* the ids of every picture still kept in the Pictures tab (null when there is no tab) */
+function picIds_(){
+  var sh = SpreadsheetApp.getActive().getSheetByName("Pictures"); if(!sh) return null;
+  var set = {}, last = sh.getLastRow();
+  if(last > 1) sh.getRange(2, 1, last - 1, 1).getValues().forEach(function(r){ if(r[0]) set[String(r[0])] = 1; });
+  return set;
+}
+/* a photos list with the dead links taken out: links to a picture kept here that is no longer in the
+   Pictures tab (replaced or cleared). Buddy's own photos and Drive links are never touched. */
+function livePhotos_(list, ids){
+  if(!ids) return list;
+  return list.filter(function(u){ var k = String(u).match(/[?&]pic=(b5pic-[a-z0-9]{20,})/); return !k || !!ids[k[1]]; });
+}
+/* Takes the dead picture links out of every note in Buddy. buddyNote_ does this each time the site writes a note;
+   run this once by hand (pick tidyBuddyPictures above and press Run) to fix notes from before 27 Nov 2026 now. */
+function tidyBuddyPictures(){
+  var bs = buddySS_(); if(!bs) return "no Buddy link";
+  var sh = bs.getSheetByName("Logs"); if(!sh) return "no Logs tab in Buddy";
+  var n = tidyPhotoCells_(sh, sh.getDataRange().getValues(), picIds_(), 0);
+  Logger.log("Dead picture links taken off " + n + " note(s)."); return n;
+}
+function tidyPhotoCells_(sh, v, ids, skipRow){
+  if(!ids || !v.length) return 0;
+  var lo = v[0].map(function(h){ return String(h).trim().toLowerCase(); }), cp = lo.indexOf("photos"), cf = lo.indexOf("linked file"), n = 0;
+  if(cp < 0) cp = lo.indexOf("photo"); if(cp < 0) return 0;
+  for(var i = 1; i < v.length; i++){
+    if(i + 1 === skipRow) continue;
+    var cell = String(v[i][cp] || ""); if(cell.indexOf("pic=b5pic-") < 0) continue;
+    var list = cell.split(",").map(function(x){ return x.trim(); }).filter(String), live = livePhotos_(list, ids);
+    if(live.length === list.length) continue;
+    sh.getRange(i + 1, cp + 1).setNumberFormat("@").setValue(live.join(","));
+    if(cf >= 0 && String(v[i][cf] || "").indexOf("pic=b5pic-") >= 0 && livePhotos_([String(v[i][cf])], ids).length === 0)
+      sh.getRange(i + 1, cf + 1).setNumberFormat("@").setValue(live[0] || "");
+    n++;
+  }
+  return n;
 }
 /* a picture's link from what the site sent back: a Drive file id, or a picture kept here */
 function picLink_(id){ id = String(id || ""); return /^b5pic-/.test(id) ? picUrl_(id.replace(/[^\w-]/g, "")) : "https://drive.google.com/file/d/" + id.replace(/[^\w-]/g, "") + "/view"; }
